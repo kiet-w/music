@@ -40,21 +40,15 @@ export default function HomePage({ params: { locale } }: { params: { locale: str
   useSupabaseRealtime('Album', loadAlbums);
 
   const { processedAlbums, totalSongs } = React.useMemo(() => {
-    const topAlbums = albums.slice(0, 6);
     const total = albums.reduce((acc, album) => acc + (album._count?.songs || 0), 0);
-    return { processedAlbums: topAlbums, totalSongs: total };
+    return { processedAlbums: albums, totalSongs: total };
   }, [albums]);
 
   return (
     <main className="px-6 py-8 pb-32 min-h-[100dvh] max-w-7xl mx-auto space-y-12">
       <section>
-        <h1 className="text-3xl font-serif italic mb-8 tracking-tight">Your Playlists</h1>
-        <PlaylistGrid />
-      </section>
-
-      <section>
         <div className="flex items-baseline justify-between mb-8">
-          <h2 className="text-2xl font-serif italic tracking-tight">Recently Played</h2>
+          <h1 className="text-3xl font-serif italic tracking-tight">Your Albums</h1>
           <p className="text-[13px] text-muted-foreground font-medium">Collection: {totalSongs} songs</p>
         </div>
         

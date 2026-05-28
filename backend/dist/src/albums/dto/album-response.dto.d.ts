@@ -5,4 +5,7 @@ export declare class AlbumResponseDto {
     artist: string;
     coverUrl: string;
     tracks?: SongResponseDto[];
+    _count?: {
+        songs: number;
+    };
 }

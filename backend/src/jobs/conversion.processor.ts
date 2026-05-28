@@ -21,9 +21,9 @@ export class ConversionProcessor extends WorkerHost {
 
   async process(job: Job<any, any, string>): Promise<any> {
     const { url, songId } = job.data;
-    const tempDir = path.join(__dirname, '../../temp');
+    const tempDir = path.join(process.cwd(), 'temp');
     if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir);
+      fs.mkdirSync(tempDir, { recursive: true });
     }
     const outputPath = path.join(tempDir, `${songId}.mp3`);
 

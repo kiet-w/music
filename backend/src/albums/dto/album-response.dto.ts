@@ -35,4 +35,9 @@ export class AlbumResponseDto {
   @Expose()
   @Type(() => SongResponseDto)
   tracks?: SongResponseDto[];
+
+  @Expose()
+  _count?: {
+    songs: number;
+  };
 }

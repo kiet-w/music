@@ -64,9 +64,9 @@ let ConversionProcessor = ConversionProcessor_1 = class ConversionProcessor exte
     }
     async process(job) {
         const { url, songId } = job.data;
-        const tempDir = path.join(__dirname, '../../temp');
+        const tempDir = path.join(process.cwd(), 'temp');
         if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir);
+            fs.mkdirSync(tempDir, { recursive: true });
         }
         const outputPath = path.join(tempDir, `${songId}.mp3`);
         try {

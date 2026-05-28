@@ -19,6 +19,7 @@ class AlbumResponseDto {
     artist;
     coverUrl;
     tracks;
+    _count;
 }
 exports.AlbumResponseDto = AlbumResponseDto;
 __decorate([
@@ -59,4 +60,8 @@ __decorate([
     (0, class_transformer_1.Type)(() => song_response_dto_1.SongResponseDto),
     __metadata("design:type", Array)
 ], AlbumResponseDto.prototype, "tracks", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Object)
+], AlbumResponseDto.prototype, "_count", void 0);
 //# sourceMappingURL=album-response.dto.js.map

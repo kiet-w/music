@@ -13,18 +13,6 @@ export declare class AlbumService {
         createdAt: Date;
         coverUrl: string | null;
     }>;
-    findAll(): Promise<{
-        id: string;
-        title: string;
-        artist: string | null;
-        createdAt: Date;
-        coverUrl: string | null;
-    }[]>;
-    findOne(id: string): Promise<{
-        id: string;
-        title: string;
-        artist: string | null;
-        createdAt: Date;
-        coverUrl: string | null;
-    } | null>;
+    findAll(): Promise<any[]>;
+    findOne(id: string): Promise<any>;
 }
