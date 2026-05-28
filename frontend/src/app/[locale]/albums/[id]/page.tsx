@@ -3,6 +3,12 @@ import AlbumDetailClient from '@/components/templates/AlbumDetailClient';
 import { fetchAlbum } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-static';
+
+export async function generateStaticParams() {
+  return [];
+}
+
 export default async function AlbumDetailPage({ 
   params: { locale, id } 
 }: { 
