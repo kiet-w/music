@@ -4,6 +4,7 @@ import { fetchAlbum } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-static';
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   return [];
