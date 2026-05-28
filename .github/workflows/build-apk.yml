@@ -28,6 +28,8 @@ jobs:
         run: |
           cd frontend
           npm run build
+          # Copy a default index.html to the root of out/ for Capacitor
+          cp out/vi.html out/index.html || cp out/en.html out/index.html || cp out/vi/index.html out/index.html || cp out/en/index.html out/index.html
 
       - name: Build Android APK
         run: |
