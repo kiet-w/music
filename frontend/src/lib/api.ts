@@ -5,12 +5,16 @@ console.log('Current API_URL:', API_URL);
 const headers = {
   'Content-Type': 'application/json',
   'bypass-tunnel-reminder': 'true',
+  'ngrok-skip-browser-warning': 'true',
 };
 
 export async function fetchAlbums() {
   const res = await fetch(`${API_URL}/albums`, { 
     cache: 'no-store',
-    headers: { 'bypass-tunnel-reminder': 'true' }
+    headers: { 
+      'bypass-tunnel-reminder': 'true',
+      'ngrok-skip-browser-warning': 'true'
+    }
   });
   if (!res.ok) throw new Error('Failed to fetch albums');
   return res.json();
