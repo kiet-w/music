@@ -7,7 +7,7 @@ const withNextIntl = createNextIntlPlugin(
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // output: 'export', // Removed for now to avoid middleware conflicts in dev/standard prod
+  output: 'export',
   images: {
     unoptimized: true,
   },

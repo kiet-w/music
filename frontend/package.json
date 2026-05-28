@@ -31,6 +31,8 @@
     "zustand": "^4.5.1"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
     "@types/howler": "^2.2.13",
     "@types/node": "^20.11.16",
     "@types/react": "^18.2.52",
