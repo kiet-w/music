@@ -1,4 +1,4 @@
-const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+const RAW_API_URL = 'http://localhost:3002';
 // Remove trailing slash if exists to prevent double slashes in paths
 const API_URL = RAW_API_URL.replace(/\/$/, '');
 
