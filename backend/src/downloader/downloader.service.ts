@@ -19,9 +19,9 @@ export class DownloaderService implements IDownloaderProvider {
     try {
       this.logger.log(`Starting download from ${url} to ${outputPath}`);
       // Basic yt-dlp command to download audio as mp3
-      // -x: extract audio, --audio-format: mp3, -o: output path
+      // -x: extract audio, --audio-format: mp3, --audio-quality 0: max quality, -o: output path
       await execAsync(
-        `yt-dlp -x --audio-format mp3 -o "${outputPath}" "${url}"`,
+        `yt-dlp -x --audio-format mp3 --audio-quality 0 -o "${outputPath}" "${url}"`,
       );
       this.logger.log(`Download completed: ${outputPath}`);
     } catch (error) {
