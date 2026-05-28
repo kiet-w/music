@@ -17,15 +17,23 @@ model Album {
   tracks    Track[]
 }
 
+enum TrackStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
 model Track {
-  id         String   @id @default(uuid())
+  id         String      @id @default(uuid())
   title      String
   artist     String?
   url        String
   duration   Int?
+  status     TrackStatus @default(PENDING)
   albumId    String
   sourceType String?
   sourceId   String?
-  createdAt  DateTime @default(now())
-  album      Album    @relation(fields: [albumId], references: [id])
+  createdAt  DateTime    @default(now())
+  album      Album       @relation(fields: [albumId], references: [id])
 }
