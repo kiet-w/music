@@ -65,7 +65,7 @@ export default function HomePage({ params: { locale } }: { params: { locale: str
       ) : processedAlbums.length > 0 ? (
         <div className="grid grid-cols-2 gap-4">
           {processedAlbums.map((album) => (
-            <Link key={album.id} href={`/${locale}/albums/${album.id}`} className="group flex flex-col gap-2">
+            <Link key={album.id} href={`/${locale}/albums/detail?id=${album.id}`} className="group flex flex-col gap-2">
               <div className="relative aspect-square overflow-hidden rounded-xl bg-muted flex items-center justify-center border-[0.5px] border-border group-hover:border-foreground/30 transition-colors duration-200">
                 {album.coverUrl ? (
                   <img src={album.coverUrl} alt={album.title} loading="lazy" className="w-full h-full object-cover" />

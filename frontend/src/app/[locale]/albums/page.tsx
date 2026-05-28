@@ -146,7 +146,7 @@ export default function AlbumsPage({ params: { locale } }: { params: { locale: s
       ) : albums.length > 0 ? (
         <div className={viewMode === 'grid' ? "grid grid-cols-2 gap-3" : "flex flex-col gap-3"}>
           {albums.map((album) => (
-            <Link key={album.id} href={`/${locale}/albums/${album.id}`} className={viewMode === 'grid' ? "group flex flex-col gap-2" : "group flex items-center gap-4 p-2 rounded-xl hover:bg-muted/50 transition-colors"}>
+            <Link key={album.id} href={`/${locale}/albums/detail?id=${album.id}`} className={viewMode === 'grid' ? "group flex flex-col gap-2" : "group flex items-center gap-4 p-2 rounded-xl hover:bg-muted/50 transition-colors"}>
               <div className={`relative overflow-hidden rounded-xl bg-muted flex items-center justify-center border-[0.5px] border-border group-hover:border-foreground/30 transition-colors duration-200 shrink-0 ${viewMode === 'grid' ? 'aspect-square w-full' : 'w-16 h-16'}`}>
                 {album.coverUrl ? (
                   <img src={album.coverUrl} alt={album.title} loading="lazy" className="w-full h-full object-cover" />
