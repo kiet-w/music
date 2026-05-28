@@ -6,8 +6,11 @@ import { notFound } from 'next/navigation';
 export const dynamic = 'force-static';
 export const dynamicParams = false;
 
-export async function generateStaticParams() {
-  return [];
+export function generateStaticParams() {
+  return [
+    { locale: 'en', id: '1' },
+    { locale: 'vi', id: '1' }
+  ];
 }
 
 export default async function AlbumDetailPage({ 
