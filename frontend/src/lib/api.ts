@@ -1,5 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 
+console.log('Current API_URL:', API_URL);
+
 export async function fetchAlbums() {
   const res = await fetch(`${API_URL}/albums`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch albums');
