@@ -10,7 +10,14 @@ const swagger_1 = require("@nestjs/swagger");
 async function bootstrap() {
     const logger = new common_1.Logger('Bootstrap');
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
-    app.enableCors();
+    app.enableCors({
+        origin: true,
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+        credentials: true,
+        allowedHeaders: '*',
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+    });
     app.useGlobalFilters(new http_exception_filter_1.HttpExceptionFilter());
     app.useGlobalInterceptors(new logging_interceptor_1.LoggingInterceptor());
     app.useGlobalPipes(new common_1.ValidationPipe({
