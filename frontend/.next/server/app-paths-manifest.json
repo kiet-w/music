@@ -1,0 +1,4 @@
+{
+  "/[locale]/albums/page": "app/[locale]/albums/page.js",
+  "/[locale]/page": "app/[locale]/page.js"
+}

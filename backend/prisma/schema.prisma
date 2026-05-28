@@ -1,0 +1,31 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Album {
+  id        String   @id @default(uuid())
+  title     String
+  artist    String?
+  coverUrl  String?
+  createdAt DateTime @default(now())
+  tracks    Track[]
+}
+
+model Track {
+  id         String   @id @default(uuid())
+  title      String
+  artist     String?
+  url        String
+  duration   Int?
+  albumId    String
+  sourceType String?
+  sourceId   String?
+  createdAt  DateTime @default(now())
+  album      Album    @relation(fields: [albumId], references: [id])
+}

@@ -1,0 +1,26 @@
+{
+  "Music": {
+    "title": "Âm nhạc",
+    "download": "Tải xuống",
+    "library": "Thư viện",
+    "paste_url": "Dán link YouTube vào đây...",
+    "downloading": "Đang tải...",
+    "preparing": "Đang chuẩn bị...",
+    "converting": "Đang chuyển đổi sang MP3...",
+    "success": "Thành công! Đã thêm vào thư viện.",
+    "play": "Phát",
+    "playing": "Đang phát",
+    "pause": "Tạm dừng",
+    "vol": "Âm lượng",
+    "albums": "Album",
+    "tracks": "Bài hát",
+    "delete": "Xóa",
+    "move": "Di chuyển",
+    "delete_confirm": "Xác nhận xóa bài hát",
+    "delete_warning": "Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa bài hát này?",
+    "move_to_album": "Di chuyển đến Album",
+    "select_album": "Chọn album đích",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận"
+  }
+}

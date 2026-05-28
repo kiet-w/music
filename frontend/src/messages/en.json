@@ -1,0 +1,18 @@
+{
+  "Music": {
+    "title": "Music",
+    "download": "Download",
+    "library": "Library",
+    "paste_url": "Paste YouTube URL here...",
+    "downloading": "Downloading...",
+    "preparing": "Preparing download...",
+    "converting": "Converting to MP3...",
+    "success": "Success! Added to library.",
+    "play": "Play",
+    "playing": "Playing",
+    "pause": "Pause",
+    "vol": "Vol",
+    "albums": "Albums",
+    "tracks": "Tracks"
+  }
+}

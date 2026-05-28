@@ -1,0 +1,64 @@
+<h2>Home Page Design</h2>
+<p class="subtitle">Layout for Featured Albums, Library, and Downloader</p>
+
+<div class="options">
+  <div class="option" data-choice="grid" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Standard Grid</h3>
+      <p>Featured Albums in a 2x2 or 4x1 grid, followed by sections for Library and Downloader.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="sidebar" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Sidebar & Main</h3>
+      <p>Library/Downloader in a sidebar, with Featured Albums in the main content area.</p>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Preview: Home Page (Standard Grid)</div>
+  <div class="mockup-body">
+    <div style="padding: 20px;">
+      <h3 style="margin-bottom: 20px;">Featured Albums</h3>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+        <div class="card" style="padding: 0;">
+          <div class="placeholder" style="aspect-ratio: 1; border-radius: 8px 8px 0 0;">Album Cover 1</div>
+          <div style="padding: 12px;">
+            <div style="font-weight: bold;">Album Title 1</div>
+            <div style="font-size: 0.8em; color: gray;">Artist 1</div>
+          </div>
+        </div>
+        <div class="card" style="padding: 0;">
+          <div class="placeholder" style="aspect-ratio: 1; border-radius: 8px 8px 0 0;">Album Cover 2</div>
+          <div style="padding: 12px;">
+            <div style="font-weight: bold;">Album Title 2</div>
+            <div style="font-size: 0.8em; color: gray;">Artist 2</div>
+          </div>
+        </div>
+        <div class="card" style="padding: 0;">
+          <div class="placeholder" style="aspect-ratio: 1; border-radius: 8px 8px 0 0;">Album Cover 3</div>
+          <div style="padding: 12px;">
+            <div style="font-weight: bold;">Album Title 3</div>
+            <div style="font-size: 0.8em; color: gray;">Artist 3</div>
+          </div>
+        </div>
+        <div class="card" style="padding: 0;">
+          <div class="placeholder" style="aspect-ratio: 1; border-radius: 8px 8px 0 0;">Album Cover 4</div>
+          <div style="padding: 12px;">
+            <div style="font-weight: bold;">Album Title 4</div>
+            <div style="font-size: 0.8em; color: gray;">Artist 4</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin: 40px 0 20px;">Library</h3>
+      <div class="placeholder" style="height: 150px;">Track List / Library Items</div>
+
+      <h3 style="margin: 40px 0 20px;">Download</h3>
+      <div class="placeholder" style="height: 100px;">Downloader Input & Progress</div>
+    </div>
+  </div>
+</div>

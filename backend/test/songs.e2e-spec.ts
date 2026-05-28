@@ -1,0 +1,164 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { PrismaService } from '../src/prisma/prisma.service';
+import { getQueueToken } from '@nestjs/bullmq';
+import { ConversionProcessor } from '../src/jobs/conversion.processor';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+
+describe('SongsController (e2e)', () => {
+  let app: INestApplication;
+
+  const mockPrismaService = {
+    track: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+      update: jest.fn(),
+    },
+    album: {
+      findMany: jest.fn(),
+      create: jest.fn(),
+    },
+  };
+
+  const mockQueue = {
+    add: jest.fn(),
+  };
+
+  const mockCacheManager = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    })
+      .overrideProvider(PrismaService)
+      .useValue(mockPrismaService)
+      .overrideProvider(getQueueToken('conversion'))
+      .useValue(mockQueue)
+      .overrideProvider(ConversionProcessor)
+      .useValue({})
+      .overrideProvider(CACHE_MANAGER)
+      .useValue(mockCacheManager)
+      .compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({ transform: true, whitelist: true }),
+    );
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('/songs (GET) - should return all songs', async () => {
+    const mockSongs = [
+      { id: '1', title: 'Song 1', artist: 'Artist 1', url: 'http://link.com' },
+    ];
+    mockPrismaService.track.findMany.mockResolvedValue(mockSongs);
+
+    return request(app.getHttpServer())
+      .get('/songs')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].title).toBe('Song 1');
+      });
+  });
+
+  it('/songs/youtube (POST) - should create a conversion job', async () => {
+    const songData = {
+      url: 'https://youtube.com/watch?v=123',
+      title: 'New Song',
+      artist: 'New Artist',
+    };
+    const mockAlbum = { id: 'album-1', title: 'Default' };
+    const mockSong = {
+      id: 'song-1',
+      ...songData,
+      albumId: 'album-1',
+      sourceType: 'youtube',
+    };
+
+    mockPrismaService.album.findMany.mockResolvedValue([mockAlbum]);
+    mockPrismaService.track.create.mockResolvedValue(mockSong);
+    mockQueue.add.mockResolvedValue({ id: 'job-1' });
+
+    return request(app.getHttpServer())
+      .post('/songs/youtube')
+      .send(songData)
+      .expect(201)
+      .expect((res) => {
+        expect(res.body.id).toBe('song-1');
+        expect(mockQueue.add).toHaveBeenCalled();
+      });
+  });
+
+  it('/songs/youtube (POST) - should use provided albumId', async () => {
+    const songData = {
+      url: 'https://youtube.com/watch?v=123',
+      title: 'New Song',
+      artist: 'New Artist',
+      albumId: 'custom-album-id',
+    };
+    const mockSong = {
+      id: 'song-2',
+      ...songData,
+      sourceType: 'youtube',
+    };
+
+    mockPrismaService.track.create.mockResolvedValue(mockSong);
+    mockQueue.add.mockResolvedValue({ id: 'job-2' });
+
+    return request(app.getHttpServer())
+      .post('/songs/youtube')
+      .send(songData)
+      .expect(201)
+      .expect((res) => {
+        expect(res.body.id).toBe('song-2');
+        expect(res.body.albumId).toBe('custom-album-id');
+        expect(mockPrismaService.track.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              albumId: 'custom-album-id',
+            }),
+          }),
+        );
+      });
+  });
+
+  it('/songs/:id (DELETE) - should delete a song', async () => {
+    const songId = 'song-1';
+    mockPrismaService.track.findUnique.mockResolvedValue({ id: songId });
+    mockPrismaService.track.delete.mockResolvedValue({ id: songId });
+
+    return request(app.getHttpServer())
+      .delete(`/songs/${songId}`)
+      .expect(204);
+  });
+
+  it('/songs/:id/move (PATCH) - should move a song to a different album', async () => {
+    const songId = 'song-1';
+    const albumId = 'new-album-id';
+    const updatedSong = { id: songId, albumId };
+
+    mockPrismaService.track.findUnique.mockResolvedValue({ id: songId });
+    mockPrismaService.track.update.mockResolvedValue(updatedSong);
+
+    return request(app.getHttpServer())
+      .patch(`/songs/${songId}/move`)
+      .send({ albumId })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.albumId).toBe(albumId);
+      });
+  });
+});

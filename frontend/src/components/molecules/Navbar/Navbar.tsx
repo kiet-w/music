@@ -1,0 +1,54 @@
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Home, Disc } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+export function Navbar() {
+  const pathname = usePathname();
+  
+  const navItems = [
+    { href: '/', icon: Home, label: 'Home' },
+    { href: '/albums', icon: Disc, label: 'Albums' },
+  ];
+
+  // Helper to handle locale prefix in pathname
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/en' || pathname === '/vi' || pathname === '/en/' || pathname === '/vi/';
+    }
+    return pathname.includes(href);
+  };
+
+  return (
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[358px] h-[60px] glass-dark shadow-soft rounded-2xl flex items-center justify-around px-6 z-40">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const active = isActive(item.href);
+        return (
+          <Link 
+            key={item.href} 
+            href={item.href}
+            className={cn(
+              "relative flex flex-col items-center gap-1 transition-all duration-300",
+              active ? "text-white scale-110" : "text-white/40 hover:text-white/70"
+            )}
+          >
+            <Icon size={22} strokeWidth={active ? 2.5 : 2} />
+            <span className={cn(
+              "text-[9px] font-bold uppercase tracking-widest transition-opacity duration-300",
+              active ? "opacity-100" : "opacity-0"
+            )}>
+              {item.label}
+            </span>
+            {active && (
+              <div className="absolute -bottom-1 w-1 h-1 bg-white rounded-full shadow-glow" />
+            )}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
