@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import '../globals.css';
 import { Instrument_Serif } from 'next/font/google';
 import { GeistSans } from 'geist/font/sans';
@@ -34,9 +35,9 @@ export default async function RootLayout({
   return (
     <html lang={locale} className="bg-background dark">
       <head>
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
       </head>
       <body className={`${GeistSans.variable} ${instrumentSerif.variable} font-sans bg-background text-foreground antialiased selection:bg-foreground selection:text-background`}>
+        <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <div className="mx-auto max-w-[430px] min-h-[100dvh] relative pb-32">
             {children}

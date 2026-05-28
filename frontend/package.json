@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && cp out/en.html out/index.html",
     "start": "next start",
     "lint": "next lint"
   },
@@ -33,6 +33,7 @@
   "devDependencies": {
     "@capacitor/android": "^8.3.4",
     "@capacitor/cli": "^8.3.4",
+    "@types/google.accounts": "^0.0.18",
     "@types/howler": "^2.2.13",
     "@types/node": "^20.11.16",
     "@types/react": "^18.2.52",

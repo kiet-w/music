@@ -1,4 +1,4 @@
-const RAW_API_URL = 'http://localhost:3002';
+const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 // Remove trailing slash if exists to prevent double slashes in paths
 const API_URL = RAW_API_URL.replace(/\/$/, '');
 
@@ -89,7 +89,7 @@ export async function moveTrackToAlbum(id: string, albumId: string) {
 }
 
 export async function fetchGoogleDriveFiles(token: string) {
-  const res = await fetch(`${API_URL}/google-drive/files?token=${token}`, { 
+  const res = await fetch(`${API_URL}/google-drive/files?token=${encodeURIComponent(token)}`, { 
     cache: 'no-store',
     headers: { 'bypass-tunnel-reminder': 'true' }
   });

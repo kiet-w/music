@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { fetchGoogleDriveFiles } from '@/lib/api';
 
+// window.google is now typed via @types/google.accounts, but we can still keep the interface for safety
 declare global {
   interface Window {
     google: any;
@@ -25,6 +26,12 @@ export function useGoogleDrive() {
     if (!window.google) {
       console.error('Google object not found on window');
       alert('Google Identity Services script chưa được tải. Vui lòng refresh trang.');
+      return;
+    }
+
+    if (!window.google.accounts) {
+      console.error('Google accounts object not found on window.google');
+      alert('Google Identity Services đang khởi tạo. Vui lòng thử lại sau vài giây.');
       return;
     }
 
