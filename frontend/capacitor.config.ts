@@ -6,6 +6,12 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     cleartext: true
+  },
+  plugins: {
+    CapacitorUpdater: {
+      autoUpdate: true,
+      resetWhenUpdate: false
+    }
   }
 };
 

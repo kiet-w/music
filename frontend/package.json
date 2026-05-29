@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
+    "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.3.4",
     "@capacitor/filesystem": "^8.1.2",
+    "@capgo/capacitor-updater": "^8.47.4",
     "@supabase/supabase-js": "^2.106.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
