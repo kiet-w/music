@@ -1,14 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { TrackStatus } from '@prisma/client';
 import { SongRepository } from './repositories/song.repository';
 import { AlbumRepository } from '../albums/repositories/album.repository';
+import { DownloaderService } from '../downloader/downloader.service';
 
 @Injectable()
 export class SongService {
   constructor(
     private songRepository: SongRepository,
     private albumRepository: AlbumRepository,
+    private downloaderService: DownloaderService,
     @InjectQueue('conversion') private conversionQueue: Queue,
   ) {}
 
@@ -36,12 +39,29 @@ export class SongService {
       finalAlbumId = defaultAlbum.id;
     }
 
+    // Task 1: Fetch metadata early to provide a better UI experience
+    // Use the provided title if available, otherwise get it from yt-dlp
+    let finalTitle = title;
+    let duration: number | null = null;
+
+    try {
+      const metadata = await this.downloaderService.getMetadata(url);
+      if (!finalTitle || finalTitle === 'Processing...') {
+        finalTitle = metadata.title;
+      }
+      duration = metadata.duration;
+    } catch (error) {
+      console.error('Metadata fetch failed:', error);
+    }
+
     const song = await this.songRepository.create({
       data: {
-        title,
+        title: finalTitle,
         artist,
         url: '',
+        duration,
         albumId: finalAlbumId,
+        status: TrackStatus.PROCESSING,
         sourceType: 'youtube',
       },
     });
@@ -54,8 +74,9 @@ export class SongService {
     return song;
   }
 
-  async findAll() {
+  async findAll(albumId?: string) {
     return this.songRepository.findMany({
+      where: albumId ? { albumId } : {},
       include: { album: true },
     });
   }

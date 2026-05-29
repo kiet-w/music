@@ -2,12 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SongService } from './song.service';
 import { SongRepository } from './repositories/song.repository';
 import { AlbumRepository } from '../albums/repositories/album.repository';
+import { DownloaderService } from '../downloader/downloader.service';
 import { getQueueToken } from '@nestjs/bullmq';
 
 describe('SongService', () => {
   let service: SongService;
   let songRepository: SongRepository;
   let albumRepository: AlbumRepository;
+  let downloaderService: DownloaderService;
   let queue: any;
 
   const mockSongRepository = {
@@ -21,6 +23,10 @@ describe('SongService', () => {
   const mockAlbumRepository = {
     findMany: jest.fn(),
     create: jest.fn(),
+  };
+
+  const mockDownloaderService = {
+    getMetadata: jest.fn(),
   };
 
   const mockQueue = {
@@ -40,6 +46,10 @@ describe('SongService', () => {
           useValue: mockAlbumRepository,
         },
         {
+          provide: DownloaderService,
+          useValue: mockDownloaderService,
+        },
+        {
           provide: getQueueToken('conversion'),
           useValue: mockQueue,
         },
@@ -49,6 +59,7 @@ describe('SongService', () => {
     service = module.get<SongService>(SongService);
     songRepository = module.get<SongRepository>(SongRepository);
     albumRepository = module.get<AlbumRepository>(AlbumRepository);
+    downloaderService = module.get<DownloaderService>(DownloaderService);
     queue = module.get(getQueueToken('conversion'));
   });
 
@@ -62,7 +73,9 @@ describe('SongService', () => {
       const title = 'Test Song';
       const artist = 'Test Artist';
       const albumId = 'album-123';
+      const metadata = { title: 'Metadata Title', duration: 180 };
 
+      mockDownloaderService.getMetadata.mockResolvedValue(metadata);
       const mockSong = { id: 'song-123', title, artist, albumId };
       mockSongRepository.create.mockResolvedValue(mockSong);
 
@@ -74,7 +87,9 @@ describe('SongService', () => {
           title,
           artist,
           url: '',
+          duration: 180,
           albumId,
+          status: 'PROCESSING',
           sourceType: 'youtube',
         },
       });
@@ -86,7 +101,9 @@ describe('SongService', () => {
       const title = 'Test Song';
       const artist = 'Test Artist';
       const defaultAlbum = { id: 'default-album', title: 'Default' };
+      const metadata = { title: 'Metadata Title', duration: 180 };
 
+      mockDownloaderService.getMetadata.mockResolvedValue(metadata);
       mockAlbumRepository.findMany.mockResolvedValue([defaultAlbum]);
       mockSongRepository.create.mockResolvedValue({ id: 'song-123', title, artist, albumId: defaultAlbum.id });
 
@@ -106,7 +123,9 @@ describe('SongService', () => {
       const title = 'Test Song';
       const artist = 'Test Artist';
       const defaultAlbum = { id: 'new-default-album', title: 'Default' };
+      const metadata = { title: 'Metadata Title', duration: 180 };
 
+      mockDownloaderService.getMetadata.mockResolvedValue(metadata);
       mockAlbumRepository.findMany.mockResolvedValue([]);
       mockAlbumRepository.create.mockResolvedValue(defaultAlbum);
       mockSongRepository.create.mockResolvedValue({ id: 'song-123', title, artist, albumId: defaultAlbum.id });

@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Patch,
+  Query,
   HttpCode,
   HttpStatus,
   UseInterceptors,
@@ -51,10 +52,9 @@ export class SongController {
     description: 'Return all songs.',
     type: [SongResponseDto],
   })
-  @UseInterceptors(CacheInterceptor)
   @Get()
-  async findAll(): Promise<SongResponseDto[]> {
-    const songs = await this.songService.findAll();
+  async findAll(@Query('albumId') albumId?: string): Promise<SongResponseDto[]> {
+    const songs = await this.songService.findAll(albumId);
     return plainToInstance(SongResponseDto, songs, {
       excludeExtraneousValues: true,
     });
