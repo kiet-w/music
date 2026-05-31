@@ -1,7 +1,8 @@
 {
-  "/_not-found": "app/_not-found.js",
-  "/[locale]/page": "app/[locale]/page.js",
-  "/[locale]/albums/page": "app/[locale]/albums/page.js",
+  "/not-found": "app/not-found.js",
   "/[locale]/albums/detail/page": "app/[locale]/albums/detail/page.js",
+  "/[locale]/page": "app/[locale]/page.js",
+  "/[locale]/login/page": "app/[locale]/login/page.js",
+  "/[locale]/albums/page": "app/[locale]/albums/page.js",
   "/[locale]/music/page": "app/[locale]/music/page.js"
 }

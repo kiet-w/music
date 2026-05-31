@@ -20,9 +20,9 @@ export class GoogleDriveService {
     console.log('Searching for audio files in Google Drive (including Shared Drives)...');
     try {
       const res = await drive.files.list({
-        pageSize: 1000,
+        pageSize: 100,
         fields: 'nextPageToken, files(id, name, mimeType, size, shortcutDetails, capabilities, driveId)',
-        q: "trashed = false",
+        q: "trashed = false and (mimeType contains 'audio/' or mimeType = 'application/vnd.google-apps.shortcut' or mimeType = 'video/mp4')",
         supportsAllDrives: true,
         includeItemsFromAllDrives: true,
       });
@@ -87,17 +87,9 @@ export class GoogleDriveService {
     return res.data;
   }
 
-  async downloadFile(accessToken: string, fileId: string): Promise<Buffer> {
+  async downloadFile(accessToken: string, fileId: string): Promise<any> {
     this.oauth2Client.setCredentials({ access_token: accessToken });
     const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
-
-    // Fetch meta first to log and check
-    const meta = await drive.files.get({ 
-      fileId, 
-      fields: 'name, mimeType, size',
-      supportsAllDrives: true,
-    });
-    console.log(`Downloading: ${meta.data.name} (${meta.data.mimeType}) - Size: ${meta.data.size}`);
 
     const res = await drive.files.get(
       { 
@@ -106,8 +98,8 @@ export class GoogleDriveService {
         supportsAllDrives: true,
         acknowledgeAbuse: true
       },
-      { responseType: 'arraybuffer' },
+      { responseType: 'stream' },
     );
-    return Buffer.from(res.data as ArrayBuffer);
+    return res.data;
   }
 }

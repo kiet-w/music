@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+'use client';
+
+import { useState, useCallback, useEffect } from 'react';
 import { fetchGoogleDriveFiles } from '@/lib/api';
 
-// window.google is now typed via @types/google.accounts, but we can still keep the interface for safety
 declare global {
   interface Window {
     google: any;
@@ -21,17 +22,22 @@ export function useGoogleDrive() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
+      console.log('Injecting Google GSI script...');
+      const script = document.createElement('script');
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }, []);
+
   const login = useCallback(() => {
     console.log('Login function called');
     if (!window.google) {
       console.error('Google object not found on window');
       alert('Google Identity Services script chưa được tải. Vui lòng refresh trang.');
-      return;
-    }
-
-    if (!window.google.accounts) {
-      console.error('Google accounts object not found on window.google');
-      alert('Google Identity Services đang khởi tạo. Vui lòng thử lại sau vài giây.');
       return;
     }
 
@@ -65,11 +71,11 @@ export function useGoogleDrive() {
     }
   }, []);
 
-  const listFiles = useCallback(async (token: string) => {
+  const listFiles = useCallback(async (appToken: string, googleAccessToken: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchGoogleDriveFiles(token);
+      const data = await fetchGoogleDriveFiles(appToken, googleAccessToken);
       setFiles(data);
     } catch (err: any) {
       setError(err.message || 'Failed to list files');

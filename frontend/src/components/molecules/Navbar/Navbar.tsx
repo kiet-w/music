@@ -2,12 +2,22 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, Disc } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Home, Disc, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLocale } from 'next-intl';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const locale = useLocale();
+  const { clearSession, user } = useAuthStore();
+
+  const handleLogout = () => {
+    clearSession();
+    router.push(`/${locale}/login`);
+  };
   
   const navItems = [
     { href: '/', icon: Home, label: 'Home' },
@@ -17,7 +27,7 @@ export function Navbar() {
   // Helper to handle locale prefix in pathname
   const isActive = (href: string) => {
     if (href === '/') {
-      return pathname === '/en' || pathname === '/vi' || pathname === '/en/' || pathname === '/vi/';
+      return pathname === `/${locale}` || pathname === `/${locale}/` || pathname === '/';
     }
     return pathname.includes(href);
   };
@@ -30,7 +40,7 @@ export function Navbar() {
         return (
           <Link 
             key={item.href} 
-            href={item.href}
+            href={`/${locale}${item.href === '/' ? '' : item.href}`}
             className={cn(
               "relative flex flex-col items-center gap-1 transition-all duration-300",
               active ? "text-white scale-110" : "text-white/40 hover:text-white/70"
@@ -49,6 +59,18 @@ export function Navbar() {
           </Link>
         );
       })}
+
+      {/* Logout Button */}
+      <button 
+        onClick={handleLogout}
+        className="relative flex flex-col items-center gap-1 transition-all duration-300 text-white/40 hover:text-white/70"
+        title={user?.email || 'Logout'}
+      >
+        <LogOut size={22} strokeWidth={2} />
+        <span className="text-[9px] font-bold uppercase tracking-widest opacity-0 hover:opacity-100 transition-opacity duration-300">
+          Logout
+        </span>
+      </button>
     </nav>
   );
 }

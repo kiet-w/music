@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module common - Micro-Technical Detail</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --sidebar-bg: #252526;
+      --card-bg: #2d2d30;
+      --border: #404040;
+      --text: #d4d4d4;
+      --text-dim: #858585;
+      --kw: #569cd6;
+      --fn: #dcdcaa;
+      --str: #ce9178;
+      --typ: #4ec9b0;
+      --accent: #007acc;
+      --hover: #37373d;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .sidebar h2 { font-size: 14px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 20px; letter-spacing: 1px; }
+    .sidebar-link {
+      display: block;
+      padding: 8px 12px;
+      color: var(--text);
+      text-decoration: none;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .sidebar-link:hover { background: var(--hover); }
+    .sidebar-link i { margin-right: 10px; width: 16px; text-align: center; color: var(--accent); }
+
+    /* Main Content */
+    .content {
+      margin-left: 280px;
+      padding: 40px;
+      width: calc(100% - 280px);
+      max-width: 1200px;
+    }
+
+    h1, h2, h3 { font-weight: 600; }
+    h1 { color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .badge {
+      background: var(--accent);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+
+    /* Technical Card */
+    .tech-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .tech-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .tech-title { font-family: 'JetBrains Mono', monospace; color: var(--fn); font-size: 18px; }
+    .tech-meta { font-size: 13px; color: var(--text-dim); }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .io-box { background: #1a1a1a; padding: 15px; border-radius: 6px; border-left: 3px solid var(--accent); }
+    .io-label { font-weight: bold; font-size: 11px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
+    .io-content { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #9cdcfe; }
+
+    pre.code-block {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      border: 1px solid var(--border);
+    }
+
+    .mermaid {
+      background: #f0f0f0; /* White background for visibility */
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Lifecycle Container */
+    .lifecycle-container {
+      display: flex;
+      gap: 30px;
+      margin-top: 40px;
+      border-top: 1px solid var(--border);
+      padding-top: 40px;
+    }
+    .lifecycle-viz { flex: 1; position: sticky; top: 40px; height: fit-content; }
+    .lifecycle-details { flex: 1.2; }
+
+    /* SVG Tooltip */
+    #tooltip-bg { transition: all 0.3s; }
+
+    @media (max-width: 1024px) {
+      .grid { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .content { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>Common Module</h2>
+    <a href="#overview" class="sidebar-link"><i class="fas fa-project-diagram"></i> Tổng quan</a>
+    <a href="#flow" class="sidebar-link"><i class="fas fa-route"></i> Sơ đồ Hệ Thống</a>
+    <a href="#baserepository" class="sidebar-link"><i class="fas fa-database"></i> BaseRepository</a>
+    <a href="#logginginterceptor" class="sidebar-link"><i class="fas fa-terminal"></i> LoggingInterceptor</a>
+    <a href="#httpfilter" class="sidebar-link"><i class="fas fa-exclamation-triangle"></i> HttpExceptionFilter</a>
+    <a href="#interfaces" class="sidebar-link"><i class="fas fa-file-code"></i> Interfaces</a>
+  </div>
+
+  <div class="content">
+    <section id="overview">
+      <h1>Module common <span class="badge">NestJS Core</span></h1>
+      <p>Module `common` là xương sống của ứng dụng, chứa các thành phần trừu tượng và xử lý logic cắt ngang (cross-cutting concerns) như logging, exception handling và database abstraction.</p>
+      
+      <div class="tech-card">
+        <div class="grid">
+          <div>
+            <div class="io-label">File Paths</div>
+            <div class="io-content">src/common/**/*</div>
+          </div>
+          <div>
+            <div class="io-label">Dependencies</div>
+            <div class="io-content">@nestjs/common, rxjs, Prisma</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="flow">
+      <h2>Sơ đồ Hệ Thống (System Data Flow)</h2>
+      <div class="tech-card" style="text-align: center;">
+        <svg viewBox="0 0 720 900" style="max-width: 500px; height: auto; display: block; margin: 0 auto;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#858585" /></marker>
+            <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#569cd6" /></marker>
+            <marker id="arr-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#c586c0" /></marker>
+          </defs>
+          <style>
+            .c-blue { stroke: #569cd6; fill: #1a3a52; stroke-width: 2; cursor: pointer; }
+            .c-red { stroke: #f44747; fill: #3a1a1a; stroke-width: 2; cursor: pointer; }
+            .c-amber { stroke: #dcdcaa; fill: #2d2516; stroke-width: 2; cursor: pointer; }
+            .c-purple { stroke: #c586c0; fill: #2d1e35; stroke-width: 2; cursor: pointer; }
+            .c-teal { stroke: #4ec9b0; fill: #1a3a28; stroke-width: 2; cursor: pointer; }
+            .c-gray { stroke: #858585; fill: #2d2d30; stroke-width: 2; cursor: pointer; }
+            .th { font: bold 14px sans-serif; fill: #fff; pointer-events: none; }
+            .ts { font: 12px sans-serif; fill: #aaa; pointer-events: none; }
+            .region { fill: none; stroke: #404040; stroke-dasharray: 8 4; stroke-width: 1; }
+            .path-line { fill: none; stroke: #858585; stroke-width: 2; marker-end: url(#arr); }
+          </style>
+
+          <!-- NestJS Region -->
+          <rect x="20" y="80" width="680" height="730" rx="15" class="region" />
+          <text x="30" y="100" class="ts" style="font-weight: bold;">NESTJS PIPELINE</text>
+
+          <!-- Client -->
+          <g onclick="showTooltip(event, 'Client Request', 'Điểm bắt đầu của mọi request HTTP.', 'JSON/FormData', 'HTTP 200/4xx/5xx')">
+            <rect x="260" y="10" width="200" height="50" rx="8" class="c-gray"/>
+            <text x="360" y="32" class="th" text-anchor="middle">Client Application</text>
+            <text x="360" y="47" class="ts" text-anchor="middle">Browser / Mobile App</text>
+          </g>
+
+          <path d="M360 60 V120" class="path-line" />
+
+          <!-- Interceptor -->
+          <g onclick="scrollToElement('logginginterceptor'); showTooltip(event, 'LoggingInterceptor', 'Ghi log request/response và đo thời gian thực thi.', 'ExecutionContext', 'Observable')">
+            <rect x="260" y="120" width="200" height="60" rx="8" class="c-blue"/>
+            <text x="360" y="145" class="th" text-anchor="middle">LoggingInterceptor</text>
+            <text x="360" y="165" class="ts" text-anchor="middle">@Injectable()</text>
+          </g>
+
+          <path d="M360 180 V240" class="path-line" />
+
+          <!-- Controller -->
+          <g onclick="showTooltip(event, 'Controller', 'Xác định route và điều hướng logic tới Service.', 'DTOs', 'Response Payload')">
+            <rect x="260" y="240" width="200" height="60" rx="8" class="c-amber"/>
+            <text x="360" y="265" class="th" text-anchor="middle">Module Controller</text>
+            <text x="360" y="285" class="ts" text-anchor="middle">@Controller()</text>
+          </g>
+
+          <path d="M360 300 V360" class="path-line" />
+
+          <!-- Service -->
+          <g onclick="showTooltip(event, 'Service', 'Chứa Business Logic chính của ứng dụng.', 'Method Params', 'Return Values')">
+            <rect x="260" y="360" width="200" height="60" rx="8" class="c-teal"/>
+            <text x="360" y="385" class="th" text-anchor="middle">Module Service</text>
+            <text x="360" y="405" class="ts" text-anchor="middle">Business Logic</text>
+          </g>
+
+          <path d="M360 420 V480" class="path-line" />
+
+          <!-- Repository -->
+          <g onclick="scrollToElement('baserepository'); showTooltip(event, 'BaseRepository', 'Lớp trừu tượng hóa các thao tác Database qua Prisma.', 'Prisma Args', 'Database Entity')">
+            <rect x="260" y="480" width="200" height="60" rx="8" class="c-purple"/>
+            <text x="360" y="505" class="th" text-anchor="middle">BaseRepository</text>
+            <text x="360" y="525" class="ts" text-anchor="middle">Prisma Delegate</text>
+          </g>
+
+          <!-- Exception Filter -->
+          <g onclick="scrollToElement('httpfilter'); showTooltip(event, 'HttpExceptionFilter', 'Bắt các lỗi HttpException và chuẩn hóa format JSON trả về.', 'HttpException', 'Standard Error JSON')">
+            <rect x="40" y="360" width="180" height="60" rx="8" class="c-red"/>
+            <text x="130" y="385" class="th" text-anchor="middle">HttpExceptionFilter</text>
+            <text x="130" y="405" class="ts" text-anchor="middle">Global Exception Filter</text>
+          </g>
+
+          <!-- Error Path -->
+          <path d="M260 390 H220" class="path-line" style="stroke: #f44747; stroke-dasharray: 4;" />
+          <path d="M130 360 V40 Q130 10 260 40" class="path-line" style="stroke: #f44747;" />
+
+          <!-- Tooltip Box -->
+          <rect id="tooltip-bg" x="40" y="820" width="640" height="70" rx="8" fill="#252526" stroke="#404040" />
+          <foreignObject x="60" y="825" width="600" height="60">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="color:#d4d4d4; font-family:sans-serif; font-size:12px;">
+              <div id="tt-title" style="color:#fff; font-weight:bold; margin-bottom:4px;">Chọn một node...</div>
+              <div id="tt-why" style="margin-bottom:4px; font-style: italic; color: #ce9178;">Thông tin chi tiết sẽ hiển thị tại đây.</div>
+              <div style="display:flex; gap:20px;">
+                <span style="color:#4ec9b0;">IN: <span id="tt-in">-</span></span>
+                <span style="color:#569cd6;">OUT: <span id="tt-out">-</span></span>
+              </div>
+            </div>
+          </foreignObject>
+        </svg>
+      </div>
+    </section>
+
+    <div class="lifecycle-container">
+      <div class="lifecycle-viz">
+        <div id="baserepository" class="tech-card">
+          <div class="tech-header">
+            <div>
+              <div class="tech-title">BaseRepository&lt;T, Delegate&gt;</div>
+              <div class="tech-meta">src/common/repositories/base.repository.ts</div>
+            </div>
+          </div>
+          <p>Generic Abstract Class đóng vai trò như một wrapper mỏng cho Prisma Delegate, giúp tái sử dụng các thao tác CRUD cơ bản.</p>
+          
+          <pre class="mermaid">graph TD
+A[Call findMany] --> B{Delegate exists?}
+B -- Yes --> C[Delegate.findMany args]
+C --> D[Return Promise T]
+B -- No --> E[TypeScript Error]</pre>
+
+          <div class="grid">
+            <div class="io-box">
+              <div class="io-label">Input (IN)</div>
+              <div class="io-content">args: any (Prisma Query)</div>
+            </div>
+            <div class="io-box">
+              <div class="io-label">Output (OUT)</div>
+              <div class="io-content">Promise&lt;T[] | T | null&gt;</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="logginginterceptor" class="tech-card">
+          <div class="tech-header">
+            <div>
+              <div class="tech-title">LoggingInterceptor</div>
+              <div class="tech-meta">src/common/interceptors/logging.interceptor.ts</div>
+            </div>
+          </div>
+          <p>Tự động ghi log thời gian phản hồi cho mọi request HTTP.</p>
+
+          <pre class="mermaid">sequenceDiagram
+participant C as Client
+participant I as LoggingInterceptor
+participant H as Handler
+C->>I: HTTP Request
+I->>I: Start Timer (now)
+I->>H: next.handle()
+H-->>I: Response
+I->>I: Calculate diff (Date.now - now)
+I->>I: Logger.log(method, url, ms)
+I-->>C: Response</pre>
+        </div>
+      </div>
+
+      <div class="lifecycle-details">
+        <div id="httpfilter" class="tech-card">
+          <div class="tech-header">
+            <div>
+              <div class="tech-title">HttpExceptionFilter</div>
+              <div class="tech-meta">src/common/filters/http-exception.filter.ts</div>
+            </div>
+          </div>
+          <p>Bắt và format lại các lỗi `HttpException` thành cấu trúc JSON chuẩn.</p>
+          
+          <pre class="mermaid">graph LR
+E[Exception] --> F[Filter Catch]
+F --> G[Extract Status]
+F --> H[Extract Message]
+G --> I[Format Response]
+H --> I
+I --> J[Response.json]</pre>
+
+          <div class="io-label">Micro-Logic</div>
+          <ul style="font-size: 14px; padding-left: 20px;">
+            <li>Sử dụng `@Catch(HttpException)` để đăng ký filter.</li>
+            <li>Trích xuất `status` từ `exception.getStatus()`.</li>
+            <li>Phân tích `exception.getResponse()` để lấy thông báo lỗi chi tiết nhất.</li>
+            <li>Trả về JSON bao gồm: `statusCode`, `message`, `timestamp`, `path`.</li>
+          </ul>
+        </div>
+
+        <div id="interfaces" class="tech-card">
+          <div class="tech-header">
+            <div class="tech-title">Provider Interfaces</div>
+          </div>
+          <p>Định nghĩa "Hợp đồng" cho Dependency Inversion.</p>
+          
+          <div style="margin-bottom: 20px;">
+            <div class="io-label">IStorageProvider</div>
+            <pre class="code-block">upload(filePath, bucket, dest): Promise&lt;string&gt;
+uploadBuffer(buffer, bucket, dest): Promise&lt;string&gt;
+delete(bucket, path): Promise&lt;void&gt;</pre>
+          </div>
+
+          <div>
+            <div class="io-label">IDownloaderProvider</div>
+            <pre class="code-block">download(url, outputPath): Promise&lt;void&gt;
+cleanup(filePath): Promise&lt;void&gt;</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ 
+      theme: 'dark',
+      startOnLoad: true,
+      securityLevel: 'loose'
+    });
+
+    function showTooltip(event, title, why, input, output) {
+      document.getElementById('tt-title').innerText = title;
+      document.getElementById('tt-why').innerText = why;
+      document.getElementById('tt-in').innerText = input;
+      document.getElementById('tt-out').innerText = output;
+      
+      const bg = document.getElementById('tooltip-bg');
+      bg.setAttribute('stroke', '#007acc');
+      bg.setAttribute('stroke-width', '2');
+      setTimeout(() => {
+        bg.setAttribute('stroke-width', '1');
+        bg.setAttribute('stroke', '#404040');
+      }, 500);
+    }
+
+    function scrollToElement(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.style.boxShadow = '0 0 15px #007acc';
+        setTimeout(() => {
+          el.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+        }, 1500);
+      }
+    }
+  </script>
+</body>
+</html>

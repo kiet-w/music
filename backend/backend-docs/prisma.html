@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Prisma - Technical Detail</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            theme: 'dark',
+            startOnLoad: true,
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' }
+        });
+    </script>
+    <style>
+        :root {
+            --bg: #1e1e1e;
+            --sidebar-bg: #252526;
+            --text: #d4d4d4;
+            --kw: #569cd6;
+            --fn: #dcdcaa;
+            --str: #ce9178;
+            --comment: #6a9955;
+            --accent: #007acc;
+            --type: #4ec9b0;
+            --border: #404040;
+            --card-bg: #2d2d30;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            line-height: 1.6;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            margin-left: 290px;
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1, h2, h3 { color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .kw { color: var(--kw); }
+        .fn { color: var(--fn); }
+        .type { color: var(--type); }
+
+        .tech-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .label { color: #888; font-size: 0.85em; text-transform: uppercase; font-weight: bold; }
+        .value { color: #eee; font-family: 'Cascadia Code', Consolas, monospace; }
+
+        .mermaid {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px auto;
+            display: block;
+            max-width: 500px;
+        }
+
+        .lifecycle-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .code-block {
+            background: #000;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Cascadia Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            border: 1px solid #333;
+        }
+
+        nav a {
+            display: block;
+            color: #ccc;
+            text-decoration: none;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        nav a:hover { color: var(--accent); }
+
+        #tooltip-bg { transition: all 0.3s ease; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h3>Prisma Module</h3>
+        <nav>
+            <a href="#overview">Tổng quan</a>
+            <a href="#system-flow">Sơ đồ hệ thống</a>
+            <a href="#prisma-module">PrismaModule Detail</a>
+            <a href="#prisma-service">PrismaService Detail</a>
+            <a href="#onmoduleinit">onModuleInit Logic</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <h1 id="overview">Module: Prisma (Micro-Technical Detail)</h1>
+        <p>Module <code>prisma</code> chịu trách nhiệm khởi tạo và quản lý kết nối cơ sở dữ liệu thông qua Prisma ORM, đảm bảo tính nhất quán và hiệu năng cho toàn bộ hệ thống.</p>
+
+        <h2 id="system-flow">1. Sơ đồ Hệ Thống (System Data Flow)</h2>
+        <svg viewBox="0 0 720 400" style="max-width: 600px; height: auto; display: block; margin: 0 auto;" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#858585" /></marker>
+            </defs>
+            <style>
+                .c-blue { stroke: #569cd6; fill: #1a3a52; stroke-width: 2; cursor: pointer; }
+                .c-teal { stroke: #4ec9b0; fill: #1a3a28; stroke-width: 2; cursor: pointer; }
+                .c-purple { stroke: #c586c0; fill: #2d1e35; stroke-width: 2; cursor: pointer; }
+                .c-amber { stroke: #dcdcaa; fill: #2d2516; stroke-width: 2; cursor: pointer; }
+                .th { font: bold 14px sans-serif; fill: #fff; pointer-events: none; }
+                .ts { font: 12px sans-serif; fill: #aaa; pointer-events: none; }
+                .region { fill: none; stroke: #404040; stroke-dasharray: 8 4; stroke-width: 1; }
+                .path-line { fill: none; stroke: #858585; stroke-width: 2; marker-end: url(#arr); }
+                rect:hover { filter: brightness(1.2); }
+            </style>
+
+            <rect x="20" y="80" width="680" height="220" rx="15" class="region" />
+            <text x="30" y="100" class="ts" style="font-weight: bold;">NESTJS APPLICATION</text>
+
+            <!-- AppModule -->
+            <g onclick="showTooltip('AppModule', 'Root module của ứng dụng, nơi import PrismaModule lần duy nhất.', 'None', 'App Instance')">
+                <rect x="50" y="120" width="160" height="60" rx="8" class="c-blue"/>
+                <text x="130" y="145" class="th" text-anchor="middle">AppModule</text>
+                <text x="130" y="165" class="ts" text-anchor="middle">Root Container</text>
+            </g>
+
+            <!-- PrismaModule -->
+            <g onclick="showTooltip('PrismaModule', 'Module Global cung cấp PrismaService cho toàn bộ hệ thống.', 'AppModule', 'Global Provider')">
+                <rect x="280" y="120" width="160" height="60" rx="8" class="c-purple"/>
+                <text x="360" y="145" class="th" text-anchor="middle">PrismaModule</text>
+                <text x="360" y="165" class="ts" text-anchor="middle">@Global()</text>
+            </g>
+
+            <!-- Database -->
+            <g onclick="showTooltip('PostgreSQL', 'Cơ sở dữ liệu Supabase lưu trữ metadata của Songs và Albums.', 'Prisma Connection', 'Data Persistence')">
+                <rect x="510" y="120" width="160" height="60" rx="8" class="c-teal"/>
+                <text x="590" y="145" class="th" text-anchor="middle">PostgreSQL</text>
+                <text x="590" y="165" class="ts" text-anchor="middle">Supabase (Port 6543)</text>
+            </g>
+
+            <path d="M 210 150 L 270 150" class="path-line" />
+            <path d="M 440 150 L 500 150" class="path-line" />
+
+            <!-- Tooltip -->
+            <rect id="tooltip-bg" x="40" y="310" width="640" height="80" rx="8" fill="#252526" stroke="#404040" />
+            <foreignObject x="60" y="315" width="600" height="70">
+                <div xmlns="http://www.w3.org/1999/xhtml" style="color:#d4d4d4; font-family:sans-serif; font-size:12px;">
+                    <div id="tt-title" style="color:#fff; font-weight:bold; margin-bottom:4px;">Click a node for details...</div>
+                    <div id="tt-why" style="margin-bottom:4px; font-style: italic; color: #ce9178;">Technical context will appear here.</div>
+                    <div style="display:flex; gap:20px;">
+                        <span style="color:#4ec9b0;">IN: <span id="tt-in">-</span></span>
+                        <span style="color:#569cd6;">OUT: <span id="tt-out">-</span></span>
+                    </div>
+                </div>
+            </foreignObject>
+        </svg>
+
+        <h2 id="prisma-module">2. Chi tiết Module (PrismaModule)</h2>
+        <div class="tech-card">
+            <div class="grid">
+                <div>
+                    <div class="label">File Path</div>
+                    <div class="value">src/prisma/prisma.module.ts</div>
+                </div>
+                <div>
+                    <div class="label">Scope</div>
+                    <div class="value">@Global()</div>
+                </div>
+            </div>
+            <div class="label" style="margin-top: 20px;">Micro-Logic</div>
+            <p>Sử dụng decorator <code>@Global()</code> để biến <code>PrismaService</code> thành singleton toàn cục. Các module khác như <code>SongsModule</code> hay <code>AlbumsModule</code> có thể inject <code>PrismaService</code> mà không cần import lại <code>PrismaModule</code> trong mảng <code>imports</code> của chúng.</p>
+            <div class="label">Impact</div>
+            <p>Giảm thiểu boilerplate code và đảm bảo chỉ có một instance duy nhất của PrismaClient quản lý connection pool, tối ưu hóa tài nguyên DB.</p>
+        </div>
+
+        <h2 id="prisma-service">3. Chi tiết Service (PrismaService)</h2>
+        <div class="tech-card">
+            <div class="grid">
+                <div>
+                    <div class="label">Extends</div>
+                    <div class="value">PrismaClient</div>
+                </div>
+                <div>
+                    <div class="label">Interfaces</div>
+                    <div class="value">OnModuleInit</div>
+                </div>
+            </div>
+            
+            <h3 id="onmoduleinit" style="font-size: 1.1em; margin-top: 30px;">Lifecycle Hook: onModuleInit()</h3>
+            <div class="lifecycle-container">
+                <div style="flex: 1;">
+                    <pre class="mermaid">graph TD
+Start((App Start)) --> Init[Module Init Phase]
+Init --> Connect[await this.$connect()]
+Connect --> Success{Connected?}
+Success -- Yes --> Ready((System Ready))
+Success -- No --> Fail((Fail Fast / Error))</pre>
+                </div>
+                <div style="flex: 1;">
+                    <div class="code-block">
+                        <span class="kw">async</span> <span class="fn">onModuleInit</span>() {<br>
+                        &nbsp;&nbsp;<span class="kw">await</span> <span class="kw">this</span>.<span class="fn">$connect</span>();<br>
+                        }
+                    </div>
+                    <div class="grid" style="margin-top: 15px;">
+                        <div>
+                            <div class="label">Input</div>
+                            <div class="value">None</div>
+                        </div>
+                        <div>
+                            <div class="label">Output</div>
+                            <div class="value">Promise&lt;void&gt;</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="label" style="margin-top: 20px;">Micro-Logic</div>
+            <p>PrismaClient mặc định thực hiện <i>lazy connection</i> (kết nối khi có query đầu tiên). Việc ghi đè <code>onModuleInit</code> và gọi <code>$connect()</code> chủ động giúp ứng dụng thực hiện <strong>Fail-Fast</strong>: Nếu thông tin credentials sai hoặc Database server không khả dụng, NestJS sẽ báo lỗi ngay khi khởi động thay vì đợi đến khi người dùng thực hiện request đầu tiên.</p>
+        </div>
+    </div>
+
+    <script>
+        function showTooltip(title, why, input, output) {
+            document.getElementById('tt-title').innerText = title;
+            document.getElementById('tt-why').innerText = why;
+            document.getElementById('tt-in').innerText = input;
+            document.getElementById('tt-out').innerText = output;
+            
+            const bg = document.getElementById('tooltip-bg');
+            bg.style.stroke = '#569cd6';
+            bg.style.strokeWidth = '2px';
+            setTimeout(() => {
+                bg.style.stroke = '#404040';
+                bg.style.strokeWidth = '1px';
+            }, 500);
+        }
+    </script>
+</body>
+</html>

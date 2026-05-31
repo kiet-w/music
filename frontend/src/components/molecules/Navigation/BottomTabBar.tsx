@@ -2,20 +2,29 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, Disc, Music } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Home, Disc, Music, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export const BottomTabBar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations('Music'); // Using Music namespace for now
+  const { clearSession, user } = useAuthStore();
+
+  const handleLogout = () => {
+    clearSession();
+    router.push(`/${locale}/login`);
+  };
 
   // Function to check if a tab is active based on pathname
   const isActive = (path: string) => {
     // Basic check for exact match or starts with (for /albums/id)
     if (path === '/') {
-      return pathname === '/en' || pathname === '/vi' || pathname === '/';
+      return pathname === `/${locale}` || pathname === `/${locale}/` || pathname === '/';
     }
     return pathname.includes(path);
   };
@@ -35,7 +44,7 @@ export const BottomTabBar = () => {
           return (
             <Link 
               key={tab.name}
-              href={`/en${tab.path}`} // Hardcoded locale for simplicity, or handle it via next-intl routing
+              href={`/${locale}${tab.path === '/' ? '' : tab.path}`}
               className={cn(
                 "relative flex flex-col items-center justify-center w-16 h-full transition-colors duration-200",
                 active ? "text-foreground" : "text-muted-foreground hover:text-foreground/80"
@@ -59,6 +68,18 @@ export const BottomTabBar = () => {
             </Link>
           );
         })}
+
+        {/* Logout Button */}
+        <button 
+          onClick={handleLogout}
+          className="relative flex flex-col items-center justify-center w-16 h-full transition-colors duration-200 text-muted-foreground hover:text-foreground/80"
+          title={user?.email || 'Logout'}
+        >
+          <LogOut size={22} strokeWidth={2} />
+          <span className="text-[10px] font-medium absolute bottom-2 opacity-0 hover:opacity-100 transition-opacity duration-200">
+            Logout
+          </span>
+        </button>
       </div>
     </div>
   );

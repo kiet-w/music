@@ -3,19 +3,21 @@
 /* eslint-disable @typescript-eslint/require-await */
 import {
   Injectable,
-  Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as fs from 'fs';
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { IStorageProvider } from '../common/interfaces/storage-provider.interface';
 
 @Injectable()
 export class StorageService implements IStorageProvider {
   private supabase: SupabaseClient;
-  private readonly logger = new Logger(StorageService.name);
 
-  constructor() {
+  constructor(
+    @InjectPinoLogger(StorageService.name)
+    private readonly logger: PinoLogger,
+  ) {
     const rawUrl = process.env.SUPABASE_URL;
     const rawKey = process.env.SUPABASE_KEY;
 
@@ -34,7 +36,8 @@ export class StorageService implements IStorageProvider {
 
     if (!isConfigured) {
       this.logger.error(
-        `Supabase is not correctly configured. URL: ${rawUrl}, Key present: ${!!rawKey}`,
+        { rawUrl, keyPresent: !!rawKey },
+        'Supabase is not correctly configured',
       );
     }
 
@@ -50,8 +53,9 @@ export class StorageService implements IStorageProvider {
     destinationPath: string,
   ): Promise<string> {
     try {
-      this.logger.log(
-        `Uploading file from ${filePath} to ${bucketName}/${destinationPath}`,
+      this.logger.info(
+        { filePath, bucketName, destinationPath },
+        'Uploading file',
       );
 
       if (!fs.existsSync(filePath)) {
@@ -67,16 +71,16 @@ export class StorageService implements IStorageProvider {
         });
 
       if (error) {
-        this.logger.error(`Supabase upload error: ${error.message}`);
+        this.logger.error({ error: error.message }, 'Supabase upload error');
         throw new InternalServerErrorException(
           `Supabase upload failed: ${error.message}`,
         );
       }
 
-      this.logger.log(`File uploaded successfully: ${data.path}`);
+      this.logger.info({ path: data.path }, 'File uploaded successfully');
       return data.path;
     } catch (error) {
-      this.logger.error(`Upload failed: ${error.message}`);
+      this.logger.error({ error: error.message }, 'Upload failed');
       throw error instanceof InternalServerErrorException
         ? error
         : new InternalServerErrorException(error.message);
@@ -90,8 +94,9 @@ export class StorageService implements IStorageProvider {
     contentType: string = 'audio/mpeg',
   ): Promise<string> {
     try {
-      this.logger.log(
-        `Uploading buffer to ${bucketName}/${destinationPath} with content-type ${contentType}`,
+      this.logger.info(
+        { bucketName, destinationPath, contentType },
+        'Uploading buffer',
       );
 
       const { data, error } = await this.supabase.storage
@@ -102,16 +107,52 @@ export class StorageService implements IStorageProvider {
         });
 
       if (error) {
-        this.logger.error(`Supabase upload error: ${error.message}`);
+        this.logger.error({ error: error.message }, 'Supabase upload error');
         throw new InternalServerErrorException(
           `Supabase upload failed: ${error.message}`,
         );
       }
 
-      this.logger.log(`Buffer uploaded successfully: ${data.path}`);
+      this.logger.info({ path: data.path }, 'Buffer uploaded successfully');
       return data.path;
     } catch (error) {
-      this.logger.error(`Buffer upload failed: ${error.message}`);
+      this.logger.error({ error: error.message }, 'Buffer upload failed');
+      throw error instanceof InternalServerErrorException
+        ? error
+        : new InternalServerErrorException(error.message);
+    }
+  }
+
+  async uploadStream(
+    stream: any,
+    bucketName: string,
+    destinationPath: string,
+    contentType: string = 'audio/mpeg',
+  ): Promise<string> {
+    try {
+      this.logger.info(
+        { bucketName, destinationPath, contentType },
+        'Uploading stream',
+      );
+
+      const { data, error } = await this.supabase.storage
+        .from(bucketName)
+        .upload(destinationPath, stream, {
+          contentType,
+          upsert: true,
+        });
+
+      if (error) {
+        this.logger.error({ error: error.message }, 'Supabase upload error');
+        throw new InternalServerErrorException(
+          `Supabase upload failed: ${error.message}`,
+        );
+      }
+
+      this.logger.info({ path: data.path }, 'Stream uploaded successfully');
+      return data.path;
+    } catch (error) {
+      this.logger.error({ error: error.message }, 'Stream upload failed');
       throw error instanceof InternalServerErrorException
         ? error
         : new InternalServerErrorException(error.message);
@@ -125,24 +166,25 @@ export class StorageService implements IStorageProvider {
 
   async delete(bucketName: string, path: string): Promise<void> {
     try {
-      this.logger.log(`Deleting file from ${bucketName}/${path}`);
+      this.logger.info({ bucketName, path }, 'Deleting file');
       const { error } = await this.supabase.storage
         .from(bucketName)
         .remove([path]);
 
       if (error) {
-        this.logger.error(`Supabase delete error: ${error.message}`);
+        this.logger.error({ error: error.message }, 'Supabase delete error');
         throw new InternalServerErrorException(
           `Supabase delete failed: ${error.message}`,
         );
       }
 
-      this.logger.log(`File deleted successfully: ${path}`);
+      this.logger.info({ path }, 'File deleted successfully');
     } catch (error) {
-      this.logger.error(`Delete failed: ${error.message}`);
+      this.logger.error({ error: error.message }, 'Delete failed');
       throw error instanceof InternalServerErrorException
         ? error
         : new InternalServerErrorException(error.message);
     }
   }
 }
+

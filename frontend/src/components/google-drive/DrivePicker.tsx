@@ -6,11 +6,12 @@ import { X, Search, File, Music, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GoogleDriveFile } from "@/hooks/useGoogleDrive";
 import { importFromDrive } from "@/lib/api";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface DrivePickerProps {
   isOpen: boolean;
   onClose: () => void;
-  accessToken: string | null;
+  googleToken: string | null;
   files: GoogleDriveFile[];
   isLoading: boolean;
   albumId?: string;
@@ -21,13 +22,14 @@ interface DrivePickerProps {
 export const DrivePicker = ({
   isOpen,
   onClose,
-  accessToken,
+  googleToken,
   files,
   isLoading,
   albumId: initialAlbumId,
   albums = [],
   onImportComplete,
 }: DrivePickerProps) => {
+  const { accessToken: appToken } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedAlbumId, setSelectedAlbumId] = useState(initialAlbumId);
@@ -59,7 +61,8 @@ export const DrivePicker = ({
   };
 
   const handleImport = async () => {
-    if (!accessToken || selectedIds.size === 0 || !selectedAlbumId) {
+    if (!googleToken || !appToken || selectedIds.size === 0 || !selectedAlbumId) {
+      if (!appToken) alert('Vui lòng đăng nhập trước khi nhập nhạc.');
       if (!selectedAlbumId) alert('Vui lòng chọn Album trước khi nhập nhạc.');
       return;
     }
@@ -71,7 +74,7 @@ export const DrivePicker = ({
     try {
       for (let i = 0; i < ids.length; i++) {
         setImportProgress({ current: i + 1, total: ids.length });
-        await importFromDrive(ids[i], accessToken, selectedAlbumId);
+        await importFromDrive(appToken, ids[i], googleToken, selectedAlbumId);
       }
       onImportComplete?.();
       onClose();

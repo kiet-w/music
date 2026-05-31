@@ -8,32 +8,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  albums       Album[]
+}
+
 model Album {
   id        String   @id @default(uuid())
   title     String
   artist    String?
   coverUrl  String?
+  isDefault Boolean  @default(false)
+  userId    String
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tracks    Track[]
-}
 
-enum TrackStatus {
-  PENDING
-  PROCESSING
-  READY
-  FAILED
+  @@index([userId])
+  @@index([userId, isDefault])
 }
 
 model Track {
-  id         String      @id @default(uuid())
+  id         String   @id @default(uuid())
   title      String
   artist     String?
   url        String
   duration   Int?
-  status     TrackStatus @default(PENDING)
   albumId    String
   sourceType String?
   sourceId   String?
-  createdAt  DateTime    @default(now())
-  album      Album       @relation(fields: [albumId], references: [id])
+  createdAt  DateTime @default(now())
+  album      Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@index([albumId])
 }

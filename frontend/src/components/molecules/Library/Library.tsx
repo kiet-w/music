@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Play, Plus, Trash2, FolderInput, Download, CheckCircle2, Loader2 } from 'lucide-react';
 import { useOfflineStorage } from '@/hooks/useOfflineStorage';
 import { Button } from '@/components/atoms/ui/button';
@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 import { fetchTracks, deleteTrack, moveTrackToAlbum } from '@/lib/api';
 import dynamic from 'next/dynamic';
 import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter } from 'next/navigation';
 
 const AddToPlaylistDialog = dynamic(() => import('../AddToPlaylist/AddToPlaylistDialog').then(mod => mod.AddToPlaylistDialog), {
   ssr: false,
@@ -35,6 +37,9 @@ interface LibraryProps {
 
 export const Library: React.FC<LibraryProps> = ({ onTrackSelect, currentTrackId, albumId }) => {
   const t = useTranslations('Music');
+  const router = useRouter();
+  const locale = useLocale();
+  const { accessToken, isHydrated, clearSession } = useAuthStore();
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogState, setDialogState] = useState<{ isOpen: boolean; songTitle: string }>({
@@ -69,7 +74,13 @@ export const Library: React.FC<LibraryProps> = ({ onTrackSelect, currentTrackId,
   };
 
   const loadTracks = useCallback(() => {
-    fetchTracks()
+    if (!isHydrated) return;
+    if (!accessToken) {
+      setLoading(false);
+      return;
+    }
+
+    fetchTracks(accessToken)
       .then((data: Track[]) => {
         if (albumId) {
           setTracks(data.filter(t => t.albumId === albumId));
@@ -77,15 +88,21 @@ export const Library: React.FC<LibraryProps> = ({ onTrackSelect, currentTrackId,
           setTracks(data);
         }
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error('Error fetching tracks:', err);
+        if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
+          clearSession();
+          router.push(`/${locale}/login`);
+        }
+      })
       .finally(() => setLoading(false));
-  }, [albumId]);
+  }, [albumId, accessToken, isHydrated, clearSession, router, locale]);
 
   useEffect(() => {
     loadTracks();
   }, [loadTracks]);
 
-  useSupabaseRealtime('Track', loadTracks);
+  useSupabaseRealtime(accessToken ? 'Track' : '', loadTracks);
 
 
   const handleAddToPlaylist = useCallback((e: React.MouseEvent, title: string) => {
@@ -95,28 +112,40 @@ export const Library: React.FC<LibraryProps> = ({ onTrackSelect, currentTrackId,
 
   const handleDeleteClick = useCallback(async (e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
+    if (!accessToken) return;
+
     if (window.confirm(t('delete_warning'))) {
       try {
-        await deleteTrack(track.id);
+        await deleteTrack(accessToken, track.id);
         loadTracks();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error deleting track:', error);
+        if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+          clearSession();
+          router.push(`/${locale}/login`);
+        }
       }
     }
-  }, [loadTracks, t]);
+  }, [loadTracks, t, accessToken, clearSession, router, locale]);
 
   const handleMoveClick = useCallback(async (e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
+    if (!accessToken) return;
+
     const targetAlbumId = window.prompt(t('select_album'));
     if (targetAlbumId) {
       try {
-        await moveTrackToAlbum(track.id, targetAlbumId);
+        await moveTrackToAlbum(accessToken, track.id, targetAlbumId);
         loadTracks();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error moving track:', error);
+        if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+          clearSession();
+          router.push(`/${locale}/login`);
+        }
       }
     }
-  }, [loadTracks, t]);
+  }, [loadTracks, t, accessToken, clearSession, router, locale]);
 
   const formatDuration = useCallback((seconds: number | null) => {
     if (seconds === null) return '--:--';

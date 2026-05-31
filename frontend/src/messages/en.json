@@ -14,5 +14,20 @@
     "vol": "Vol",
     "albums": "Albums",
     "tracks": "Tracks"
+  },
+  "Auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "login_button": "Log In",
+    "register_button": "Create Account",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "invalid_credentials": "Invalid email or password",
+    "email_exists": "Email already exists",
+    "error_generic": "Something went wrong. Please try again.",
+    "loading": "Loading..."
   }
 }

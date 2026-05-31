@@ -1,18 +1,56 @@
 import { Injectable } from '@nestjs/common';
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { AlbumRepository } from './repositories/album.repository';
 
 @Injectable()
 export class AlbumService {
-  constructor(private readonly albumRepository: AlbumRepository) {}
+  constructor(
+    private readonly albumRepository: AlbumRepository,
+    @InjectPinoLogger(AlbumService.name)
+    private readonly logger: PinoLogger,
+  ) {}
 
-  async create(data: { title: string; artist?: string; coverUrl?: string }) {
-    return this.albumRepository.create({ data });
+  async create(userId: string, data: { title: string; artist?: string; coverUrl?: string }) {
+    this.logger.info({ userId, data }, 'Creating new album');
+    return this.albumRepository.create({
+      data: {
+        ...data,
+        userId,
+      },
+    });
   }
 
-  async findAll() {
+  async findOrCreateDefault(userId: string) {
+    this.logger.debug({ userId }, 'Finding or creating default album');
+    const existing = await this.albumRepository.findDefault(userId);
+    if (existing) {
+      return existing;
+    }
+
+    try {
+      return await this.albumRepository.create({
+        data: {
+          title: 'Default',
+          artist: 'Various Artists',
+          isDefault: true,
+          userId,
+        },
+      });
+    } catch (error) {
+      // Handle race condition where another request created it between find and create
+      const raceResult = await this.albumRepository.findDefault(userId);
+      if (raceResult) {
+        return raceResult;
+      }
+      throw error;
+    }
+  }
+
+  async findAll(userId: string) {
+    this.logger.debug({ userId }, 'Finding all albums for user');
     const albums = await this.albumRepository.findMany({
+      where: { userId },
       include: {
-        tracks: true,
         _count: {
           select: { tracks: true },
         },
@@ -27,18 +65,21 @@ export class AlbumService {
     }));
   }
 
-  async findOne(id: string) {
-    const album = await this.albumRepository.findUnique({
-      where: { id },
+  async findOne(userId: string, id: string) {
+    this.logger.debug({ userId, id }, 'Finding album by ID for user');
+    const album = await this.albumRepository.findFirst({
+      where: { id, userId },
       include: {
-        tracks: true,
         _count: {
           select: { tracks: true },
         },
       },
     });
 
-    if (!album) return null;
+    if (!album) {
+      this.logger.warn({ userId, id }, 'Album not found or access denied');
+      return null;
+    }
 
     const albumWithCount = album as any;
     return {

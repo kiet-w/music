@@ -18,6 +18,10 @@ export abstract class BaseRepository<T, Delegate> {
     return (this.delegate as any).findUnique(args);
   }
 
+  async findFirst(args: any): Promise<T | null> {
+    return (this.delegate as any).findFirst(args);
+  }
+
   async create(args: any): Promise<T> {
     return (this.delegate as any).create(args);
   }

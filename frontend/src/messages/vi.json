@@ -22,5 +22,20 @@
     "select_album": "Chọn album đích",
     "cancel": "Hủy",
     "confirm": "Xác nhận"
+  },
+  "Auth": {
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "name": "Tên",
+    "login_button": "Đăng nhập",
+    "register_button": "Tạo tài khoản",
+    "no_account": "Chưa có tài khoản?",
+    "have_account": "Đã có tài khoản?",
+    "invalid_credentials": "Email hoặc mật khẩu không đúng",
+    "email_exists": "Email đã tồn tại",
+    "error_generic": "Có lỗi xảy ra. Vui lòng thử lại.",
+    "loading": "Đang xử lý..."
   }
 }

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module Albums - Technical Detail</title>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.1.0/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      theme: 'dark',
+      startOnLoad: true,
+      securityLevel: 'loose'
+    });
+    window.mermaid = mermaid;
+  </script>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --sidebar-bg: #252526;
+      --text: #d4d4d4;
+      --kw: #569cd6;
+      --fn: #dcdcaa;
+      --str: #ce9178;
+      --accent: #007acc;
+      --border: #404040;
+      --card-bg: #2d2d30;
+      --type: #4ec9b0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+    }
+
+    h1, h2, h3 { color: #fff; }
+    .keyword { color: var(--kw); }
+    .function { color: var(--fn); }
+    .string { color: var(--str); }
+    .type { color: var(--type); }
+
+    /* Module Info */
+    .module-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      background: var(--sidebar-bg);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 40px;
+    }
+
+    .info-group label {
+      display: block;
+      font-weight: bold;
+      color: var(--accent);
+      font-size: 0.9em;
+      text-transform: uppercase;
+    }
+
+    /* Lifecycle Container */
+    .lifecycle-container {
+      display: flex;
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .flow-panel {
+      flex: 1;
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+      background: var(--sidebar-bg);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .detail-panel {
+      flex: 1.5;
+    }
+
+    /* Technical Card */
+    .tech-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+      transition: border-color 0.3s;
+    }
+
+    .tech-card:hover {
+      border-color: var(--accent);
+    }
+
+    .tech-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(0, 122, 204, 0.3);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 5px;
+    }
+
+    .badge {
+      font-size: 0.75em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .badge-post { background: #49cc90; color: #fff; }
+    .badge-get { background: #61affe; color: #fff; }
+    .badge-svc { background: #c586c0; color: #fff; }
+    .badge-repo { background: #ce9178; color: #fff; }
+
+    .io-grid {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 10px;
+      font-family: 'Cascadia Code', Consolas, monospace;
+      font-size: 0.9em;
+      background: #1a1a1a;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    .io-label { color: var(--accent); font-weight: bold; }
+
+    .micro-logic {
+      font-size: 0.95em;
+      border-left: 3px solid var(--accent);
+      padding-left: 15px;
+      margin-top: 15px;
+    }
+
+    pre.mermaid {
+      background: transparent !important;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .mermaid svg {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Tooltip styling from template */
+    #tooltip-bg { transition: all 0.2s; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Module: Albums</h1>
+    <p>Quản lý vòng đời album nhạc, tích hợp tracks counting và caching.</p>
+  </header>
+
+  <div class="module-info">
+    <div class="info-group">
+      <label>Base Route</label>
+      <code>/albums</code>
+    </div>
+    <div class="info-group">
+      <label>Core Files</label>
+      <div style="font-size: 0.85em; margin-top: 5px;">
+        • <code>src/albums/album.controller.ts</code><br>
+        • <code>src/albums/album.service.ts</code><br>
+        • <code>src/albums/repositories/album.repository.ts</code>
+      </div>
+    </div>
+    <div class="info-group">
+      <label>Dependencies</label>
+      <code>AlbumRepository</code>, <code>PrismaService</code>, <code>CacheModule</code>
+    </div>
+    <div class="info-group">
+      <label>Responsibility</label>
+      Xử lý CRUD album, map metadata tracks, và cung cấp API tra cứu thông tin album.
+    </div>
+  </div>
+
+  <h2>Sơ đồ Hệ Thống (Data Flow)</h2>
+  <div class="flow-panel" style="position: static; margin-bottom: 40px; width: auto;">
+    <svg viewBox="0 0 720 700" style="max-width: 600px; height: auto; display: block; margin: 0 auto;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#858585" /></marker>
+        <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#569cd6" /></marker>
+      </defs>
+      <style>
+        .c-blue { stroke: #569cd6; fill: #1a3a52; stroke-width: 2; cursor: pointer; }
+        .c-purple { stroke: #c586c0; fill: #2d1e35; stroke-width: 2; cursor: pointer; }
+        .c-teal { stroke: #4ec9b0; fill: #1a3a28; stroke-width: 2; cursor: pointer; }
+        .c-amber { stroke: #dcdcaa; fill: #2d2516; stroke-width: 2; cursor: pointer; }
+        .th { font: bold 14px sans-serif; fill: #fff; pointer-events: none; }
+        .ts { font: 12px sans-serif; fill: #aaa; pointer-events: none; }
+        .region { fill: none; stroke: #404040; stroke-dasharray: 8 4; stroke-width: 1; }
+        .path-line { fill: none; stroke: #858585; stroke-width: 2; marker-end: url(#arr); }
+      </style>
+
+      <rect x="20" y="20" width="680" height="580" rx="15" class="region" />
+      <text x="30" y="40" class="ts" style="font-weight: bold;">NESTJS BACKEND</text>
+
+      <!-- Controller Layer -->
+      <g onclick="scrollToMethod('ctrl-create')">
+        <rect x="50" y="80" width="180" height="60" rx="8" class="c-blue"/>
+        <text x="140" y="105" class="th" text-anchor="middle">POST /</text>
+        <text x="140" y="125" class="ts" text-anchor="middle">create()</text>
+      </g>
+      <g onclick="scrollToMethod('ctrl-findAll')">
+        <rect x="270" y="80" width="180" height="60" rx="8" class="c-blue"/>
+        <text x="360" y="105" class="th" text-anchor="middle">GET /</text>
+        <text x="360" y="125" class="ts" text-anchor="middle">findAll()</text>
+      </g>
+      <g onclick="scrollToMethod('ctrl-findOne')">
+        <rect x="490" y="80" width="180" height="60" rx="8" class="c-blue"/>
+        <text x="580" y="105" class="th" text-anchor="middle">GET /:id</text>
+        <text x="580" y="125" class="ts" text-anchor="middle">findOne()</text>
+      </g>
+
+      <!-- Service Layer -->
+      <path d="M140 140 V220" class="path-line" />
+      <path d="M360 140 V220" class="path-line" />
+      <path d="M580 140 V220" class="path-line" />
+
+      <g onclick="scrollToMethod('srv-create')">
+        <rect x="50" y="220" width="180" height="60" rx="8" class="c-purple"/>
+        <text x="140" y="245" class="th" text-anchor="middle">Srv.create</text>
+        <text x="140" y="265" class="ts" text-anchor="middle">Save to DB</text>
+      </g>
+      <g onclick="scrollToMethod('srv-findAll')">
+        <rect x="270" y="220" width="180" height="60" rx="8" class="c-purple"/>
+        <text x="360" y="245" class="th" text-anchor="middle">Srv.findAll</text>
+        <text x="360" y="265" class="ts" text-anchor="middle">List + Count</text>
+      </g>
+      <g onclick="scrollToMethod('srv-findOne')">
+        <rect x="490" y="220" width="180" height="60" rx="8" class="c-purple"/>
+        <text x="580" y="245" class="th" text-anchor="middle">Srv.findOne</text>
+        <text x="580" y="265" class="ts" text-anchor="middle">Detail + Count</text>
+      </g>
+
+      <!-- Repository Layer -->
+      <path d="M140 280 V360" class="path-line" />
+      <path d="M360 280 V360" class="path-line" />
+      <path d="M580 280 V360" class="path-line" />
+
+      <g onclick="scrollToMethod('repo-base')">
+        <rect x="200" y="360" width="320" height="60" rx="8" class="c-teal"/>
+        <text x="360" y="385" class="th" text-anchor="middle">AlbumRepository</text>
+        <text x="360" y="405" class="ts" text-anchor="middle">Extends BaseRepository</text>
+      </g>
+
+      <!-- Database -->
+      <path d="M360 420 V500" class="path-line" stroke-dasharray="4 4" />
+      <g>
+        <rect x="260" y="500" width="200" height="60" rx="8" class="c-amber"/>
+        <text x="360" y="525" class="th" text-anchor="middle">Database</text>
+        <text x="360" y="545" class="ts" text-anchor="middle">Supabase / Prisma</text>
+      </g>
+
+      <!-- Tooltip -->
+      <rect id="tooltip-bg" x="40" y="610" width="640" height="70" rx="8" fill="#252526" stroke="#404040" />
+      <foreignObject x="60" y="615" width="600" height="60">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="color:#d4d4d4; font-family:sans-serif; font-size:12px;">
+          <div id="tt-title" style="color:#fff; font-weight:bold; margin-bottom:4px;">Hệ thống Albums</div>
+          <div id="tt-why" style="margin-bottom:4px; font-style: italic; color: #ce9178;">Click vào một node để xem chi tiết kỹ thuật bên dưới.</div>
+          <div style="display:flex; gap:20px;">
+            <span style="color:#4ec9b0;">LAYER: <span id="tt-in">Controller/Service/Repo</span></span>
+            <span style="color:#569cd6;">STATUS: <span id="tt-out">Ready</span></span>
+          </div>
+        </div>
+      </foreignObject>
+    </svg>
+  </div>
+
+  <div class="lifecycle-container">
+    <div class="detail-panel" style="flex: 1;">
+      <h2>Chi Tiết Kỹ Thuật</h2>
+
+      <!-- Controller Section -->
+      <h3 style="color: var(--kw); border-bottom: 1px solid var(--border);">AlbumController</h3>
+      
+      <div id="ctrl-create" class="tech-card">
+        <div class="card-header">
+          <span class="function">create()</span>
+          <span class="badge badge-post">POST /</span>
+        </div>
+        <div class="io-grid">
+          <div class="io-label">IN</div>
+          <div>CreateAlbumDto (title, artist?, coverUrl?)</div>
+          <div class="io-label">OUT</div>
+          <div>AlbumResponseDto (201 Created)</div>
+        </div>
+        <div class="micro-logic">
+          <strong>Logic:</strong> Chuyển body sang Service, sau đó dùng <code>plainToInstance</code> để serialize output theo quy tắc <code>@Expose</code>.
+        </div>
+        <div style="margin-top: 20px;">
+          <pre class="mermaid">graph LR
+A[Client] -- Body --> B(Controller.create)
+B -- DTO --> C[Service.create]
+C -- Entity --> D[ClassTransformer]
+D -- DTO --> E[Response]</pre>
+        </div>
+      </div>
+
+      <div id="ctrl-findAll" class="tech-card">
+        <div class="card-header">
+          <span class="function">findAll()</span>
+          <span class="badge badge-get">GET /</span>
+        </div>
+        <div class="io-grid">
+          <div class="io-label">IN</div>
+          <div>None</div>
+          <div class="io-label">OUT</div>
+          <div>AlbumResponseDto[] (200 OK)</div>
+        </div>
+        <div class="micro-logic">
+          <strong>Features:</strong> Sử dụng <code>CacheInterceptor</code> để tối ưu hóa hiệu năng truy xuất danh sách tĩnh.
+        </div>
+        <div style="margin-top: 20px;">
+          <pre class="mermaid">graph LR
+A[Client] --> B{Cache?}
+B -- Yes --> C[Return cached]
+B -- No --> D[Service.findAll]
+D --> E[Serialize]
+E --> F[Cache & Return]</pre>
+        </div>
+      </div>
+
+      <div id="ctrl-findOne" class="tech-card">
+        <div class="card-header">
+          <span class="function">findOne()</span>
+          <span class="badge badge-get">GET /:id</span>
+        </div>
+        <div class="io-grid">
+          <div class="io-label">IN</div>
+          <div>id (UUID string)</div>
+          <div class="io-label">OUT</div>
+          <div>AlbumResponseDto (200) / 404 Not Found</div>
+        </div>
+        <div class="micro-logic">
+          <strong>Logic:</strong> Truy xuất chi tiết kèm danh sách tracks. Trả về metadata <code>_count</code> để client hiển thị số lượng bài hát.
+        </div>
+        <div style="margin-top: 20px;">
+          <pre class="mermaid">graph LR
+A[Client] -- ID --> B(Controller.findOne)
+B --> C[Service.findOne]
+C -- Data --> D[Serialize]
+D -- 200 --> E[Client]
+C -- Null --> F[404 Exception]</pre>
+        </div>
+      </div>
+
+      <!-- Service Section -->
+      <h3 style="color: var(--type); border-bottom: 1px solid var(--border);">AlbumService</h3>
+
+      <div id="srv-create" class="tech-card">
+        <div class="card-header">
+          <span class="function">create()</span>
+          <span class="badge badge-svc">PUBLIC</span>
+        </div>
+        <div class="io-grid">
+          <div class="io-label">IN</div>
+          <div>Object { title, artist?, coverUrl? }</div>
+          <div class="io-label">OUT</div>
+          <div>Promise&lt;Album&gt;</div>
+        </div>
+        <div class="micro-logic">
+          <strong>Logic:</strong> Gọi trực tiếp <code>albumRepository.create</code>. Không chứa logic nghiệp vụ phức tạp ở bước này.
+        </div>
+        <div style="margin-top: 20px;">
+          <pre class="mermaid">graph TD
+A[Data] --> B(Service.create)
+B --> C[Repo.create]
+C --> D[Prisma Save]</pre>
+        </div>
+      </div>
+
+      <div id="srv-findAll" class="tech-card">
+        <div class="card-header">
+          <span class="function">findAll()</span>
+          <span class="badge badge-svc">PUBLIC</span>
+        </div>
+        <div class="io-grid">
+          <div class="io-label">IN</div>
+          <div>None</div>
+          <div class="io-label">OUT</div>
+          <div>Promise&lt;MappedAlbums[]&gt;</div>
+        </div>
+        <div class="micro-logic">
+          <strong>Data Mapping:</strong> Sử dụng <code>include</code> của Prisma để lấy <code>_count.tracks</code>, sau đó map lại thành <code>_count.songs</code> để đảm bảo API contract.
+        </div>
+        <div style="margin-top: 20px;">
+          <pre class="mermaid">graph TD
+A[Call] --> B[Repo.findMany]
+B -- Include tracks & count --> C[Map Results]
+C -- _count.tracks to songs --> D[Return]</pre>
+        </div>
+      </div>
+
+      <div id="srv-findOne" class="tech-card">
+        <div class="card-header">
+          <span class="function">findOne()</span>
+          <span class="badge badge-svc">PUBLIC</span>
+        </div>
+        <div class="io-grid">
+          <div class="io-label">IN</div>
+          <div>id</div>
+          <div class="io-label">OUT</div>
+          <div>Promise&lt;MappedAlbum | null&gt;</div>
+        </div>
+        <div class="micro-logic">
+          <strong>Logic:</strong> <code>findUnique</code> với tracks. Xử lý trường hợp null và thực hiện map counter giống như <code>findAll</code>.
+        </div>
+        <div style="margin-top: 20px;">
+          <pre class="mermaid">graph TD
+A[ID] --> B[Repo.findUnique]
+B -- Not Found --> C[Return null]
+B -- Found --> D[Map _count.tracks]
+D --> E[Return Mapped Data]</pre>
+        </div>
+      </div>
+
+      <!-- Repository Section -->
+      <h3 style="color: var(--str); border-bottom: 1px solid var(--border);">AlbumRepository</h3>
+
+      <div id="repo-findByTitleAndArtist" class="tech-card">
+        <div class="card-header">
+          <span class="function">findByTitleAndArtist()</span>
+          <span class="badge badge-repo">QUERY</span>
+        </div>
+        <div class="io-grid">
+          <div class="io-label">IN</div>
+          <div>title, artist</div>
+          <div class="io-label">OUT</div>
+          <div>Promise&lt;Album | null&gt;</div>
+        </div>
+        <div class="micro-logic">
+          <strong>Logic:</strong> Thực hiện <code>findFirst</code> với điều kiện AND trên cả 2 trường để kiểm tra bản ghi trùng lặp.
+        </div>
+        <div style="margin-top: 20px;">
+          <pre class="mermaid">graph TD
+A[Title, Artist] --> B[Prisma.findFirst]
+B -- Where AND --> C[Result]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function scrollToMethod(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Highlight effect
+      document.querySelectorAll('.tech-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+    }
+  }
+
+  // Update tooltip on hover (optional enhancement)
+  function showTooltip(event, title, why, input, output) {
+    document.getElementById('tt-title').innerText = title;
+    document.getElementById('tt-why').innerText = why;
+    document.getElementById('tt-in').innerText = input;
+    document.getElementById('tt-out').innerText = output;
+  }
+</script>
+
+</body>
+</html>

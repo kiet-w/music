@@ -12,6 +12,27 @@ export class AlbumRepository extends BaseRepository<
     super(prisma, prisma.album);
   }
 
+  async findByUserAndTitle(
+    userId: string,
+    title: string,
+  ): Promise<Album | null> {
+    return this.prisma.album.findFirst({
+      where: {
+        userId,
+        title,
+      },
+    });
+  }
+
+  async findDefault(userId: string): Promise<Album | null> {
+    return this.prisma.album.findFirst({
+      where: {
+        userId,
+        isDefault: true,
+      },
+    });
+  }
+
   async findByTitleAndArtist(
     title: string,
     artist: string,

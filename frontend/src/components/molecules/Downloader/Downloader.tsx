@@ -1,13 +1,17 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/atoms/ui/button';
 import { Input } from '@/components/atoms/ui/input';
 import { Download, Loader2, CheckCircle2 } from 'lucide-react';
-import { downloadFromYoutube, fetchAlbums, fetchTrack } from '@/lib/api';
+import { downloadFromYoutube, fetchTrack } from '@/lib/api';
 import { supabase, isConfigured } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter } from 'next/navigation';
+
+import { useAlbumStore } from '@/store/useAlbumStore';
 
 interface DownloaderProps {
   onDownloadStarted?: (url: string) => void;
@@ -15,22 +19,22 @@ interface DownloaderProps {
 
 export const Downloader: React.FC<DownloaderProps> = ({ onDownloadStarted }) => {
   const t = useTranslations('Music');
+  const router = useRouter();
+  const locale = useLocale();
+  const { accessToken, clearSession } = useAuthStore();
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
-  const [albums, setAlbums] = useState<any[]>([]);
+  const { albums, loadAlbums: originalLoadAlbums } = useAlbumStore();
   const [selectedAlbumId, setSelectedAlbumId] = useState<string>('');
   const [isDownloading, setIsDownloading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
-  const loadAlbums = useCallback(async () => {
-    try {
-      const data = await fetchAlbums();
-      setAlbums(data);
-    } catch (err) {
-      console.error('Failed to load albums:', err);
+  const loadAlbums = useCallback(() => {
+    if (accessToken) {
+      originalLoadAlbums(accessToken);
     }
-  }, []);
+  }, [accessToken, originalLoadAlbums]);
 
   useEffect(() => {
     loadAlbums();
@@ -38,13 +42,17 @@ export const Downloader: React.FC<DownloaderProps> = ({ onDownloadStarted }) => 
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!accessToken) {
+      router.push(`/${locale}/login`);
+      return;
+    }
     if (!url || !title) return;
 
     setIsDownloading(true);
     setStatus(t('preparing'));
 
     try {
-      const song = await downloadFromYoutube(url, title, artist, selectedAlbumId || undefined);
+      const song = await downloadFromYoutube(accessToken, url, title, artist, selectedAlbumId || undefined);
       const songId = song.id;
       
       let isCompleted = false;
@@ -102,15 +110,21 @@ export const Downloader: React.FC<DownloaderProps> = ({ onDownloadStarted }) => 
         if (isCompleted) return;
 
         try {
-          const updatedSong = await fetchTrack(songId);
+          const updatedSong = await fetchTrack(accessToken, songId);
           if (updatedSong.url && !isCompleted) {
             handleSuccess();
             if (channel) supabase.removeChannel(channel);
           } else if (!isCompleted) {
             setTimeout(poll, 3000);
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error('Polling error:', err);
+          if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
+            isCompleted = true;
+            clearSession();
+            router.push(`/${locale}/login`);
+            return;
+          }
           if (!isCompleted) setTimeout(poll, 5000);
         }
       };
@@ -127,12 +141,17 @@ export const Downloader: React.FC<DownloaderProps> = ({ onDownloadStarted }) => 
         }
       }, 180000); // 3 minutes
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting download:', error);
-      setStatus('Error starting download');
+      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        clearSession();
+        router.push(`/${locale}/login`);
+      } else {
+        setStatus('Error starting download');
+      }
       setIsDownloading(false);
     }
-  }, [url, title, artist, selectedAlbumId, t, onDownloadStarted]);
+  }, [url, title, artist, selectedAlbumId, t, onDownloadStarted, accessToken, router, clearSession, locale]);
 
   return (
     <div className="w-full space-y-4 p-5 rounded-2xl bg-secondary/5 border-none shadow-inner">

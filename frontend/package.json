@@ -5,16 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && cp out/en.html out/index.html",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
-    "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.3.4",
     "@capacitor/filesystem": "^8.1.2",
-    "@capgo/capacitor-updater": "^8.47.4",
     "@supabase/supabase-js": "^2.106.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -35,7 +33,6 @@
   "devDependencies": {
     "@capacitor/android": "^8.3.4",
     "@capacitor/cli": "^8.3.4",
-    "@types/google.accounts": "^0.0.18",
     "@types/howler": "^2.2.13",
     "@types/node": "^20.11.16",
     "@types/react": "^18.2.52",

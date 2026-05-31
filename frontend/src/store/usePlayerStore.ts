@@ -1,3 +1,5 @@
+'use client';
+
 import { create } from 'zustand';
 import { Howl } from 'howler';
 
@@ -20,10 +22,11 @@ interface PlayerState {
   resume: () => void;
   togglePlay: () => void;
   seek: (time: number) => void;
+  reset: () => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => {
-  let timer: any = null;
+  let timer: ReturnType<typeof setInterval> | null = null;
 
   const startTimer = () => {
     if (timer) clearInterval(timer);
@@ -36,7 +39,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
   };
 
   const stopTimer = () => {
-    if (timer) clearInterval(timer);
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
   };
 
   return {
@@ -115,6 +121,21 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         howl.seek(time);
         set({ currentTime: time });
       }
+    },
+
+    reset: () => {
+      const { howl } = get();
+      stopTimer();
+      if (howl) {
+        howl.unload();
+      }
+      set({
+        currentTrack: null,
+        isPlaying: false,
+        howl: null,
+        duration: 0,
+        currentTime: 0,
+      });
     },
   };
 });

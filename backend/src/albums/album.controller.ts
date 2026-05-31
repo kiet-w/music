@@ -6,15 +6,19 @@ import {
   Param,
   UseInterceptors,
   ClassSerializerInterceptor,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AlbumService } from './album.service';
 import { AlbumResponseDto } from './dto/album-response.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { plainToInstance } from 'class-transformer';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @ApiTags('albums')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('albums')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AlbumController {
@@ -28,9 +32,10 @@ export class AlbumController {
   })
   @Post()
   async create(
+    @CurrentUser() user: any,
     @Body() createAlbumDto: CreateAlbumDto,
   ): Promise<AlbumResponseDto> {
-    const album = await this.albumService.create(createAlbumDto);
+    const album = await this.albumService.create(user.id, createAlbumDto);
     return plainToInstance(AlbumResponseDto, album);
   }
 
@@ -40,10 +45,9 @@ export class AlbumController {
     description: 'Return all albums.',
     type: [AlbumResponseDto],
   })
-  @UseInterceptors(CacheInterceptor)
   @Get()
-  async findAll(): Promise<AlbumResponseDto[]> {
-    const albums = await this.albumService.findAll();
+  async findAll(@CurrentUser() user: any): Promise<AlbumResponseDto[]> {
+    const albums = await this.albumService.findAll(user.id);
     return plainToInstance(AlbumResponseDto, albums);
   }
 
@@ -55,8 +59,11 @@ export class AlbumController {
   })
   @ApiResponse({ status: 404, description: 'Album not found.' })
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<AlbumResponseDto> {
-    const album = await this.albumService.findOne(id);
+  async findOne(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+  ): Promise<AlbumResponseDto> {
+    const album = await this.albumService.findOne(user.id, id);
     return plainToInstance(AlbumResponseDto, album);
   }
 }

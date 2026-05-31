@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module Songs - Technical Documentation</title>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.1.0/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+      securityLevel: 'loose'
+    });
+    window.showTooltip = function(event, title, why, input, output) {
+      document.getElementById('tt-title').innerText = title;
+      document.getElementById('tt-why').innerText = why;
+      document.getElementById('tt-in').innerText = input;
+      document.getElementById('tt-out').innerText = output;
+      const bg = document.getElementById('tooltip-bg');
+      bg.style.stroke = event.currentTarget.querySelector('rect').style.stroke || '#569cd6';
+    };
+    window.scrollToMethod = function(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+  </script>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --sidebar-bg: #252526;
+      --card-bg: #2d2d30;
+      --text: #d4d4d4;
+      --kw: #569cd6;
+      --fn: #dcdcaa;
+      --str: #ce9178;
+      --comment: #6a9955;
+      --type: #4ec9b0;
+      --accent: #007acc;
+      --border: #404040;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      line-height: 1.6;
+    }
+    .content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+    }
+    h1 { color: #fff; font-size: 2.5em; margin: 0; }
+    .module-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .info-card {
+      background: var(--sidebar-bg);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .info-card h3 { margin-top: 0; color: var(--kw); font-size: 0.9em; text-transform: uppercase; }
+    .info-card p { margin: 5px 0; font-family: 'Consolas', monospace; font-size: 0.85em; }
+
+    .lifecycle-container {
+      display: grid;
+      grid-template-columns: 500px 1fr;
+      gap: 40px;
+      margin-top: 40px;
+      align-items: start;
+    }
+    @media (max-width: 1000px) {
+      .lifecycle-container { grid-template-columns: 1fr; }
+    }
+
+    .svg-panel {
+      position: sticky;
+      top: 40px;
+      background: var(--sidebar-bg);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .detail-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .tech-card {
+      background: var(--card-bg);
+      border-left: 4px solid var(--accent);
+      padding: 25px;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tech-card h2 { margin-top: 0; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .tech-card .path { font-family: monospace; font-size: 0.6em; background: #000; padding: 4px 8px; border-radius: 4px; color: #aaa; }
+    .tag { font-size: 0.7em; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+    .tag-post { background: #4e7e4e; color: #fff; }
+    .tag-get { background: #4e6e8e; color: #fff; }
+    .tag-patch { background: #8e6e4e; color: #fff; }
+    .tag-delete { background: #8e4e4e; color: #fff; }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .field {
+      background: rgba(0,0,0,0.2);
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .field-lbl { font-size: 0.75em; color: var(--kw); font-weight: bold; text-transform: uppercase; }
+    .field-val { font-family: 'Consolas', monospace; font-size: 0.85em; color: #ce9178; }
+
+    .micro-logic {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      margin-top: 15px;
+    }
+    .micro-logic h4 { margin-top: 0; color: var(--type); font-size: 0.9em; }
+    .micro-logic ul { margin: 0; padding-left: 20px; font-size: 0.9em; }
+
+    .mermaid {
+      margin: 20px auto;
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 8px;
+      display: block;
+      max-width: 500px;
+    }
+
+    code { font-family: 'Consolas', monospace; color: var(--fn); }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <header>
+      <h1>Module Songs</h1>
+      <p>Quản lý tracks, tích hợp YouTube Downloader và Album linking.</p>
+      <div class="module-info">
+        <div class="info-card">
+          <h3>Controller</h3>
+          <p>src/songs/song.controller.ts</p>
+          <p>Base Route: <code>/songs</code></p>
+        </div>
+        <div class="info-card">
+          <h3>Service</h3>
+          <p>src/songs/song.service.ts</p>
+        </div>
+        <div class="info-card">
+          <h3>Repository</h3>
+          <p>src/songs/repositories/song.repository.ts</p>
+        </div>
+        <div class="info-card">
+          <h3>Dependencies</h3>
+          <p>JobsModule, AlbumsModule, PrismaModule</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="lifecycle-container">
+      <div class="svg-panel">
+        <h3 style="text-align: center; color: var(--kw);">Sơ đồ Hệ Thống (Module Flow)</h3>
+        <svg viewBox="0 0 720 900" style="max-width: 450px; height: auto; display: block; margin: 0 auto;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#858585" /></marker>
+          </defs>
+          <style>
+            .c-blue { stroke: #569cd6; fill: #1a3a52; stroke-width: 2; cursor: pointer; }
+            .c-teal { stroke: #4ec9b0; fill: #1a3a28; stroke-width: 2; cursor: pointer; }
+            .c-amber { stroke: #dcdcaa; fill: #2d2516; stroke-width: 2; cursor: pointer; }
+            .c-gray { stroke: #858585; fill: #2d2d30; stroke-width: 2; cursor: pointer; }
+            .th { font: bold 14px sans-serif; fill: #fff; pointer-events: none; }
+            .ts { font: 12px sans-serif; fill: #aaa; pointer-events: none; }
+            .region { fill: none; stroke: #404040; stroke-dasharray: 8 4; stroke-width: 1; }
+            .path-line { fill: none; stroke: #858585; stroke-width: 2; marker-end: url(#arr); }
+          </style>
+
+          <rect x="20" y="80" width="680" height="730" rx="15" class="region" />
+          <text x="30" y="100" class="ts" style="font-weight: bold;">NESTJS BACKEND</text>
+
+          <!-- Client -->
+          <g onclick="scrollToMethod('ctrl-create')">
+            <rect x="260" y="10" width="200" height="50" rx="8" class="c-blue"/>
+            <text x="360" y="32" class="th" text-anchor="middle">Client Request</text>
+            <text x="360" y="47" class="ts" text-anchor="middle">POST /songs/youtube</text>
+          </g>
+          <path d="M360 60 L360 120" class="path-line" />
+
+          <!-- Controller -->
+          <g onclick="scrollToMethod('ctrl-create')">
+            <rect x="235" y="125" width="250" height="60" rx="8" class="c-teal"/>
+            <text x="360" y="150" class="th" text-anchor="middle">SongController</text>
+            <text x="360" y="165" class="ts" text-anchor="middle">createFromYoutube()</text>
+          </g>
+          <path d="M360 185 L360 250" class="path-line" />
+
+          <!-- Service -->
+          <g onclick="scrollToMethod('svc-create')">
+            <rect x="235" y="255" width="250" height="80" rx="8" class="c-amber"/>
+            <text x="360" y="280" class="th" text-anchor="middle">SongService</text>
+            <text x="360" y="300" class="ts" text-anchor="middle">createFromYoutube() Logic</text>
+          </g>
+
+          <!-- Default Album Check -->
+          <path d="M485 295 L550 295 L550 380" class="path-line" />
+          <g onclick="scrollToMethod('svc-create')">
+            <rect x="475" y="385" width="150" height="50" rx="8" class="c-gray"/>
+            <text x="550" y="405" class="th" text-anchor="middle">Album Check</text>
+            <text x="550" y="420" class="ts" text-anchor="middle">Default Search/Create</text>
+          </g>
+
+          <!-- DB Draft -->
+          <path d="M360 335 L360 460" class="path-line" />
+          <g onclick="scrollToMethod('repo-class')">
+            <rect x="260" y="465" width="200" height="60" rx="8" class="c-blue"/>
+            <text x="360" y="490" class="th" text-anchor="middle">SongRepository</text>
+            <text x="360" y="505" class="ts" text-anchor="middle">create() draft track</text>
+          </g>
+
+          <!-- Queue -->
+          <path d="M360 525 L360 620" class="path-line" />
+          <g onclick="showTooltip(event, 'BullMQ Queue', 'Asynchronous processing', 'Song URL + ID', 'Job Added')">
+            <rect x="260" y="625" width="200" height="60" rx="8" class="c-teal"/>
+            <text x="360" y="650" class="th" text-anchor="middle">BullMQ: conversion</text>
+            <text x="360" y="665" class="ts" text-anchor="middle">add('convert', payload)</text>
+          </g>
+
+          <!-- Tooltip Box -->
+          <rect id="tooltip-bg" x="40" y="820" width="640" height="70" rx="8" fill="#252526" stroke="#404040" />
+          <foreignObject x="60" y="825" width="600" height="60">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="color:#d4d4d4; font-family:sans-serif; font-size:12px;">
+              <div id="tt-title" style="color:#fff; font-weight:bold; margin-bottom:4px;">Hướng dẫn</div>
+              <div id="tt-why" style="margin-bottom:4px; font-style: italic; color: #ce9178;">Nhấp vào các nút để xem chi tiết logic hoặc cuộn tới code.</div>
+              <div style="display:flex; gap:20px;">
+                <span style="color:#4ec9b0;">IN: <span id="tt-in">-</span></span>
+                <span style="color:#569cd6;">OUT: <span id="tt-out">-</span></span>
+              </div>
+            </div>
+          </foreignObject>
+        </svg>
+      </div>
+
+      <div class="detail-panel">
+        <section id="ctrl-create" class="tech-card">
+          <h2><span class="tag tag-post">POST</span> createFromYoutube <span class="path">/youtube</span></h2>
+          <div class="fields">
+            <div class="field"><div class="field-lbl">Input (IN)</div><div class="field-val">CreateSongYoutubeDto { url, title, artist, albumId }</div></div>
+            <div class="field"><div class="field-lbl">Output (OUT)</div><div class="field-val">SongResponseDto (HTTP 201)</div></div>
+          </div>
+          <div class="micro-logic">
+            <h4>Micro-Logic:</h4>
+            <ul>
+              <li>Nhận payload từ Client, thực hiện validation tự động qua <code>CreateSongYoutubeDto</code>.</li>
+              <li>Chuyển tiếp yêu cầu xử lý sang <code>SongService.createFromYoutube</code>.</li>
+              <li>Sử dụng <code>plainToInstance</code> để lọc dữ liệu trả về theo schema của <code>SongResponseDto</code> (đảm bảo tính bảo mật).</li>
+            </ul>
+          </div>
+<pre class="mermaid">graph TD
+A[Request Body] --> B{Validation}
+B -- Valid --> C[Call SongService]
+C --> D[Map to SongResponseDto]
+D --> E[HTTP 201 Response]</pre>
+        </section>
+
+        <section id="svc-create" class="tech-card">
+          <h2><span class="kw">Service:</span> createFromYoutube</h2>
+          <div class="fields">
+            <div class="field"><div class="field-lbl">Service Call</div><div class="field-val">songRepository.create, conversionQueue.add</div></div>
+            <div class="field"><div class="field-lbl">Impact</div><div class="field-val">Tạo track nháp & kích hoạt Worker tải nhạc</div></div>
+          </div>
+          <div class="micro-logic">
+            <h4>Logic Chi Tiết:</h4>
+            <ul>
+              <li><strong>Album Check:</strong> Nếu <code>albumId</code> rỗng, tìm album "Default". Nếu không tồn tại, tạo mới với artist "Various Artists".</li>
+              <li><strong>Draft Record:</strong> Tạo bản ghi <code>Track</code> với <code>url: ''</code> và <code>sourceType: 'youtube'</code>.</li>
+              <li><strong>Job Queue:</strong> Đẩy job <code>'convert'</code> vào BullMQ <code>conversion</code> queue để worker xử lý tải file ngầm.</li>
+            </ul>
+          </div>
+<pre class="mermaid">graph LR
+A[Start] --> B{Has albumId?}
+B -- No --> C[Find/Create Default Album]
+B -- Yes --> D[Use albumId]
+C --> E[Create Track Record in DB]
+D --> E
+E --> F[Add Job to BullMQ]
+F --> G[Return Song Object]</pre>
+        </section>
+
+        <section id="ctrl-find-all" class="tech-card">
+          <h2><span class="tag tag-get">GET</span> findAll <span class="path">/</span></h2>
+          <div class="fields">
+            <div class="field"><div class="field-lbl">In</div><div class="field-val">None</div></div>
+            <div class="field"><div class="field-lbl">Out</div><div class="field-val">SongResponseDto[] (HTTP 200)</div></div>
+          </div>
+          <div class="micro-logic">
+            <h4>Logic:</h4>
+            <ul>
+              <li>Sử dụng <code>CacheInterceptor</code> để lưu cache kết quả, giảm tải DB.</li>
+              <li>Gọi <code>SongService.findAll()</code>, kết quả bao gồm thông tin <code>album</code> (Eager Loading).</li>
+            </ul>
+          </div>
+<pre class="mermaid">graph TD
+A[Request] --> B{Cache Hit?}
+B -- Yes --> C[Return Cached Data]
+B -- No --> D[Service.findAll]
+D --> E[Store in Cache]
+E --> F[Return Response]</pre>
+        </section>
+
+        <section id="svc-find-all" class="tech-card">
+          <h2><span class="kw">Service:</span> findAll / findOne</h2>
+          <div class="micro-logic">
+            <h4>Logic:</h4>
+            <ul>
+              <li>Truy vấn DB qua Repository.</li>
+              <li>Sử dụng <code>include: { album: true }</code> để join bảng Album, lấy metadata đầy đủ cho bài hát.</li>
+            </ul>
+          </div>
+<pre class="mermaid">graph LR
+A[Call Repository] --> B[Prisma findMany/findUnique]
+B --> C[Join Album Table]
+C --> D[Return hydrated data]</pre>
+        </section>
+
+        <section id="ctrl-remove" class="tech-card">
+          <h2><span class="tag tag-delete">DELETE</span> remove <span class="path">/:id</span></h2>
+          <div class="micro-logic">
+            <h4>Impact:</h4>
+            <ul>
+              <li>Xóa vĩnh viễn bài hát khỏi Database.</li>
+              <li>Nếu không tìm thấy ID, ném <code>NotFoundException</code> (HTTP 404).</li>
+              <li>Thành công trả về HTTP 204 No Content.</li>
+            </ul>
+          </div>
+<pre class="mermaid">graph TD
+A[Check Existence] --> B{Found?}
+B -- No --> C[Throw 404]
+B -- Yes --> D[Delete Record]
+D --> E[HTTP 204]</pre>
+        </section>
+
+        <section id="ctrl-move" class="tech-card">
+          <h2><span class="tag tag-patch">PATCH</span> moveToAlbum <span class="path">/:id/move</span></h2>
+          <div class="fields">
+            <div class="field"><div class="field-lbl">In (Body)</div><div class="field-val">{ albumId: string }</div></div>
+          </div>
+          <div class="micro-logic">
+            <h4>Logic:</h4>
+            <ul>
+              <li>Cập nhật <code>albumId</code> mới cho track ID tương ứng.</li>
+              <li>Hữu ích khi người dùng muốn phân loại lại bài hát sau khi tải.</li>
+            </ul>
+          </div>
+<pre class="mermaid">graph LR
+A[Find Track] --> B{Exists?}
+B -- Yes --> C[Update albumId]
+C --> D[Return Updated Track]
+B -- No --> E[Throw 404]</pre>
+        </section>
+
+        <section id="repo-class" class="tech-card">
+          <h2><span class="kw">Repository:</span> SongRepository</h2>
+          <div class="micro-logic">
+            <h4>Cấu trúc:</h4>
+            <ul>
+              <li>Kế thừa <code>BaseRepository</code> để tái sử dụng các hàm CRUD chuẩn (create, update, delete, findUnique, findMany).</li>
+              <li>Inject <code>PrismaService</code> và target tới <code>prisma.track</code>.</li>
+            </ul>
+          </div>
+<pre class="mermaid">graph TD
+A[PrismaService] --> B[SongRepository]
+B --> C[Prisma.TrackDelegate]
+C --> D[BaseRepository CRUD]</pre>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

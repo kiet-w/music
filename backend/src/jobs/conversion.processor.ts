@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { Logger } from '@nestjs/common';
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { DownloaderService } from '../downloader/downloader.service';
 import { StorageService } from '../storage/storage.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -9,9 +9,9 @@ import * as fs from 'fs';
 
 @Processor('conversion')
 export class ConversionProcessor extends WorkerHost {
-  private readonly logger = new Logger(ConversionProcessor.name);
-
   constructor(
+    @InjectPinoLogger(ConversionProcessor.name)
+    private readonly logger: PinoLogger,
     private readonly downloaderService: DownloaderService,
     private readonly storageService: StorageService,
     private readonly prisma: PrismaService,
@@ -20,7 +20,7 @@ export class ConversionProcessor extends WorkerHost {
   }
 
   async process(job: Job<any, any, string>): Promise<any> {
-    const { url, songId } = job.data;
+    const { url, songId, userId } = job.data;
     const tempDir = path.join(process.cwd(), 'temp');
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
@@ -52,7 +52,7 @@ export class ConversionProcessor extends WorkerHost {
 
       return { storagePath, publicUrl };
     } catch (error) {
-      this.logger.error('Job failed:', error);
+      this.logger.error({ songId, userId, error: error.message }, 'Job failed');
       await this.downloaderService.cleanup(outputPath);
       throw error;
     }
