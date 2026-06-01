@@ -34,18 +34,18 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   if (!isHydrated) {
     return (
       <div className="flex items-center justify-center min-h-[100dvh] bg-background">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin will-change-transform translate-z-0" />
       </div>
     );
   }
 
   // If it's a public route, don't wrap in the main container with pb-32
   if (isPublicRoute) {
-    return <div className="bg-background min-h-dvh">{children}</div>;
+    return <div className="bg-background min-h-[100dvh]">{children}</div>;
   }
 
   return (
-    <div className="bg-background min-h-dvh relative">
+    <div className="bg-background min-h-[100dvh] relative">
       {children}
     </div>
   );
