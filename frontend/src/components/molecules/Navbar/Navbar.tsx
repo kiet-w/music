@@ -33,7 +33,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[358px] h-[60px] glass-dark shadow-soft rounded-2xl flex items-center justify-around px-6 z-40">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[358px] h-[60px] glass-dark shadow-soft rounded-[1.25rem] flex items-center justify-around px-6 z-40 border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
       {navItems.map((item) => {
         const Icon = item.icon;
         const active = isActive(item.href);
@@ -46,7 +46,7 @@ export function Navbar() {
               active ? "text-white scale-110" : "text-white/40 hover:text-white/70"
             )}
           >
-            <Icon size={22} strokeWidth={active ? 2.5 : 2} />
+            <Icon size={22} strokeWidth={1.5} />
             <span className={cn(
               "text-[9px] font-bold uppercase tracking-widest transition-opacity duration-300",
               active ? "opacity-100" : "opacity-0"
@@ -66,7 +66,7 @@ export function Navbar() {
         className="relative flex flex-col items-center gap-1 transition-all duration-300 text-white/40 hover:text-white/70"
         title={user?.email || 'Logout'}
       >
-        <LogOut size={22} strokeWidth={2} />
+        <LogOut size={22} strokeWidth={1.5} />
         <span className="text-[9px] font-bold uppercase tracking-widest opacity-0 hover:opacity-100 transition-opacity duration-300">
           Logout
         </span>

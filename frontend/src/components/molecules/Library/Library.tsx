@@ -12,7 +12,11 @@ import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 
-const AddToPlaylistDialog = dynamic(() => import('../AddToPlaylist/AddToPlaylistDialog').then(mod => mod.AddToPlaylistDialog), {
+const AddToPlaylistDialog = dynamic(() => import('../AddToPlaylist/AddToPlaylistDialog'), {
+  ssr: false,
+});
+
+const PlayingVisualizer = dynamic(() => import('./PlayingVisualizer'), {
   ssr: false,
 });
 
@@ -35,7 +39,7 @@ interface LibraryProps {
   albumId?: string;
 }
 
-export const Library: React.FC<LibraryProps> = ({ onTrackSelect, currentTrackId, albumId }) => {
+export default function Library({ onTrackSelect, currentTrackId, albumId }: LibraryProps) {
   const t = useTranslations('Music');
   const router = useRouter();
   const locale = useLocale();
@@ -164,12 +168,14 @@ export const Library: React.FC<LibraryProps> = ({ onTrackSelect, currentTrackId,
     formattedTotal: formatDuration(totalDuration)
   }), [tracks.length, totalDuration, formatDuration]);
 
-  if (loading) return <div className="p-8 text-center text-muted-foreground italic">Loading library...</div>;
+  if (loading) return <div className="p-8 text-center text-muted-foreground italic animate-pulse">Loading library...</div>;
 
   return (
     <div className="w-full">
       {tracks.length > 0 && (
-        <div className="flex items-center gap-2 mb-4 px-4 py-2 bg-secondary/5 rounded-lg border border-secondary/10">
+        <div 
+          className="flex items-center gap-2 mb-4 px-4 py-2 bg-secondary/5 rounded-lg border border-secondary/10"
+        >
           <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-70">
             Library Stats
           </span>
@@ -190,13 +196,13 @@ export const Library: React.FC<LibraryProps> = ({ onTrackSelect, currentTrackId,
             <div 
               key={track.id} 
               className={cn(
-                "group flex justify-between items-center p-3 px-4 rounded-xl transition-all duration-300",
+                "group flex justify-between items-center p-3 px-4 rounded-xl transition-all duration-300 gap-3",
                 isFailed ? "opacity-50 grayscale cursor-not-allowed bg-red-500/5" : "bg-secondary/5 hover:bg-secondary/10 active:scale-[0.98] cursor-pointer",
                 isActive && "bg-primary/10 shadow-glow"
               )}
               onClick={() => !isFailed && handleTrackSelect(track)}
             >
-              <div className="flex flex-col gap-0.5 min-w-0">
+              <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                 <span className={cn(
                   "font-medium leading-tight truncate transition-colors",
                   isActive ? "text-primary" : isFailed ? "text-red-400" : "text-foreground/90 group-hover:text-primary"
@@ -207,12 +213,12 @@ export const Library: React.FC<LibraryProps> = ({ onTrackSelect, currentTrackId,
                   {track.artist || track.album?.title || 'Unknown Artist'}
                 </span>
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-[10px] text-muted-foreground/60 font-medium tracking-wider mr-2">
+              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                <span className="text-[10px] text-muted-foreground/60 font-medium tracking-wider mr-1">
                   {isFailed ? 'Error' : formatDuration(track.duration)}
                 </span>
                 {!isFailed && (
-                  <>
+                  <div className="flex items-center gap-1">
                     {isDownloading ? (
                       <Loader2 size={14} className="text-primary animate-spin mr-1" />
                     ) : isDownloaded ? (
@@ -277,9 +283,11 @@ export const Library: React.FC<LibraryProps> = ({ onTrackSelect, currentTrackId,
                         handleTrackSelect(track);
                       }}
                     >
-                      {isActive ? <div className="w-1.5 h-1.5 bg-primary-foreground rounded-full animate-pulse" /> : <Play size={14} className="ml-0.5" />}
+                      {isActive ? (
+                        <PlayingVisualizer />
+                      ) : <Play size={14} className="ml-0.5" />}
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>

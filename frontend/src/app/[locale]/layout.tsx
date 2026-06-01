@@ -1,9 +1,16 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { PlayerBar } from '@/components/molecules/PlayerBar';
-import { BottomTabBar } from '@/components/molecules/Navigation/BottomTabBar';
+import dynamic from 'next/dynamic';
 import { AuthGate } from '@/components/auth/AuthGate';
 import { NavWrapper } from '@/components/auth/NavWrapper';
+
+const PlayerBar = dynamic(() => import('@/components/molecules/PlayerBar'), {
+  ssr: false
+});
+
+const BottomTabBar = dynamic(() => import('@/components/molecules/Navigation/BottomTabBar'), {
+  ssr: false
+});
 
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'vi' }];

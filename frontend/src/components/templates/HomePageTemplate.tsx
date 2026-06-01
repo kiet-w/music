@@ -35,8 +35,6 @@ export default function HomePageClient({
   const loadAlbums = useCallback(() => {
     if (!accessToken) return;
     
-    // We use { cache: 'no-store' } here because this is a client-side refresh 
-    // triggered by realtime events, and we want the absolute latest.
     fetchAlbums(accessToken, { cache: 'no-store' })
       .then(setAlbums)
       .catch(err => {
@@ -48,14 +46,12 @@ export default function HomePageClient({
       });
   }, [setAlbums, accessToken, clearSession, router, locale]);
 
-  // Fetch only when hydrated and token exists
   useEffect(() => {
     if (isHydrated && accessToken) {
       loadAlbums();
     }
   }, [isHydrated, accessToken, loadAlbums]);
 
-  // Delay realtime subscription until token exists
   useSupabaseRealtime(accessToken ? 'Album' : '', loadAlbums);
 
   const totalSongs = React.useMemo(() => {
@@ -64,44 +60,64 @@ export default function HomePageClient({
 
   return (
     <MainContainer>
-      <section>
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-serif italic tracking-tight">{t('your_albums')}</h1>
-          <div>
-            <p className="text-[13px] text-muted-foreground font-medium">{t('collection_count', { count: totalSongs })}</p>
-          </div>
+      <section className="mt-4">
+        <div className="flex flex-col gap-2 mb-12">
+          <h1 className="font-instrument text-4xl md:text-5xl tracking-tighter leading-none">
+            {t('your_albums')}
+          </h1>
+          <p className="text-base text-muted-foreground leading-relaxed">
+            {t('collection_count', { count: totalSongs })}
+          </p>
         </div>
         
         {isLoading && albums.length === 0 ? (
-        <div className="grid grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <AlbumSkeleton key={i} />
-          ))}
-        </div>
-      ) : albums.length > 0 ? (
-        <div className="grid grid-cols-2 gap-4">
-          {albums.map((album) => (
-            <Link key={album.id} href={`/${locale}/albums/detail?id=${album.id}`} className="group flex flex-col gap-2">
-              <div className="relative aspect-square overflow-hidden rounded-xl bg-muted flex items-center justify-center border-[0.5px] border-border group-hover:border-foreground/30 transition-colors duration-200">
-                {album.coverUrl ? (
-                  <img src={album.coverUrl} alt={album.title} loading="lazy" className="w-full h-full object-cover" />
-                ) : (
-                  <Music className="w-8 h-8 text-muted-foreground" />
-                )}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className={i % 2 === 0 ? "mt-8" : ""}>
+                <AlbumSkeleton />
               </div>
-              <div className="space-y-0.5">
-                <h3 className="text-[15px] font-medium leading-tight truncate group-hover:text-primary transition-colors">{album.title}</h3>
-                <p className="text-[13px] text-muted-foreground truncate">{album._count?.songs || 0} {t('songs')}</p>
+            ))}
+          </div>
+        ) : albums.length > 0 ? (
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10">
+            {albums.map((album, index) => (
+              <div
+                key={album.id}
+                className={index % 2 === 1 ? "mt-12" : ""}
+              >
+                <Link 
+                  href={`/${locale}/albums/detail?id=${album.id}`} 
+                  className="group flex flex-col gap-3"
+                >
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-muted flex items-center justify-center border-[0.5px] border-border group-hover:border-foreground/30 transition-all duration-500 ease-out group-hover:scale-[1.02] shadow-sm">
+                    {album.coverUrl ? (
+                      <img src={album.coverUrl} alt={album.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 opacity-40">
+                        <Music className="w-10 h-10 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-1 pr-2">
+                    <h3 className="text-lg font-medium leading-tight group-hover:text-primary transition-colors line-clamp-1">{album.title}</h3>
+                    <p className="text-sm text-muted-foreground/80 font-sans tracking-wide">{album._count?.songs || 0} {t('songs')}</p>
+                  </div>
+                </Link>
               </div>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
-          <Music className="w-12 h-12 mb-4 opacity-20" />
-          <p className="text-[15px]">{t('no_albums_yet')}</p>
-        </div>
-      )}
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-32 text-center">
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full" />
+              <Music className="w-16 h-16 relative z-10 text-muted-foreground/20" />
+            </div>
+            <h2 className="text-xl font-medium text-foreground mb-2">{t('no_albums_yet')}</h2>
+            <p className="text-base text-muted-foreground leading-relaxed max-w-[240px] mx-auto font-sans">
+              Start building your collection by adding music from YouTube or Drive.
+            </p>
+          </div>
+        )}
       </section>
     </MainContainer>
   );

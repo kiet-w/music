@@ -1,8 +1,8 @@
 {
-  "/page": "app/page.js",
   "/[locale]/login/page": "app/[locale]/login/page.js",
-  "/[locale]/page": "app/[locale]/page.js",
   "/[locale]/albums/detail/page": "app/[locale]/albums/detail/page.js",
-  "/[locale]/albums/page": "app/[locale]/albums/page.js",
-  "/[locale]/music/page": "app/[locale]/music/page.js"
+  "/[locale]/register/page": "app/[locale]/register/page.js",
+  "/[locale]/page": "app/[locale]/page.js",
+  "/[locale]/music/page": "app/[locale]/music/page.js",
+  "/[locale]/albums/page": "app/[locale]/albums/page.js"
 }

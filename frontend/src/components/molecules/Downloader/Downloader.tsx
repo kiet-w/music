@@ -17,7 +17,7 @@ interface DownloaderProps {
   onDownloadStarted?: (url: string) => void;
 }
 
-export const Downloader: React.FC<DownloaderProps> = ({ onDownloadStarted }) => {
+export default function Downloader({ onDownloadStarted }: DownloaderProps) {
   const t = useTranslations('Music');
   const router = useRouter();
   const locale = useLocale();

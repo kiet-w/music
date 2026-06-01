@@ -74,69 +74,93 @@ export default function AlbumsClient({ locale }: { locale: string }) {
 
   return (
     <MainContainer>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-serif italic tracking-tight">{t('albums')}</h1>
-        <div>
+      <div className="flex flex-col gap-6 mb-12 mt-4">
+        <div className="flex items-end justify-between">
+          <h1 className="font-instrument text-4xl md:text-5xl tracking-tighter leading-none">{t('albums')}</h1>
           <button 
             onClick={() => setIsCreating(true)}
-            className="flex items-center gap-1 bg-foreground text-background rounded-lg px-3 py-1.5 hover:opacity-90 transition-opacity text-[13px] font-medium">
-            <Plus className="w-3.5 h-3.5" />
+            className="flex items-center gap-1.5 bg-foreground text-background rounded-full px-4 py-2 hover:opacity-90 transition-all active:scale-95 text-sm font-medium shadow-lg shadow-foreground/10">
+            <Plus size={16} strokeWidth={1.5} />
             {t('create')}
           </button>
         </div>
+        
+        {albums.length > 0 && (
+          <div className="flex justify-between items-center border-b border-border/50 pb-4">
+            <p className="text-sm text-muted-foreground font-sans">
+              {t('collection_count', { count: albums.length })}
+            </p>
+            <div className="flex bg-muted/30 p-1 rounded-full border border-border/50">
+              <button 
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-full transition-all ${viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <LayoutGrid size={18} strokeWidth={1.5} />
+              </button>
+              <button 
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-full transition-all ${viewMode === 'list' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <List size={18} strokeWidth={1.5} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {albums.length > 0 && (
-        <div className="flex justify-end mb-4">
-          <div className="flex bg-muted/50 p-1 rounded-lg">
-            <button 
-              onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </button>
-            <button 
-              onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              <List className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
       {isLoading && albums.length === 0 ? (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10">
           {[1, 2, 3, 4].map(i => (
-            <AlbumSkeleton key={i} />
+            <div key={i} className={i % 2 === 0 ? "mt-12" : ""}>
+              <AlbumSkeleton />
+            </div>
           ))}
         </div>
       ) : albums.length > 0 ? (
-        <div className={viewMode === 'grid' ? "grid grid-cols-2 gap-4" : "flex flex-col gap-3"}>
-          {albums.map((album) => (
-            <Link key={album.id} href={`/${locale}/albums/detail?id=${album.id}`} className={viewMode === 'grid' ? "group flex flex-col gap-2" : "group flex items-center gap-4 p-2 rounded-xl hover:bg-muted/50 transition-colors"}>
-              <div className={`relative overflow-hidden rounded-xl bg-muted flex items-center justify-center border-[0.5px] border-border group-hover:border-foreground/30 transition-colors duration-200 shrink-0 ${viewMode === 'grid' ? 'aspect-square w-full' : 'w-16 h-16'}`}>
-                {album.coverUrl ? (
-                  <img src={album.coverUrl} alt={album.title} loading="lazy" className="w-full h-full object-cover" />
-                ) : (
-                  <DiscAlbum className={`${viewMode === 'grid' ? 'w-8 h-8' : 'w-6 h-6'} text-muted-foreground`} />
-                )}
-              </div>
-              <div className="space-y-0.5 flex-1 min-w-0">
-                <h3 className="text-[15px] font-medium leading-tight truncate group-hover:text-primary transition-colors">{album.title}</h3>
-                <p className="text-[13px] text-muted-foreground truncate">{album._count?.songs || 0} {t('songs')} • {new Date(album.createdAt || Date.now()).toLocaleDateString()}</p>
-              </div>
-            </Link>
+        <div className={viewMode === 'grid' ? "grid grid-cols-2 gap-x-6 gap-y-10" : "flex flex-col gap-4"}>
+          {albums.map((album, index) => (
+            <div
+              key={album.id}
+              className={viewMode === 'grid' && index % 2 === 1 ? "mt-12" : ""}
+            >
+              <Link 
+                href={`/${locale}/albums/detail?id=${album.id}`} 
+                className={viewMode === 'grid' 
+                  ? "group flex flex-col gap-3" 
+                  : "group flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/30 transition-all border border-transparent hover:border-border/50"}
+              >
+                <div className={`relative overflow-hidden rounded-2xl bg-muted flex items-center justify-center border-[0.5px] border-white/10 group-hover:border-white/20 transition-all duration-500 ease-out shrink-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] ${viewMode === 'grid' ? 'aspect-[3/4] w-full shadow-sm group-hover:scale-[1.02]' : 'w-20 h-20 shadow-sm'}`}>
+                  {album.coverUrl ? (
+                    <img src={album.coverUrl} alt={album.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  ) : (
+                    <DiscAlbum size={viewMode === 'grid' ? 40 : 32} strokeWidth={1.5} className="text-muted-foreground/30" />
+                  )}
+                </div>
+                <div className={`space-y-1 flex-1 min-w-0 ${viewMode === 'grid' ? 'pr-2' : ''}`}>
+                  <h3 className="text-lg font-medium leading-tight truncate group-hover:text-primary transition-colors">{album.title}</h3>
+                  <p className="text-sm text-muted-foreground/80 font-sans tracking-wide">
+                    {album._count?.songs || 0} {t('songs')} 
+                    {viewMode === 'list' && ` • ${new Date(album.createdAt || Date.now()).toLocaleDateString()}`}
+                  </p>
+                </div>
+              </Link>
+            </div>
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground border-[0.5px] border-dashed border-border rounded-2xl">
-          <DiscAlbum className="w-12 h-12 mb-4 opacity-20" />
-          <p className="text-[15px] mb-6">{t('no_albums_yet')}</p>
+        <div className="flex flex-col items-center justify-center py-32 text-center">
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full" />
+            <DiscAlbum className="w-20 h-20 relative z-10 text-muted-foreground/20" />
+          </div>
+          <h2 className="text-2xl font-instrument tracking-tight text-foreground mb-3">{t('no_albums_yet')}</h2>
+          <p className="text-base text-muted-foreground leading-relaxed max-w-[260px] mx-auto font-sans mb-10">
+            Organize your library by creating your first custom album.
+          </p>
           <button 
             onClick={() => setIsCreating(true)}
-            className="flex items-center gap-2 bg-foreground text-background rounded-lg px-5 py-2.5 font-medium hover:opacity-90 transition-opacity">
-            <Plus className="w-4 h-4" />
+            className="flex items-center gap-2.5 bg-foreground text-background rounded-full px-8 py-4 font-medium hover:opacity-90 transition-all active:scale-95 shadow-xl shadow-foreground/10">
+            <Plus className="w-5 h-5" />
             {t('create_first_album')}
           </button>
         </div>
@@ -152,7 +176,7 @@ export default function AlbumsClient({ locale }: { locale: string }) {
                 placeholder={t('album_title')} 
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="px-3 py-2 bg-muted rounded-lg border border-border text-foreground"
+                className="px-3 py-2 bg-muted rounded-lg border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
                 required
               />
               <input 
@@ -160,19 +184,19 @@ export default function AlbumsClient({ locale }: { locale: string }) {
                 placeholder={t('artist_optional')} 
                 value={newArtist}
                 onChange={(e) => setNewArtist(e.target.value)}
-                className="px-3 py-2 bg-muted rounded-lg border border-border text-foreground"
+                className="px-3 py-2 bg-muted rounded-lg border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
               <div className="flex justify-end gap-2 mt-2">
                 <button 
                   type="button" 
                   onClick={() => setIsCreating(false)}
-                  className="px-4 py-2 rounded-lg hover:bg-muted font-medium"
+                  className="px-4 py-2 rounded-lg hover:bg-muted font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="px-4 py-2 bg-foreground text-background rounded-lg hover:opacity-90 font-medium"
+                  className="px-4 py-2 bg-foreground text-background rounded-lg hover:opacity-90 font-medium transition-opacity"
                 >
                   {t('create')}
                 </button>

@@ -5,7 +5,9 @@ import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { cn } from '@/lib/utils';
 
-export function PlayerBar() {
+import { motion, AnimatePresence } from 'framer-motion';
+
+export default function PlayerBar() {
   const { currentTrack, isPlaying, togglePlay, currentTime, duration, seek } = usePlayerStore();
 
   if (!currentTrack) return null;
@@ -23,10 +25,21 @@ export function PlayerBar() {
   };
 
   return (
-    <div className="fixed bottom-[96px] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[400px] glass-dark shadow-soft rounded-2xl flex flex-col p-3 z-40 transition-all duration-300">
-      <div className="flex items-center w-full px-1">
-        <div className="flex items-center flex-1 min-w-0">
-          <div className="w-10 h-10 bg-white/10 rounded-lg overflow-hidden flex-shrink-0 shadow-inner">
+    <motion.div 
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="fixed bottom-[96px] left-0 right-0 mx-auto w-[calc(100%-2rem)] max-w-[390px] glass-dark shadow-soft rounded-[2rem] flex flex-col p-4 z-40 border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
+    >
+      <div className="flex items-center w-full gap-4">
+        <div className="flex items-center flex-1 min-w-0 gap-3">
+          <motion.div 
+            animate={isPlaying ? {
+              scale: [1, 1.05, 1],
+              rotate: [0, 2, 0, -2, 0]
+            } : {}}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            className="w-12 h-12 bg-white/5 rounded-2xl overflow-hidden flex-shrink-0 shadow-inner border border-white/10"
+          >
             {currentTrack.coverUrl ? (
               <img src={currentTrack.coverUrl} alt={currentTrack.title} loading="lazy" className="w-full h-full object-cover" />
             ) : (
@@ -34,44 +47,71 @@ export function PlayerBar() {
                 No Art
               </div>
             )}
-          </div>
-          <div className="ml-3 min-w-0">
-            <p className="text-[13px] font-bold truncate tracking-tight">{currentTrack.title}</p>
-            <p className="text-[10px] text-white/50 truncate font-medium">{currentTrack.artist}</p>
+          </motion.div>
+          <div className="min-w-0">
+            <p className="text-[14px] font-bold truncate tracking-tight text-white">{currentTrack.title}</p>
+            <p className="text-[11px] text-white/40 truncate font-medium">{currentTrack.artist}</p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-1">
-          <button className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white transition-colors active:scale-90">
-            <SkipBack size={16} fill="currentColor" />
+        <div className="flex items-center gap-2">
+          <button className="w-9 h-9 flex items-center justify-center text-white/30 hover:text-white transition-all active:scale-90">
+            <SkipBack size={20} strokeWidth={1.5} fill="currentColor" className="opacity-80" />
           </button>
-          <button 
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
             onClick={togglePlay}
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 active:scale-95 transition-all shadow-glow"
+            className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)]"
           >
-            {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-1" />}
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white transition-colors active:scale-90">
-            <SkipForward size={16} fill="currentColor" />
+            <AnimatePresence mode="wait">
+              {isPlaying ? (
+                <motion.div
+                  key="pause"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                >
+                  <Pause size={20} strokeWidth={1.5} fill="currentColor" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="play"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                >
+                  <Play size={20} strokeWidth={1.5} fill="currentColor" className="ml-1" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
+          <button className="w-9 h-9 flex items-center justify-center text-white/30 hover:text-white transition-all active:scale-90">
+            <SkipForward size={20} strokeWidth={1.5} fill="currentColor" className="opacity-80" />
           </button>
         </div>
       </div>
 
-      <div className="mt-2 px-1 space-y-1">
-        <input 
-          type="range" 
-          min="0" 
-          max={duration || 100} 
-          step="1"
-          value={currentTime} 
-          onChange={handleSeek}
-          className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white hover:accent-primary transition-all"
-        />
-        <div className="flex justify-between text-[9px] font-medium text-white/30 tabular-nums">
+      <div className="mt-4 px-1">
+        <div className="relative w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+          <motion.div 
+            className="absolute h-full bg-white" 
+            style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
+          />
+          <input 
+            type="range" 
+            min="0" 
+            max={duration || 100} 
+            step="0.1"
+            value={currentTime} 
+            onChange={handleSeek}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          />
+        </div>
+        <div className="flex justify-between mt-2 text-[10px] font-medium text-white/20 tabular-nums tracking-widest uppercase">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

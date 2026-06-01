@@ -7,6 +7,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        instrument: ["var(--font-instrument)", "serif"],
+        sans: ["var(--font-geist-sans)", "sans-serif"],
+      },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
