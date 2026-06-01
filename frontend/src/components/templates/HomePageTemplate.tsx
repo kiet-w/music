@@ -3,11 +3,14 @@
 import React, { useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Music } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { fetchAlbums } from '@/lib/api';
 import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
 import { useAlbumStore } from '@/store/useAlbumStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useRouter } from 'next/navigation';
+import { MainContainer } from '@/components/layout/MainContainer';
+import { AlbumSkeleton } from '@/components/atoms/AlbumSkeleton';
 
 interface Album {
   id: string;
@@ -24,6 +27,7 @@ export default function HomePageClient({
 }: { 
   locale: string; 
 }) {
+  const t = useTranslations('Music');
   const { albums, setAlbums, isLoading } = useAlbumStore();
   const { accessToken, isHydrated, clearSession } = useAuthStore();
   const router = useRouter();
@@ -59,21 +63,19 @@ export default function HomePageClient({
   }, [albums]);
 
   return (
-    <main className="px-6 py-8 pb-32 min-h-[100dvh] max-w-7xl mx-auto space-y-12">
+    <MainContainer>
       <section>
-        <div className="flex items-baseline justify-between mb-8">
-          <h1 className="text-3xl font-serif italic tracking-tight">Your Albums</h1>
-          <p className="text-[13px] text-muted-foreground font-medium">Collection: {totalSongs} songs</p>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-serif italic tracking-tight">{t('your_albums')}</h1>
+          <div>
+            <p className="text-[13px] text-muted-foreground font-medium">{t('collection_count', { count: totalSongs })}</p>
+          </div>
         </div>
         
         {isLoading && albums.length === 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="animate-pulse flex flex-col gap-2">
-              <div className="aspect-square bg-muted rounded-xl"></div>
-              <div className="h-4 bg-muted w-3/4 rounded"></div>
-              <div className="h-3 bg-muted w-1/2 rounded"></div>
-            </div>
+            <AlbumSkeleton key={i} />
           ))}
         </div>
       ) : albums.length > 0 ? (
@@ -89,7 +91,7 @@ export default function HomePageClient({
               </div>
               <div className="space-y-0.5">
                 <h3 className="text-[15px] font-medium leading-tight truncate group-hover:text-primary transition-colors">{album.title}</h3>
-                <p className="text-[13px] text-muted-foreground truncate">{album._count?.songs || 0} songs</p>
+                <p className="text-[13px] text-muted-foreground truncate">{album._count?.songs || 0} {t('songs')}</p>
               </div>
             </Link>
           ))}
@@ -97,10 +99,10 @@ export default function HomePageClient({
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
           <Music className="w-12 h-12 mb-4 opacity-20" />
-          <p className="text-[15px]">Chưa có gì ở đây. Hãy nghe nhạc thôi!</p>
+          <p className="text-[15px]">{t('no_albums_yet')}</p>
         </div>
       )}
       </section>
-    </main>
+    </MainContainer>
   );
 }

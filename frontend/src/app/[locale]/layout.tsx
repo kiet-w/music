@@ -21,13 +21,11 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <AuthGate>
-        <div className="mx-auto max-w-[430px] min-h-[100dvh] relative pb-32">
-          {children}
-          <NavWrapper>
-            <PlayerBar />
-            <BottomTabBar />
-          </NavWrapper>
-        </div>
+        {children}
+        <NavWrapper>
+          <PlayerBar />
+          <BottomTabBar />
+        </NavWrapper>
       </AuthGate>
     </NextIntlClientProvider>
   );

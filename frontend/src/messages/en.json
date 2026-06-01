@@ -13,7 +13,19 @@
     "pause": "Pause",
     "vol": "Vol",
     "albums": "Albums",
-    "tracks": "Tracks"
+    "tracks": "Tracks",
+    "your_albums": "Your Albums",
+    "add_music": "Add Music",
+    "collection_count": "Collection: {count} songs",
+    "from_youtube": "From YouTube",
+    "recent": "Recent",
+    "create": "Create",
+    "create_new_album": "Create New Album",
+    "album_title": "Album Title",
+    "artist_optional": "Artist (Optional)",
+    "no_albums_yet": "No albums yet.",
+    "create_first_album": "Create your first album",
+    "songs": "songs"
   },
   "Auth": {
     "login": "Login",
