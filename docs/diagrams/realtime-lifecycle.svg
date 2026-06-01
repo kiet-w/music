@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1350" height="700" viewBox="0 0 1350 700" role="img" aria-labelledby="title desc">
+  <title id="title">Realtime Refresh Lifecycle</title>
+  <desc id="desc">Lifecycle of Supabase realtime subscriptions and fallback fetch behavior.</desc>
+  <defs><style>.bg{fill:#f8fafc}.title{font:800 34px Arial,sans-serif;fill:#0f172a}.box{fill:#fff;stroke:#334155;stroke-width:2;rx:18}.on{fill:#dcfce7;stroke:#16a34a}.off{fill:#fee2e2;stroke:#dc2626}.wait{fill:#e0f2fe;stroke:#0284c7}.txt{font:700 18px Arial,sans-serif;fill:#0f172a}.small{font:400 15px Arial,sans-serif;fill:#475569}.arrow{stroke:#334155;stroke-width:2.5;fill:none;marker-end:url(#a)}.dash{stroke:#64748b;stroke-width:2;fill:none;marker-end:url(#a);stroke-dasharray:7 7}</style><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs>
+  <rect class="bg" width="1350" height="700"/>
+  <text class="title" x="60" y="58">Realtime Refresh Lifecycle</text>
+  <text class="small" x="62" y="88">Used by Home, AlbumDetail, Library, and Downloader to refresh Album/Track UI.</text>
+  <rect class="box wait" x="70" y="230" width="190" height="80"/><text class="txt" x="112" y="262">Mounted</text><text class="small" x="105" y="288">hook starts</text>
+  <rect class="box on" x="340" y="130" width="220" height="85"/><text class="txt" x="385" y="163">Subscribed</text><text class="small" x="370" y="190">postgres_changes</text>
+  <rect class="box on" x="640" y="130" width="220" height="85"/><text class="txt" x="684" y="163">Event Received</text><text class="small" x="682" y="190">Album or Track</text>
+  <rect class="box wait" x="940" y="130" width="220" height="85"/><text class="txt" x="995" y="163">Refetch</text><text class="small" x="978" y="190">GET albums/songs</text>
+  <rect class="box on" x="940" y="360" width="220" height="85"/><text class="txt" x="990" y="393">UI Updated</text><text class="small" x="972" y="420">store/state changes</text>
+  <rect class="box off" x="340" y="360" width="220" height="85"/><text class="txt" x="386" y="393">Polling Only</text><text class="small" x="372" y="420">Supabase missing</text>
+  <rect class="box off" x="640" y="500" width="220" height="85"/><text class="txt" x="686" y="533">Unmounted</text><text class="small" x="675" y="560">removeChannel</text>
+  <path class="arrow" d="M260 260 C305 220 310 175 340 172"/><text class="small" x="286" y="198">configured</text>
+  <path class="arrow" d="M260 285 C305 335 315 390 340 402"/><text class="small" x="282" y="366">not configured</text>
+  <path class="arrow" d="M560 172 L640 172"/><path class="arrow" d="M860 172 L940 172"/><path class="arrow" d="M1050 215 L1050 360"/>
+  <path class="arrow" d="M940 405 C770 455 570 430 560 172"/><text class="small" x="700" y="465">wait for next DB event</text>
+  <path class="dash" d="M450 445 C570 560 830 560 940 430"/><text class="small" x="570" y="620">manual fetch and conversion polling still update UI</text>
+  <path class="arrow" d="M750 215 L750 500"/><text class="small" x="770" y="360">component unmount</text>
+</svg>

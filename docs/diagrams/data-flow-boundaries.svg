@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Data Flow Boundaries</title>
+  <desc id="desc">Data flow across browser, backend, and infrastructure boundaries.</desc>
+  <defs><style>.bg{fill:#f8fafc}.title{font:800 34px Arial,sans-serif;fill:#0f172a}.zone{fill:#fff;stroke:#cbd5e1;stroke-width:2;rx:22}.box{fill:#f8fafc;stroke:#475569;stroke-width:2;rx:14}.b{fill:#e0f2fe;stroke:#0284c7}.g{fill:#dcfce7;stroke:#16a34a}.o{fill:#fef3c7;stroke:#d97706}.p{fill:#f3e8ff;stroke:#9333ea}.txt{font:700 17px Arial,sans-serif;fill:#0f172a}.small{font:400 14px Arial,sans-serif;fill:#475569}.arrow{stroke:#334155;stroke-width:2.4;fill:none;marker-end:url(#a)}.dash{stroke:#64748b;stroke-width:2;fill:none;marker-end:url(#a);stroke-dasharray:7 7}</style><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs>
+  <rect class="bg" width="1500" height="900"/>
+  <text class="title" x="60" y="58">Data Flow Boundaries</text>
+  <text class="small" x="62" y="88">Browser owns UX state, backend owns authorization and writes, infrastructure stores metadata/audio/events.</text>
+  <rect class="zone" x="60" y="140" width="380" height="650"/><text class="txt" x="90" y="178">Browser / Frontend</text>
+  <rect class="zone" x="560" y="140" width="380" height="650"/><text class="txt" x="590" y="178">NestJS Backend</text>
+  <rect class="zone" x="1060" y="140" width="380" height="650"/><text class="txt" x="1090" y="178">Infrastructure</text>
+  <rect class="box b" x="100" y="220" width="290" height="60"/><text class="txt" x="170" y="256">React UI</text>
+  <rect class="box b" x="100" y="320" width="290" height="60"/><text class="txt" x="175" y="356">api.ts</text>
+  <rect class="box g" x="100" y="420" width="290" height="60"/><text class="txt" x="150" y="456">Zustand Stores</text>
+  <rect class="box o" x="100" y="520" width="290" height="60"/><text class="txt" x="138" y="556">Howler / Offline</text>
+  <rect class="box b" x="600" y="220" width="290" height="60"/><text class="txt" x="660" y="256">Controllers</text>
+  <rect class="box o" x="600" y="320" width="290" height="60"/><text class="txt" x="670" y="356">Guards</text>
+  <rect class="box g" x="600" y="420" width="290" height="60"/><text class="txt" x="660" y="456">Services</text>
+  <rect class="box p" x="600" y="520" width="290" height="60"/><text class="txt" x="638" y="556">Repositories/Worker</text>
+  <rect class="box g" x="1100" y="220" width="290" height="60"/><text class="txt" x="1180" y="256">PostgreSQL</text>
+  <rect class="box o" x="1100" y="320" width="290" height="60"/><text class="txt" x="1195" y="356">Redis</text>
+  <rect class="box p" x="1100" y="420" width="290" height="60"/><text class="txt" x="1160" y="456">Supabase Storage</text>
+  <rect class="box p" x="1100" y="520" width="290" height="60"/><text class="txt" x="1158" y="556">Supabase Realtime</text>
+  <rect class="box b" x="1100" y="620" width="290" height="60"/><text class="txt" x="1165" y="656">Google / yt-dlp</text>
+  <path class="arrow" d="M245 280 L245 320"/><path class="arrow" d="M390 350 L600 250"/><text class="small" x="430" y="292">REST + JWT</text>
+  <path class="arrow" d="M745 280 L745 320"/><path class="arrow" d="M745 380 L745 420"/><path class="arrow" d="M745 480 L745 520"/>
+  <path class="arrow" d="M890 550 L1100 250"/><text class="small" x="950" y="370">Prisma</text>
+  <path class="arrow" d="M890 550 L1100 350"/><text class="small" x="970" y="470">Queue</text>
+  <path class="arrow" d="M890 455 L1100 450"/><text class="small" x="955" y="435">Upload URL</text>
+  <path class="arrow" d="M890 455 C975 555 1020 620 1100 650"/><text class="small" x="955" y="600">Drive/import/download</text>
+  <path class="dash" d="M1100 550 C880 805 435 755 245 580"/><text class="small" x="575" y="805">Realtime events return to UI as refresh signals</text>
+  <path class="dash" d="M1100 450 C825 845 520 760 245 580"/><text class="small" x="565" y="845">Playback reads public URL or local file</text>
+</svg>

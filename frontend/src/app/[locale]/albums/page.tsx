@@ -1,6 +1,5 @@
 import React from 'react';
-import { fetchAlbums } from '@/lib/api';
-import AlbumsClient from './AlbumsClient';
+import AlbumsClient from '@/components/templates/AlbumsTemplate';
 
 export const revalidate = 0;
 

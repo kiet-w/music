@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="760" viewBox="0 0 1500 760" role="img" aria-labelledby="title desc">
+  <title id="title">Auth Sequence</title>
+  <desc id="desc">Login and session verification sequence across frontend and backend.</desc>
+  <defs><style>.bg{fill:#f8fafc}.title{font:800 34px Arial,sans-serif;fill:#0f172a}.lane{stroke:#94a3b8;stroke-width:2;stroke-dasharray:8 8}.head{fill:#e0f2fe;stroke:#0284c7;stroke-width:2;rx:14}.server{fill:#dcfce7;stroke:#16a34a;stroke-width:2;rx:14}.txt{font:700 15px Arial,sans-serif;fill:#0f172a}.small{font:400 13px Arial,sans-serif;fill:#475569}.msg{stroke:#334155;stroke-width:2;fill:none;marker-end:url(#a)}.ret{stroke:#64748b;stroke-width:2;fill:none;marker-end:url(#a);stroke-dasharray:7 7}</style><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs>
+  <rect class="bg" width="1500" height="760"/>
+  <text class="title" x="60" y="58">Auth Sequence - Login and Hydration</text>
+  <text class="small" x="62" y="88">Frontend persists music.auth, then verifies it later with GET /auth/me.</text>
+  <rect class="head" x="70" y="125" width="150" height="50"/><text class="txt" x="112" y="156">User</text>
+  <rect class="head" x="285" y="125" width="170" height="50"/><text class="txt" x="322" y="156">Login Page</text>
+  <rect class="head" x="520" y="125" width="170" height="50"/><text class="txt" x="565" y="156">api.ts</text>
+  <rect class="server" x="755" y="125" width="190" height="50"/><text class="txt" x="792" y="156">AuthController</text>
+  <rect class="server" x="1010" y="125" width="170" height="50"/><text class="txt" x="1050" y="156">AuthService</text>
+  <rect class="server" x="1245" y="125" width="170" height="50"/><text class="txt" x="1280" y="156">Database</text>
+  <line class="lane" x1="145" y1="175" x2="145" y2="700"/><line class="lane" x1="370" y1="175" x2="370" y2="700"/><line class="lane" x1="605" y1="175" x2="605" y2="700"/><line class="lane" x1="850" y1="175" x2="850" y2="700"/><line class="lane" x1="1095" y1="175" x2="1095" y2="700"/><line class="lane" x1="1330" y1="175" x2="1330" y2="700"/>
+  <path class="msg" d="M145 230 L370 230"/><text class="small" x="190" y="218">submit email/password</text>
+  <path class="msg" d="M370 285 L605 285"/><text class="small" x="430" y="273">login(data)</text>
+  <path class="msg" d="M605 340 L850 340"/><text class="small" x="650" y="328">POST /auth/login</text>
+  <path class="msg" d="M850 395 L1095 395"/><text class="small" x="900" y="383">AuthService.login</text>
+  <path class="msg" d="M1095 450 L1330 450"/><text class="small" x="1132" y="438">findByEmail + compare hash</text>
+  <path class="ret" d="M1330 500 L1095 500"/><text class="small" x="1185" y="488">user row</text>
+  <path class="ret" d="M1095 550 L850 550"/><text class="small" x="915" y="538">AuthResponse token/user</text>
+  <path class="ret" d="M850 595 L605 595"/><text class="small" x="680" y="583">200</text>
+  <path class="ret" d="M605 635 L370 635"/><text class="small" x="435" y="623">response</text>
+  <path class="msg" d="M370 675 L370 710"/><text class="small" x="390" y="698">setSession + localStorage music.auth</text>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1300" height="720" viewBox="0 0 1300 720" role="img" aria-labelledby="title desc">
+  <title id="title">Auth Session Lifecycle</title>
+  <desc id="desc">Lifecycle diagram for auth hydration, token verification, login, and logout.</desc>
+  <defs><style>.bg{fill:#f8fafc}.title{font:800 34px Arial,sans-serif;fill:#0f172a}.state{fill:#fff;stroke:#334155;stroke-width:2;rx:18}.ok{fill:#dcfce7;stroke:#16a34a}.bad{fill:#fee2e2;stroke:#dc2626}.wait{fill:#e0f2fe;stroke:#0284c7}.txt{font:700 18px Arial,sans-serif;fill:#0f172a}.small{font:400 15px Arial,sans-serif;fill:#475569}.arrow{stroke:#334155;stroke-width:2.5;fill:none;marker-end:url(#a)}</style><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs>
+  <rect class="bg" width="1300" height="720"/>
+  <text class="title" x="60" y="58">Auth Session Lifecycle</text>
+  <text class="small" x="62" y="88">Based on AuthGate, useAuthStore.hydrate, fetchMe, login, register, and clearSession.</text>
+  <rect class="state wait" x="70" y="210" width="190" height="80"/><text class="txt" x="105" y="243">Not Hydrated</text><text class="small" x="100" y="268">app just mounted</text>
+  <rect class="state" x="340" y="120" width="220" height="85"/><text class="txt" x="384" y="153">No Storage</text><text class="small" x="372" y="180">no music.auth key</text>
+  <rect class="state" x="340" y="310" width="220" height="85"/><text class="txt" x="370" y="343">Stored Session</text><text class="small" x="370" y="370">read localStorage</text>
+  <rect class="state wait" x="640" y="310" width="220" height="85"/><text class="txt" x="675" y="343">Verify Token</text><text class="small" x="680" y="370">GET /auth/me</text>
+  <rect class="state ok" x="940" y="190" width="230" height="95"/><text class="txt" x="980" y="225">Authenticated</text><text class="small" x="978" y="252">render protected app</text>
+  <rect class="state bad" x="940" y="410" width="230" height="95"/><text class="txt" x="980" y="445">Unauthenticated</text><text class="small" x="965" y="472">redirect to login</text>
+  <rect class="state ok" x="640" y="115" width="220" height="85"/><text class="txt" x="707" y="148">Login</text><text class="small" x="676" y="175">setSession + persist</text>
+  <path class="arrow" d="M260 235 C300 210 310 170 340 160"/><text class="small" x="285" y="188">missing</text>
+  <path class="arrow" d="M260 260 C300 300 310 340 340 350"/><text class="small" x="286" y="330">found</text>
+  <path class="arrow" d="M560 352 L640 352"/>
+  <path class="arrow" d="M860 335 C900 300 915 260 940 240"/><text class="small" x="878" y="292">valid</text>
+  <path class="arrow" d="M860 370 C905 390 915 430 940 450"/><text class="small" x="878" y="420">invalid</text>
+  <path class="arrow" d="M560 160 L640 160"/><text class="small" x="575" y="145">user submits</text>
+  <path class="arrow" d="M860 160 C900 165 925 195 940 220"/>
+  <path class="arrow" d="M1055 285 L1055 410"/><text class="small" x="1070" y="355">logout or 401</text>
+  <path class="arrow" d="M940 465 C760 610 425 595 450 395"/><text class="small" x="620" y="610">login/register can restore session</text>
+</svg>

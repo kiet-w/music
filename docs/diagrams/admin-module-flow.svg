@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="920" viewBox="0 0 1500 920" role="img" aria-labelledby="title desc">
+  <title id="title">Admin Module Flow</title>
+  <desc id="desc">Detailed SVG diagram for the admin module showing controller endpoints, inline DTO, repository and storage dependencies, and infrastructure effects.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 800 34px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 16px Arial, sans-serif; fill: #475569; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 20; }
+      .box { fill: #fff; stroke: #334155; stroke-width: 2; rx: 16; }
+      .controller { fill: #e0f2fe; stroke: #0284c7; }
+      .dep { fill: #dcfce7; stroke: #16a34a; }
+      .infra { fill: #f3e8ff; stroke: #9333ea; }
+      .warn { fill: #fff7ed; stroke: #f97316; }
+      .deny { fill: #fee2e2; stroke: #dc2626; }
+      .txt { font: 700 18px Arial, sans-serif; fill: #0f172a; }
+      .small { font: 400 14px Arial, sans-serif; fill: #475569; }
+      .mono { font: 700 14px "Courier New", monospace; fill: #0f172a; }
+      .path { font: 400 14px "Courier New", monospace; fill: #0f172a; }
+      .arrow { stroke: #334155; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .dash { stroke: #64748b; stroke-width: 2; fill: none; stroke-dasharray: 7 7; marker-end: url(#arrow); }
+      .label { font: 400 13px Arial, sans-serif; fill: #475569; }
+      .note { font: 400 15px Arial, sans-serif; fill: #334155; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1500" height="920" />
+  <text class="title" x="60" y="60">Admin Module Flow</text>
+  <text class="subtitle" x="62" y="90">Based on backend/backend-docs/admin.md: no dedicated AdminService, two controller actions, inline DTO, direct dependency calls.</text>
+
+  <!-- Left Panel: Actor & Body Shapes -->
+  <rect class="panel" x="50" y="135" width="320" height="620" rx="22" />
+  <text class="txt" x="80" y="175">Admin Actor</text>
+  
+  <rect class="box warn" x="85" y="210" width="250" height="96" rx="16" />
+  <text class="txt" x="135" y="245">Admin User</text>
+  <text class="small" x="123" y="272">triggers system actions</text>
+  <text class="small" x="110" y="290">delete track or clean storage</text>
+
+  <rect class="box deny" x="85" y="355" width="250" height="120" rx="16" />
+  <text class="txt" x="118" y="389">No Auth Detail In Doc</text>
+  <text class="small" x="113" y="416">markdown describes behavior only</text>
+  <text class="small" x="114" y="438">not auth policy or role system</text>
+
+  <rect class="box warn" x="85" y="530" width="250" height="150" rx="16" />
+  <text class="txt" x="124" y="565">CleanupStorageBody</text>
+  <text class="mono" x="110" y="597">bucketName: string</text>
+  <text class="mono" x="110" y="623">path: string</text>
+  <text class="small" x="110" y="651">inline body shape in controller</text>
+
+  <!-- Middle Panel: Backend Module -->
+  <rect class="panel" x="420" y="135" width="540" height="620" rx="22" />
+  <text class="txt" x="450" y="175">Backend Module Boundary</text>
+  <text class="small" x="450" y="200">Module: src/admin/admin.module.ts</text>
+  <text class="small" x="450" y="224">Controller: src/admin/admin.controller.ts</text>
+  <text class="small" x="450" y="248">No AdminService defined in the module</text>
+
+  <rect class="box controller" x="470" y="285" width="440" height="250" rx="18" />
+  <text class="txt" x="615" y="325">AdminController</text>
+  <text class="small" x="525" y="350">directly calls dependencies from other modules</text>
+  <line x1="500" y1="370" x2="880" y2="370" stroke="#94a3b8" stroke-width="1.5" />
+
+  <rect class="box warn" x="500" y="395" width="380" height="66" rx="14" />
+  <text class="mono" x="520" y="422">deleteTrack(@Param('id') id: string)</text>
+  <text class="path" x="520" y="445">DELETE /admin/tracks/:id</text>
+
+  <rect class="box warn" x="500" y="475" width="380" height="66" rx="14" />
+  <text class="mono" x="520" y="502">cleanupStorage(@Body() body)</text>
+  <text class="path" x="520" y="525">POST /admin/storage/cleanup</text>
+
+  <!-- Right Panel: Dependencies -->
+  <rect class="panel" x="1020" y="135" width="430" height="620" rx="22" />
+  <text class="txt" x="1050" y="175">Dependencies / Infrastructure</text>
+
+  <rect class="box dep" x="1060" y="230" width="170" height="80" rx="16" />
+  <text class="txt" x="1085" y="264">SongRepository</text>
+  <text class="small" x="1088" y="291">Prisma delete()</text>
+
+  <rect class="box dep" x="1260" y="230" width="170" height="80" rx="16" />
+  <text class="txt" x="1272" y="264">StorageCleanupService</text>
+  <text class="small" x="1304" y="291">cleanupFile()</text>
+
+  <rect class="box infra" x="1060" y="390" width="170" height="90" rx="16" />
+  <text class="txt" x="1089" y="425">PostgreSQL</text>
+  <text class="small" x="1078" y="452">hard delete track</text>
+  <text class="small" x="1094" y="472">via Prisma</text>
+
+  <rect class="box infra" x="1260" y="390" width="170" height="90" rx="16" />
+  <text class="txt" x="1277" y="425">Cloud Storage</text>
+  <text class="small" x="1294" y="452">Supabase / S3</text>
+  <text class="small" x="1295" y="472">bucket + path</text>
+
+  <rect class="box warn" x="1060" y="555" width="370" height="130" rx="16" />
+  <text class="txt" x="1095" y="590">Documented effects</text>
+  <text class="small" x="1095" y="620">• deleteTrack: xoa cứng bản ghi bài hát theo id</text>
+  <text class="small" x="1095" y="645">• cleanupStorage: trả 200 OK ngay, dọn file phía sau</text>
+  <text class="small" x="1095" y="670">• module chỉ điều phối, không có service riêng</text>
+
+  <!-- Connections -->
+  <path class="arrow" d="M335 258 C400 258 420 330 470 350" />
+  <text class="label" x="352" y="236">Admin request</text>
+
+  <path class="arrow" d="M380 553 C430 535 445 510 470 500" />
+  <text class="label" x="378" y="530">cleanup body</text>
+
+  <path class="arrow" d="M840 430 C915 390 955 300 1060 270" />
+  <text class="label" x="905" y="352">deleteTrack -> delete()</text>
+
+  <path class="arrow" d="M840 510 C930 545 975 300 1260 270" />
+  <text class="label" x="915" y="468">cleanupStorage -> cleanupFile()</text>
+
+  <path class="arrow" d="M1145 310 L1145 390" />
+  <text class="label" x="1160" y="355">DB write</text>
+
+  <path class="arrow" d="M1345 310 L1345 390" />
+  <text class="label" x="1360" y="355">storage API</text>
+
+  <path class="dash" d="M1050 425 C970 425 930 425 900 425" />
+  <text class="label" x="935" y="410">cleanup initiated and returned immediately</text>
+
+  <!-- Footer Note -->
+  <rect class="panel" x="50" y="785" width="1400" height="90" rx="20" />
+  <text class="note" x="80" y="822">In/Out summary: deleteTrack accepts path param id and returns Prisma delete result. cleanupStorage accepts body { bucketName, path } and returns { message, file } after calling StorageCleanupService.</text>
+  <text class="note" x="80" y="850">This SVG keeps the full admin.md meaning: direct repository deletion, immediate cleanup response, and no dedicated AdminService layer.</text>
+</svg>

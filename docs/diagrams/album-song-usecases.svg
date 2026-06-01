@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1450" height="860" viewBox="0 0 1450 860" role="img" aria-labelledby="title desc">
+  <title id="title">Album and Song Use Cases</title>
+  <desc id="desc">Detailed album and song use cases and ownership checks.</desc>
+  <defs><style>.bg{fill:#f8fafc}.title{font:800 34px Arial,sans-serif;fill:#0f172a}.actor{fill:#e0f2fe;stroke:#0284c7;stroke-width:2}.case{fill:#fff;stroke:#475569;stroke-width:2}.guard{fill:#fee2e2;stroke:#dc2626;stroke-width:2}.data{fill:#dcfce7;stroke:#16a34a;stroke-width:2}.txt{font:700 17px Arial,sans-serif;fill:#0f172a}.small{font:400 14px Arial,sans-serif;fill:#475569}.line{stroke:#334155;stroke-width:2;fill:none}.arrow{stroke:#334155;stroke-width:2;fill:none;marker-end:url(#a)}</style><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs>
+  <rect class="bg" width="1450" height="860"/>
+  <text class="title" x="60" y="58">Album and Song Use Cases</text>
+  <text class="small" x="62" y="88">Every protected album/song action is scoped by current user from JWT.</text>
+  <circle class="actor" cx="120" cy="420" r="48"/><text class="txt" x="84" y="492">User</text>
+  <ellipse class="case" cx="430" cy="180" rx="145" ry="38"/><text class="txt" x="350" y="187">View Albums</text>
+  <ellipse class="case" cx="430" cy="285" rx="145" ry="38"/><text class="txt" x="350" y="292">Create Album</text>
+  <ellipse class="case" cx="430" cy="390" rx="145" ry="38"/><text class="txt" x="340" y="397">View Album Detail</text>
+  <ellipse class="case" cx="430" cy="495" rx="145" ry="38"/><text class="txt" x="360" y="502">View Songs</text>
+  <ellipse class="case" cx="430" cy="600" rx="145" ry="38"/><text class="txt" x="340" y="607">Delete / Move Song</text>
+  <ellipse class="case" cx="430" cy="705" rx="145" ry="38"/><text class="txt" x="355" y="712">Play / Offline</text>
+  <rect class="guard" x="735" y="210" width="250" height="80" rx="16"/><text class="txt" x="785" y="244">JWT Guard</text><text class="small" x="775" y="270">request.user = token.sub</text>
+  <rect class="guard" x="735" y="360" width="250" height="95" rx="16"/><text class="txt" x="775" y="395">Ownership Check</text><text class="small" x="760" y="422">Album.userId or Track.album.userId</text>
+  <rect class="data" x="1110" y="200" width="240" height="85" rx="16"/><text class="txt" x="1180" y="234">Album</text><text class="small" x="1150" y="262">id, title, userId</text>
+  <rect class="data" x="1110" y="360" width="240" height="85" rx="16"/><text class="txt" x="1185" y="394">Track</text><text class="small" x="1145" y="422">id, url, albumId</text>
+  <rect class="data" x="1110" y="520" width="240" height="85" rx="16"/><text class="txt" x="1170" y="554">Storage URL</text><text class="small" x="1145" y="582">public audio file</text>
+  <path class="line" d="M168 420 L290 180"/><path class="line" d="M168 420 L290 285"/><path class="line" d="M168 420 L290 390"/><path class="line" d="M168 420 L290 495"/><path class="line" d="M168 420 L290 600"/><path class="line" d="M168 420 L290 705"/>
+  <path class="arrow" d="M575 285 C650 280 685 250 735 250"/><path class="arrow" d="M575 495 C660 470 685 420 735 407"/><path class="arrow" d="M985 250 L1110 242"/><path class="arrow" d="M985 407 L1110 402"/><path class="arrow" d="M575 705 C800 735 1000 610 1110 562"/>
+  <text class="small" x="690" y="705">Playback does not mutate DB. It uses Track.url or local offline URI.</text>
+</svg>

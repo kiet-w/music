@@ -1,6 +1,5 @@
 import React from 'react';
-import { fetchAlbums } from '@/lib/api';
-import HomePageClient from './HomePageClient';
+import HomePageClient from '@/components/templates/HomePageTemplate';
 
 // Enable dynamic rendering but with standard Next.js caching
 export const revalidate = 0; 

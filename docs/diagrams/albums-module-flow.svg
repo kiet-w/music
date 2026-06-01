@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="920" viewBox="0 0 1500 920" role="img" aria-labelledby="title desc">
+  <title id="title">Albums Module Flow</title>
+  <desc id="desc">Detailed SVG diagram for the albums module showing controller endpoints, DTO shapes, service logic, repository queries, and database effects.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 800 34px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 16px Arial, sans-serif; fill: #475569; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 20; }
+      .box { fill: #fff; stroke: #334155; stroke-width: 2; rx: 16; }
+      .controller { fill: #e0f2fe; stroke: #0284c7; }
+      .dep { fill: #dcfce7; stroke: #16a34a; }
+      .infra { fill: #f3e8ff; stroke: #9333ea; }
+      .warn { fill: #fff7ed; stroke: #f97316; }
+      .deny { fill: #fee2e2; stroke: #dc2626; }
+      .txt { font: 700 18px Arial, sans-serif; fill: #0f172a; }
+      .small { font: 400 14px Arial, sans-serif; fill: #475569; }
+      .mono { font: 700 14px "Courier New", monospace; fill: #0f172a; }
+      .path { font: 400 14px "Courier New", monospace; fill: #0f172a; }
+      .arrow { stroke: #334155; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .dash { stroke: #64748b; stroke-width: 2; fill: none; stroke-dasharray: 7 7; marker-end: url(#arrow); }
+      .label { font: 400 13px Arial, sans-serif; fill: #475569; }
+      .note { font: 400 15px Arial, sans-serif; fill: #334155; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1500" height="920" />
+  <text class="title" x="60" y="60">Albums Module Flow</text>
+  <text class="subtitle" x="62" y="90">Full technical flow for managing albums: handles creation, list retrieval with track counts, and detail views via Prisma.</text>
+
+  <!-- Left Panel: Actor & DTO Shapes -->
+  <rect class="panel" x="50" y="135" width="340" height="620" rx="22" />
+  <text class="txt" x="80" y="175">Client / API Request</text>
+  
+  <rect class="box warn" x="70" y="210" width="300" height="150" rx="16" />
+  <text class="txt" x="145" y="240">CreateAlbumDto</text>
+  <text class="mono" x="90" y="270">title: string (@IsNotEmpty)</text>
+  <text class="mono" x="90" y="295">artist: string (@IsOptional)</text>
+  <text class="mono" x="90" y="320">coverUrl: string (@IsUrl)</text>
+  <text class="small" x="90" y="345">Validated via global ValidationPipe</text>
+
+  <rect class="box warn" x="70" y="390" width="300" height="180" rx="16" />
+  <text class="txt" x="145" y="420">AlbumResponseDto</text>
+  <text class="mono" x="90" y="450">id: string</text>
+  <text class="mono" x="90" y="475">title: string</text>
+  <text class="mono" x="90" y="500">tracks: SongResponseDto[]</text>
+  <text class="mono" x="90" y="525">_count: { songs: number }</text>
+  <text class="small" x="90" y="555">Formatted via ClassSerializerInterceptor</text>
+
+  <!-- Middle Panel: Backend Logic -->
+  <rect class="panel" x="420" y="135" width="600" height="620" rx="22" />
+  <text class="txt" x="450" y="175">Backend Services (NestJS)</text>
+  <text class="small" x="450" y="200">Module: src/albums/albums.module.ts</text>
+
+  <!-- Controller -->
+  <rect class="box controller" x="440" y="230" width="560" height="230" rx="18" />
+  <text class="txt" x="650" y="265">AlbumController</text>
+  <text class="small" x="460" y="290">Interceptors: CacheInterceptor (findAll), ClassSerializerInterceptor (All)</text>
+  <line x1="460" y1="310" x2="980" y2="310" stroke="#94a3b8" stroke-width="1.5" />
+
+  <text class="mono" x="460" y="340">create(@Body() dto) → POST /albums</text>
+  <text class="mono" x="460" y="375">findAll() → GET /albums (Cached)</text>
+  <text class="mono" x="460" y="410">findOne(@Param('id') id) → GET /albums/:id</text>
+  <text class="small" x="460" y="440">Transforms output using plainToInstance()</text>
+
+  <!-- Service -->
+  <rect class="box dep" x="440" y="480" width="560" height="250" rx="18" />
+  <text class="txt" x="650" y="515">AlbumService</text>
+  <line x1="460" y1="535" x2="980" y2="535" stroke="#94a3b8" stroke-width="1.5" />
+
+  <text class="mono" x="460" y="565">create(data) { ... }</text>
+  <text class="small" x="480" y="585">calls albumRepository.create()</text>
+  
+  <text class="mono" x="460" y="615">findAll() / findOne(id) { ... }</text>
+  <text class="small" x="480" y="635">Uses include: { tracks: true, _count: { select: { tracks: true } } }</text>
+  <text class="small" x="480" y="655">Logic: Maps DB _count.tracks to API _count.songs</text>
+  <text class="small" x="480" y="675">Ensures track counts are available in response</text>
+
+  <!-- Right Panel: Data Layer -->
+  <rect class="panel" x="1050" y="135" width="400" height="620" rx="22" />
+  <text class="txt" x="1080" y="175">Data Access Layer</text>
+
+  <rect class="box dep" x="1070" y="230" width="360" height="150" rx="16" />
+  <text class="txt" x="1170" y="265">AlbumRepository</text>
+  <text class="small" x="1090" y="290">Extends BaseRepository</text>
+  <line x1="1090" y1="305" x2="1410" y2="305" stroke="#94a3b8" stroke-width="1.5" />
+  <text class="mono" x="1090" y="335">findByTitleAndArtist(t, a)</text>
+  <text class="small" x="1110" y="360">prisma.album.findFirst({ where: { ... } })</text>
+
+  <rect class="box infra" x="1070" y="420" width="360" height="120" rx="16" />
+  <text class="txt" x="1195" y="455">PostgreSQL</text>
+  <text class="small" x="1090" y="485">Table: Album</text>
+  <text class="small" x="1090" y="510">Relation: 1-to-Many with Track</text>
+  <text class="small" x="1090" y="530">Stores: id, title, artist, coverUrl</text>
+
+  <rect class="box warn" x="1070" y="570" width="360" height="160" rx="16" />
+  <text class="txt" x="1185" y="605">Key Technical Features</text>
+  <text class="small" x="1090" y="635">• Auto-Transform: DTOs use @Expose and Interceptors</text>
+  <text class="small" x="1090" y="660">• Optimized Fetch: Single Prisma query for lists + counts</text>
+  <text class="small" x="1090" y="685">• Performance: CacheInterceptor on list retrieval</text>
+  <text class="small" x="1090" y="710">• Consistency: Mapping tracks -> songs for API uniformity</text>
+
+  <!-- Connections -->
+  <!-- Client to Controller -->
+  <path class="arrow" d="M390 285 L440 310" />
+  <text class="label" x="400" y="295">Request</text>
+
+  <!-- Controller to Service -->
+  <path class="arrow" d="M720 460 L720 480" />
+  <text class="label" x="730" y="475">Call logic</text>
+
+  <!-- Service to Repository -->
+  <path class="arrow" d="M1000 600 C1030 600 1040 305 1070 305" />
+  <text class="label" x="1010" y="585">DB Query</text>
+
+  <!-- Repository to Infra -->
+  <path class="arrow" d="M1250 380 L1250 420" />
+  <text class="label" x="1260" y="405">Prisma SQL</text>
+
+  <!-- Response -->
+  <path class="dash" d="M440 430 L390 480" />
+  <text class="label" x="400" y="455">Response</text>
+
+  <!-- Footer Note -->
+  <rect class="panel" x="50" y="785" width="1400" height="90" rx="20" />
+  <text class="note" x="80" y="822">Module Insight: Album module leverages NestJS Interceptors for automated data transformation and caching. It handles the mapping between internal DB naming (tracks) and public API naming (songs) within the service layer to maintain external consistency.</text>
+  <text class="note" x="80" y="850">Architecture: Follows Controller-Service-Repository pattern with explicit DTO validation and response shapes.</text>
+</svg>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="980" viewBox="0 0 1500 980" role="img" aria-labelledby="title desc">
+  <title id="title">Use Case Overview</title>
+  <desc id="desc">Overall use case diagram for the music app.</desc>
+  <defs>
+    <style>
+      .bg{fill:#f8fafc}.boundary{fill:#fff;stroke:#cbd5e1;stroke-width:2;rx:22}.actor{fill:#e0f2fe;stroke:#0284c7;stroke-width:2}.admin{fill:#fee2e2;stroke:#dc2626;stroke-width:2}.system{fill:#dcfce7;stroke:#16a34a;stroke-width:2}.case{fill:#fff;stroke:#64748b;stroke-width:2}.case2{fill:#fef3c7;stroke:#d97706;stroke-width:2}.txt{font:600 18px Arial,sans-serif;fill:#0f172a}.small{font:400 14px Arial,sans-serif;fill:#475569}.title{font:800 34px Arial,sans-serif;fill:#0f172a}.line{stroke:#475569;stroke-width:2;fill:none}.dash{stroke:#64748b;stroke-width:2;fill:none;stroke-dasharray:7 7}
+    </style>
+  </defs>
+  <rect class="bg" width="1500" height="980"/>
+  <text class="title" x="60" y="62">Use Case Overview - Music App</text>
+  <text class="small" x="62" y="92">Actors, user-facing actions, backend processing, and external integrations.</text>
+  <rect class="boundary" x="300" y="130" width="850" height="760"/>
+  <text class="txt" x="330" y="170">Music App System Boundary</text>
+
+  <circle class="actor" cx="130" cy="250" r="44"/><text class="txt" x="92" y="315">User</text>
+  <circle class="actor" cx="1320" cy="285" r="44"/><text class="txt" x="1264" y="350">Google Account</text>
+  <circle class="admin" cx="130" cy="740" r="44"/><text class="txt" x="90" y="805">Admin</text>
+  <circle class="system" cx="1320" cy="720" r="44"/><text class="txt" x="1260" y="785">Backend Worker</text>
+
+  <ellipse class="case" cx="470" cy="235" rx="145" ry="38"/><text class="txt" x="393" y="242">Register/Login</text>
+  <ellipse class="case" cx="760" cy="235" rx="145" ry="38"/><text class="txt" x="680" y="242">Verify Session</text>
+  <ellipse class="case" cx="470" cy="340" rx="145" ry="38"/><text class="txt" x="386" y="347">View Albums</text>
+  <ellipse class="case" cx="760" cy="340" rx="145" ry="38"/><text class="txt" x="674" y="347">Create Album</text>
+  <ellipse class="case" cx="470" cy="445" rx="145" ry="38"/><text class="txt" x="385" y="452">View Songs</text>
+  <ellipse class="case" cx="760" cy="445" rx="145" ry="38"/><text class="txt" x="676" y="452">Play Song</text>
+  <ellipse class="case" cx="470" cy="550" rx="145" ry="38"/><text class="txt" x="372" y="557">Delete / Move Song</text>
+  <ellipse class="case2" cx="760" cy="550" rx="160" ry="38"/><text class="txt" x="650" y="557">Add From YouTube</text>
+  <ellipse class="case2" cx="760" cy="655" rx="160" ry="38"/><text class="txt" x="650" y="662">Import Google Drive</text>
+  <ellipse class="case" cx="470" cy="655" rx="145" ry="38"/><text class="txt" x="360" y="662">Download Offline</text>
+  <ellipse class="admin" cx="470" cy="790" rx="150" ry="38"/><text class="txt" x="360" y="797">Admin Delete Track</text>
+  <ellipse class="admin" cx="790" cy="790" rx="160" ry="38"/><text class="txt" x="665" y="797">Admin Storage Cleanup</text>
+  <ellipse class="system" cx="1010" cy="550" rx="120" ry="38"/><text class="txt" x="938" y="557">Convert Audio</text>
+  <ellipse class="system" cx="1010" cy="655" rx="120" ry="38"/><text class="txt" x="940" y="662">Notify UI</text>
+
+  <path class="line" d="M174 250 L325 235"/><path class="line" d="M174 250 L615 235"/>
+  <path class="line" d="M174 250 L325 340"/><path class="line" d="M174 250 L615 340"/>
+  <path class="line" d="M174 250 L325 445"/><path class="line" d="M174 250 L615 445"/>
+  <path class="line" d="M174 250 L325 550"/><path class="line" d="M174 250 L600 550"/>
+  <path class="line" d="M174 250 L600 655"/><path class="line" d="M174 250 L325 655"/>
+  <path class="line" d="M174 740 L320 790"/><path class="line" d="M174 740 L630 790"/>
+  <path class="line" d="M1276 285 L920 655"/>
+  <path class="line" d="M1276 720 L1130 550"/>
+  <path class="dash" d="M920 550 L890 550"/><path class="dash" d="M1010 588 L1010 617"/>
+  <text class="small" x="930" y="522">async worker</text>
+  <text class="small" x="1018" y="610">DB event</text>
+</svg>

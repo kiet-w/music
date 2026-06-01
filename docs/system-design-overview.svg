@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">Music App System Design Overview</title>
+  <desc id="desc">Simple architecture diagram showing frontend, backend, database, queue, storage, realtime, Google Drive, and yt-dlp interactions.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f7f8fb; }
+      .panel { fill: #ffffff; stroke: #d7dce5; stroke-width: 2; }
+      .panelTitle { font: 700 26px Arial, sans-serif; fill: #1e293b; }
+      .box { fill: #f8fafc; stroke: #94a3b8; stroke-width: 2; rx: 14; }
+      .boxBlue { fill: #e8f1ff; stroke: #3b82f6; }
+      .boxGreen { fill: #e8f8ef; stroke: #22c55e; }
+      .boxOrange { fill: #fff3e5; stroke: #f59e0b; }
+      .boxPurple { fill: #f2e8ff; stroke: #a855f7; }
+      .boxRed { fill: #ffe8e8; stroke: #ef4444; }
+      .label { font: 600 19px Arial, sans-serif; fill: #0f172a; }
+      .small { font: 400 15px Arial, sans-serif; fill: #475569; }
+      .arrow { stroke: #334155; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .arrowSoft { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#arrowSoft); stroke-dasharray: 7 7; }
+      .note { font: 400 16px Arial, sans-serif; fill: #334155; }
+      .titleText { font: 800 38px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 18px Arial, sans-serif; fill: #475569; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155" />
+    </marker>
+    <marker id="arrowSoft" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1400" height="900" />
+  <text class="titleText" x="70" y="64">Music App System Design Overview</text>
+  <text class="subtitle" x="72" y="96">Frontend orchestrates UX. Backend owns auth, ownership, conversion, storage, and database writes.</text>
+
+  <rect class="panel" x="60" y="135" width="360" height="620" rx="22" />
+  <text class="panelTitle" x="90" y="178">Frontend</text>
+
+  <rect class="box boxBlue" x="95" y="210" width="290" height="72" rx="14" />
+  <text class="label" x="122" y="244">Next.js UI</text>
+  <text class="small" x="122" y="267">pages, components, locale layout</text>
+
+  <rect class="box boxBlue" x="95" y="315" width="290" height="72" rx="14" />
+  <text class="label" x="122" y="349">API Client</text>
+  <text class="small" x="122" y="372">src/lib/api.ts + auth headers</text>
+
+  <rect class="box boxGreen" x="95" y="420" width="290" height="78" rx="14" />
+  <text class="label" x="122" y="454">Zustand Stores</text>
+  <text class="small" x="122" y="477">auth, albums, player state</text>
+
+  <rect class="box boxPurple" x="95" y="532" width="290" height="78" rx="14" />
+  <text class="label" x="122" y="566">Realtime + Polling</text>
+  <text class="small" x="122" y="589">Supabase changes, conversion poll</text>
+
+  <rect class="box boxOrange" x="95" y="642" width="290" height="78" rx="14" />
+  <text class="label" x="122" y="676">Playback + Offline</text>
+  <text class="small" x="122" y="699">Howler, local file cache</text>
+
+  <rect class="panel" x="520" y="135" width="360" height="620" rx="22" />
+  <text class="panelTitle" x="550" y="178">Backend</text>
+
+  <rect class="box boxBlue" x="555" y="210" width="290" height="72" rx="14" />
+  <text class="label" x="582" y="244">NestJS Controllers</text>
+  <text class="small" x="582" y="267">auth, albums, songs, drive</text>
+
+  <rect class="box boxRed" x="555" y="315" width="290" height="72" rx="14" />
+  <text class="label" x="582" y="349">JWT Guard + DTOs</text>
+  <text class="small" x="582" y="372">verify token, validate input</text>
+
+  <rect class="box boxGreen" x="555" y="420" width="290" height="78" rx="14" />
+  <text class="label" x="582" y="454">Domain Services</text>
+  <text class="small" x="582" y="477">auth, ownership, album/song logic</text>
+
+  <rect class="box boxPurple" x="555" y="532" width="290" height="78" rx="14" />
+  <text class="label" x="582" y="566">Repositories + Prisma</text>
+  <text class="small" x="582" y="589">User, Album, Track access</text>
+
+  <rect class="box boxOrange" x="555" y="642" width="290" height="78" rx="14" />
+  <text class="label" x="582" y="676">Conversion Worker</text>
+  <text class="small" x="582" y="699">BullMQ, Redis, yt-dlp</text>
+
+  <rect class="panel" x="980" y="135" width="360" height="620" rx="22" />
+  <text class="panelTitle" x="1010" y="178">Infrastructure</text>
+
+  <rect class="box boxGreen" x="1015" y="210" width="290" height="72" rx="14" />
+  <text class="label" x="1042" y="244">PostgreSQL</text>
+  <text class="small" x="1042" y="267">User, Album, Track metadata</text>
+
+  <rect class="box boxOrange" x="1015" y="315" width="290" height="72" rx="14" />
+  <text class="label" x="1042" y="349">Redis Queue</text>
+  <text class="small" x="1042" y="372">conversion job transport</text>
+
+  <rect class="box boxPurple" x="1015" y="420" width="290" height="78" rx="14" />
+  <text class="label" x="1042" y="454">Supabase Storage</text>
+  <text class="small" x="1042" y="477">public audio URLs</text>
+
+  <rect class="box boxPurple" x="1015" y="532" width="290" height="78" rx="14" />
+  <text class="label" x="1042" y="566">Supabase Realtime</text>
+  <text class="small" x="1042" y="589">Album/Track change events</text>
+
+  <rect class="box boxBlue" x="1015" y="642" width="290" height="78" rx="14" />
+  <text class="label" x="1042" y="676">Google Drive API</text>
+  <text class="small" x="1042" y="699">list and download user files</text>
+
+  <path class="arrow" d="M385 351 C430 351, 490 246, 555 246" />
+  <text class="note" x="410" y="305">REST + JWT</text>
+
+  <path class="arrow" d="M700 282 L700 315" />
+  <path class="arrow" d="M700 387 L700 420" />
+  <path class="arrow" d="M700 498 L700 532" />
+  <path class="arrow" d="M845 571 C900 571, 950 246, 1015 246" />
+  <text class="note" x="891" y="395">Prisma queries</text>
+
+  <path class="arrow" d="M845 681 C910 681, 950 351, 1015 351" />
+  <text class="note" x="900" y="520">enqueue jobs</text>
+
+  <path class="arrow" d="M845 681 C915 681, 945 459, 1015 459" />
+  <text class="note" x="900" y="610">upload audio</text>
+
+  <path class="arrow" d="M845 459 C925 459, 940 681, 1015 681" />
+  <text class="note" x="890" y="735">Drive import</text>
+
+  <path class="arrowSoft" d="M1015 571 C805 800, 420 770, 240 610" />
+  <text class="note" x="565" y="802">Realtime refresh back to UI</text>
+
+  <path class="arrowSoft" d="M1015 459 C760 840, 420 800, 240 720" />
+  <text class="note" x="620" y="845">Playback uses public URL or offline local file</text>
+
+  <rect class="panel" x="60" y="790" width="1280" height="70" rx="18" />
+  <text class="note" x="90" y="822">Core rule: frontend sends token and intent; backend verifies user ownership before every protected album/song read or write.</text>
+  <text class="note" x="90" y="848">Main optimization: heavy YouTube conversion is asynchronous, while UI uses realtime plus polling to detect when tracks are ready.</text>
+</svg>

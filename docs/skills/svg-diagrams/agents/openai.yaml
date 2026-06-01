@@ -1,0 +1,8 @@
+interface:
+  display_name: "SVG Diagrams"
+  short_description: "Create clean SVG diagrams for docs"
+  default_prompt: "Use $svg-diagrams to create a clean SVG diagram for this document and keep the layout simple, readable, and valid XML."
+  brand_color: "#0EA5E9"
+
+policy:
+  allow_implicit_invocation: true
