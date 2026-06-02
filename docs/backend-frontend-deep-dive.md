@@ -1425,7 +1425,6 @@ Frontend la orchestration layer cho:
 Duong bien quan trong nhat giua hai phia la `src/lib/api.ts`. Moi thay doi backend contract nen duoc doi chieu voi file nay, sau do xem cac consumer: auth pages, `AuthGate`, `HomePageClient`, `AlbumsClient`, `AlbumDetailClient`, `Downloader`, `Library`, `DrivePicker`.
 
 ## 28. System Design Tong The
-
 Hinh tong quan don gian:
 
 ![Music App System Design Overview](./system-design-overview.svg)
@@ -1444,7 +1443,6 @@ Thu muc SVG chi tiet:
 - `docs/diagrams/playback-offline-lifecycle.svg`
 - `docs/diagrams/auth-sequence.svg`
 - `docs/diagrams/data-flow-boundaries.svg`
-
 System design cua project hien tai co the nhin nhu 5 lop:
 
 ```text
@@ -1549,10 +1547,6 @@ Ket luan thiet ke:
 
 ## 30. Use Case Diagram Tong The
 
-SVG render san:
-
-![Use Case Overview](./diagrams/usecase-overview.svg)
-
 Mermaid khong co use-case diagram native nhu UML, nen diagram duoi dung flowchart voi actor va use case.
 
 ```mermaid
@@ -1612,10 +1606,6 @@ flowchart TB
 ```
 
 ## 31. Use Case Detail Theo Tung Phan
-
-SVG render san cho album/song:
-
-![Album and Song Use Cases](./diagrams/album-song-usecases.svg)
 
 ### Auth use cases
 
@@ -1792,10 +1782,6 @@ Playback design giup:
 
 ## 32. Database Diagram
 
-SVG render san:
-
-![Database ERD](./diagrams/database-erd.svg)
-
 ERD theo Prisma schema hien tai:
 
 ```mermaid
@@ -1894,10 +1880,6 @@ Database design chua toi uu cho:
 
 ## 33. Component Diagram Backend
 
-SVG render san:
-
-![Backend Component Diagram](./diagrams/backend-components.svg)
-
 ```mermaid
 flowchart TB
   AppModule[AppModule]
@@ -1983,10 +1965,6 @@ Backend component design giup:
 
 ## 34. Component Diagram Frontend
 
-SVG render san:
-
-![Frontend Component Diagram](./diagrams/frontend-components.svg)
-
 ```mermaid
 flowchart TB
   Layout[app/[locale]/layout.tsx]
@@ -2071,18 +2049,6 @@ Frontend component design giup:
 ## 35. Lifecycle Diagram Cho Tung Luong
 
 Tu "recycle diagram" trong yeu cau, phan nay hieu la lifecycle/state-cycle diagram: mot object/request di qua cac trang thai nao.
-
-SVG render san cho cac lifecycle chinh:
-
-![Auth Session Lifecycle](./diagrams/auth-lifecycle.svg)
-
-![YouTube Track Lifecycle](./diagrams/youtube-track-lifecycle.svg)
-
-![Google Drive Import Lifecycle](./diagrams/google-drive-lifecycle.svg)
-
-![Realtime Refresh Lifecycle](./diagrams/realtime-lifecycle.svg)
-
-![Playback and Offline Lifecycle](./diagrams/playback-offline-lifecycle.svg)
 
 ### Auth session lifecycle
 
@@ -2233,10 +2199,6 @@ Toi uu:
 
 ## 36. Sequence Diagram Cho Cac Request Quan Trong
 
-SVG render san:
-
-![Auth Sequence](./diagrams/auth-sequence.svg)
-
 ### Login sequence
 
 ```mermaid
@@ -2379,10 +2341,6 @@ sequenceDiagram
 ```
 
 ## 37. Data Flow Diagram Theo Boundary
-
-SVG render san:
-
-![Data Flow Boundaries](./diagrams/data-flow-boundaries.svg)
 
 ```mermaid
 flowchart TB
