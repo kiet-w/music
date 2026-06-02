@@ -87,6 +87,10 @@ npx cap open android
 - `src/store/`: Zustand state definitions.
 - `src/lib/`: Utilities, API client, and Supabase config.
 
+## Tool Policy
+- **DO NOT** use `mcp-stitch` tools or any `mcp_stitch_*` commands.
+- **DO NOT** use `code-review-graph` for code analysis or review.
+
 ## Environment Variables
 Ensure these are set in your `.env.local`:
 - `NEXT_PUBLIC_API_URL`: Backend API URL (default: http://localhost:3002).

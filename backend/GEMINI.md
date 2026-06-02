@@ -65,11 +65,54 @@ This backend service manages music metadata, handles YouTube downloads/conversio
 - **Interfaces:** Use `IDownloaderProvider` and `IStorageProvider` to allow for alternative implementations (e.g., swapping Supabase for S3).
 - **Repositories:** Database logic is abstracted into repository classes (e.g., `SongRepository`).
 
-## Key Files & Modules
+## Backend Structure (NestJS)
+*Always check existing modules and components before creating new ones.*
 
-- `src/songs/`: Core music metadata management.
-- `src/downloader/`: Wrapper for `yt-dlp` CLI.
-- `src/storage/`: Integration with Supabase Storage.
-- `src/jobs/`: BullMQ processor for background tasks.
-- `src/google-drive/`: Google Drive API integration.
+### Core Modules (`src/`)
+- **AppModule / CoreModule:** Root application bootstrapping.
+- **PrismaModule:** Database connection (`PrismaService`).
+- **JobsModule:** Background task processing (`ConversionProcessor` via BullMQ).
+- **CommonModule / Common:** Shared utilities (`HttpExceptionFilter`, `LoggingInterceptor`, Base Repositories, Interfaces).
+
+### Feature Modules & Endpoints
+1. **AdminModule** (`/admin`)
+   - `DELETE /admin/tracks/:id`
+   - `POST /admin/storage/cleanup`
+2. **AlbumsModule** (`/albums`)
+   - `POST /albums`
+   - `GET /albums`
+   - `GET /albums/:id`
+3. **AuthModule** (`/auth`)
+   - `POST /auth/register`
+   - `POST /auth/login`
+   - `GET /auth/me`
+4. **GoogleDriveModule** (`/google-drive`)
+   - `GET /google-drive/ping`
+   - `GET /google-drive/files`
+   - `POST /google-drive/import`
+5. **SongsModule** (`/songs`)
+   - `POST /songs/youtube`
+   - `GET /songs`
+   - `GET /songs/:id`
+   - `DELETE /songs/:id`
+   - `PATCH /songs/:id/move`
+6. **DownloaderModule** & **StorageModule**: Internal services for `yt-dlp` processing and Supabase storage (No direct endpoints).
+
+### DTOs (Data Transfer Objects)
+- **Albums:** `CreateAlbumDto`, `AlbumResponseDto`
+- **Auth:** `LoginDto`, `RegisterDto`, `AuthResponseDto`
+- **Google Drive:** `ImportDto`
+- **Songs:** `CreateSongYoutubeDto`, `SongResponseDto`
+
+### Guards & Decorators
+- `JwtAuthGuard`: Protects endpoints requiring authentication (`src/auth/jwt-auth.guard.ts`).
+- `@CurrentUser()`: Custom decorator to extract the user payload from the request (`src/auth/current-user.decorator.ts`).
+
+### Repositories
+- Data access is strictly handled via repository classes extending `BaseRepository`:
+  - `UserRepository`
+  - `AlbumRepository`
+  - `SongRepository`
+
+## Key Files (Miscellaneous)
 - `prisma/schema.prisma`: Database schema definition.

@@ -81,11 +81,34 @@ A comprehensive music application featuring YouTube downloading/conversion and a
 - **Conversion Pipeline:** Utilizes `yt-dlp` (Python CLI) for robust YouTube downloading and MP3 conversion.
 - **Media Hosting:** Files are uploaded to **Supabase Storage** for direct streaming to the client.
 - **Database ORM:** **Prisma** for data management.
-
-### Infrastructure & Database
+## Infrastructure & Database
 - **Supabase:** Provides both the relational database and object storage.
 - **Connection Mandate:** For Prisma, always use **Port 6543** (Transaction pooler) instead of 5432 to prevent "too many connections" errors on the Supabase free tier.
 
+## MCP Servers (AI Tools)
+Dự án tích hợp các MCP Server để hỗ trợ AI hiểu sâu hơn về hệ thống:
+
+### 1. mcp-database
+- **Vị trí:** `mcp-servers/mcp-database`
+- **Tính năng:** 
+  - Đọc cấu trúc database (`database://schema`).
+  - Liệt kê bảng (`list_tables`).
+  - Truy vấn SELECT an toàn (`execute_query`).
+- **Cách cài đặt cho Agent:**
+  Thêm cấu hình sau vào tool chain của bạn:
+  ```json
+  {
+    "name": "mcp-database",
+    "command": "node",
+    "args": ["/home/baudui/Downloads/project/music/mcp-servers/mcp-database/dist/index.js"],
+    "env": {
+      "DATABASE_URL": "..." 
+    }
+  }
+  ```
+  *(Lưu ý: Server tự động load .env từ thư mục backend nên thường không cần truyền env thủ công nếu chạy đúng path)*
+
+## Building and Running
 ## Directory Structure (Planned)
 - `frontend/`: React + Vite project.
 - `backend/`: NestJS project (includes conversion services).
