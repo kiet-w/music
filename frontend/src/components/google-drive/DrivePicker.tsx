@@ -78,9 +78,9 @@ export const DrivePicker = ({
       }
       onImportComplete?.();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Import failed:", error);
-      alert("Một số file gặp lỗi khi nhập. Vui lòng thử lại.");
+      alert(error.message || "Một số file gặp lỗi khi nhập. Vui lòng thử lại.");
     } finally {
       setIsImporting(false);
       setImportProgress(null);
@@ -109,7 +109,7 @@ export const DrivePicker = ({
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-white">Google Drive</h2>
-                  <p className="text-sm text-white/40 mt-1">Chọn nhạc để nhập vào thư viện</p>
+                  <p className="text-sm text-white/40 mt-1">Chọn file nhạc MP3 để nhập vào thư viện</p>
                 </div>
                 <button 
                   onClick={onClose} 
@@ -167,30 +167,31 @@ export const DrivePicker = ({
                   <div className="grid grid-cols-1 gap-2">
                     {filteredFiles.map((file) => {
                       const isSelected = selectedIds.has(file.id);
-                      const isAudio = file.mimeType.startsWith('audio/') || 
-                                     file.name.toLowerCase().endsWith('.mp3') || 
-                                     file.name.toLowerCase().endsWith('.wav') ||
-                                     file.name.toLowerCase().endsWith('.flac') ||
-                                     file.name.toLowerCase().endsWith('.m4a');
+                      const isMp3 = file.mimeType === 'audio/mpeg' || 
+                                    file.mimeType === 'audio/mp3' ||
+                                    file.name.toLowerCase().endsWith('.mp3');
                       
                       const fileSize = file.size ? `${(parseInt(file.size) / (1024 * 1024)).toFixed(1)} MB` : 'Unknown size';
                       
                       return (
                         <button
                           key={file.id}
-                          onClick={() => toggleFile(file.id)}
+                          onClick={() => isMp3 && toggleFile(file.id)}
+                          disabled={!isMp3}
                           className={cn(
                             "flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 text-left",
                             isSelected
                               ? "bg-accent/20 border-accent/50 text-accent"
-                              : "bg-white/5 border-transparent hover:bg-white/10 text-white/80"
+                              : isMp3 
+                                ? "bg-white/5 border-transparent hover:bg-white/10 text-white/80"
+                                : "bg-white/5 border-transparent opacity-40 cursor-not-allowed text-white/40"
                           )}
                         >
                           <div className={cn(
                             "w-10 h-10 rounded-lg flex items-center justify-center",
                             isSelected ? "bg-accent/20" : "bg-white/10"
                           )}>
-                            {isAudio ? <Music className="w-5 h-5" /> : <File className="w-5 h-5 opacity-40" />}
+                            {isMp3 ? <Music className="w-5 h-5" /> : <File className="w-5 h-5 opacity-40" />}
                           </div>
                           
                           <div className="flex-1 min-w-0">

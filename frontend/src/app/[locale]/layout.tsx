@@ -3,6 +3,7 @@ import { getMessages } from 'next-intl/server';
 import dynamic from 'next/dynamic';
 import { AuthGate } from '@/components/auth/AuthGate';
 import { NavWrapper } from '@/components/auth/NavWrapper';
+import { GoogleAuthProvider } from '@/components/providers/GoogleAuthProvider';
 
 const PlayerBar = dynamic(() => import('@/components/molecules/PlayerBar'), {
   ssr: false
@@ -27,13 +28,15 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <AuthGate>
-        {children}
-        <NavWrapper>
-          <PlayerBar />
-          <BottomTabBar />
-        </NavWrapper>
-      </AuthGate>
+      <GoogleAuthProvider>
+        <AuthGate>
+          {children}
+          <NavWrapper>
+            <PlayerBar />
+            <BottomTabBar />
+          </NavWrapper>
+        </AuthGate>
+      </GoogleAuthProvider>
     </NextIntlClientProvider>
   );
 }

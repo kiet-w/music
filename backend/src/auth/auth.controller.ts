@@ -13,6 +13,7 @@ import { CurrentUser } from './current-user.decorator';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @ApiTags('auth')
@@ -37,6 +38,15 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with Google' })
+  @ApiResponse({ status: 200, description: 'User successfully logged in with Google' })
+  @ApiResponse({ status: 401, description: 'Invalid Google token' })
+  async googleLogin(@Body() googleLoginDto: GoogleLoginDto): Promise<AuthResponseDto> {
+    return this.authService.googleLogin(googleLoginDto.idToken);
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -45,5 +55,14 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async me(@CurrentUser() user: { id: string; email: string }) {
     return this.authService.me(user.id);
+  }
+
+  @Get('users')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({ status: 200, description: 'Return all users' })
+  async findAll() {
+    return this.authService.findAll();
   }
 }

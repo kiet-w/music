@@ -42,5 +42,18 @@
     "email_exists": "Email already exists",
     "error_generic": "Something went wrong. Please try again.",
     "loading": "Loading..."
+  },
+  "Navbar": {
+    "home": "Home",
+    "albums": "Albums",
+    "messages": "Messages"
+  },
+  "Chat": {
+    "title": "Messages",
+    "type_placeholder": "Type a message...",
+    "no_messages": "No messages yet. Start a conversation!",
+    "no_conversations": "No conversations found.",
+    "select_user": "Select a user to start chatting",
+    "send": "Send"
   }
 }

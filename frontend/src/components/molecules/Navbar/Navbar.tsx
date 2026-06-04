@@ -3,15 +3,16 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Disc, LogOut } from 'lucide-react';
+import { Home, Disc, LogOut, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('Navbar');
   const { clearSession, user } = useAuthStore();
 
   const handleLogout = () => {
@@ -20,8 +21,9 @@ export function Navbar() {
   };
   
   const navItems = [
-    { href: '/', icon: Home, label: 'Home' },
-    { href: '/albums', icon: Disc, label: 'Albums' },
+    { href: '/', icon: Home, label: t('home') },
+    { href: '/albums', icon: Disc, label: t('albums') },
+    { href: '/messages', icon: MessageCircle, label: t('messages') },
   ];
 
   // Helper to handle locale prefix in pathname

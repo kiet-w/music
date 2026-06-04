@@ -2,8 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { Youtube, FileAudio, ArrowDownToLine } from 'lucide-react';
+import { Youtube, FileAudio, CheckCircle2 } from 'lucide-react';
 import { MainContainer } from '@/components/layout/MainContainer';
+import { useDownloadHistoryStore } from '@/store/useDownloadHistoryStore';
 
 const Downloader = dynamic(() => import('@/components/molecules/Downloader/Downloader'), {
   ssr: false,
@@ -12,6 +13,7 @@ const Downloader = dynamic(() => import('@/components/molecules/Downloader/Downl
 
 export default function MusicTemplate() {
   const t = useTranslations('Music');
+  const { history } = useDownloadHistoryStore();
   
   return (
     <MainContainer>
@@ -38,42 +40,38 @@ export default function MusicTemplate() {
           </div>
         </div>
         
-        {/* Placeholder for recent history with asymmetric spacing */}
-        <div className="pt-4 ml-4">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-sm text-muted-foreground font-medium tracking-widest uppercase">{t('recent')}</h3>
-            <div className="h-[1px] flex-1 bg-border/50 ml-4" />
-          </div>
-          <div className="flex flex-col gap-4 -ml-4">
-            {[1, 2].map((i) => (
-              <div 
-                key={i} 
-                className={`flex items-center justify-between p-4 rounded-2xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-all ${i % 2 === 0 ? "ml-8" : "mr-4"}`}
-              >
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center shrink-0 shadow-sm border border-border/50">
-                    <FileAudio className="w-5 h-5 text-muted-foreground/60" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-base font-medium truncate">{t('downloading')}</p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 h-1 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="w-full h-full bg-primary/40 rounded-full" 
-                          style={{ width: i === 1 ? "33%" : "0%" }}
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground font-sans">{i === 1 ? "33%" : "0%"}</p>
+        {/* Recent history from store */}
+        {history.length > 0 && (
+          <div className="pt-4 ml-4">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-sm text-muted-foreground font-medium tracking-widest uppercase">{t('recent')}</h3>
+              <div className="h-[1px] flex-1 bg-border/50 ml-4" />
+            </div>
+            <div className="flex flex-col gap-4 -ml-4">
+              {history.map((item, i) => (
+                <div 
+                  key={item.id} 
+                  className={`flex items-center justify-between p-4 rounded-2xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-all ${i === 1 ? "ml-8" : "mr-4"}`}
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center shrink-0 shadow-sm border border-border/50">
+                      <FileAudio className="w-5 h-5 text-muted-foreground/60" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-base font-medium truncate">{item.title}</p>
+                      <p className="text-xs text-muted-foreground font-sans truncate">
+                        {item.artist || 'Unknown Artist'} • {item.albumTitle}
+                      </p>
                     </div>
                   </div>
+                  <div className="p-2 rounded-full bg-accent/10 border border-accent/20 shadow-sm">
+                    <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
+                  </div>
                 </div>
-                <div className="p-2 rounded-full bg-background border border-border/50 shadow-sm">
-                  <ArrowDownToLine className="w-4 h-4 text-primary shrink-0" />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </section>
     </MainContainer>
   );

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { GoogleDriveService } from './google-drive.service';
@@ -67,6 +67,16 @@ export class GoogleDriveController {
       accessToken,
       fileId,
     );
+
+    // Strict MP3 Validation
+    const isMp3Mime = metadata.mimeType === 'audio/mpeg' || metadata.mimeType === 'audio/mp3';
+    const isMp3Ext = metadata.name?.toLowerCase().endsWith('.mp3');
+
+    if (!isMp3Mime && !isMp3Ext) {
+      this.logger.warn({ fileId, mimeType: metadata.mimeType, name: metadata.name }, 'Rejection: Only MP3 files are allowed');
+      throw new BadRequestException('Chỉ hỗ trợ file định dạng MP3');
+    }
+
     const stream = await this.googleDriveService.downloadFile(
       accessToken,
       fileId,

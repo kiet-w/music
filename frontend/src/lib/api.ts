@@ -48,6 +48,24 @@ export async function register(data: {
   return res.json();
 }
 
+export async function googleLogin(idToken: string): Promise<AuthResponse> {
+  const res = await fetch(`${API_URL}/auth/google`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ idToken }),
+  });
+  
+  if (res.status === 401) {
+    throw new Error('Invalid Google token');
+  }
+  
+  if (!res.ok) {
+    throw new Error('Google login failed');
+  }
+  
+  return res.json();
+}
+
 export async function login(data: {
   email: string;
   password: string;
@@ -171,6 +189,38 @@ export async function importFromDrive(appToken: string, fileId: string, googleAc
     headers: getAuthHeaders(appToken),
     body: JSON.stringify({ fileId, accessToken: googleAccessToken, albumId }),
   });
-  if (!res.ok) throw new Error('Failed to import from Google Drive');
+  
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to import from Google Drive');
+  }
+  
+  return res.json();
+}
+
+export async function sendMessage(appToken: string, receiverId: string, content: string) {
+  const res = await fetch(`${API_URL}/messages`, {
+    method: 'POST',
+    headers: getAuthHeaders(appToken),
+    body: JSON.stringify({ receiverId, content }),
+  });
+  if (!res.ok) throw new Error('Failed to send message');
+  return res.json();
+}
+
+export async function fetchChatHistory(appToken: string, userId: string) {
+  const res = await fetch(`${API_URL}/messages/${userId}`, {
+    cache: 'no-store',
+    headers: getAuthHeaders(appToken),
+  });
+  if (!res.ok) throw new Error('Failed to fetch chat history');
+  return res.json();
+}
+
+export async function fetchUsers(appToken: string) {
+  const res = await fetch(`${API_URL}/auth/users`, {
+    headers: getAuthHeaders(appToken),
+  });
+  if (!res.ok) return []; 
   return res.json();
 }

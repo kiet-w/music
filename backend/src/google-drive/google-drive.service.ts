@@ -17,12 +17,12 @@ export class GoogleDriveService {
     this.oauth2Client.setCredentials({ access_token: accessToken });
     const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
     
-    console.log('Searching for audio files in Google Drive (including Shared Drives)...');
+    console.log('Searching for MP3 files in Google Drive (including Shared Drives)...');
     try {
       const res = await drive.files.list({
         pageSize: 100,
         fields: 'nextPageToken, files(id, name, mimeType, size, shortcutDetails, capabilities, driveId)',
-        q: "trashed = false and (mimeType contains 'audio/' or mimeType = 'application/vnd.google-apps.shortcut' or mimeType = 'video/mp4')",
+        q: "trashed = false and (mimeType = 'audio/mpeg' or mimeType = 'application/vnd.google-apps.shortcut')",
         supportsAllDrives: true,
         includeItemsFromAllDrives: true,
       });
@@ -30,24 +30,19 @@ export class GoogleDriveService {
       const files = res.data.files || [];
       console.log(`Successfully fetched ${files.length} total files from Drive.`);
       
-      // Broadly filter for music files or shortcuts to music files
+      // Strictly filter for MP3 files or shortcuts to MP3 files
       const musicFiles = files.filter(file => {
         const name = file.name?.toLowerCase() || '';
         const mime = file.mimeType?.toLowerCase() || '';
-        const isAudioMime = mime.includes('audio') || 
-                           mime.includes('mpeg') || 
-                           mime.includes('flac') || 
-                           mime.includes('wav');
-        const isAudioExt = name.endsWith('.mp3') || 
-                          name.endsWith('.wav') || 
-                          name.endsWith('.flac') || 
-                          name.endsWith('.m4a') ||
-                          name.endsWith('.mp4');
+        const isMp3Mime = mime === 'audio/mpeg' || mime === 'audio/mp3';
+        const isMp3Ext = name.endsWith('.mp3');
         
-        const isShortcutToAudio = mime === 'application/vnd.google-apps.shortcut' && 
-                                 (file.shortcutDetails?.targetMimeType?.includes('audio') || name.endsWith('.mp3'));
+        const isShortcutToMp3 = mime === 'application/vnd.google-apps.shortcut' && 
+                                 (file.shortcutDetails?.targetMimeType === 'audio/mpeg' || 
+                                  file.shortcutDetails?.targetMimeType === 'audio/mp3' ||
+                                  name.endsWith('.mp3'));
 
-        return isAudioMime || isAudioExt || isShortcutToAudio;
+        return isMp3Mime || isMp3Ext || isShortcutToMp3;
       });
 
       // Map shortcuts to their targets

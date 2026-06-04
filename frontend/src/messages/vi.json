@@ -50,5 +50,18 @@
     "email_exists": "Email đã tồn tại",
     "error_generic": "Có lỗi xảy ra. Vui lòng thử lại.",
     "loading": "Đang xử lý..."
+  },
+  "Navbar": {
+    "home": "Trang chủ",
+    "albums": "Album",
+    "messages": "Tin nhắn"
+  },
+  "Chat": {
+    "title": "Tin nhắn",
+    "type_placeholder": "Nhập tin nhắn...",
+    "no_messages": "Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện!",
+    "no_conversations": "Không tìm thấy cuộc trò chuyện nào.",
+    "select_user": "Chọn một người dùng để bắt đầu trò chuyện",
+    "send": "Gửi"
   }
 }

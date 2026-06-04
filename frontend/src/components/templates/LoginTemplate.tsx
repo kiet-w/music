@@ -9,12 +9,7 @@ import { Input } from '@/components/atoms/ui/input';
 import { login } from '@/lib/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import Link from 'next/link';
-
-const GoogleIcon = () => (
-  <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-    <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
-  </svg>
-);
+import { GoogleLoginButton } from '@/components/auth/GoogleLoginButton';
 
 export default function LoginTemplate({ locale }: { locale: string }) {
   const t = useTranslations('Auth');
@@ -23,6 +18,15 @@ export default function LoginTemplate({ locale }: { locale: string }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const setSession = useAuthStore((state) => state.setSession);
+  const user = useAuthStore((state) => state.user);
+
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (user) {
+      router.push(`/${locale}`);
+    }
+  }, [user, locale, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,17 +35,13 @@ export default function LoginTemplate({ locale }: { locale: string }) {
 
     try {
       const response = await login({ email, password });
-      useAuthStore.getState().setSession(response.accessToken, response.user);
+      setSession(response.accessToken, response.user);
       router.push(`/${locale}`);
     } catch (err: any) {
       setError(err.message === 'Invalid email or password' ? t('invalid_credentials') : t('error_generic'));
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleLogin = () => {
-    console.log('Google login clicked');
   };
 
   return (
@@ -115,15 +115,7 @@ export default function LoginTemplate({ locale }: { locale: string }) {
               </div>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-14 text-base font-medium rounded-2xl border-white/10 bg-white/5 backdrop-blur-xl hover:bg-white/10 active:scale-[0.98] transition-all"
-              onClick={handleGoogleLogin}
-            >
-              <GoogleIcon />
-              {t('google_login')}
-            </Button>
+            <GoogleLoginButton />
           </form>
 
           <footer className="text-center text-sm font-sans pt-4">
