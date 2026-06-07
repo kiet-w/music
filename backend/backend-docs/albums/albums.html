@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Albums Module — Technical Docs</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        /* ── CSS Variables ── */
+        :root {
+          /* Backgrounds */
+          --bg:             #f4f2ee;
+          --sidebar-bg:     #eceae5;
+          --panel-bg:       #fafaf8;
+
+          /* Text */
+          --text:           #1a1a18;
+          --text-muted:     #5f5e5a;
+
+          /* Syntax Highlighting */
+          --kw:             #185fa5;  /* keyword — blue */
+          --fn:             #854f0b;  /* function — amber */
+          --str:            #0f6e56;  /* string — teal */
+
+          /* Accent / Brand */
+          --accent:         #d85a30;  /* Claude coral/orange */
+          --border:         #d3d1c7;
+
+          /* Semantic */
+          --success:        #2c7a39;  /* rgb(44,122,57) */
+          --warn:           #854f0b;
+          --error:          #ab2b3f;  /* rgb(171,43,63) */
+
+          /* ─── SVG Component Palette (Light) ─────────── */
+          --svg-mod:         #f4f2ee;
+          --svg-ctrl:        #e6f1fb;
+          --svg-ctrl-stroke: #185fa5;
+          --svg-svc:         #e1f5ee;
+          --svg-svc-stroke:  #0f6e56;
+          --svg-repo:        #faeeda;
+          --svg-repo-stroke: #854f0b;
+          --svg-infra:       #eeedfe;
+          --svg-infra-stroke:#534ab7;
+        }
+
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Consolas', monospace;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            font-size: 15px;
+        }
+
+        /* ── Layout ── */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 32px 20px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+            z-index: 100;
+        }
+        .sidebar-title {
+            font-size: 0.75em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar nav ul { list-style: none; }
+        .sidebar nav li { margin-bottom: 4px; }
+        .sidebar nav a {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar nav a:hover { background: var(--panel-bg); color: var(--accent); transform: translateX(4px); }
+        .sidebar nav a.active { background: var(--accent); color: #fff !important; font-weight: 600; }
+
+        .toc-h3 > a { padding-left: 24px; font-size: 0.85em; color: var(--text-muted); }
+        .toc-h4 > a { padding-left: 40px; font-size: 0.8em; color: var(--text-muted); }
+
+        /* ── Main Content ── */
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding-bottom: 100px;
+        }
+
+        /* ── Hero Section (Landing Page Style) ── */
+        .hero {
+            padding: 120px 60px 80px;
+            text-align: center;
+            background: linear-gradient(180deg, #252526 0%, #1e1e1e 100%);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 60px;
+        }
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .hero p {
+            font-size: 1.25em;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+        }
+
+        /* ── Main Body Container ── */
+        .main-body {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* ── Typography ── */
+        h1 { font-size: 2.4em; color: var(--fn); margin-bottom: 40px; }
+        h2 {
+            font-size: 1.8em;
+            color: var(--kw);
+            margin: 64px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            scroll-margin-top: 40px;
+        }
+        h3 {
+            font-size: 1.4em;
+            color: var(--fn);
+            margin: 48px 0 16px;
+            scroll-margin-top: 40px;
+        }
+        h4 {
+            font-size: 1em;
+            color: var(--success);
+            margin: 32px 0 12px;
+            scroll-margin-top: 40px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        p { margin-bottom: 20px; }
+        ul, ol { margin: 0 0 24px 28px; }
+        li { margin-bottom: 10px; }
+        strong { color: #1a1a18; font-weight: 700; } /* Adjusted contrast */
+        em { color: var(--str); font-style: normal; }
+
+        /* ── SVG Diagrams (Custom Style) ── */
+        .svg-container {
+            width: 100%;
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .svg-container svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+        /* SVG Internal Styles (Matched to CSS Variables) */
+        .svg-bg { fill: transparent; }
+        .svg-mod { fill: var(--sidebar-bg); stroke: var(--border); stroke-width: 2; rx: 18; }
+        .svg-ctrl { fill: var(--svg-ctrl); stroke: var(--svg-ctrl-stroke); stroke-width: 2; rx: 12; }
+        .svg-svc { fill: var(--svg-svc); stroke: var(--svg-svc-stroke); stroke-width: 2; rx: 12; }
+        .svg-repo { fill: var(--svg-repo); stroke: var(--svg-repo-stroke); stroke-width: 2; rx: 12; }
+        .svg-infra { fill: var(--svg-infra); stroke: var(--svg-infra-stroke); stroke-width: 2; rx: 12; }
+        .svg-txt { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; fill: var(--text); }
+        .svg-small { font-family: 'Inter', sans-serif; font-size: 13px; fill: var(--text-muted); }
+        .svg-arrow { stroke: var(--border); stroke-width: 2.5; fill: none; }
+
+        /* ── Inline code & Blocks ── */
+        code {
+            background: var(--panel-bg);
+            color: var(--str);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            border: 1px solid var(--border);
+        }
+        pre {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            overflow-x: auto;
+            margin-bottom: 32px;
+        }
+        pre code { background: none; border: none; padding: 0; color: var(--text); }
+
+        /* ── Tables ── */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 32px; border-radius: 10px; overflow: hidden; }
+        th { background: var(--sidebar-bg); color: var(--kw); border: 1px solid var(--border); padding: 14px 18px; text-align: left; }
+        td { border: 1px solid var(--border); padding: 12px 18px; }
+        tr:nth-child(even) td { background: var(--panel-bg); }
+
+        /* ── Method Section ── */
+        .method-section {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 56px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .method-signature {
+            background: var(--sidebar-bg);
+            border-left: 5px solid var(--accent);
+            border-radius: 6px;
+            padding: 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95em;
+            margin: 20px 0 32px;
+            color: var(--fn);
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bbb; }
+
+        /* Animation */
+        @keyframes sectionFlash {
+            0% { outline: 3px solid var(--accent); outline-offset: 6px; background: rgba(216,90,48,0.1); }
+            100% { outline: 3px solid transparent; outline-offset: 15px; }
+        }
+        .section-highlight { animation: sectionFlash 1.2s ease-out forwards; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title">📄 Albums Module</div>
+            <nav id="toc"></nav>
+        </aside>
+
+        <main class="content" id="main-content">
+            <section class="hero">
+                <div class="hero-badge">Backend Module</div>
+                <h1>Albums Module</h1>
+                <p>Quản lý các album nhạc của người dùng trong hệ thống. Bao gồm các tính năng: tạo album mới, lấy danh sách album của người dùng (có phân trang), lấy chi tiết một album theo ID, và tìm hoặc tạo một album mặc định cho người dùng.</p>
+            </section>
+            
+            <div class="main-body">
+                <h2>1. Kiến trúc tổng thể (Component Overview)</h2>
+                <p>Kiến trúc được tổ chức theo Separation of Concerns, tách biệt các layer Controller (HTTP) -> Service (Business Logic) -> Repository (Database Query).</p>
+                
+                <div class="svg-container">
+                    <svg viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                          <path d="M0,0 L0,6 L9,3 z" fill="#1a1a18" />
+                        </marker>
+                      </defs>
+                      <rect width="100%" height="100%" class="svg-bg" />
+                      
+                      <!-- HTTP Layer -->
+                      <rect x="50" y="80" width="180" height="60" class="svg-mod" />
+                      <text x="140" y="115" class="svg-txt" text-anchor="middle">HTTP Client</text>
+                      
+                      <!-- Controller -->
+                      <rect x="300" y="80" width="180" height="60" class="svg-ctrl" />
+                      <text x="390" y="115" class="svg-txt" text-anchor="middle">AlbumController</text>
+                      
+                      <!-- Guard -->
+                      <rect x="300" y="180" width="180" height="60" fill="transparent" stroke="#185fa5" stroke-width="2" stroke-dasharray="5 5" rx="12" />
+                      <text x="390" y="215" class="svg-txt" text-anchor="middle">JwtAuthGuard</text>
+
+                      <!-- Service -->
+                      <rect x="550" y="80" width="180" height="60" class="svg-svc" />
+                      <text x="640" y="115" class="svg-txt" text-anchor="middle">AlbumService</text>
+
+                      <!-- Repository -->
+                      <rect x="550" y="180" width="180" height="60" class="svg-repo" />
+                      <text x="640" y="215" class="svg-txt" text-anchor="middle">AlbumRepository</text>
+
+                      <!-- Database -->
+                      <rect x="800" y="180" width="150" height="60" class="svg-infra" />
+                      <text x="875" y="215" class="svg-txt" text-anchor="middle">PostgreSQL DB</text>
+
+                      <!-- Connections -->
+                      <path d="M230 110 L290 110" class="svg-arrow" marker-end="url(#arrow)"/>
+                      <path d="M480 110 L540 110" class="svg-arrow" marker-end="url(#arrow)"/>
+                      <path d="M640 140 L640 170" class="svg-arrow" marker-end="url(#arrow)"/>
+                      <path d="M730 210 L790 210" class="svg-arrow" marker-end="url(#arrow)"/>
+                      
+                      <!-- Controller to Guard annotation -->
+                      <path d="M390 140 L390 170" stroke="#185fa5" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow)"/>
+                    </svg>
+                </div>
+
+                <h2>2. Các Dependencies</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dependency</th>
+                            <th>Vai trò</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>AlbumRepository</code></td>
+                            <td>Giao tiếp với DB để query và thao tác entity Album (kế thừa từ BaseRepository).</td>
+                        </tr>
+                        <tr>
+                            <td><code>PinoLogger</code></td>
+                            <td>Ghi log chuẩn cấu trúc theo vết hoạt động (create, find).</td>
+                        </tr>
+                        <tr>
+                            <td><code>PrismaService</code></td>
+                            <td>Inject vào AlbumRepository cung cấp Prisma Client query DB.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>3. System Data Flow</h2>
+                <div class="svg-container">
+                    <svg viewBox="0 0 1100 500" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                          <path d="M0,0 L0,6 L9,3 z" fill="#1a1a18" />
+                        </marker>
+                      </defs>
+                      <rect width="100%" height="100%" class="svg-bg" />
+                      
+                      <text x="50" y="40" font-family="Inter, sans-serif" font-weight="800" font-size="20" fill="#1a1a18">Luồng GET /albums (findAll)</text>
+
+                      <rect x="50" y="70" width="150" height="50" class="svg-mod" />
+                      <text x="125" y="100" class="svg-txt" text-anchor="middle">Client GET</text>
+
+                      <rect x="250" y="70" width="150" height="50" class="svg-ctrl" />
+                      <text x="325" y="100" class="svg-txt" text-anchor="middle">AlbumController</text>
+                      <text x="325" y="140" class="svg-small" text-anchor="middle">Tính skip/take</text>
+
+                      <rect x="450" y="70" width="150" height="50" class="svg-svc" />
+                      <text x="525" y="100" class="svg-txt" text-anchor="middle">AlbumService</text>
+
+                      <rect x="650" y="70" width="150" height="50" class="svg-repo" />
+                      <text x="725" y="100" class="svg-txt" text-anchor="middle">Promise.all()</text>
+
+                      <rect x="850" y="40" width="150" height="40" class="svg-repo" />
+                      <text x="925" y="65" class="svg-txt" text-anchor="middle">count()</text>
+
+                      <rect x="850" y="100" width="150" height="40" class="svg-repo" />
+                      <text x="925" y="125" class="svg-txt" text-anchor="middle">findMany()</text>
+
+                      <path d="M200 95 L240 95" class="svg-arrow" marker-end="url(#arrow)"/>
+                      <path d="M400 95 L440 95" class="svg-arrow" marker-end="url(#arrow)"/>
+                      <path d="M600 95 L640 95" class="svg-arrow" marker-end="url(#arrow)"/>
+                      <path d="M800 85 L840 60" class="svg-arrow" marker-end="url(#arrow)"/>
+                      <path d="M800 105 L840 120" class="svg-arrow" marker-end="url(#arrow)"/>
+                      
+                      <text x="50" y="220" font-family="Inter, sans-serif" font-weight="800" font-size="20" fill="#1a1a18">Luồng findOrCreateDefault (Race Condition Handling)</text>
+                      
+                      <rect x="50" y="250" width="150" height="50" class="svg-mod" />
+                      <text x="125" y="280" class="svg-txt" text-anchor="middle">Internal Caller</text>
+
+                      <rect x="250" y="250" width="150" height="50" class="svg-svc" />
+                      <text x="325" y="280" class="svg-txt" text-anchor="middle">Service</text>
+
+                      <rect x="450" y="250" width="150" height="50" class="svg-repo" />
+                      <text x="525" y="280" class="svg-txt" text-anchor="middle">findDefault()</text>
+                      
+                      <rect x="650" y="250" width="150" height="50" class="svg-infra" />
+                      <text x="725" y="280" class="svg-txt" text-anchor="middle">PostgreSQL</text>
+                      
+                      <path d="M200 275 L240 275" class="svg-arrow" marker-end="url(#arrow)"/>
+                      <path d="M400 275 L440 275" class="svg-arrow" marker-end="url(#arrow)"/>
+                      <path d="M600 275 L640 275" class="svg-arrow" marker-end="url(#arrow)"/>
+
+                      <!-- Null Path -->
+                      <path d="M525 300 L525 350 L640 350" class="svg-arrow" marker-end="url(#arrow)"/>
+                      <text x="535" y="325" class="svg-small">If Null</text>
+
+                      <rect x="650" y="325" width="150" height="50" class="svg-repo" />
+                      <text x="725" y="355" class="svg-txt" text-anchor="middle">create()</text>
+                      
+                      <path d="M800 350 L840 350" class="svg-arrow" marker-end="url(#arrow)"/>
+
+                      <rect x="850" y="325" width="150" height="50" fill="#fff7ed" stroke="#f97316" stroke-width="2" rx="12" />
+                      <text x="925" y="355" font-family="Inter" font-weight="700" font-size="14" fill="#854f0b" text-anchor="middle">Unique Error?</text>
+
+                      <!-- Retry Path -->
+                      <path d="M925 375 L925 430 L400 430 L400 290" class="svg-arrow" marker-end="url(#arrow)" stroke-dasharray="5 5" stroke="#dc2626"/>
+                      <text x="650" y="420" class="svg-small" fill="#dc2626">Catch Error -&gt; Retry findDefault()</text>
+
+                    </svg>
+                </div>
+
+                <h2>4. Phân tích chi tiết Controller & Service</h2>
+                
+                <div class="method-section">
+                    <h3>AlbumController</h3>
+                    <div class="method-signature">@Controller('albums')<br>@UseGuards(JwtAuthGuard)<br>@UseInterceptors(ClassSerializerInterceptor)</div>
+                    <p>Controller sử dụng các decorator của NestJS và Swagger để cấu hình route bảo mật bằng JWT và chuẩn hóa dữ liệu trả về thông qua DTO.</p>
+                    <ul>
+                        <li><strong>create():</strong> Nhận body <code>{ title, artist, coverUrl }</code> và gọi <code>AlbumService.create()</code>. Trả về <code>AlbumResponseDto</code>.</li>
+                        <li><strong>findAll():</strong> Lấy danh sách phân trang bằng cách tính toán <code>skip</code> và <code>take</code>. Mặc định <code>limit = 50</code>.</li>
+                        <li><strong>findOne():</strong> Lấy chi tiết bằng ID, ném <code>NotFoundException</code> nếu không tìm thấy.</li>
+                    </ul>
+                </div>
+
+                <div class="method-section">
+                    <h3>AlbumService</h3>
+                    <p>Chứa toàn bộ logic nghiệp vụ, gọi Repository và mapping dữ liệu trả về client.</p>
+                    <ul>
+                        <li><strong>create():</strong> Ghi log sự kiện và tạo album gán với <code>userId</code>.</li>
+                        <li><strong>findOrCreateDefault():</strong> Xử lý race condition với cấu trúc Try-Catch. Cố gắng <code>findDefault()</code>, nếu không có tiến hành <code>create()</code> album "Default", nếu lỗi Unique Constraint xảy ra, catch lỗi và gọi lại <code>findDefault()</code>.</li>
+                        <li><strong>findAll():</strong> Tối ưu hóa truy vấn bằng <code>Promise.all</code> để chạy song song lệnh count và lệnh findMany.</li>
+                        <li><strong>mapAlbumResponse():</strong> Ánh xạ dữ liệu <code>_count.tracks</code> sang <code>_count.songs</code> để phù hợp DTO.</li>
+                    </ul>
+                </div>
+
+                <h2>5. API Design & DTO Pattern</h2>
+                
+                <h3>DTO (Data Transfer Objects)</h3>
+                <p><strong>CreateAlbumDto:</strong> Validate bằng class-validator: <code>@IsString</code>, <code>@IsNotEmpty</code>, <code>@IsUrl</code>, <code>@IsOptional</code>.</p>
+                <p><strong>AlbumResponseDto:</strong> Sử dụng <code>@Expose()</code> và <code>@Type()</code> kết hợp với <code>ClassSerializerInterceptor</code> ở Controller. Pattern này giúp ẩn đi các metadata từ ORM một cách tự động, bảo vệ cấu trúc CSDL bên dưới.</p>
+
+                <h3>API Responses Shape</h3>
+<pre><code>{
+  "id": "uuid",
+  "title": "Tên album",
+  "artist": "Ca sĩ",
+  "coverUrl": "URL ảnh",
+  "tracks": [],
+  "_count": {
+    "songs": 10
+  }
+}</code></pre>
+
+                <h2>6. Đánh giá & Cải thiện (Best Practices)</h2>
+                <h3>✅ Đã làm tốt</h3>
+                <ul>
+                    <li><strong>Tenant Isolation:</strong> Truy vấn DB luôn đi kèm <code>where: { userId }</code>.</li>
+                    <li><strong>Race Condition Handling:</strong> Áp dụng pattern catch-and-retry hiệu quả.</li>
+                    <li><strong>Data Transfer Isolation:</strong> Sử dụng <code>ClassSerializerInterceptor</code> rất sạch sẽ.</li>
+                </ul>
+
+                <h3>❌ Cần cải thiện</h3>
+                <ul>
+                    <li><strong>Pagination tại Controller:</strong> Tính toán skip/take thủ công không an toàn. Nên sửa thành dùng <code>ParseIntPipe</code> hoặc <code>PaginationDto</code>.</li>
+                    <li><strong>Sử dụng type <code>any</code>:</strong> Type <code>any</code> tại <code>@CurrentUser() user: any</code> làm giảm sức mạnh của TypeScript. Nên sử dụng interface JWT Payload chuẩn.</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.scrollToSection = function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.classList.remove('section-highlight');
+            void el.offsetWidth;
+            el.classList.add('section-highlight');
+            
+            document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+            const active = document.querySelector(`#toc a[data-target="${id}"]`);
+            if (active) {
+                active.classList.add('active');
+                active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        };
+
+        mermaid.initialize({
+            startOnLoad: true,
+            securityLevel: 'loose',
+            theme: 'base',
+            themeVariables: {
+                background: '#1e1e1e',
+                mainBkg: '#2d2d30',
+                primaryTextColor: '#d4d4d4',
+                lineColor: '#569cd6',
+                fontFamily: 'Inter, Segoe UI, sans-serif'
+            }
+        });
+
+        (function buildTOC() {
+            const main = document.getElementById('main-content');
+            const toc = document.getElementById('toc');
+            const headings = main.querySelectorAll('h2, h3, h4');
+            const ul = document.createElement('ul');
+            headings.forEach((h, i) => {
+                if (!h.id) h.id = 'h-' + i;
+                const li = document.createElement('li');
+                li.className = 'toc-' + h.tagName.toLowerCase();
+                const a = document.createElement('a');
+                a.href = '#' + h.id;
+                a.textContent = h.textContent.replace(/^[▶✅❌⚠️ℹ️📄⚙️🌐🗄️]+\s*/, '');
+                a.dataset.target = h.id;
+                a.onclick = (e) => { e.preventDefault(); scrollToSection(h.id); };
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+            toc.appendChild(ul);
+        })();
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+                    const active = document.querySelector(`#toc a[data-target="${entry.target.id}"]`);
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+        document.querySelectorAll('h2, h3, h4').forEach(h => observer.observe(h));
+    </script>
+</body>
+</html>

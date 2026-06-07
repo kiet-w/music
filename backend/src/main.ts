@@ -1,14 +1,16 @@
-import 'dotenv/config';
-import { NestFactory } from '@nestjs/core';
+import { config } from 'dotenv';
+config({ override: true });
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
-  app.useLogger(app.get(Logger));
+  const logger = app.get(Logger);
+  app.useLogger(logger);
 
   app.enableCors({
     origin: true,
@@ -19,7 +21,10 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
   });
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  const httpAdapterHost = app.get(HttpAdapterHost);
+  // Get pino logger instance for the filter
+  const pinoLogger = app.get(Logger);
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost, pinoLogger as any));
 
   app.useGlobalPipes(
     new ValidationPipe({

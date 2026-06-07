@@ -1431,18 +1431,18 @@ Hinh tong quan don gian:
 
 Thu muc SVG chi tiet:
 
-- `docs/diagrams/usecase-overview.svg`
-- `docs/diagrams/album-song-usecases.svg`
-- `docs/diagrams/database-erd.svg`
-- `docs/diagrams/backend-components.svg`
-- `docs/diagrams/frontend-components.svg`
-- `docs/diagrams/auth-lifecycle.svg`
-- `docs/diagrams/youtube-track-lifecycle.svg`
-- `docs/diagrams/google-drive-lifecycle.svg`
-- `docs/diagrams/realtime-lifecycle.svg`
-- `docs/diagrams/playback-offline-lifecycle.svg`
-- `docs/diagrams/auth-sequence.svg`
-- `docs/diagrams/data-flow-boundaries.svg`
+- `docs/diagrams/use-cases/usecase-overview.svg`
+- `docs/diagrams/use-cases/album-song-usecases.svg`
+- `docs/diagrams/architecture/database-erd.svg`
+- `docs/diagrams/architecture/backend-components.svg`
+- `docs/diagrams/architecture/frontend-components.svg`
+- `docs/diagrams/auth/auth-lifecycle.svg`
+- `docs/diagrams/lifecycles/youtube-track-lifecycle.svg`
+- `docs/diagrams/lifecycles/google-drive-lifecycle.svg`
+- `docs/diagrams/lifecycles/realtime-lifecycle.svg`
+- `docs/diagrams/lifecycles/playback-offline-lifecycle.svg`
+- `docs/diagrams/auth/auth-sequence.svg`
+- `docs/diagrams/architecture/data-flow-boundaries.svg`
 System design cua project hien tai co the nhin nhu 5 lop:
 
 ```text

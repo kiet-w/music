@@ -3,16 +3,19 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Disc, LogOut } from 'lucide-react';
+import { Disc, LogOut, MessageCircle, Music } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useChatStore } from '@/store/useChatStore';
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('Navbar');
   const { clearSession, user } = useAuthStore();
+  const { unreadMessages } = useChatStore();
 
   const handleLogout = () => {
     clearSession();
@@ -20,15 +23,18 @@ export function Navbar() {
   };
   
   const navItems = [
-    { href: '/', icon: Home, label: 'Home' },
-    { href: '/albums', icon: Disc, label: 'Albums' },
+    { href: '/albums', icon: Disc, label: t('albums') },
+    { href: '/music', icon: Music, label: t('music') },
+    { 
+      href: '/messages', 
+      icon: MessageCircle, 
+      label: t('messages'),
+      badge: unreadMessages.length > 0
+    },
   ];
 
   // Helper to handle locale prefix in pathname
   const isActive = (href: string) => {
-    if (href === '/') {
-      return pathname === `/${locale}` || pathname === `/${locale}/` || pathname === '/';
-    }
     return pathname.includes(href);
   };
 
@@ -46,7 +52,12 @@ export function Navbar() {
               active ? "text-white scale-110" : "text-white/40 hover:text-white/70"
             )}
           >
-            <Icon size={22} strokeWidth={1.5} />
+            <div className="relative">
+              <Icon size={22} strokeWidth={1.5} />
+              {(item as any).badge && (
+                <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[#070b14] shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+              )}
+            </div>
             <span className={cn(
               "text-[9px] font-bold uppercase tracking-widest transition-opacity duration-300",
               active ? "opacity-100" : "opacity-0"

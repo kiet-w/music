@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { AlbumRepository } from './repositories/album.repository';
+import { CreateAlbumDto } from './dto/create-album.dto';
 
 @Injectable()
 export class AlbumService {
@@ -10,25 +11,26 @@ export class AlbumService {
     private readonly logger: PinoLogger,
   ) {}
 
-  async create(userId: string, data: { title: string; artist?: string; coverUrl?: string }) {
+  async create(userId: string, data: CreateAlbumDto) {
     this.logger.info({ userId, data }, 'Creating new album');
-    return this.albumRepository.create({
+    const album = await this.albumRepository.create({
       data: {
         ...data,
         userId,
       },
     });
+    return this.mapAlbumResponse(album);
   }
 
   async findOrCreateDefault(userId: string) {
     this.logger.debug({ userId }, 'Finding or creating default album');
     const existing = await this.albumRepository.findDefault(userId);
     if (existing) {
-      return existing;
+      return this.mapAlbumResponse(existing);
     }
 
     try {
-      return await this.albumRepository.create({
+      const album = await this.albumRepository.create({
         data: {
           title: 'Default',
           artist: 'Various Artists',
@@ -36,33 +38,42 @@ export class AlbumService {
           userId,
         },
       });
+      return this.mapAlbumResponse(album);
     } catch (error) {
       // Handle race condition where another request created it between find and create
       const raceResult = await this.albumRepository.findDefault(userId);
       if (raceResult) {
-        return raceResult;
+        return this.mapAlbumResponse(raceResult);
       }
       throw error;
     }
   }
 
-  async findAll(userId: string) {
-    this.logger.debug({ userId }, 'Finding all albums for user');
-    const albums = await this.albumRepository.findMany({
-      where: { userId },
-      include: {
-        _count: {
-          select: { tracks: true },
+  async findAll(userId: string, skip: number = 0, take: number = 50) {
+    this.logger.debug({ userId, skip, take }, 'Finding all albums for user');
+    
+    const [total, albums] = await Promise.all([
+      this.albumRepository.count({ where: { userId } }),
+      this.albumRepository.findMany({
+        where: { userId },
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          _count: {
+            select: { tracks: true },
+          },
         },
-      },
-    });
+      })
+    ]);
 
-    return albums.map((album: any) => ({
-      ...album,
-      _count: {
-        songs: album._count?.tracks || 0,
-      },
-    }));
+    return {
+      data: albums.map((album) => this.mapAlbumResponse(album)),
+      total,
+      page: Math.floor(skip / take) + 1,
+      limit: take,
+      totalPages: Math.ceil(total / take)
+    };
   }
 
   async findOne(userId: string, id: string) {
@@ -76,16 +87,15 @@ export class AlbumService {
       },
     });
 
-    if (!album) {
-      this.logger.warn({ userId, id }, 'Album not found or access denied');
-      return null;
-    }
+    return this.mapAlbumResponse(album);
+  }
 
-    const albumWithCount = album as any;
+  private mapAlbumResponse(album: any) {
+    if (!album) return null;
     return {
-      ...albumWithCount,
+      ...album,
       _count: {
-        songs: albumWithCount._count?.tracks || 0,
+        songs: album._count?.tracks || 0,
       },
     };
   }

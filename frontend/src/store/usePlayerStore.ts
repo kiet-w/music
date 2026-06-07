@@ -9,6 +9,7 @@ export interface Track {
   artist: string | null;
   url: string;
   coverUrl?: string;
+  albumId?: string;
 }
 
 interface PlayerState {

@@ -7,16 +7,15 @@ import {
   Delete,
   Patch,
   HttpCode,
-  HttpStatus,
   UseInterceptors,
   ClassSerializerInterceptor,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { SongService } from './song.service';
 import { CreateSongYoutubeDto } from './dto/create-song-youtube.dto';
 import { SongResponseDto } from './dto/song-response.dto';
-import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 
@@ -39,30 +38,29 @@ export class SongController {
     @CurrentUser() user: any,
     @Body() createSongDto: CreateSongYoutubeDto,
   ): Promise<SongResponseDto> {
-    const song = await this.songService.createFromYoutube(
+    return this.songService.createFromYoutube(
       user.id,
       createSongDto.url,
       createSongDto.title,
       createSongDto.artist,
       createSongDto.albumId,
     );
-    return plainToInstance(SongResponseDto, song, {
-      excludeExtraneousValues: true,
-    });
   }
 
   @ApiOperation({ summary: 'Get all songs' })
   @ApiResponse({
     status: 200,
-    description: 'Return all songs.',
-    type: [SongResponseDto],
+    description: 'Return all songs with pagination.',
   })
   @Get()
-  async findAll(@CurrentUser() user: any): Promise<SongResponseDto[]> {
-    const songs = await this.songService.findAll(user.id);
-    return plainToInstance(SongResponseDto, songs, {
-      excludeExtraneousValues: true,
-    });
+  async findAll(
+    @CurrentUser() user: any,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const skip = page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
+    const take = limit ? parseInt(limit, 10) : 50;
+    return this.songService.findAll(user.id, skip, take);
   }
 
   @ApiOperation({ summary: 'Get a song by ID' })
@@ -77,10 +75,7 @@ export class SongController {
     @CurrentUser() user: any,
     @Param('id') id: string,
   ): Promise<SongResponseDto> {
-    const song = await this.songService.findOne(user.id, id);
-    return plainToInstance(SongResponseDto, song, {
-      excludeExtraneousValues: true,
-    });
+    return this.songService.findOne(user.id, id);
   }
 
   @ApiOperation({ summary: 'Delete a song' })
@@ -108,9 +103,7 @@ export class SongController {
     @Param('id') id: string,
     @Body('albumId') albumId: string,
   ): Promise<SongResponseDto> {
-    const song = await this.songService.moveToAlbum(user.id, id, albumId);
-    return plainToInstance(SongResponseDto, song, {
-      excludeExtraneousValues: true,
-    });
+    return this.songService.moveToAlbum(user.id, id, albumId);
   }
 }
+

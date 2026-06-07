@@ -14,4 +14,10 @@ export class UserRepository extends BaseRepository<User, Prisma.UserDelegate> {
       where: { email },
     });
   }
+
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { googleId },
+    });
+  }
 }

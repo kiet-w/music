@@ -14,6 +14,7 @@ import { AlbumsModule } from './albums/albums.module';
 import { GoogleDriveModule } from './google-drive/google-drive.module';
 import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
+import { MessagesModule } from './messages/messages.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 @Module({
@@ -51,6 +52,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     GoogleDriveModule,
     AdminModule,
     AuthModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,1 +1,5 @@
-{}
+{
+  "/[locale]/albums/page": "app/[locale]/albums/page.js",
+  "/[locale]/messages/page": "app/[locale]/messages/page.js",
+  "/[locale]/music/page": "app/[locale]/music/page.js"
+}

@@ -1,8 +1,5 @@
-import React from 'react';
-import AlbumsClient from '@/components/templates/AlbumsTemplate';
+import { AlbumsPage } from '@/components/pages/AlbumsPage';
 
-export const revalidate = 0;
-
-export default async function AlbumsPage({ params: { locale } }: { params: { locale: string } }) {
-  return <AlbumsClient locale={locale} />;
+export default function Page({ params: { locale } }: { params: { locale: string } }) {
+  return <AlbumsPage locale={locale} />;
 }

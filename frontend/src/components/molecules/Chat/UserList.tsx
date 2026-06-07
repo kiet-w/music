@@ -1,0 +1,58 @@
+'use client';
+
+import React from 'react';
+import { cn } from '@/lib/utils';
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+interface UserListProps {
+  users: User[];
+  activeUserId: string | null;
+  unreadUserIds?: string[];
+  onSelectUser: (userId: string) => void;
+}
+
+export function UserList({ users, activeUserId, unreadUserIds = [], onSelectUser }: UserListProps) {
+  return (
+    <div className="flex flex-col gap-2">
+      {users.map((user) => {
+        const isUnread = unreadUserIds.includes(user.id);
+        
+        return (
+          <button
+            key={user.id}
+            onClick={() => onSelectUser(user.id)}
+            className={cn(
+              "flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 text-left relative",
+              activeUserId === user.id 
+                ? "glass-light text-white shadow-soft" 
+                : "text-white/60 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center font-bold text-white border border-white/10 relative">
+              {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
+              {isUnread && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#121212] shadow-sm animate-pulse" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={cn("font-semibold truncate", isUnread && "text-white")}>
+                {user.name || user.email}
+              </p>
+              <p className="text-[10px] opacity-40 truncate">{user.email}</p>
+            </div>
+            {isUnread && (
+              <div className="bg-red-500/20 text-red-500 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                NEW
+              </div>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

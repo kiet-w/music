@@ -31,9 +31,10 @@ export class ConversionProcessor extends WorkerHost {
       // 1. Download from YouTube
       await this.downloaderService.download(url, outputPath);
 
-      // 2. Upload to Supabase Storage
+      // 2. Upload to Supabase Storage using stream to avoid OOM
       const storagePath = `songs/${songId}.mp3`;
-      await this.storageService.upload(outputPath, 'music', storagePath);
+      const fileStream = fs.createReadStream(outputPath);
+      await this.storageService.uploadStream(fileStream, 'music', storagePath);
 
       // 3. Get Public URL
       const publicUrl = await this.storageService.getPublicUrl(

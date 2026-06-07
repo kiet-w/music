@@ -59,7 +59,10 @@ describe('AlbumService', () => {
 
       const result = await service.create(mockUserId, data);
 
-      expect(result).toEqual(mockAlbum);
+      expect(result).toEqual({
+        ...mockAlbum,
+        _count: { songs: 0 },
+      });
       expect(albumRepository.create).toHaveBeenCalledWith({
         data: {
           ...data,
@@ -76,7 +79,10 @@ describe('AlbumService', () => {
 
       const result = await service.findOrCreateDefault(mockUserId);
 
-      expect(result).toEqual(mockAlbum);
+      expect(result).toEqual({
+        ...mockAlbum,
+        _count: { songs: 0 },
+      });
       expect(albumRepository.findDefault).toHaveBeenCalledWith(mockUserId);
       expect(albumRepository.create).not.toHaveBeenCalled();
     });
@@ -88,7 +94,10 @@ describe('AlbumService', () => {
 
       const result = await service.findOrCreateDefault(mockUserId);
 
-      expect(result).toEqual(mockAlbum);
+      expect(result).toEqual({
+        ...mockAlbum,
+        _count: { songs: 0 },
+      });
       expect(albumRepository.create).toHaveBeenCalledWith({
         data: {
           title: 'Default',
@@ -107,7 +116,10 @@ describe('AlbumService', () => {
 
       const result = await service.findOrCreateDefault(mockUserId);
 
-      expect(result).toEqual(mockAlbum);
+      expect(result).toEqual({
+        ...mockAlbum,
+        _count: { songs: 0 },
+      });
       expect(albumRepository.findDefault).toHaveBeenCalledTimes(2);
     });
   });

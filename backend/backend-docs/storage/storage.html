@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Module — Technical Docs</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        /* ── CSS Variables (Claude Code Light Theme) ── */
+        :root {
+          /* Backgrounds */
+          --bg:             #f4f2ee;
+          --sidebar-bg:     #eceae5;
+          --panel-bg:       #fafaf8;
+
+          /* Text */
+          --text:           #1a1a18;
+          --text-muted:     #5f5e5a;
+
+          /* Syntax Highlighting */
+          --kw:             #185fa5;
+          --fn:             #854f0b;
+          --str:            #0f6e56;
+
+          /* Accent / Brand */
+          --accent:         #d85a30;
+          --border:         #d3d1c7;
+
+          /* Semantic */
+          --success:        #2c7a39;
+          --warn:           #854f0b;
+          --error:          #ab2b3f;
+        }
+
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Consolas', monospace;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            font-size: 15px;
+        }
+
+        /* ── Layout ── */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 32px 20px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+            z-index: 100;
+        }
+        .sidebar-title {
+            font-size: 0.75em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar nav ul { list-style: none; }
+        .sidebar nav li { margin-bottom: 4px; }
+        .sidebar nav a {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar nav a:hover { background: var(--panel-bg); color: var(--accent); transform: translateX(4px); }
+        .sidebar nav a.active { background: var(--accent); color: #fff !important; font-weight: 600; }
+
+        .toc-h3 > a { padding-left: 24px; font-size: 0.85em; color: var(--text-muted); }
+        .toc-h4 > a { padding-left: 40px; font-size: 0.8em; color: var(--text-muted); }
+
+        /* ── Main Content ── */
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding-bottom: 100px;
+        }
+
+        /* ── Hero Section (Landing Page Style) ── */
+        .hero {
+            padding: 120px 60px 80px;
+            text-align: center;
+            background: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 60px;
+        }
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: var(--text);
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .hero p {
+            font-size: 1.25em;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+        }
+
+        /* ── Main Body Container ── */
+        .main-body {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* ── Typography ── */
+        h1 { font-size: 2.4em; color: var(--fn); margin-bottom: 40px; }
+        h2 {
+            font-size: 1.8em;
+            color: var(--kw);
+            margin: 64px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            scroll-margin-top: 40px;
+        }
+        h3 {
+            font-size: 1.4em;
+            color: var(--fn);
+            margin: 48px 0 16px;
+            scroll-margin-top: 40px;
+        }
+        h4 {
+            font-size: 1em;
+            color: var(--success);
+            margin: 32px 0 12px;
+            scroll-margin-top: 40px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        p { margin-bottom: 20px; }
+        ul, ol { margin: 0 0 24px 28px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text); font-weight: 700; }
+        em { color: var(--str); font-style: normal; }
+
+        /* ── SVG Diagrams ── */
+        .svg-container {
+            width: 100%;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .svg-container svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ── Inline code & Blocks ── */
+        code {
+            background: var(--sidebar-bg);
+            color: var(--str);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            border: 1px solid var(--border);
+        }
+        pre {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            overflow-x: auto;
+            margin-bottom: 32px;
+        }
+        pre code { background: none; border: none; padding: 0; color: var(--text); }
+
+        /* ── Tables ── */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 32px; border-radius: 10px; overflow: hidden; }
+        th { background: var(--sidebar-bg); color: var(--kw); border: 1px solid var(--border); padding: 14px 18px; text-align: left; }
+        td { border: 1px solid var(--border); padding: 12px 18px; }
+        tr:nth-child(even) td { background: var(--panel-bg); }
+
+        /* ── Method Section ── */
+        .method-section {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 56px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .method-signature {
+            background: var(--sidebar-bg);
+            border-left: 5px solid var(--accent);
+            border-radius: 6px;
+            padding: 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95em;
+            margin: 20px 0 32px;
+            color: var(--text);
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #999; }
+
+        /* Animation */
+        @keyframes sectionFlash {
+            0% { outline: 3px solid var(--accent); outline-offset: 6px; background: rgba(216,90,48,0.1); }
+            100% { outline: 3px solid transparent; outline-offset: 15px; }
+        }
+        .section-highlight { animation: sectionFlash 1.2s ease-out forwards; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title">📄 Storage Module</div>
+            <nav id="toc"></nav>
+        </aside>
+
+        <main class="content" id="main-content">
+            <section class="hero">
+                <div class="hero-badge">Backend Module</div>
+                <h1>Storage Module</h1>
+                <p>Chịu trách nhiệm xử lý toàn bộ thao tác liên quan đến lưu trữ file của hệ thống. Thay vì lưu trữ trực tiếp trên server, module này sử dụng dịch vụ Supabase Storage như một S3-compatible bucket để upload file (từ path, buffer, stream), lấy public URL và xóa file, đồng thời cung cấp service chuyên biệt để cleanup file.</p>
+            </section>
+            
+            <div class="main-body">
+                
+                <h2>1. Tổng quan Kiến trúc (Component Overview)</h2>
+                <div class="svg-container">
+                    <svg width="100%" height="450" viewBox="0 0 1000 450" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#1a1a18" />
+                            </marker>
+                        </defs>
+                        <rect x="50" y="50" width="900" height="350" fill="transparent" stroke="#d3d1c7" stroke-width="2" rx="20" />
+                        <text x="80" y="90" font-family="Inter, sans-serif" font-weight="800" font-size="24px" fill="#1a1a18">Storage Module Architecture</text>
+
+                        <!-- Caller -->
+                        <rect x="100" y="160" width="220" height="70" fill="#e6f1fb" stroke="#185fa5" stroke-width="2" rx="16" />
+                        <text x="210" y="195" font-family="Inter, sans-serif" font-weight="700" font-size="18px" fill="#1a1a18" text-anchor="middle">Other Services</text>
+                        <text x="210" y="215" font-family="Inter, sans-serif" font-size="14px" fill="#5f5e5a" text-anchor="middle">(e.g. AudioService)</text>
+
+                        <!-- Interface -->
+                        <rect x="420" y="110" width="240" height="70" fill="#ffffff" stroke="#d3d1c7" stroke-width="2" stroke-dasharray="6 6" rx="16" />
+                        <text x="540" y="150" font-family="Inter, sans-serif" font-weight="700" font-size="18px" fill="#1a1a18" text-anchor="middle">IStorageProvider</text>
+
+                        <!-- StorageService -->
+                        <rect x="420" y="220" width="240" height="70" fill="#e1f5ee" stroke="#0f6e56" stroke-width="2" rx="16" />
+                        <text x="540" y="260" font-family="Inter, sans-serif" font-weight="700" font-size="18px" fill="#1a1a18" text-anchor="middle">StorageService</text>
+
+                        <!-- StorageCleanupService -->
+                        <rect x="420" y="320" width="240" height="70" fill="#e1f5ee" stroke="#0f6e56" stroke-width="2" rx="16" />
+                        <text x="540" y="360" font-family="Inter, sans-serif" font-weight="700" font-size="18px" fill="#1a1a18" text-anchor="middle">StorageCleanupService</text>
+
+                        <!-- Supabase -->
+                        <rect x="760" y="220" width="160" height="70" fill="#faeeda" stroke="#854f0b" stroke-width="2" rx="16" />
+                        <text x="840" y="255" font-family="Inter, sans-serif" font-weight="700" font-size="18px" fill="#1a1a18" text-anchor="middle">Supabase</text>
+                        <text x="840" y="275" font-family="Inter, sans-serif" font-size="14px" fill="#5f5e5a" text-anchor="middle">(Storage)</text>
+
+                        <!-- Arrows -->
+                        <path d="M320,195 L370,195 L370,145 L420,145" stroke="#334155" stroke-width="2.5" fill="none" marker-end="url(#arrow)" />
+                        <path d="M420,255 L390,255 L390,145 L420,145" stroke="#64748b" stroke-width="2" fill="none" stroke-dasharray="5 5" />
+                        <text x="385" y="200" font-family="Inter, sans-serif" font-size="14px" fill="#5f5e5a" transform="rotate(-90 385 200)">implements</text>
+
+                        <path d="M660,255 L760,255" stroke="#334155" stroke-width="2.5" fill="none" marker-end="url(#arrow)" />
+                        
+                        <path d="M540,320 L540,290" stroke="#334155" stroke-width="2.5" fill="none" marker-end="url(#arrow)" />
+                        <text x="550" y="310" font-family="Inter, sans-serif" font-size="14px" fill="#5f5e5a">injects</text>
+                    </svg>
+                </div>
+
+                <h3>Tại sao tách các layer?</h3>
+                <ul>
+                    <li><strong>Dependency Inversion:</strong> Bằng cách định nghĩa <code>IStorageProvider</code> và dùng custom provider (<code>useExisting: StorageService</code>), các module khác chỉ phụ thuộc vào Interface chứ không phụ thuộc trực tiếp vào <code>StorageService</code> hay Supabase. Nếu sau này hệ thống muốn đổi sang AWS S3 hoặc MinIO, chỉ cần tạo <code>S3StorageService</code> implement <code>IStorageProvider</code> và thay đổi ở <code>StorageModule</code> mà không ảnh hưởng tới bất kỳ chỗ nào khác.</li>
+                    <li><strong>Tách biệt logic dọn dẹp:</strong> <code>StorageCleanupService</code> được tách riêng để xử lý các logic cleanup (có thể mở rộng thêm retry, cronjob dọn file rác) thay vì nhồi nhét vào <code>StorageService</code>.</li>
+                </ul>
+
+                <h2>2. Các Dependencies (Dependencies Injection)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dependency</th>
+                            <th>Vai trò</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>ConfigService</code></td>
+                            <td>Truy xuất các biến môi trường cấu hình liên quan đến Supabase (<code>SUPABASE_URL</code>, <code>SUPABASE_KEY</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><code>PinoLogger</code> (nestjs-pino)</td>
+                            <td>Dùng để ghi log quá trình khởi tạo, upload, và xóa file chuẩn cấu trúc.</td>
+                        </tr>
+                        <tr>
+                            <td><code>IStorageProvider</code></td>
+                            <td>Interface chuẩn hóa cho Storage Provider giúp loose coupling, trong module này được implement bởi <code>StorageService</code>.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>3. Phân tích chi tiết Module &amp; Service</h2>
+                
+                <h3>3.1. StorageModule (<code>storage.module.ts</code>)</h3>
+                <ul>
+                    <li>Đăng ký <code>StorageService</code> và <code>StorageCleanupService</code>.</li>
+                    <li>Định nghĩa custom provider <code>{ provide: 'IStorageProvider', useExisting: StorageService }</code> để tiêm <code>StorageService</code> cho bất kỳ module nào cần <code>IStorageProvider</code>.</li>
+                    <li>Export <code>IStorageProvider</code>, <code>StorageCleanupService</code>, và <code>StorageService</code> ra ngoài để các module khác sử dụng.</li>
+                </ul>
+
+                <h3>3.2. StorageService (<code>storage.service.ts</code>)</h3>
+                <p>Implement interface <code>IStorageProvider</code>.</p>
+                <h4>Các Private Methods:</h4>
+                <ul>
+                    <li><strong><code>initializeSupabase()</code></strong>: Được gọi trong constructor. Đọc <code>SUPABASE_URL</code> và <code>SUPABASE_KEY</code> từ <code>ConfigService</code>. Kiểm tra tính hợp lệ của URL bằng <code>isValidUrl()</code>. Nếu không hợp lệ hoặc thiếu key, sẽ ghi log error. Cuối cùng, khởi tạo <code>SupabaseClient</code>.</li>
+                    <li><strong><code>isValidUrl(url: string)</code></strong>: Kiểm tra chuỗi có phải là URL <code>http</code> hoặc <code>https</code> hợp lệ hay không bằng cách parse qua class <code>URL</code> của Node.js.</li>
+                </ul>
+                <h4>Các Public Methods:</h4>
+                <ul>
+                    <li><strong><code>upload(filePath, bucketName, destinationPath)</code></strong>: Đọc file từ local disk (<code>fs.promises.readFile</code>) và gọi Supabase Client <code>upload</code> vào <code>bucketName</code>. Mặc định contentType <code>audio/mpeg</code>, <code>upsert: true</code>. Trả về đường dẫn của file (path). Ném <code>InternalServerErrorException</code> nếu lỗi.</li>
+                    <li><strong><code>uploadBuffer(buffer, bucketName, destinationPath, contentType)</code></strong>: Tương tự <code>upload</code> nhưng nhận dữ liệu đầu vào là <code>Buffer</code> và hỗ trợ truyền <code>contentType</code>.</li>
+                    <li><strong><code>uploadStream(stream, bucketName, destinationPath, contentType)</code></strong>: Tương tự nhưng nhận đầu vào là một <code>stream</code>.</li>
+                    <li><strong><code>getPublicUrl(bucketName, path)</code></strong>: Gọi Supabase Client <code>getPublicUrl</code> để lấy URL công khai của file.</li>
+                    <li><strong><code>delete(bucketName, path)</code></strong>: Gọi Supabase Client <code>remove</code> để xóa file khỏi <code>bucketName</code>.</li>
+                </ul>
+
+                <h3>3.3. StorageCleanupService (<code>storage-cleanup.service.ts</code>)</h3>
+                <h4>Các Public Methods:</h4>
+                <ul>
+                    <li><strong><code>cleanupFile(bucketName: string, path: string)</code></strong>: Ghi log sự kiện dọn dẹp và gọi hàm <code>delete</code> của <code>IStorageProvider</code> (được inject thông qua custom provider) để thực hiện xóa file.</li>
+                </ul>
+
+                <h2>4. System Data Flow</h2>
+                <div class="svg-container">
+                    <svg width="100%" height="400" viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#334155" />
+                            </marker>
+                        </defs>
+                        <rect x="50" y="50" width="900" height="300" fill="transparent" stroke="#d3d1c7" stroke-width="2" rx="20" />
+                        <text x="80" y="90" font-family="Inter, sans-serif" font-weight="800" font-size="24px" fill="#1a1a18">System Data Flow: Upload &amp; Cleanup</text>
+
+                        <!-- Actors/Components -->
+                        <rect x="80" y="140" width="160" height="60" fill="#e6f1fb" stroke="#185fa5" stroke-width="2" rx="16" />
+                        <text x="160" y="175" font-family="Inter, sans-serif" font-weight="700" font-size="16px" fill="#1a1a18" text-anchor="middle">Caller / Cron</text>
+
+                        <rect x="420" y="140" width="200" height="60" fill="#e1f5ee" stroke="#0f6e56" stroke-width="2" rx="16" />
+                        <text x="520" y="175" font-family="Inter, sans-serif" font-weight="700" font-size="16px" fill="#1a1a18" text-anchor="middle">StorageService</text>
+
+                        <rect x="420" y="250" width="200" height="60" fill="#e1f5ee" stroke="#0f6e56" stroke-width="2" rx="16" />
+                        <text x="520" y="285" font-family="Inter, sans-serif" font-weight="700" font-size="16px" fill="#1a1a18" text-anchor="middle">StorageCleanupService</text>
+
+                        <rect x="760" y="140" width="160" height="60" fill="#faeeda" stroke="#854f0b" stroke-width="2" rx="16" />
+                        <text x="840" y="175" font-family="Inter, sans-serif" font-weight="700" font-size="16px" fill="#1a1a18" text-anchor="middle">Supabase Storage</text>
+
+                        <rect x="760" y="250" width="160" height="60" fill="#faeeda" stroke="#854f0b" stroke-width="2" rx="16" />
+                        <text x="840" y="285" font-family="Inter, sans-serif" font-weight="700" font-size="16px" fill="#1a1a18" text-anchor="middle">Supabase Storage</text>
+                        <text x="840" y="300" font-family="Inter, sans-serif" font-size="13px" fill="#5f5e5a" text-anchor="middle">(Remove API)</text>
+
+                        <!-- Upload Flow -->
+                        <path d="M240,170 L420,170" stroke="#185fa5" stroke-width="2.5" fill="none" marker-end="url(#arrow2)" />
+                        <text x="330" y="160" font-family="Inter, sans-serif" font-size="14px" font-weight="600" fill="#185fa5" text-anchor="middle">1. upload()</text>
+
+                        <path d="M620,170 L760,170" stroke="#0f6e56" stroke-width="2.5" fill="none" marker-end="url(#arrow2)" />
+                        <text x="690" y="160" font-family="Inter, sans-serif" font-size="14px" font-weight="600" fill="#0f6e56" text-anchor="middle">2. upload()</text>
+
+                        <!-- Cleanup Flow -->
+                        <path d="M160,200 L160,280 L420,280" stroke="#185fa5" stroke-width="2.5" fill="none" marker-end="url(#arrow2)" />
+                        <text x="290" y="270" font-family="Inter, sans-serif" font-size="14px" font-weight="600" fill="#185fa5" text-anchor="middle">3. cleanupFile()</text>
+
+                        <path d="M620,280 L760,280" stroke="#0f6e56" stroke-width="2.5" fill="none" marker-end="url(#arrow2)" />
+                        <text x="690" y="270" font-family="Inter, sans-serif" font-size="14px" font-weight="600" fill="#0f6e56" text-anchor="middle">4. remove()</text>
+
+                        <!-- Internal call -->
+                        <path d="M520,250 L520,200" stroke="#0f6e56" stroke-width="2.5" fill="none" stroke-dasharray="5 5" marker-end="url(#arrow2)" />
+                        <text x="530" y="230" font-family="Inter, sans-serif" font-size="13px" fill="#0f6e56">calls delete()</text>
+                    </svg>
+                </div>
+
+                <ul>
+                    <li><strong>1. Khởi tạo StorageService:</strong> System khởi động &rarr; <code>StorageService.constructor()</code> &rarr; <code>initializeSupabase()</code> &rarr; Lấy URL/Key từ <code>ConfigService</code> &rarr; <code>createClient()</code>.</li>
+                    <li><strong>2. Upload file từ Disk (hoặc Buffer/Stream):</strong> Caller &rarr; <code>StorageService.upload()</code> &rarr; Check tồn tại (nếu là path) &rarr; <code>supabase.storage.upload()</code> &rarr; Trả về đường dẫn.</li>
+                    <li><strong>3. Lấy Public URL:</strong> Caller &rarr; <code>StorageService.getPublicUrl()</code> &rarr; <code>supabase.storage.getPublicUrl()</code> &rarr; Trả về publicUrl.</li>
+                    <li><strong>4. Xóa/Cleanup File:</strong> Caller &rarr; <code>StorageCleanupService.cleanupFile()</code> &rarr; <code>IStorageProvider.delete()</code> &rarr; <code>supabase.storage.remove()</code> &rarr; DB/S3 Supabase xóa file.</li>
+                </ul>
+
+                <h2>5. Đánh giá — Đã tốt chưa?</h2>
+                
+                <h3>✅ Đã làm tốt</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Điểm tốt</th>
+                            <th>Lý do</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Áp dụng Dependency Inversion (DI)</td>
+                            <td>Cung cấp custom provider cho <code>IStorageProvider</code> giúp hệ thống linh hoạt và dễ mock khi viết Unit Test.</td>
+                        </tr>
+                        <tr>
+                            <td>Xử lý đa dạng input</td>
+                            <td>Hỗ trợ upload từ local path, memory buffer, hoặc network stream, phù hợp với nhiều use case khác nhau.</td>
+                        </tr>
+                        <tr>
+                            <td>Error Handling &amp; Logging</td>
+                            <td>Chuyển đổi lỗi của SDK Supabase thành HttpException chuẩn của NestJS (<code>InternalServerErrorException</code>) kèm theo logging đầy đủ qua Pino.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>❌ Chưa tốt / Cần cải thiện</h3>
+                <div class="method-section">
+                    <div class="method-signature">1. Hardcode Content-Type mặc định</div>
+                    <p><strong>Vấn đề:</strong> Hiện tại <code>upload()</code> fix cứng <code>contentType: 'audio/mpeg'</code>.</p>
+                    <p><strong>Giải pháp:</strong> File có thể là hình ảnh (image/png) hoặc định dạng khác, không nên fix cứng. Nên nhận định dạng từ tham số hoặc đoán qua extension file.</p>
+                </div>
+
+                <div class="method-section">
+                    <div class="method-signature">2. Khởi tạo Supabase Client với URL giả mạo khi thiếu Config</div>
+                    <p><strong>Vấn đề:</strong> Khởi tạo với <code>'https://placeholder.supabase.co'</code> nếu cấu hình bị thiếu.</p>
+                    <p><strong>Giải pháp:</strong> Nếu server chạy thiếu config, nó sẽ im lặng sử dụng URL giả và nổ lỗi lúc runtime. Nên ném Error ngay lập tức lúc khởi động app (trong constructor) để DevOps biết cấu hình sai.</p>
+                </div>
+
+                <h2>6. API Design Review</h2>
+                <p><em>(Module này không expose HTTP API trực tiếp, chỉ expose Service Methods cho internal use)</em></p>
+                <p>Các hàm upload trả về string (path) là thiết kế tốt, giúp caller có thể lưu path đó vào DB và sau này dùng hàm <code>getPublicUrl</code> để phân phối URL cho Client thay vì lưu Hardcode URL trong DB.</p>
+
+                <h2>7. Cách Debug khi gặp lỗi</h2>
+                <h3>Lỗi 500 InternalServerErrorException khi Upload/Delete</h3>
+                <pre><code>Checklist:
+1. Kiểm tra lại thông tin SUPABASE_URL và SUPABASE_KEY trong file .env.
+2. Kiểm tra bucketName truyền vào có tồn tại và đúng chính tả trên Supabase Dashboard chưa.
+3. Kiểm tra Policy (RLS - Row Level Security) của Storage Bucket trên Supabase đã cho phép quyền INSERT/DELETE chưa.
+
+Command debug:
+&rarr; Xem log của Pino trên server để lấy message lỗi nguyên bản từ phía Supabase API.</code></pre>
+
+                <h2>8. Các Pattern quan trọng trong module này</h2>
+                <h3>Pattern 1: Interface-based Provider (Dependency Inversion)</h3>
+                <pre><code>// Tại sao dùng pattern này?
+// &rarr; Giúp dễ thay thế (ví dụ chuyển sang AWS S3) và mock trong lúc viết unit test.
+@Module({
+  providers: [
+    StorageService,
+    {
+      provide: 'IStorageProvider',
+      useExisting: StorageService,
+    },
+  ],
+})
+
+// Khi Service khác dùng, chỉ cần inject interface:
+constructor(@Inject('IStorageProvider') private readonly storage: IStorageProvider) {}</code></pre>
+
+                <h2>9. Biến môi trường cần thiết</h2>
+                <pre><code>SUPABASE_URL=          # Base URL của project Supabase (vd: https://xyz.supabase.co)
+SUPABASE_KEY=          # Service Role Key hoặc Anon Key của Supabase dùng để xác thực quyền truy cập Storage</code></pre>
+
+                <h2>10. Khi AI agent làm việc với module này</h2>
+                <ul>
+                    <li><strong>Trước khi thêm feature mới:</strong> Bất kỳ tính năng giao tiếp nào với Storage Service ngoại vi (S3, Cloudinary...) nên tuân theo interface <code>IStorageProvider</code>. Thêm phương thức mới vào interface trước, sau đó mới implement vào <code>StorageService</code>. Nếu cập nhật Interface, đảm bảo cập nhật đầy đủ file Mock và Service thực tế.</li>
+                    <li><strong>Khi sửa phần nhạy cảm của module:</strong> Luôn sử dụng try-catch và convert lỗi thành các <code>HttpException</code> thay vì để lỗi gốc của các SDK gây crash luồng. Không xóa/sửa tham số <code>upsert: true</code> trong các method upload trừ khi hiểu rất rõ.</li>
+                    <li><strong>Khi debug:</strong> Truy xuất log của file <code>storage.service.ts</code> để kiểm tra các tham số <code>bucketName</code> và <code>destinationPath</code> trước khi tiến hành check trên dashboard của Supabase.</li>
+                </ul>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.scrollToSection = function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.classList.remove('section-highlight');
+            void el.offsetWidth;
+            el.classList.add('section-highlight');
+            
+            document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+            const active = document.querySelector(`#toc a[data-target="${id}"]`);
+            if (active) {
+                active.classList.add('active');
+                active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        };
+
+        (function buildTOC() {
+            const main = document.getElementById('main-content');
+            const toc = document.getElementById('toc');
+            const headings = main.querySelectorAll('h2, h3, h4');
+            const ul = document.createElement('ul');
+            headings.forEach((h, i) => {
+                if (!h.id) h.id = 'h-' + i;
+                const li = document.createElement('li');
+                li.className = 'toc-' + h.tagName.toLowerCase();
+                const a = document.createElement('a');
+                a.href = '#' + h.id;
+                a.textContent = h.textContent.replace(/^[▶✅❌⚠️ℹ️📄⚙️🌐🗄️]+\s*/, '');
+                a.dataset.target = h.id;
+                a.onclick = (e) => { e.preventDefault(); scrollToSection(h.id); };
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+            toc.appendChild(ul);
+        })();
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+                    const active = document.querySelector(`#toc a[data-target="${entry.target.id}"]`);
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+        document.querySelectorAll('h2, h3, h4').forEach(h => observer.observe(h));
+    </script>
+</body>
+</html>

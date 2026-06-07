@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>messages — Technical Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#060d1b; --surf:#0d1829; --surf2:#111f34; --bdr:#1a2d45;
+  --txt:#c8d6e5; --dim:#6b8199; --bright:#e8f4ff;
+  --acc:#00c8f0; --accg:#00c8f012;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(#1a2d45 1px,transparent 1px);background-size:28px 28px;opacity:.28;pointer-events:none;z-index:0}
+
+/* ─── SIDEBAR ─────────────────────────────────── */
+.sb{width:228px;min-width:228px;height:100vh;position:sticky;top:0;background:rgba(6,11,24,.92);backdrop-filter:blur(14px);border-right:1px solid var(--bdr);overflow-y:auto;z-index:50;display:flex;flex-direction:column}
+.sb-top{padding:18px 16px 12px;border-bottom:1px solid var(--bdr)}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:4px}
+.sb-title{font-size:13px;font-weight:700;color:var(--bright)}
+.sb-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.sb-sec{padding:8px 0}
+.sb-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:7px 16px 3px}
+.sbl{display:flex;align-items:center;gap:8px;padding:6px 16px;font-size:12px;color:var(--dim);cursor:pointer;border-left:2px solid transparent;transition:all .14s;text-decoration:none}
+.sbl:hover, .sbl.active{color:var(--bright);border-left-color:var(--acc);background:var(--accg)}
+
+/* ─── MAIN ─────────────────────────────────────── */
+.main{flex:1;overflow-x:hidden;position:relative;z-index:1;max-width:calc(100vw - 228px); padding: 40px;}
+
+/* MARKDOWN STYLES */
+.md-content h1 { font-size: 28px; color: var(--bright); margin-bottom: 20px; border-bottom: 1px solid var(--bdr); padding-bottom: 10px; }
+.md-content h2 { font-size: 20px; color: var(--bright); margin-top: 30px; margin-bottom: 15px; }
+.md-content h3 { font-size: 16px; color: var(--acc); margin-top: 20px; margin-bottom: 10px; }
+.md-content p { margin-bottom: 15px; line-height: 1.6; font-size: 14px; }
+.md-content ul, .md-content ol { margin-bottom: 15px; padding-left: 20px; font-size: 14px; line-height: 1.6; }
+.md-content li { margin-bottom: 5px; }
+.md-content pre { background: #040a12; border: 1px solid var(--bdr); border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow-x: auto; margin-bottom: 15px; color: #abb2bf; }
+.md-content code { font-family: 'JetBrains Mono', monospace; background: var(--surf2); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+.md-content table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+.md-content th { background: var(--surf2); padding: 10px; text-align: left; border-bottom: 1px solid var(--bdr); color: var(--dim); font-family: 'JetBrains Mono', monospace; }
+.md-content td { padding: 10px; border-bottom: 1px solid var(--bdr); }
+.md-content blockquote { border-left: 3px solid var(--acc); color: var(--dim); margin-bottom: 15px; background: var(--surf); padding: 10px 15px; border-radius: 4px; }
+.md-content strong { color: var(--bright); }
+.md-content hr { border: 0; height: 1px; background: var(--bdr); margin: 30px 0; }
+
+@media(max-width:960px){
+  .sb{display:none}
+  .main{max-width:100vw; padding: 20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-top">
+    <div class="sb-tag">NestJS Docs</div>
+    <div class="sb-title">MESSAGES Module</div>
+    <div class="sb-sub">Technical Documentation</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Navigation</div>
+    <a class="sbl" href="#">Overview</a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="md-content">
+    <h1>Messages Module Documentation</h1>
+<h2>1. Tổng quan Kiến trúc (Component Overview)</h2>
+<p>Module <code>Messages</code> chịu trách nhiệm quản lý hệ thống tin nhắn (chat) và lời mời kết bạn (friend requests). Nó cung cấp các tính năng: gửi tin nhắn trực tiếp giữa hai người dùng, lấy lịch sử trò chuyện (hội thoại 2 chiều), tạo đường dẫn/lời mời kết bạn (có thời hạn 24 giờ), xem chi tiết thông tin lời mời và chấp nhận lời mời thông qua token.</p>
+<h2>2. Các Dependencies (Dependencies Injection)</h2>
+<ul>
+<li><strong><code>PrismaModule</code></strong>: Được import vào <code>MessagesModule</code> để khởi tạo <code>PrismaService</code> phục vụ cho quá trình tương tác cơ sở dữ liệu.</li>
+<li><strong><code>MessagesService</code></strong>: Xử lý logic nghiệp vụ liên quan tới tin nhắn giữa các người dùng.</li>
+<li><strong><code>FriendRequestService</code></strong>: Xử lý logic nghiệp vụ liên quan tới luồng mời kết bạn (sinh token, kiểm tra thời hạn và trạng thái).</li>
+<li><strong><code>MessageRepository</code></strong>: Đóng gói các truy vấn cơ sở dữ liệu liên quan đến entity <code>Message</code>.</li>
+<li><strong><code>FriendRequestRepository</code></strong>: Đóng gói các truy vấn cơ sở dữ liệu liên quan đến entity <code>FriendRequest</code>.</li>
+</ul>
+<h2>3. Phân tích chi tiết Controller, Service, Guard, v.v.</h2>
+<h3>3.1. MessagesController (<code>messages.controller.ts</code>)</h3>
+<p>Các Decorators:</p>
+<ul>
+<li><code>@ApiTags(&#39;messages&#39;)</code>, <code>@Controller(&#39;messages&#39;)</code>: Gắn Swagger tag và prefix route HTTP là <code>/messages</code>.</li>
+<li><code>@ApiBearerAuth()</code>: Chỉ định trên Swagger yêu cầu đính kèm token Bearer.</li>
+<li><code>@UseGuards(JwtAuthGuard)</code>: Middleware bảo vệ endpoints, bắt buộc phải có JWT Token hợp lệ để truy cập.</li>
+<li><code>@UseInterceptors(ClassSerializerInterceptor)</code>: Tự động tuần tự hóa và loại bỏ các trường nhạy cảm dựa trên khai báo của DTO trước khi trả response.</li>
+<li><code>@Post()</code>, <code>@Get(&#39;:userId&#39;)</code>: Khai báo HTTP method và route param.</li>
+<li><code>@ApiOperation</code>, <code>@ApiResponse</code>: Sinh tài liệu Swagger API chi tiết.</li>
+</ul>
+<p><strong>Các endpoint (Public Methods):</strong></p>
+<ul>
+<li><strong><code>create(user, createMessageDto: CreateMessageDto)</code></strong>: Nhận data từ body (content, receiverId) và id từ người dùng hiện tại -&gt; gọi <code>MessagesService.create()</code>. Trả về tin nhắn đã tạo dưới dạng <code>MessageResponseDto</code>.</li>
+<li><strong><code>findAllByConversation(user, otherUserId: string)</code></strong>: Lấy ID người thứ hai từ Param và ID của bản thân từ token -&gt; gọi <code>MessagesService.findAllByConversation()</code>. Trả về lịch sử tin nhắn dạng <code>[MessageResponseDto]</code>.</li>
+</ul>
+<h3>3.2. MessagesService (<code>messages.service.ts</code>)</h3>
+<h4>Các Public Methods:</h4>
+<ul>
+<li><strong><code>create(senderId: string, createMessageDto: CreateMessageDto)</code></strong>:<ul>
+<li>Tham số: <code>senderId</code>, <code>createMessageDto</code> (gồm content và receiverId).</li>
+<li>Logic: Sử dụng <code>messageRepository.create()</code> để lưu tin nhắn mới vào database. Sử dụng cú pháp <code>connect</code> của Prisma để nối ID cho cả sender và receiver.</li>
+<li>Return: Trả về đối tượng <code>Message</code> nguyên bản vừa tạo.</li>
+</ul>
+</li>
+<li><strong><code>findAllByConversation(userId1: string, userId2: string)</code></strong>:<ul>
+<li>Tham số: <code>userId1</code>, <code>userId2</code>.</li>
+<li>Logic: Gọi <code>messageRepository.findConversation()</code> để truy xuất toàn bộ cuộc hội thoại.</li>
+<li>Return: Danh sách đối tượng <code>Message</code>.</li>
+</ul>
+</li>
+</ul>
+<h3>3.3. MessageRepository (<code>message.repository.ts</code>)</h3>
+<p>Các hàm Public:</p>
+<ul>
+<li>Kế thừa <code>BaseRepository</code> của Prisma.</li>
+<li><strong><code>findConversation(userId1: string, userId2: string)</code></strong>: Truy vấn <code>.findMany()</code>. Tìm kiếm bằng điều kiện <code>OR</code>: (<code>senderId = userId1</code> VÀ <code>receiverId = userId2</code>) HOẶC (<code>senderId = userId2</code> VÀ <code>receiverId = userId1</code>), đồng thời sắp xếp tin nhắn theo thời gian tăng dần (<code>orderBy: { createdAt: &#39;asc&#39; }</code>).</li>
+</ul>
+<h3>3.4. FriendRequestsController (<code>friend-requests.controller.ts</code>)</h3>
+<p>Các Decorators:</p>
+<ul>
+<li><code>@ApiTags(&#39;friend-requests&#39;)</code>, <code>@Controller(&#39;friend-requests&#39;)</code>: Gắn Swagger tag và prefix <code>/friend-requests</code>.</li>
+<li><code>@UseGuards(JwtAuthGuard)</code>, <code>@ApiBearerAuth()</code>: Áp dụng cho các endpoint tạo lời mời và chấp nhận lời mời.</li>
+<li><code>@ApiOperation()</code>: Mô tả API.</li>
+</ul>
+<p><strong>Các endpoint (Public Methods):</strong></p>
+<ul>
+<li><strong><code>createInvite(req, dto: CreateFriendRequestDto)</code></strong>: Yêu cầu xác thực. Nhận <code>receiverId</code> (optional) từ body -&gt; gọi <code>FriendRequestService.createInvite()</code>.</li>
+<li><strong><code>getInviteInfo(token: string)</code></strong>: Public API (không có Guard). Lấy thông tin lời mời kết bạn từ <code>token</code> -&gt; gọi <code>FriendRequestService.getInviteInfo()</code>.</li>
+<li><strong><code>acceptInvite(req, token: string)</code></strong>: Yêu cầu xác thực. Chấp nhận lời mời dựa trên <code>token</code> và ID người dùng đăng nhập -&gt; gọi <code>FriendRequestService.acceptInvite()</code>.</li>
+</ul>
+<h3>3.5. FriendRequestService (<code>friend-request.service.ts</code>)</h3>
+<h4>Các Public Methods:</h4>
+<ul>
+<li><strong><code>createInvite(senderId: string, dto: CreateFriendRequestDto)</code></strong>:<ul>
+<li>Tham số: <code>senderId</code>, <code>dto</code>.</li>
+<li>Logic: Tính toán thời điểm hết hạn (<code>expiresAt</code>) bằng cách cộng 24 giờ vào thời gian hiện tại. Sinh token dạng UUID v4. Cuối cùng, gọi repository để tạo lời mời mới.</li>
+<li>Return: Đối tượng <code>FriendRequest</code> mới.</li>
+</ul>
+</li>
+<li><strong><code>getInviteInfo(token: string)</code></strong>:<ul>
+<li>Tham số: <code>token</code>.</li>
+<li>Logic: Lấy lời mời từ repository (<code>findByToken</code>). Nếu không có: ném <code>NotFoundException</code>. Nếu <code>status !== PENDING</code>: ném <code>BadRequestException</code>. Nếu thời gian hiện tại lớn hơn <code>expiresAt</code>: cập nhật trạng thái ở CSDL thành <code>EXPIRED</code> và ném <code>BadRequestException</code>.</li>
+<li>Return: Trả về thông tin lời mời nếu hợp lệ và còn hạn.</li>
+</ul>
+</li>
+<li><strong><code>acceptInvite(token: string, receiverId: string)</code></strong>:<ul>
+<li>Tham số: <code>token</code>, <code>receiverId</code>.</li>
+<li>Logic: Đầu tiên, gọi <code>getInviteInfo(token)</code> để xác minh token hợp lệ. Kế tiếp kiểm tra xem <code>senderId</code> có trùng với <code>receiverId</code> không (tự mời bản thân), nếu có ném <code>BadRequestException</code>. Cuối cùng, gọi repository cập nhật <code>status = ACCEPTED</code> và điền <code>receiverId</code>.</li>
+<li>Return: Đối tượng lời mời đã cập nhật.</li>
+</ul>
+</li>
+<li><strong><code>checkConnection(userId1: string, userId2: string)</code></strong>:<ul>
+<li>Tham số: <code>userId1</code>, <code>userId2</code>.</li>
+<li>Logic: Tìm một <code>FriendRequest</code> giữa hai user đã mang trạng thái <code>ACCEPTED</code>.</li>
+<li>Return: Giá trị <code>boolean</code> xác nhận hai người là bạn bè.</li>
+</ul>
+</li>
+</ul>
+<h3>3.6. FriendRequestRepository (<code>friend-request.repository.ts</code>)</h3>
+<p>Các hàm Public:</p>
+<ul>
+<li>Kế thừa <code>BaseRepository</code>.</li>
+<li><strong><code>findByToken(token: string)</code></strong>: Query <code>findUnique</code> theo token, bổ sung quan hệ <code>include</code> để truy xuất một số trường cơ bản của người gửi (<code>id</code>, <code>name</code>, <code>email</code>).</li>
+<li><strong><code>findPendingRequest(senderId: string, receiverId: string)</code></strong>: Tìm lời mời giữa hai người đang mang trạng thái <code>PENDING</code>.</li>
+</ul>
+<h3>3.7. DTOs</h3>
+<ul>
+<li><strong><code>CreateMessageDto</code></strong>: Yêu cầu <code>content</code> (chuỗi) và <code>receiverId</code> (chuỗi UUID).</li>
+<li><strong><code>MessageResponseDto</code></strong>: Cấu trúc trả về tin nhắn gồm: id, content, senderId, receiverId, createdAt.</li>
+<li><strong><code>CreateFriendRequestDto</code></strong>: Cho phép <code>receiverId</code> là optional UUID.</li>
+<li><strong><code>FriendRequestResponseDto</code></strong>: Cấu trúc trả về lời mời: id, token, senderId, receiverId, status, expiresAt, createdAt.</li>
+</ul>
+<hr>
+<h2>4. System Data Flow</h2>
+<p><strong>1. POST <code>/messages</code> (create)</strong></p>
+<ul>
+<li>Flow: Client -&gt; <code>JwtAuthGuard</code> (xác thực token) -&gt; <code>ClassSerializerInterceptor</code> -&gt; Controller (<code>create()</code>) -&gt; Service (<code>create()</code>) -&gt; Repository (<code>create()</code>) -&gt; Database (Lưu tin nhắn mới) -&gt; Service -&gt; Controller (<code>plainToInstance</code> mapping ra <code>MessageResponseDto</code>) -&gt; Client.</li>
+</ul>
+<p><strong>2. GET <code>/messages/:userId</code> (findAllByConversation)</strong></p>
+<ul>
+<li>Flow: Client -&gt; <code>JwtAuthGuard</code> -&gt; <code>ClassSerializerInterceptor</code> -&gt; Controller (<code>findAllByConversation()</code>) -&gt; Service (<code>findAllByConversation()</code>) -&gt; Repository (<code>findConversation()</code>) -&gt; Database (Truy vấn theo OR và sắp xếp asc) -&gt; Service -&gt; Controller (<code>plainToInstance</code>) -&gt; Client.</li>
+</ul>
+<p><strong>3. POST <code>/friend-requests/invite</code> (createInvite)</strong></p>
+<ul>
+<li>Flow: Client -&gt; <code>JwtAuthGuard</code> -&gt; Controller (<code>createInvite()</code>) -&gt; Service (<code>createInvite()</code>) -&gt; Service (Sinh UUID cho <code>token</code> &amp; set <code>expiresAt</code> là +24h) -&gt; Repository (<code>create()</code>) -&gt; Database (Lưu lời mời mới) -&gt; Service -&gt; Controller -&gt; Client.</li>
+</ul>
+<p><strong>4. GET <code>/friend-requests/info/:token</code> (getInviteInfo)</strong></p>
+<ul>
+<li>Flow: Client -&gt; Controller (<code>getInviteInfo()</code>) -&gt; Service (<code>getInviteInfo()</code>) -&gt; Repository (<code>findByToken()</code>) -&gt; Database (Tìm thông tin kèm relation sender) -&gt; Service (Verify trạng thái PENDING. Nếu quá hạn <code>expiresAt</code> -&gt; Repository update thành EXPIRED) -&gt; Database -&gt; Service -&gt; Controller -&gt; Client.</li>
+</ul>
+<p><strong>5. POST <code>/friend-requests/accept/:token</code> (acceptInvite)</strong></p>
+<ul>
+<li>Flow: Client -&gt; <code>JwtAuthGuard</code> -&gt; Controller (<code>acceptInvite()</code>) -&gt; Service (<code>acceptInvite()</code>) -&gt; Service (<code>getInviteInfo()</code> để xác thực lại token) -&gt; Repository (<code>findByToken()</code>) -&gt; Database -&gt; Service (Check điều kiện tự accept bản thân) -&gt; Repository (<code>update()</code> sang trạng thái ACCEPTED) -&gt; Database (Lưu trạng thái mới) -&gt; Service -&gt; Controller -&gt; Client.</li>
+</ul>
+<hr>
+<hr>
+<h1>Messages Module — AI Coding Skill Context</h1>
+<blockquote>
+<p>File này dùng làm context cho AI coding agent khi làm việc với Messages Module.</p>
+</blockquote>
+<hr>
+<h2>1. Kiến trúc tổng thể — Tại sao tổ chức như vậy?</h2>
+<pre><code>HTTP Request
+    │
+    ▼
+MessagesController / FriendRequestsController  ← Chỉ nhận/trả HTTP, định tuyến API và mapping dữ liệu
+    │
+    ▼
+JwtAuthGuard                                   ← Middleware bảo vệ endpoint, kiểm tra token xác thực
+    │
+    ▼
+MessagesService / FriendRequestService         ← Chứa toàn bộ business logic (hạn token 24h, validate logic)
+    │
+    ▼
+MessageRepository / FriendRequestRepository    ← Tầng Database Access: query phức tạp được đóng gói tại đây
+    │
+    ▼
+[Database PostgreSQL]                          ← Thông qua Prisma
+</code></pre>
+<p><strong>Tại sao tách các layer?</strong></p>
+<ul>
+<li><strong>Tách biệt mối quan tâm (Separation of Concerns):</strong> Controller chỉ lo liệu phần HTTP (param, body payload, guard). Service đảm nhận quy tắc nghiệp vụ phức tạp (ví dụ: tạo hạn 24 giờ, sinh mã token, kiểm tra không được tự kết bạn). Repository lo liệu cách giao tiếp với Prisma ORM, chẳng hạn viết query <code>OR</code> để lấy hội thoại hai chiều.</li>
+<li><strong>Khả năng Test &amp; Bảo trì (Testability):</strong> Việc tách logic CSDL xuống Repository giúp việc viết Unit Test cho Service dễ dàng thông qua mocking mà không phụ thuộc cứng vào Prisma.</li>
+</ul>
+<hr>
+<h2>2. Các Dependencies</h2>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Vai trò</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MessageRepository</code></td>
+<td>Tương tác trực tiếp với Database cho các truy vấn của thực thể <code>Message</code>.</td>
+</tr>
+<tr>
+<td><code>FriendRequestRepository</code></td>
+<td>Tương tác trực tiếp với Database cho thực thể <code>FriendRequest</code>.</td>
+</tr>
+<tr>
+<td><code>PrismaModule</code></td>
+<td>Khởi tạo và cung cấp đối tượng Prisma Client để Repository thực thi query.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. Entry Points — Đi đâu về đâu</h2>
+<h3>POST /messages</h3>
+<pre><code>Client gửi: { content, receiverId }
+    │
+    ▼ Controller.create()
+    │   → Lấy user id từ @CurrentUser() và DTO từ body, truyền cho Service.
+    │
+    ▼ Service.create()
+    │   1. Map dữ liệu vào format kết nối Prisma relations (connect: id).
+    │   2. Gọi MessageRepository.create() lưu tin nhắn.
+    │
+    ▼ Trả về: { id, content, senderId, receiverId, createdAt }
+
+Lỗi có thể xảy ra:
+- 401 Unauthorized → Token không hợp lệ.
+- 400 BadRequest → Lỗi DTO (vd: thiếu content hoặc receiverId không phải UUID hợp lệ).
+</code></pre>
+<h3>GET /messages/:userId</h3>
+<pre><code>Client gửi: param `userId` (ID của người muốn xem tin nhắn chung)
+    │
+    ▼ Controller.findAllByConversation()
+    │   → Nhận `userId` mục tiêu, và ID của chính user đăng nhập từ token.
+    │
+    ▼ Service.findAllByConversation()
+    │   1. Gọi MessageRepository.findConversation() truy vấn hội thoại 2 chiều.
+    │
+    ▼ Trả về: [ { id, content, senderId, receiverId, createdAt } ] (Mảng tin nhắn)
+
+Lỗi có thể xảy ra:
+- 401 Unauthorized → Token bị thiếu hoặc sai.
+</code></pre>
+<h3>POST /friend-requests/invite</h3>
+<pre><code>Client gửi: { receiverId? }
+    │
+    ▼ Controller.createInvite()
+    │   → Trích xuất ID user gửi lời mời.
+    │
+    ▼ Service.createInvite()
+    │   1. Đặt `expiresAt` là 24 giờ kể từ hiện tại.
+    │   2. Sinh chuỗi UUID ngẫu nhiên cho `token`.
+    │   3. Lưu bản ghi lời mời vào CSDL qua Repository.
+    │
+    ▼ Trả về: { id, token, senderId, receiverId, status, expiresAt, createdAt }
+
+Lỗi có thể xảy ra:
+- 401 Unauthorized → Lỗi token người dùng.
+</code></pre>
+<h3>GET /friend-requests/info/:token</h3>
+<pre><code>Client gửi: param `token`
+    │
+    ▼ Controller.getInviteInfo()
+    │
+    ▼ Service.getInviteInfo()
+    │   1. Tìm bản ghi chứa token. Nếu null → 404 NotFound.
+    │   2. Kiểm tra `status !== PENDING` → 400 BadRequest.
+    │   3. Kiểm tra quá hạn `expiresAt`. Nếu hết hạn, cập nhật trạng thái `EXPIRED` vào CSDL và ném lỗi 400.
+    │
+    ▼ Trả về: Cấu trúc chi tiết của lời mời kèm relation `sender` (id, name, email).
+
+Lỗi có thể xảy ra:
+- 404 NotFoundException → Không tồn tại token.
+- 400 BadRequestException → Token đã sử dụng hoặc hết hạn.
+</code></pre>
+<h3>POST /friend-requests/accept/:token</h3>
+<pre><code>Client gửi: param `token`
+    │
+    ▼ Controller.acceptInvite()
+    │   → Lấy id người dùng nhận lời mời từ `@Request`.
+    │
+    ▼ Service.acceptInvite()
+    │   1. Chạy `getInviteInfo()` để xác thực tính hợp lệ của token.
+    │   2. Xác minh `senderId !== receiverId` (tránh tự gửi cho bản thân). Nếu vi phạm → 400 BadRequest.
+    │   3. Gọi Repository update `status = ACCEPTED` và ghi nhận `receiverId`.
+    │
+    ▼ Trả về: Bản ghi lời mời đã cập nhật.
+
+Lỗi có thể xảy ra:
+- 401 Unauthorized → Vấn đề về auth.
+- 404/400 → Theo luồng của hàm `getInviteInfo`.
+- 400 BadRequestException → Nếu người nhận chính là người gửi lời mời.
+</code></pre>
+<hr>
+<h2>4. Đánh giá — Đã tốt chưa?</h2>
+<h3>✅ Đã làm tốt</h3>
+<table>
+<thead>
+<tr>
+<th>Điểm tốt</th>
+<th>Lý do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tách Repository Layer</td>
+<td>Lệnh truy vấn Prisma (như điều kiện tìm kiếm <code>OR</code> 2 chiều) được cô lập vào Repository, giữ nguyên sự thuần túy của Service Layer chỉ cho Business Logic.</td>
+</tr>
+<tr>
+<td>Lazy Update Status</td>
+<td>Việc cập nhật hạn lời mời (<code>EXPIRED</code>) chỉ diễn ra tự động khi có người truy vấn nó (<code>getInviteInfo</code>). Pattern này tiết kiệm tài nguyên do không cần chạy cron job quét cơ sở dữ liệu định kỳ.</td>
+</tr>
+<tr>
+<td>Tính năng Invitation Mở</td>
+<td>Cung cấp tùy chọn tạo link với <code>receiverId</code> là optional, hỗ trợ gửi lời mời đại trà qua ứng dụng khác, ai click đầu tiên sẽ trở thành <code>receiverId</code> lúc accept.</td>
+</tr>
+</tbody></table>
+<h3>❌ Chưa tốt / Cần cải thiện</h3>
+<p><strong>1. Bảo mật và nghiệp vụ gửi tin nhắn</strong></p>
+<pre><code class="language-typescript">// HIỆN TẠI — vấn đề:
+// Việc gửi tin nhắn không bị ràng buộc (bất cứ ai có ID cũng gửi được cho người khác), tiềm ẩn nguy cơ spam.
+async create(senderId: string, createMessageDto: CreateMessageDto): Promise&lt;Message&gt; {
+  return this.messageRepository.create({ ... });
+}
+
+// NÊN SỬA — lý do:
+// Cần tích hợp method `checkConnection` của `FriendRequestService` vào luồng gửi tin nhắn, để đảm bảo 2 người đã ACCEPTED nhau trước khi nhắn. Ném lỗi ForbiddenException(403) nếu không phải bạn bè.
+</code></pre>
+<p><strong>2. Thiếu phân trang cho API xem tin nhắn</strong></p>
+<pre><code class="language-typescript">// HIỆN TẠI — vấn đề:
+// `findConversation` lấy toàn bộ log tin nhắn. Điều này sẽ chậm nếu cuộc trò chuyện dài.
+async findConversation(userId1: string, userId2: string): Promise&lt;Message[]&gt; {
+  return this.findMany({ ... });
+}
+
+// NÊN SỬA — lý do:
+// Cần implement phân trang (Pagination), ví dụ cursor-based pagination hoặc đơn giản là skip/take để giảm tải cho DB và Network.
+</code></pre>
+<hr>
+<h2>5. API Design Review</h2>
+<h3>Endpoint Naming</h3>
+<pre><code>POST /messages                       [✅] Chuẩn convention RESTful tạo mới.
+GET  /messages/:userId               [✅] Hợp lý, nhận dạng tài nguyên là cuộc hội thoại với một user.
+POST /friend-requests/invite         [⚠️] Thiên hướng verb-oriented (invite). Có thể đơn giản hóa bằng POST /friend-requests.
+GET  /friend-requests/info/:token    [⚠️] Verb-oriented. Hợp lý hơn với GET /friend-requests/:token.
+POST /friend-requests/accept/:token  [⚠️] Tốt hơn là sử dụng PATCH hoặc PUT /friend-requests/:token/accept.
+</code></pre>
+<h3>Response Shape</h3>
+<pre><code class="language-typescript">// Nhóm Endpoint của Messages trả về:
+{
+  id: string,          // UUID của tin nhắn
+  content: string,     // Nội dung
+  senderId: string,    // Người gửi
+  receiverId: string,  // Người nhận
+  createdAt: Date      // Thời gian tạo
+}
+</code></pre>
+<h3>HTTP Status Codes</h3>
+<pre><code>POST /messages                       → 201 Created   [✅]
+GET  /messages/:userId               → 200 OK        [✅]
+POST /friend-requests/invite         → 201 Created   [✅]
+GET  /friend-requests/info/:token    → 200 OK        [✅]
+POST /friend-requests/accept/:token  → 201 Created   [✅]
+</code></pre>
+<hr>
+<h2>6. Cách Debug khi gặp lỗi</h2>
+<h3>Lỗi 400 BadRequest khi &quot;Get Invitation Info&quot; hoặc &quot;Accept Invite&quot;</h3>
+<pre><code>Checklist:
+1. Xem thông báo lỗi trả về.
+2. Nếu là &quot;Invite link is already X&quot;, kiểm tra lại trong database cột `status` đã thành `ACCEPTED` hay `EXPIRED` chưa. Lời mời chỉ được thao tác khi còn `PENDING`.
+3. Nếu là &quot;Invite link has expired&quot;, kiểm tra cột `expiresAt`. Hệ thống tự update thành EXPIRED nếu gọi API quá thời hạn này.
+4. Nếu là &quot;You cannot accept your own invite&quot;, đảm bảo người đăng nhập không phải chính là `senderId` trong link.
+
+Command debug:
+→ rtk grep &quot;Invite link has expired&quot; src/messages
+→ Query DB test: SELECT id, token, status, &quot;expiresAt&quot; FROM &quot;FriendRequest&quot; WHERE token=&#39;&lt;token&gt;&#39;;
+</code></pre>
+<h3>Lỗi 401 Unauthorized</h3>
+<pre><code>Checklist:
+1. Kiểm tra request đã đính kèm Bearer token hợp lệ trên Header chưa.
+2. Endpoint `getInviteInfo` là ngoại lệ vì nó Public (không guard).
+</code></pre>
+<hr>
+<h2>7. Các Pattern quan trọng trong module này</h2>
+<h3>Pattern 1: Lazy Update (Cập nhật trễ trạng thái hết hạn)</h3>
+<pre><code class="language-typescript">// Tại sao dùng pattern này?
+// → Tránh overhead cho hệ thống khi không cần các tác vụ chạy nền (Cron jobs/Workers) quét DB đổi trạng thái định kỳ. Việc update chỉ xảy ra khi User truy cập tài nguyên.
+
+if (new Date() &gt; invite.expiresAt) {
+  await this.friendRequestRepository.update({
+    where: { id: invite.id },
+    data: { status: RequestStatus.EXPIRED },
+  });
+  throw new BadRequestException(&#39;Invite link has expired&#39;);
+}
+
+// Nếu KHÔNG dùng pattern này thì sao?
+// → Sẽ cần phụ thuộc vào một process background, khiến code trở nên phức tạp và khó cài đặt hơn cho một tính năng nhỏ.
+</code></pre>
+<h3>Pattern 2: Biến Query Params thành Prisma OR condition</h3>
+<pre><code class="language-typescript">// Tại sao dùng pattern này?
+// → Rất tự nhiên để quét một hội thoại 2 chiều trong CSDL.
+
+return this.findMany({
+  where: {
+    OR: [
+      { senderId: userId1, receiverId: userId2 },
+      { senderId: userId2, receiverId: userId1 },
+    ],
+  },
+  orderBy: { createdAt: &#39;asc&#39; },
+});
+</code></pre>
+<hr>
+<h2>8. Biến môi trường cần thiết</h2>
+<pre><code class="language-env"># Module không định nghĩa biến riêng biệt, chỉ sử dụng chung:
+DATABASE_URL=          # Kết nối CSDL thông qua Prisma
+JWT_SECRET=            # Cung cấp cho cơ chế Guard giải mã Token xác thực
+</code></pre>
+<hr>
+<h2>9. Khi AI agent làm việc với module này</h2>
+<p><strong>Trước khi thêm feature mới:</strong></p>
+<ul>
+<li>Mọi logic tính toán, xác thực thời gian, kiểm tra role (nếu có) phải đưa vào <code>Service</code>.</li>
+<li><code>Repository</code> đảm trách mọi truy vấn đến DB. Không import/sử dụng trực tiếp Prisma Client ở Controller hay Service.</li>
+</ul>
+<p><strong>Khi sửa [phần bảo mật/chặn lời mời]:</strong></p>
+<ul>
+<li>Tuyệt đối không xóa logic kiểm tra điều kiện <code>status !== RequestStatus.PENDING</code>, bởi điều đó sẽ dẫn tới việc một link lời mời có thể bị lợi dụng để nhiều user bấm chấp nhận lặp đi lặp lại.</li>
+<li>Logic kiểm tra <code>new Date() &gt; expiresAt</code> phải luôn đi trước việc update database.</li>
+</ul>
+<p><strong>Khi thêm endpoint mới:</strong></p>
+<ul>
+<li>Luôn gắn đầy đủ các Decorator của Swagger như <code>@ApiTags</code>, <code>@ApiOperation</code>, và mô tả cho DTO.</li>
+<li>Luôn kiểm soát đầu ra API thông qua thư viện <code>class-transformer</code> (<code>plainToInstance</code>) và cấu trúc DTO để đảm bảo tính đồng nhất.</li>
+<li>Bất kì endpoint nào tác động sửa đổi dữ liệu (Messages, Accept) cần <code>@UseGuards(JwtAuthGuard)</code> và <code>@ApiBearerAuth()</code>.</li>
+</ul>
+<p><strong>Khi debug:</strong></p>
+<ul>
+<li>Khi lỗi ở truy vấn tin nhắn giữa 2 cá nhân, hãy thử hoán đổi đầu vào của <code>senderId</code> và <code>receiverId</code> xem log vì Prisma OR có thể rỗng nếu kiểu dữ liệu ID (UUID) bị lệch.</li>
+<li>Theo vết <code>expiresAt</code> để kiểm tra các bug do chênh lệch múi giờ trên Server/DB.</li>
+</ul>
+<hr>
+
+  </div>
+</div>
+
+</body>
+</html>

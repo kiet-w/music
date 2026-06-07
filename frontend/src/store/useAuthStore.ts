@@ -1,7 +1,8 @@
 'use client';
 
 import { create } from 'zustand';
-import { AuthUser, fetchMe } from '@/lib/api';
+
+import { fetchMe, type AuthUser } from '@/lib/api';
 import { useAlbumStore } from '@/store/useAlbumStore';
 import { usePlayerStore } from '@/store/usePlayerStore';
 
@@ -33,6 +34,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     set({ accessToken, user });
+
     if (typeof window !== 'undefined') {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, user }));
     }
@@ -41,46 +43,38 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   clearSession: () => {
     set({ accessToken: null, user: null });
     resetUserScopedState();
+
     if (typeof window !== 'undefined') {
       localStorage.removeItem(AUTH_STORAGE_KEY);
     }
   },
 
   hydrate: async () => {
-    // If we're on the server, we can't hydrate from localStorage
     if (typeof window === 'undefined') {
       set({ isHydrated: true });
       return;
     }
 
     const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-    
     if (!stored) {
       set({ isHydrated: true });
       return;
     }
 
     try {
-      const data = JSON.parse(stored);
+      const data = JSON.parse(stored) as { accessToken?: string; user?: AuthUser };
       const accessToken = data?.accessToken;
-      
+
       if (!accessToken) {
         get().clearSession();
         set({ isHydrated: true });
         return;
       }
 
-      // Verify token with backend to get fresh user data
-      try {
-        const user = await fetchMe(accessToken);
-        set({ accessToken, user, isHydrated: true });
-      } catch (error) {
-        console.error('Failed to verify session during hydration:', error);
-        get().clearSession();
-        set({ isHydrated: true });
-      }
+      const user = await fetchMe(accessToken);
+      set({ accessToken, user, isHydrated: true });
     } catch (error) {
-      console.error('Failed to parse auth storage during hydration:', error);
+      console.error('Failed to hydrate auth session:', error);
       get().clearSession();
       set({ isHydrated: true });
     }

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>songs — Technical Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#060d1b; --surf:#0d1829; --surf2:#111f34; --bdr:#1a2d45;
+  --txt:#c8d6e5; --dim:#6b8199; --bright:#e8f4ff;
+  --acc:#00c8f0; --accg:#00c8f012;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(#1a2d45 1px,transparent 1px);background-size:28px 28px;opacity:.28;pointer-events:none;z-index:0}
+
+/* ─── SIDEBAR ─────────────────────────────────── */
+.sb{width:228px;min-width:228px;height:100vh;position:sticky;top:0;background:rgba(6,11,24,.92);backdrop-filter:blur(14px);border-right:1px solid var(--bdr);overflow-y:auto;z-index:50;display:flex;flex-direction:column}
+.sb-top{padding:18px 16px 12px;border-bottom:1px solid var(--bdr)}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:4px}
+.sb-title{font-size:13px;font-weight:700;color:var(--bright)}
+.sb-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.sb-sec{padding:8px 0}
+.sb-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:7px 16px 3px}
+.sbl{display:flex;align-items:center;gap:8px;padding:6px 16px;font-size:12px;color:var(--dim);cursor:pointer;border-left:2px solid transparent;transition:all .14s;text-decoration:none}
+.sbl:hover, .sbl.active{color:var(--bright);border-left-color:var(--acc);background:var(--accg)}
+
+/* ─── MAIN ─────────────────────────────────────── */
+.main{flex:1;overflow-x:hidden;position:relative;z-index:1;max-width:calc(100vw - 228px); padding: 40px;}
+
+/* MARKDOWN STYLES */
+.md-content h1 { font-size: 28px; color: var(--bright); margin-bottom: 20px; border-bottom: 1px solid var(--bdr); padding-bottom: 10px; }
+.md-content h2 { font-size: 20px; color: var(--bright); margin-top: 30px; margin-bottom: 15px; }
+.md-content h3 { font-size: 16px; color: var(--acc); margin-top: 20px; margin-bottom: 10px; }
+.md-content p { margin-bottom: 15px; line-height: 1.6; font-size: 14px; }
+.md-content ul, .md-content ol { margin-bottom: 15px; padding-left: 20px; font-size: 14px; line-height: 1.6; }
+.md-content li { margin-bottom: 5px; }
+.md-content pre { background: #040a12; border: 1px solid var(--bdr); border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow-x: auto; margin-bottom: 15px; color: #abb2bf; }
+.md-content code { font-family: 'JetBrains Mono', monospace; background: var(--surf2); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+.md-content table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+.md-content th { background: var(--surf2); padding: 10px; text-align: left; border-bottom: 1px solid var(--bdr); color: var(--dim); font-family: 'JetBrains Mono', monospace; }
+.md-content td { padding: 10px; border-bottom: 1px solid var(--bdr); }
+.md-content blockquote { border-left: 3px solid var(--acc); color: var(--dim); margin-bottom: 15px; background: var(--surf); padding: 10px 15px; border-radius: 4px; }
+.md-content strong { color: var(--bright); }
+.md-content hr { border: 0; height: 1px; background: var(--bdr); margin: 30px 0; }
+
+@media(max-width:960px){
+  .sb{display:none}
+  .main{max-width:100vw; padding: 20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-top">
+    <div class="sb-tag">NestJS Docs</div>
+    <div class="sb-title">SONGS Module</div>
+    <div class="sb-sub">Technical Documentation</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Navigation</div>
+    <a class="sbl" href="#">Overview</a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="md-content">
+    <h1>Songs Module Documentation</h1>
+<h2>1. Tổng quan Kiến trúc (Component Overview)</h2>
+<p>Module <code>Songs</code> chịu trách nhiệm quản lý các bài hát (Track) trong hệ thống. Tính năng cốt lõi của module bao gồm: thêm bài hát mới từ nguồn YouTube, lấy danh sách tất cả bài hát của một người dùng (hỗ trợ phân trang), lấy chi tiết bài hát, xóa bài hát, và di chuyển bài hát giữa các Album. Module này có sự kết nối chặt chẽ với <code>AlbumsModule</code> để xác thực quyền sở hữu album và <code>JobsModule</code> (sử dụng BullMQ) để đẩy tác vụ xử lý/tải âm thanh xuống chạy ngầm (Background Job).</p>
+<h2>2. Các Dependencies (Dependencies Injection)</h2>
+<ul>
+<li><strong><code>JobsModule</code></strong>: Cung cấp hàng đợi <code>conversion</code> thông qua <code>BullMQ</code> để xử lý việc convert video từ YouTube sang audio một cách bất đồng bộ.</li>
+<li><strong><code>AlbumsModule</code></strong>: Import để sử dụng <code>AlbumService</code> và <code>AlbumRepository</code> giúp xác thực quyền truy cập album của người dùng, cũng như lấy/tạo album mặc định khi không chỉ định album cụ thể.</li>
+<li><strong><code>SongRepository</code></strong>: Tầng giao tiếp với database (Prisma) cho entity <code>Track</code>.</li>
+<li><strong><code>PinoLogger</code> (nestjs-pino)</strong>: Dùng để ghi log (thông tin, cảnh báo, debug) trong quá trình xử lý logic của <code>SongService</code>.</li>
+</ul>
+<h2>3. Phân tích chi tiết Controller &amp; Service</h2>
+<h3>3.1. SongController (<code>song.controller.ts</code>)</h3>
+<p>Các Decorators:</p>
+<ul>
+<li><code>@ApiTags(&#39;songs&#39;)</code>, <code>@Controller(&#39;songs&#39;)</code>: Gắn Swagger tag và định nghĩa prefix API là <code>/songs</code>.</li>
+<li><code>@ApiBearerAuth()</code>, <code>@UseGuards(JwtAuthGuard)</code>: Yêu cầu Request phải có JWT token hợp lệ.</li>
+<li><code>@UseInterceptors(ClassSerializerInterceptor)</code>: Tự động format response thông qua <code>class-transformer</code> (loại bỏ các thuộc tính không expose).</li>
+<li>Định nghĩa HTTP methods: <code>@Post</code>, <code>@Get</code>, <code>@Delete</code>, <code>@Patch</code>.</li>
+</ul>
+<p><strong>Các endpoint (Public Methods):</strong></p>
+<ul>
+<li><strong><code>createFromYoutube(user, createSongDto: CreateSongYoutubeDto)</code></strong>: Nhận url và thông tin bài hát từ body -&gt; gọi <code>SongService.createFromYoutube()</code>.</li>
+<li><strong><code>findAll(user, page, limit)</code></strong>: Nhận tham số phân trang qua Query, tính toán <code>skip</code> và <code>take</code> thủ công -&gt; gọi <code>SongService.findAll()</code>.</li>
+<li><strong><code>findOne(user, id)</code></strong>: Nhận tham số <code>id</code> trên path -&gt; gọi <code>SongService.findOne()</code>.</li>
+<li><strong><code>remove(user, id)</code></strong>: Xóa bài hát theo <code>id</code>. Sử dụng <code>@HttpCode(204)</code> trả về No Content khi thành công -&gt; gọi <code>SongService.remove()</code>.</li>
+<li><strong><code>moveToAlbum(user, id, albumId)</code></strong>: Chuyển bài hát sang album khác với <code>albumId</code> ở body -&gt; gọi <code>SongService.moveToAlbum()</code>.</li>
+</ul>
+<h3>3.2. SongService (<code>song.service.ts</code>)</h3>
+<h4>Các Public Methods:</h4>
+<ul>
+<li><strong><code>createFromYoutube(userId, url, title, artist, albumId)</code></strong>:<ul>
+<li>Logic: Ghi log bắt đầu. Gọi <code>getValidatedAlbumId()</code> để kiểm tra hoặc lấy album mặc định. Lưu record mới vào DB (có <code>url</code> tạm để trống và <code>sourceType: &#39;youtube&#39;</code>). Đẩy job tên là <code>convert</code> vào hàng đợi <code>conversionQueue</code> (truyền <code>url</code>, <code>songId</code>, <code>userId</code>) để xử lý ngầm. </li>
+<li>Return: Thông tin bài hát dưới dạng DTO qua <code>mapToResponse()</code>.</li>
+</ul>
+</li>
+<li><strong><code>findAll(userId, skip, take)</code></strong>:<ul>
+<li>Logic: Tạo điều kiện <code>where</code> truy vấn theo <code>userId</code> từ liên kết album. Gọi đồng thời (qua <code>Promise.all</code>) <code>count()</code> và <code>findMany()</code> từ <code>songRepository</code> để lấy tổng số bản ghi và dữ liệu phân trang.</li>
+<li>Return: Object chứa mảng DTO bài hát, <code>total</code>, <code>page</code>, <code>limit</code>, và <code>totalPages</code>.</li>
+</ul>
+</li>
+<li><strong><code>findOne(userId, id)</code></strong>:<ul>
+<li>Logic: Gọi hàm helper <code>findAndValidateSong()</code> để lấy bài hát và xác nhận quyền của người dùng hiện tại đối với bài hát đó.</li>
+<li>Return: DTO cấu trúc bài hát.</li>
+</ul>
+</li>
+<li><strong><code>remove(userId, id)</code></strong>:<ul>
+<li>Logic: Gọi <code>findAndValidateSong()</code> để đảm bảo bài hát tồn tại và người dùng có quyền. Gọi <code>songRepository.delete()</code> xóa khỏi DB.</li>
+</ul>
+</li>
+<li><strong><code>moveToAlbum(userId, id, albumId)</code></strong>:<ul>
+<li>Logic: Gọi <code>findAndValidateSong()</code> check bài hát hiện tại. Gọi <code>getValidatedAlbumId()</code> xác nhận album đích có tồn tại và thuộc về user không. Cập nhật record với <code>songRepository.update()</code>.</li>
+<li>Return: DTO bài hát đã cập nhật.</li>
+</ul>
+</li>
+</ul>
+<h4>Các Private Methods (Helpers):</h4>
+<ul>
+<li><strong><code>getValidatedAlbumId(userId, albumId)</code></strong>: Nếu có <code>albumId</code>, truy vấn <code>albumRepository</code> xem nó có tồn tại và thuộc về <code>userId</code> không (ném lỗi NotFound nếu sai). Nếu không có <code>albumId</code>, gọi <code>albumService.findOrCreateDefault(userId)</code> để lấy ID album mặc định.</li>
+<li><strong><code>findAndValidateSong(userId, id)</code></strong>: Tìm bản ghi bài hát dựa vào <code>id</code> kết hợp check <code>album.userId === userId</code>. Nếu không tồn tại, ném ra <code>NotFoundException(&#39;Song not found&#39;)</code>.</li>
+<li><strong><code>mapToResponse(song)</code></strong>: Chuyển đổi dữ liệu raw query sang <code>SongResponseDto</code> bằng <code>plainToInstance</code> (loại bỏ các key dư thừa).</li>
+<li><strong><code>mapToResponseArray(songs)</code></strong>: Chuyển đổi mảng dữ liệu raw.</li>
+</ul>
+<h3>3.3. SongRepository (<code>song.repository.ts</code>)</h3>
+<p>Các hàm Public:</p>
+<ul>
+<li>Kế thừa <code>BaseRepository&lt;Track, Prisma.TrackDelegate&lt;any&gt;&gt;</code> để tái sử dụng lại các hàm ORM chuẩn như <code>count</code>, <code>findMany</code>, <code>findFirst</code>, <code>findUnique</code>, <code>update</code>, <code>create</code>, <code>delete</code> mà Prisma cung cấp. Sử dụng bảng <code>Track</code>.</li>
+</ul>
+<hr>
+<h2>4. System Data Flow</h2>
+<p><strong>1. POST <code>/songs/youtube</code> (createFromYoutube)</strong></p>
+<ul>
+<li>Flow: Client -&gt; Controller (<code>createFromYoutube()</code>) -&gt; Service (<code>createFromYoutube()</code>) -&gt; Service (<code>getValidatedAlbumId()</code>) -&gt; <code>AlbumRepository</code> / <code>AlbumService</code> -&gt; DB (Check quyền album hoặc tạo mới) -&gt; Service -&gt; <code>SongRepository.create()</code> -&gt; DB (Lưu track mới) -&gt; Service -&gt; <code>conversionQueue.add()</code> -&gt; BullMQ (Job) -&gt; Service (<code>mapToResponse()</code>) -&gt; Controller -&gt; Client.</li>
+</ul>
+<p><strong>2. GET <code>/songs</code> (findAll)</strong></p>
+<ul>
+<li>Flow: Client -&gt; Controller (<code>findAll()</code> -&gt; parse <code>page/limit</code> tính skip/take) -&gt; Service (<code>findAll()</code>) -&gt; <code>SongRepository.count()</code> &amp; <code>SongRepository.findMany()</code> -&gt; DB (Truy vấn) -&gt; Service (<code>mapToResponseArray()</code>) -&gt; Controller -&gt; Client.</li>
+</ul>
+<p><strong>3. GET <code>/songs/:id</code> (findOne)</strong></p>
+<ul>
+<li>Flow: Client -&gt; Controller (<code>findOne()</code>) -&gt; Service (<code>findOne()</code>) -&gt; Service (<code>findAndValidateSong()</code>) -&gt; <code>SongRepository.findFirst()</code> -&gt; DB (Check join album user) -&gt; Service (<code>mapToResponse()</code>) -&gt; Controller -&gt; Client.</li>
+</ul>
+<p><strong>4. DELETE <code>/songs/:id</code> (remove)</strong></p>
+<ul>
+<li>Flow: Client -&gt; Controller (<code>remove()</code>) -&gt; Service (<code>remove()</code>) -&gt; Service (<code>findAndValidateSong()</code>) -&gt; <code>SongRepository.findFirst()</code> -&gt; DB -&gt; Service -&gt; <code>SongRepository.delete()</code> -&gt; DB (Thực thi xóa) -&gt; Controller (204) -&gt; Client.</li>
+</ul>
+<p><strong>5. PATCH <code>/songs/:id/move</code> (moveToAlbum)</strong></p>
+<ul>
+<li>Flow: Client -&gt; Controller (<code>moveToAlbum()</code>) -&gt; Service (<code>moveToAlbum()</code>) -&gt; Service (<code>findAndValidateSong()</code>) -&gt; DB -&gt; Service (<code>getValidatedAlbumId()</code>) -&gt; DB (Kiểm tra album mới) -&gt; Service -&gt; <code>SongRepository.update()</code> -&gt; DB (Lưu albumId mới) -&gt; Service (<code>mapToResponse()</code>) -&gt; Controller -&gt; Client.</li>
+</ul>
+<hr>
+<hr>
+<h1>Songs Module — AI Coding Skill Context</h1>
+<blockquote>
+<p>File này dùng làm context cho AI coding agent khi làm việc với Songs Module.</p>
+</blockquote>
+<hr>
+<h2>1. Kiến trúc tổng thể — Tại sao tổ chức như vậy?</h2>
+<pre><code>HTTP Request
+    │
+    ▼
+SongController          ← Nhận/trả HTTP, định nghĩa route.
+    │
+    ▼
+JwtAuthGuard            ← Middleware bảo vệ các thao tác của user bằng token.
+    │
+    ▼
+SongService             ← Chứa logic nghiệp vụ chính (xác thực album, trigger background jobs).
+    │
+    ├──► Conversion Queue (BullMQ) ← Đẩy tác vụ nặng xuống nền (ví dụ tải nhạc từ Youtube).
+    │
+    ▼
+SongRepository          ← Quản lý giao tiếp với Database (bảng Track).
+    │
+    ▼
+[Database PostgreSQL]   ← Thông qua Prisma
+</code></pre>
+<p><strong>Tại sao tách các layer?</strong></p>
+<ul>
+<li><strong>Hiệu năng và Non-blocking:</strong> Tách rời tác vụ nặng như việc clone/download file Youtube sang <code>JobsModule</code> bằng BullMQ queue giúp API Controller phản hồi ngay lập tức sau khi tạo record tạm.</li>
+<li><strong>Tách biệt Data logic:</strong> Sử dụng <code>BaseRepository</code> cho entity <code>Track</code> giúp chuẩn hóa cách thao tác với CSDL.</li>
+<li><strong>Tái sử dụng Album Logic:</strong> Nhúng <code>AlbumService</code> và <code>AlbumRepository</code> vào <code>SongService</code> để xử lý các logic về album mà không cần viết lại logic xác thực album tại module Song.</li>
+</ul>
+<hr>
+<h2>2. Các Dependencies</h2>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Vai trò</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SongRepository</code></td>
+<td>Giao tiếp với Database để query và thao tác với entity <code>Track</code> (qua Prisma).</td>
+</tr>
+<tr>
+<td><code>AlbumRepository</code></td>
+<td>Truy vấn kiểm tra album đích xem có thuộc sở hữu của user hay không.</td>
+</tr>
+<tr>
+<td><code>AlbumService</code></td>
+<td>Gọi các logic tạo/tìm album mặc định nếu user upload nhạc nhưng không chọn album.</td>
+</tr>
+<tr>
+<td><code>conversionQueue</code></td>
+<td>Nhận job <code>convert</code> từ BullMQ khi tạo bài hát bằng link Youtube.</td>
+</tr>
+<tr>
+<td><code>PinoLogger</code></td>
+<td>Ghi log chuẩn cấu trúc quá trình tạo nhạc, tìm kiếm nhạc, hoặc cảnh báo khi vi phạm quyền truy cập.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. Entry Points — Đi đâu về đâu</h2>
+<h3>3.1. POST /songs/youtube</h3>
+<pre><code>Client gửi (Body: CreateSongYoutubeDto): { url, title, artist?, albumId? }
+    │
+    ▼ Controller.createFromYoutube(user, dto)
+    │   → Decorators: @Post(&#39;youtube&#39;), @ApiOperation
+    │
+    ▼ SongService.createFromYoutube(...)
+    │   1. Lấy thông tin xác thực album (getValidatedAlbumId).
+    │   2. Lưu Track record tạm thời có sourceType là &#39;youtube&#39; vào DB.
+    │   3. conversionQueue.add(&#39;convert&#39;, payload) → Bắn event cho worker xử lý async việc down/convert file.
+    │
+    ▼ SongService.mapToResponse(song)
+    │   → Lọc dữ liệu qua Dto để hide các trường không public.
+    │
+    ▼ Trả về: { id, title, artist, url, albumId, sourceType } (SongResponseDto)
+
+Lỗi có thể xảy ra:
+- 404 NotFoundException → Album chỉ định không tồn tại hoặc không thuộc quyền sở hữu của user.
+</code></pre>
+<h3>3.2. GET /songs</h3>
+<pre><code>Client Request: /songs?page=1&amp;limit=10 (Header: Authorization)
+    │
+    ▼ Controller.findAll(user, page, limit)
+    │   1. Tính `skip` (số lượng bỏ qua) và `take` (số lượng lấy).
+    │
+    ▼ SongService.findAll(skip, take)
+    │   1. Promise.all gọi Repository đếm `total` và `data`. Lọc theo `album.userId = user.id`.
+    │
+    ▼ Trả về: { data: SongResponseDto[], total, page, limit, totalPages }
+</code></pre>
+<h3>3.3. DELETE /songs/:id</h3>
+<pre><code>Client Request: DELETE /songs/:id (Header: Authorization)
+    │
+    ▼ Controller.remove(user, id)
+    │   → @HttpCode(204)
+    │
+    ▼ SongService.remove(userId, id)
+    │   1. SongService.findAndValidateSong(userId, id) → Kiểm tra quyền. Nếu không tìm thấy → ném 404.
+    │   2. SongRepository.delete({ where: { id } })
+    │
+    ▼ Trả về: Trống (Status 204 No Content)
+</code></pre>
+<h3>3.4. PATCH /songs/:id/move</h3>
+<pre><code>Client Request (Body): { albumId }
+    │
+    ▼ Controller.moveToAlbum(user, id, albumId)
+    │
+    ▼ SongService.moveToAlbum(userId, id, albumId)
+    │   1. SongService.findAndValidateSong(userId, id) → Check track có tồn tại.
+    │   2. SongService.getValidatedAlbumId(userId, albumId) → Check album mới.
+    │   3. SongRepository.update(data: { albumId })
+    │
+    ▼ Trả về: SongResponseDto
+</code></pre>
+<hr>
+<h2>4. Đánh giá — Đã tốt chưa?</h2>
+<h3>✅ Đã làm tốt</h3>
+<table>
+<thead>
+<tr>
+<th>Điểm tốt</th>
+<th>Lý do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Background Job</td>
+<td>Sử dụng tốt hàng đợi BullMQ để tránh gây ngẽn luồng xử lý HTTP khi tải nhạc Youtube.</td>
+</tr>
+<tr>
+<td>Data DTO Formatting</td>
+<td>Sử dụng <code>plainToInstance</code> với cấu hình <code>excludeExtraneousValues: true</code> đảm bảo Response trả về chuẩn, che giấu các trường nhạy cảm trong DB (như ngày cập nhật, flag admin, v.v.).</td>
+</tr>
+<tr>
+<td>Quản lý quyền bài hát</td>
+<td>Cách kiểm tra quyền truy cập thông qua relationship với Album (<code>album: { userId }</code>) được dùng thống nhất.</td>
+</tr>
+</tbody></table>
+<h3>❌ Chưa tốt / Cần cải thiện</h3>
+<p><strong>1. Xử lý tính Pagination thủ công ở Controller</strong></p>
+<pre><code class="language-typescript">// HIỆN TẠI — vấn đề:
+// Controller tự phân tích chuỗi query sang Int, tính công thức skip. Không an toàn và dư thừa code (lặp lại giống Auth module).
+const skip = page &amp;&amp; limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
+const take = limit ? parseInt(limit, 10) : 50;
+
+// NÊN SỬA — lý do:
+// Nên dùng Pipe hoặc Decorator (vd: PaginationParams) để thống nhất phân trang toàn app.
+@Query() paginationDto: PaginationDto
+</code></pre>
+<hr>
+<h2>5. API Design Review</h2>
+<h3>Endpoint Naming</h3>
+<pre><code>POST   /songs/youtube       [✅] Rõ ràng.
+GET    /songs               [✅] Chuẩn convention RESTful.
+GET    /songs/:id           [✅] Chuẩn.
+DELETE /songs/:id           [✅] Chuẩn.
+PATCH  /songs/:id/move      [✅] Sử dụng sub-resource (action) hợp lý thay vì PUT/PATCH toàn bộ body.
+</code></pre>
+<h3>Response Shape</h3>
+<pre><code class="language-typescript">// Các endpoint trả về chi tiết track:
+{
+  id: string,
+  title: string,
+  artist?: string,
+  url: string,
+  albumId?: string,
+  sourceType: string
+}
+</code></pre>
+<h3>HTTP Status Codes</h3>
+<pre><code>POST   /songs/youtube → 201 Created   [✅]
+GET    /songs         → 200 OK        [✅]
+DELETE /songs/:id     → 204 No Content[✅] (Dùng @HttpCode(204) rất chính xác)
+</code></pre>
+<hr>
+<h2>6. Cách Debug khi gặp lỗi</h2>
+<h3>Lỗi 404 NotFoundException khi làm việc với Track</h3>
+<pre><code>Checklist:
+1. Đảm bảo `id` của bài hát đúng định dạng.
+2. Kiểm tra `albumId` đích xem album này có đang thuộc quyền sở hữu của `userId` trong JWT token hay không. Bài hát phải nằm trong Album do user tạo.
+
+Command debug:
+→ Xem log backend: &quot;Song not found or access denied&quot; hoặc &quot;Album not found or access denied&quot;
+</code></pre>
+<h3>Lỗi bài hát tạo từ Youtube mãi không nghe được</h3>
+<pre><code>Checklist:
+1. Logic down load chạy qua BullMQ, kiểm tra xem redis có đang hoạt động không (`JobsModule`).
+2. Xem log worker xem job `convert` có báo lỗi timeout hay lỗi Youtube parser không.
+</code></pre>
+<hr>
+<h2>7. Các Pattern quan trọng trong module này</h2>
+<h3>Pattern 1: Tách nền Background Processing bằng Message Queue</h3>
+<pre><code class="language-typescript">// Tại sao dùng pattern này?
+// → Tạo nhanh bài hát để User không phải chờ HTTP request treo trong hàng chục giây tải video.
+
+await this.conversionQueue.add(&#39;convert&#39;, {
+  url,
+  songId: song.id,
+  userId,
+});
+
+// Nếu KHÔNG dùng pattern này thì sao?
+// → Request bị treo. Tệ hơn, nếu server bị gián đoạn, process tải bị đứt và phải tải lại từ đầu gây trải nghiệm tệ.
+</code></pre>
+<h3>Pattern 2: DTO Expose Serialization</h3>
+<pre><code class="language-typescript">// Tại sao dùng pattern này?
+// → Chỉ những thuộc tính có @Expose() trong SongResponseDto mới lọt ra ngoài JSON, bảo vệ dữ liệu nội bộ.
+return plainToInstance(SongResponseDto, song, {
+  excludeExtraneousValues: true,
+});
+</code></pre>
+<hr>
+<h2>8. Biến môi trường cần thiết</h2>
+<pre><code class="language-env"># Module này phụ thuộc vào cấu hình Queue ở JobsModule, do vậy cần có Redis
+REDIS_HOST=            # Host của redis
+REDIS_PORT=            # Port của redis
+</code></pre>
+<hr>
+<h2>9. Khi AI agent làm việc với module này</h2>
+<p><strong>Trước khi thêm feature mới:</strong></p>
+<ul>
+<li>Mọi truy vấn liên quan đến <code>Track</code> luôn phải đi kèm cơ chế xác thực quyền sở hữu thông qua <code>Album</code> (<code>album: { userId }</code>), không bao giờ query riêng biệt chỉ bằng <code>id</code>.</li>
+<li>Logic phải được đóng gói tại <code>SongService</code> và gọi DB tại <code>SongRepository</code>.</li>
+</ul>
+<p><strong>Khi sửa tính năng Upload:</strong></p>
+<ul>
+<li>Bắt buộc phải duy trì mô hình Queue. Tuyệt đối không nhúng logic tải hoặc convert trực tiếp bằng thread chính của request ở Controller hoặc Service thông thường.</li>
+</ul>
+<p><strong>Khi thêm endpoint mới:</strong></p>
+<ul>
+<li>Trả response qua hàm helper <code>mapToResponse</code> để chuẩn hóa DTO trước khi xuất ra cho client.</li>
+<li>Bảo mật bằng <code>@UseGuards(JwtAuthGuard)</code> và <code>@ApiBearerAuth()</code> để đảm bảo người dùng có quyền và hiển thị trên Swagger UI.</li>
+</ul>
+<hr>
+
+  </div>
+</div>
+
+</body>
+</html>

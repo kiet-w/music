@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { SongRepository } from './repositories/song.repository';
 import { AlbumRepository } from '../albums/repositories/album.repository';
 import { AlbumService } from '../albums/album.service';
+import { plainToInstance } from 'class-transformer';
+import { SongResponseDto } from './dto/song-response.dto';
 
 @Injectable()
 export class SongService {
@@ -23,22 +25,10 @@ export class SongService {
     title: string,
     artist?: string,
     albumId?: string,
-  ) {
+  ): Promise<SongResponseDto> {
     this.logger.info({ userId, url, title, artist, albumId }, 'Creating song from Youtube');
-    let finalAlbumId = albumId;
-
-    if (finalAlbumId) {
-      const album = await this.albumRepository.findUnique({
-        where: { id: finalAlbumId },
-      });
-      if (!album || album.userId !== userId) {
-        this.logger.warn({ userId, albumId: finalAlbumId }, 'Album not found or access denied');
-        throw new NotFoundException('Album not found');
-      }
-    } else {
-      const defaultAlbum = await this.albumService.findOrCreateDefault(userId);
-      finalAlbumId = defaultAlbum.id;
-    }
+    
+    const finalAlbumId = await this.getValidatedAlbumId(userId, albumId);
 
     const song = await this.songRepository.create({
       data: {
@@ -57,23 +47,84 @@ export class SongService {
       userId,
     });
 
-    return song;
+    return this.mapToResponse(song);
   }
 
-  async findAll(userId: string) {
-    this.logger.debug({ userId }, 'Finding all songs for user');
-    return this.songRepository.findMany({
-      where: {
-        album: {
-          userId,
-        },
+  async findAll(userId: string, skip: number = 0, take: number = 50) {
+    this.logger.debug({ userId, skip, take }, 'Finding all songs for user');
+    const where = {
+      album: {
+        userId,
       },
-      include: { album: true },
+    };
+
+    const [total, songs] = await Promise.all([
+      this.songRepository.count({ where }),
+      this.songRepository.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: { album: true },
+      })
+    ]);
+
+    return {
+      data: this.mapToResponseArray(songs),
+      total,
+      page: Math.floor(skip / take) + 1,
+      limit: take,
+      totalPages: Math.ceil(total / take)
+    };
+  }
+
+  async findOne(userId: string, id: string): Promise<SongResponseDto> {
+    this.logger.debug({ userId, id }, 'Finding song by ID for user');
+    const song = await this.findAndValidateSong(userId, id);
+    return this.mapToResponse(song);
+  }
+
+  async remove(userId: string, id: string): Promise<void> {
+    this.logger.info({ userId, id }, 'Removing song');
+    await this.findAndValidateSong(userId, id);
+    await this.songRepository.delete({
+      where: { id },
     });
   }
 
-  async findOne(userId: string, id: string) {
-    this.logger.debug({ userId, id }, 'Finding song by ID for user');
+  async moveToAlbum(userId: string, id: string, albumId: string): Promise<SongResponseDto> {
+    this.logger.info({ userId, id, albumId }, 'Moving song to album');
+    
+    await this.findAndValidateSong(userId, id);
+    const validatedAlbumId = await this.getValidatedAlbumId(userId, albumId);
+
+    const updatedSong = await this.songRepository.update({
+      where: { id },
+      data: { albumId: validatedAlbumId },
+    });
+
+    return this.mapToResponse(updatedSong);
+  }
+
+  // --- Private Helpers ---
+
+  private async getValidatedAlbumId(userId: string, albumId?: string): Promise<string> {
+    if (albumId) {
+      const album = await this.albumRepository.findUnique({
+        where: { id: albumId },
+      });
+      if (!album || album.userId !== userId) {
+        this.logger.warn({ userId, albumId }, 'Album not found or access denied');
+        throw new NotFoundException('Album not found');
+      }
+      return albumId;
+    }
+
+    const defaultAlbum = await this.albumService.findOrCreateDefault(userId);
+    return defaultAlbum.id;
+  }
+
+  private async findAndValidateSong(userId: string, id: string) {
     const song = await this.songRepository.findFirst({
       where: {
         id,
@@ -86,54 +137,21 @@ export class SongService {
 
     if (!song) {
       this.logger.warn({ userId, id }, 'Song not found or access denied');
-      return null;
+      throw new NotFoundException('Song not found');
     }
     return song;
   }
 
-  async remove(userId: string, id: string) {
-    this.logger.info({ userId, id }, 'Removing song');
-    const song = await this.songRepository.findFirst({
-      where: {
-        id,
-        album: {
-          userId,
-        },
-      },
-    });
-    if (!song) {
-      this.logger.warn({ userId, id }, 'Song not found for removal');
-      throw new NotFoundException('Song not found');
-    }
-    return this.songRepository.delete({
-      where: { id },
+  private mapToResponse(song: any): SongResponseDto {
+    return plainToInstance(SongResponseDto, song, {
+      excludeExtraneousValues: true,
     });
   }
 
-  async moveToAlbum(userId: string, id: string, albumId: string) {
-    this.logger.info({ userId, id, albumId }, 'Moving song to album');
-    const song = await this.songRepository.findFirst({
-      where: {
-        id,
-        album: {
-          userId,
-        },
-      },
-    });
-    if (!song) {
-      throw new NotFoundException('Song not found');
-    }
-
-    const targetAlbum = await this.albumRepository.findUnique({
-      where: { id: albumId },
-    });
-    if (!targetAlbum || targetAlbum.userId !== userId) {
-      throw new NotFoundException('Target album not found');
-    }
-
-    return this.songRepository.update({
-      where: { id },
-      data: { albumId },
+  private mapToResponseArray(songs: any[]): SongResponseDto[] {
+    return plainToInstance(SongResponseDto, songs, {
+      excludeExtraneousValues: true,
     });
   }
 }
+

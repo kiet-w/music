@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages Module — Technical Docs</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        /* ── CSS Variables ── */
+        :root {
+          /* Backgrounds */
+          --bg:             #f4f2ee;
+          --sidebar-bg:     #eceae5;
+          --panel-bg:       #fafaf8;
+
+          /* Text */
+          --text:           #1a1a18;
+          --text-muted:     #5f5e5a;
+
+          /* Syntax Highlighting */
+          --kw:             #185fa5;  /* keyword — blue */
+          --fn:             #854f0b;  /* function — amber */
+          --str:            #0f6e56;  /* string — teal */
+
+          /* Accent / Brand */
+          --accent:         #d85a30;  /* Claude coral/orange */
+          --border:         #d3d1c7;
+
+          /* Semantic */
+          --success:        #2c7a39;  /* rgb(44,122,57) */
+          --warn:           #854f0b;
+          --error:          #ab2b3f;  /* rgb(171,43,63) */
+
+          /* ─── SVG Component Palette (Light) ─────────── */
+          --svg-mod:         #f4f2ee;
+          --svg-ctrl:        #e6f1fb;
+          --svg-ctrl-stroke: #185fa5;
+          --svg-svc:         #e1f5ee;
+          --svg-svc-stroke:  #0f6e56;
+          --svg-repo:        #faeeda;
+          --svg-repo-stroke: #854f0b;
+          --svg-infra:       #eeedfe;
+          --svg-infra-stroke:#534ab7;
+        }
+
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Consolas', monospace;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            font-size: 15px;
+        }
+
+        /* ── Layout ── */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 32px 20px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+            z-index: 100;
+        }
+        .sidebar-title {
+            font-size: 0.75em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar nav ul { list-style: none; }
+        .sidebar nav li { margin-bottom: 4px; }
+        .sidebar nav a {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar nav a:hover { background: var(--panel-bg); color: var(--accent); transform: translateX(4px); }
+        .sidebar nav a.active { background: var(--accent); color: #fff !important; font-weight: 600; }
+
+        .toc-h3 > a { padding-left: 24px; font-size: 0.85em; color: var(--text-muted); }
+        .toc-h4 > a { padding-left: 40px; font-size: 0.8em; color: var(--text-muted); }
+
+        /* ── Main Content ── */
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding-bottom: 100px;
+        }
+
+        /* ── Hero Section (Landing Page Style) ── */
+        .hero {
+            padding: 120px 60px 80px;
+            text-align: center;
+            background: linear-gradient(180deg, #252526 0%, #1e1e1e 100%);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 60px;
+        }
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .hero p {
+            font-size: 1.25em;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+        }
+
+        /* ── Main Body Container ── */
+        .main-body {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* ── Typography ── */
+        h1 { font-size: 2.4em; color: var(--fn); margin-bottom: 40px; }
+        h2 {
+            font-size: 1.8em;
+            color: var(--kw);
+            margin: 64px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            scroll-margin-top: 40px;
+        }
+        h3 {
+            font-size: 1.4em;
+            color: var(--fn);
+            margin: 48px 0 16px;
+            scroll-margin-top: 40px;
+        }
+        h4 {
+            font-size: 1em;
+            color: var(--success);
+            margin: 32px 0 12px;
+            scroll-margin-top: 40px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        p { margin-bottom: 20px; }
+        ul, ol { margin: 0 0 24px 28px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text); font-weight: 700; }
+        em { color: var(--str); font-style: normal; }
+
+        /* ── SVG Diagrams (Custom Style) ── */
+        .svg-container {
+            width: 100%;
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .svg-container svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+        /* SVG Internal Styles (Matched to CSS Variables) */
+        .svg-bg { fill: transparent; }
+        .svg-mod { fill: var(--sidebar-bg); stroke: var(--border); stroke-width: 2; rx: 18; }
+        .svg-ctrl { fill: var(--svg-ctrl); stroke: var(--svg-ctrl-stroke); stroke-width: 2; rx: 12; }
+        .svg-svc { fill: var(--svg-svc); stroke: var(--svg-svc-stroke); stroke-width: 2; rx: 12; }
+        .svg-repo { fill: var(--svg-repo); stroke: var(--svg-repo-stroke); stroke-width: 2; rx: 12; }
+        .svg-infra { fill: var(--svg-infra); stroke: var(--svg-infra-stroke); stroke-width: 2; rx: 12; }
+        .svg-txt { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; fill: var(--text); }
+        .svg-small { font-family: 'Inter', sans-serif; font-size: 13px; fill: var(--text-muted); }
+        .svg-arrow { stroke: var(--text); stroke-width: 2.5; fill: none; }
+
+        /* ── Inline code & Blocks ── */
+        code {
+            background: var(--panel-bg);
+            color: var(--str);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            border: 1px solid var(--border);
+        }
+        pre {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            overflow-x: auto;
+            margin-bottom: 32px;
+        }
+        pre code { background: none; border: none; padding: 0; color: var(--text); }
+
+        /* ── Tables ── */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 32px; border-radius: 10px; overflow: hidden; }
+        th { background: var(--panel-bg); color: var(--kw); border: 1px solid var(--border); padding: 14px 18px; text-align: left; }
+        td { border: 1px solid var(--border); padding: 12px 18px; }
+        tr:nth-child(even) td { background: var(--sidebar-bg); }
+
+        /* ── Method Section ── */
+        .method-section {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 56px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .method-signature {
+            background: var(--sidebar-bg);
+            border-left: 5px solid var(--accent);
+            border-radius: 6px;
+            padding: 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95em;
+            margin: 20px 0 32px;
+            color: var(--fn);
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Animation */
+        @keyframes sectionFlash {
+            0% { outline: 3px solid var(--accent); outline-offset: 6px; background: rgba(216, 90, 48, 0.1); }
+            100% { outline: 3px solid transparent; outline-offset: 15px; }
+        }
+        .section-highlight { animation: sectionFlash 1.2s ease-out forwards; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title">📄 Messages Module</div>
+            <nav id="toc"></nav>
+        </aside>
+
+        <main class="content" id="main-content">
+            <section class="hero">
+                <div class="hero-badge">Backend Module</div>
+                <h1>Messages Module</h1>
+                <p>Quản lý hệ thống tin nhắn (chat) và lời mời kết bạn (friend requests). Cung cấp gửi tin nhắn trực tiếp, lịch sử trò chuyện, tạo lời mời kết bạn có hạn 24 giờ và xử lý token bảo mật.</p>
+            </section>
+            
+            <div class="main-body">
+                
+                <h2>1. Tổng quan Kiến trúc (Component Overview)</h2>
+                <p>Module <code>Messages</code> chịu trách nhiệm quản lý hai luồng nghiệp vụ chính: hệ thống tin nhắn giữa người dùng và quản lý lời mời kết bạn. Kiến trúc được chia thành các layer rõ ràng nhằm đảm bảo <strong>Separation of Concerns</strong> và hỗ trợ khả năng <strong>Test & Bảo trì (Testability)</strong> một cách tốt nhất.</p>
+
+                <div class="svg-container">
+                    <!-- SVG Architecture Diagram (High-Fidelity Enterprise Style) -->
+                    <svg viewBox="0 0 1000 650" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#1a1a18" />
+                            </marker>
+                        </defs>
+                        
+                        <rect width="1000" height="650" class="svg-bg" />
+                        
+                        <!-- Panel: Presentation Layer -->
+                        <rect x="50" y="50" width="900" height="180" class="svg-mod" />
+                        <text x="70" y="80" class="svg-txt" fill="#5f5e5a">Presentation Layer (HTTP & Guards)</text>
+                        
+                        <rect x="400" y="100" width="200" height="40" class="svg-ctrl" style="fill: #ffffff; stroke: #334155; rx: 8;" />
+                        <text x="500" y="125" class="svg-txt" text-anchor="middle" font-size="14px">JwtAuthGuard</text>
+                        
+                        <rect x="150" y="160" width="300" height="50" class="svg-ctrl" />
+                        <text x="300" y="190" class="svg-txt" text-anchor="middle">MessagesController</text>
+                        
+                        <rect x="550" y="160" width="300" height="50" class="svg-ctrl" />
+                        <text x="700" y="190" class="svg-txt" text-anchor="middle">FriendRequestsController</text>
+                        
+                        <!-- Arrows in Presentation -->
+                        <path d="M500 50 L500 100" class="svg-arrow" marker-end="url(#arrow)" />
+                        <path d="M450 140 L300 160" class="svg-arrow" marker-end="url(#arrow)" />
+                        <path d="M550 140 L700 160" class="svg-arrow" marker-end="url(#arrow)" />
+                        
+                        <text x="500" y="40" class="svg-small" text-anchor="middle">HTTP Client Requests</text>
+
+                        <!-- Panel: Business Logic Layer -->
+                        <rect x="50" y="260" width="900" height="130" class="svg-mod" />
+                        <text x="70" y="290" class="svg-txt" fill="#5f5e5a">Business Logic Layer (Services)</text>
+                        
+                        <rect x="150" y="310" width="300" height="50" class="svg-svc" />
+                        <text x="300" y="340" class="svg-txt" text-anchor="middle">MessagesService</text>
+                        <text x="300" y="385" class="svg-small" text-anchor="middle">Validate logic</text>
+                        
+                        <rect x="550" y="310" width="300" height="50" class="svg-svc" />
+                        <text x="700" y="340" class="svg-txt" text-anchor="middle">FriendRequestService</text>
+                        <text x="700" y="385" class="svg-small" text-anchor="middle">Hạn token 24h & Validate</text>
+                        
+                        <!-- Arrows from Controller to Service -->
+                        <path d="M300 210 L300 310" class="svg-arrow" marker-end="url(#arrow)" />
+                        <path d="M700 210 L700 310" class="svg-arrow" marker-end="url(#arrow)" />
+
+                        <!-- Panel: Data Access Layer -->
+                        <rect x="50" y="420" width="900" height="130" class="svg-mod" />
+                        <text x="70" y="450" class="svg-txt" fill="#5f5e5a">Data Access Layer (Repositories)</text>
+                        
+                        <rect x="150" y="470" width="300" height="50" class="svg-repo" />
+                        <text x="300" y="500" class="svg-txt" text-anchor="middle">MessageRepository</text>
+                        
+                        <rect x="550" y="470" width="300" height="50" class="svg-repo" />
+                        <text x="700" y="500" class="svg-txt" text-anchor="middle">FriendRequestRepository</text>
+                        
+                        <!-- Arrows from Service to Repository -->
+                        <path d="M300 360 L300 470" class="svg-arrow" marker-end="url(#arrow)" />
+                        <path d="M700 360 L700 470" class="svg-arrow" marker-end="url(#arrow)" />
+
+                        <!-- Database -->
+                        <rect x="350" y="580" width="300" height="50" class="svg-infra" />
+                        <text x="500" y="610" class="svg-txt" text-anchor="middle">PostgreSQL Database (Prisma)</text>
+                        
+                        <!-- Arrows from Repository to DB -->
+                        <path d="M300 520 L400 580" class="svg-arrow" marker-end="url(#arrow)" />
+                        <path d="M700 520 L600 580" class="svg-arrow" marker-end="url(#arrow)" />
+                    </svg>
+                </div>
+                
+                <p><strong>Tại sao tách các layer?</strong></p>
+                <ul>
+                    <li><strong>Tách biệt mối quan tâm (Separation of Concerns):</strong> Controller chỉ lo liệu phần HTTP (param, body payload, guard). Service đảm nhận quy tắc nghiệp vụ phức tạp (ví dụ: tạo hạn 24 giờ, sinh mã token, kiểm tra không được tự kết bạn). Repository lo liệu cách giao tiếp với Prisma ORM, chẳng hạn viết query <code>OR</code> để lấy hội thoại hai chiều.</li>
+                    <li><strong>Khả năng Test & Bảo trì:</strong> Việc tách logic CSDL xuống Repository giúp viết Unit Test cho Service dễ dàng thông qua mocking mà không phụ thuộc cứng vào Prisma.</li>
+                </ul>
+
+                <h2>2. Các Dependencies (Dependencies Injection)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dependency</th>
+                            <th>Vai trò</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>MessageRepository</code></td>
+                            <td>Tương tác trực tiếp với Database cho các truy vấn của thực thể <code>Message</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><code>FriendRequestRepository</code></td>
+                            <td>Tương tác trực tiếp với Database cho thực thể <code>FriendRequest</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><code>PrismaModule</code></td>
+                            <td>Khởi tạo và cung cấp đối tượng Prisma Client để Repository thực thi query.</td>
+                        </tr>
+                        <tr>
+                            <td><code>MessagesService</code></td>
+                            <td>Xử lý logic nghiệp vụ liên quan tới tin nhắn giữa các người dùng.</td>
+                        </tr>
+                        <tr>
+                            <td><code>FriendRequestService</code></td>
+                            <td>Xử lý logic nghiệp vụ liên quan tới luồng mời kết bạn (sinh token, kiểm tra thời hạn và trạng thái).</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>3. System Data Flow</h2>
+                <p>Luồng đi của dữ liệu qua các tầng từ Client xuống Database cho các chức năng chính của ứng dụng.</p>
+                <div class="svg-container">
+                    <!-- SVG Data Flow Diagram -->
+                    <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#1a1a18" />
+                            </marker>
+                        </defs>
+                        
+                        <rect width="1000" height="700" class="svg-bg" />
+                        
+                        <!-- Headers -->
+                        <text x="100" y="40" class="svg-txt" fill="#1a1a18" font-size="18px">Client</text>
+                        <text x="350" y="40" class="svg-txt" fill="#185fa5" font-size="18px">Controller / Guard</text>
+                        <text x="600" y="40" class="svg-txt" fill="#0f6e56" font-size="18px">Service Logic</text>
+                        <text x="850" y="40" class="svg-txt" fill="#854f0b" font-size="18px">Repository / DB</text>
+                        
+                        <!-- Flow 1: POST /messages -->
+                        <rect x="20" y="60" width="960" height="100" class="svg-mod" fill="#fafaf8" />
+                        <text x="40" y="85" class="svg-txt" fill="#1a1a18">1. POST /messages (create)</text>
+                        
+                        <rect x="50" y="100" width="100" height="40" class="svg-ctrl" fill="#ffffff" stroke="#334155" />
+                        <text x="100" y="125" class="svg-small" text-anchor="middle">Payload</text>
+                        
+                        <rect x="300" y="100" width="140" height="40" class="svg-ctrl" />
+                        <text x="370" y="125" class="svg-small" text-anchor="middle">JwtAuthGuard + Ctrl</text>
+                        
+                        <rect x="550" y="100" width="140" height="40" class="svg-svc" />
+                        <text x="620" y="125" class="svg-small" text-anchor="middle">Service.create()</text>
+                        
+                        <rect x="800" y="100" width="140" height="40" class="svg-repo" />
+                        <text x="870" y="125" class="svg-small" text-anchor="middle">DB (Lưu tin nhắn)</text>
+
+                        <path d="M150 120 L300 120" class="svg-arrow" marker-end="url(#arrow2)" />
+                        <path d="M440 120 L550 120" class="svg-arrow" marker-end="url(#arrow2)" />
+                        <path d="M690 120 L800 120" class="svg-arrow" marker-end="url(#arrow2)" />
+                        
+                        <!-- Flow 2: GET /messages/:userId -->
+                        <rect x="20" y="180" width="960" height="100" class="svg-mod" fill="#fafaf8" />
+                        <text x="40" y="205" class="svg-txt" fill="#1a1a18">2. GET /messages/:userId (findAllByConversation)</text>
+                        
+                        <rect x="50" y="220" width="100" height="40" class="svg-ctrl" fill="#ffffff" stroke="#334155" />
+                        <text x="100" y="245" class="svg-small" text-anchor="middle">Param: userId</text>
+                        
+                        <rect x="300" y="220" width="140" height="40" class="svg-ctrl" />
+                        <text x="370" y="245" class="svg-small" text-anchor="middle">Ctrl.findAllBy()</text>
+                        
+                        <rect x="550" y="220" width="140" height="40" class="svg-svc" />
+                        <text x="620" y="245" class="svg-small" text-anchor="middle">Service.findAllBy()</text>
+                        
+                        <rect x="800" y="220" width="140" height="40" class="svg-repo" />
+                        <text x="870" y="245" class="svg-small" text-anchor="middle">Repo.findConv()</text>
+
+                        <path d="M150 240 L300 240" class="svg-arrow" marker-end="url(#arrow2)" />
+                        <path d="M440 240 L550 240" class="svg-arrow" marker-end="url(#arrow2)" />
+                        <path d="M690 240 L800 240" class="svg-arrow" marker-end="url(#arrow2)" />
+
+                        <!-- Flow 3: POST /friend-requests/invite -->
+                        <rect x="20" y="300" width="960" height="100" class="svg-mod" fill="#fafaf8" />
+                        <text x="40" y="325" class="svg-txt" fill="#1a1a18">3. POST /friend-requests/invite (createInvite)</text>
+                        
+                        <rect x="50" y="340" width="100" height="40" class="svg-ctrl" fill="#ffffff" stroke="#334155" />
+                        <text x="100" y="365" class="svg-small" text-anchor="middle">Request</text>
+                        
+                        <rect x="300" y="340" width="140" height="40" class="svg-ctrl" />
+                        <text x="370" y="365" class="svg-small" text-anchor="middle">Ctrl.createInvite()</text>
+                        
+                        <rect x="550" y="340" width="140" height="40" class="svg-svc" />
+                        <text x="620" y="365" class="svg-small" text-anchor="middle">UUID & expiresAt</text>
+                        
+                        <rect x="800" y="340" width="140" height="40" class="svg-repo" />
+                        <text x="870" y="365" class="svg-small" text-anchor="middle">DB (Lưu mời mới)</text>
+
+                        <path d="M150 360 L300 360" class="svg-arrow" marker-end="url(#arrow2)" />
+                        <path d="M440 360 L550 360" class="svg-arrow" marker-end="url(#arrow2)" />
+                        <path d="M690 360 L800 360" class="svg-arrow" marker-end="url(#arrow2)" />
+
+                        <!-- Flow 4: GET /friend-requests/info/:token -->
+                        <rect x="20" y="420" width="960" height="120" class="svg-mod" fill="#fafaf8" />
+                        <text x="40" y="445" class="svg-txt" fill="#1a1a18">4. GET /friend-requests/info/:token (getInviteInfo)</text>
+                        
+                        <rect x="50" y="460" width="100" height="40" class="svg-ctrl" fill="#ffffff" stroke="#334155" />
+                        <text x="100" y="485" class="svg-small" text-anchor="middle">Token Param</text>
+                        
+                        <rect x="300" y="460" width="140" height="40" class="svg-ctrl" />
+                        <text x="370" y="485" class="svg-small" text-anchor="middle">Ctrl (Public API)</text>
+                        
+                        <rect x="550" y="460" width="140" height="60" class="svg-svc" />
+                        <text x="620" y="485" class="svg-small" text-anchor="middle">Check PENDING /</text>
+                        <text x="620" y="505" class="svg-small" text-anchor="middle">Lazy Update EXPIRED</text>
+                        
+                        <rect x="800" y="460" width="140" height="40" class="svg-repo" />
+                        <text x="870" y="485" class="svg-small" text-anchor="middle">Repo.findByToken()</text>
+
+                        <path d="M150 480 L300 480" class="svg-arrow" marker-end="url(#arrow2)" />
+                        <path d="M440 480 L550 480" class="svg-arrow" marker-end="url(#arrow2)" />
+                        <path d="M690 480 L800 480" class="svg-arrow" marker-end="url(#arrow2)" />
+                        
+                        <!-- Flow 5: POST /friend-requests/accept/:token -->
+                        <rect x="20" y="560" width="960" height="120" class="svg-mod" fill="#fafaf8" />
+                        <text x="40" y="585" class="svg-txt" fill="#1a1a18">5. POST /friend-requests/accept/:token (acceptInvite)</text>
+                        
+                        <rect x="50" y="600" width="100" height="40" class="svg-ctrl" fill="#ffffff" stroke="#334155" />
+                        <text x="100" y="625" class="svg-small" text-anchor="middle">Auth + Token</text>
+                        
+                        <rect x="300" y="600" width="140" height="40" class="svg-ctrl" />
+                        <text x="370" y="625" class="svg-small" text-anchor="middle">Ctrl.acceptInvite()</text>
+                        
+                        <rect x="550" y="600" width="140" height="60" class="svg-svc" />
+                        <text x="620" y="625" class="svg-small" text-anchor="middle">Verify token & check</text>
+                        <text x="620" y="645" class="svg-small" text-anchor="middle">sender != receiver</text>
+                        
+                        <rect x="800" y="600" width="140" height="40" class="svg-repo" />
+                        <text x="870" y="625" class="svg-small" text-anchor="middle">Update status ACCEPTED</text>
+
+                        <path d="M150 620 L300 620" class="svg-arrow" marker-end="url(#arrow2)" />
+                        <path d="M440 620 L550 620" class="svg-arrow" marker-end="url(#arrow2)" />
+                        <path d="M690 620 L800 620" class="svg-arrow" marker-end="url(#arrow2)" />
+                    </svg>
+                </div>
+                
+                <h2>4. Phân tích chi tiết Controller, Service, Guard</h2>
+                
+                <div class="method-section">
+                    <h3>4.1. MessagesController (<code>messages.controller.ts</code>)</h3>
+                    <p>Các Decorators:</p>
+                    <ul>
+                        <li><code>@ApiTags('messages')</code>, <code>@Controller('messages')</code>: Gắn Swagger tag và prefix route HTTP.</li>
+                        <li><code>@ApiBearerAuth()</code>: Yêu cầu đính kèm token Bearer.</li>
+                        <li><code>@UseGuards(JwtAuthGuard)</code>: Bắt buộc JWT Token hợp lệ để truy cập.</li>
+                        <li><code>@UseInterceptors(ClassSerializerInterceptor)</code>: Tuần tự hóa và loại bỏ trường nhạy cảm dựa trên khai báo của DTO.</li>
+                    </ul>
+                    <p><strong>Các endpoint (Public Methods):</strong></p>
+                    <ul>
+                        <li><strong><code>create(user, createMessageDto)</code></strong>: Nhận data từ body (content, receiverId) và ID người gửi từ token -> gọi <code>MessagesService.create()</code>. Trả về <code>MessageResponseDto</code>.</li>
+                        <li><strong><code>findAllByConversation(user, otherUserId)</code></strong>: Lấy ID người kia từ Param và bản thân từ token -> gọi <code>MessagesService.findAllByConversation()</code>. Trả về <code>[MessageResponseDto]</code>.</li>
+                    </ul>
+                </div>
+
+                <div class="method-section">
+                    <h3>4.2. MessagesService (<code>messages.service.ts</code>)</h3>
+                    <ul>
+                        <li><strong><code>create(senderId, createMessageDto)</code></strong>:<br/>Sử dụng <code>messageRepository.create()</code> lưu tin nhắn mới. Sử dụng cú pháp <code>connect</code> của Prisma để nối ID sender và receiver.</li>
+                        <li><strong><code>findAllByConversation(userId1, userId2)</code></strong>:<br/>Gọi <code>messageRepository.findConversation()</code> để truy xuất toàn bộ cuộc hội thoại.</li>
+                    </ul>
+                </div>
+
+                <div class="method-section">
+                    <h3>4.3. MessageRepository (<code>message.repository.ts</code>)</h3>
+                    <ul>
+                        <li>Kế thừa <code>BaseRepository</code> của Prisma.</li>
+                        <li><strong><code>findConversation(userId1, userId2)</code></strong>: Tìm kiếm bằng điều kiện <code>OR</code>: (senderId = userId1 VÀ receiverId = userId2) HOẶC ngược lại. Sắp xếp tin nhắn <code>orderBy: { createdAt: 'asc' }</code>.</li>
+                    </ul>
+                </div>
+
+                <div class="method-section">
+                    <h3>4.4. FriendRequestsController (<code>friend-requests.controller.ts</code>)</h3>
+                    <p>Các Decorators tương tự: <code>@ApiTags</code>, <code>@UseGuards(JwtAuthGuard)</code>, <code>@ApiBearerAuth()</code>.</p>
+                    <ul>
+                        <li><strong><code>createInvite(req, dto)</code></strong>: Tạo lời mời với <code>receiverId</code> (optional).</li>
+                        <li><strong><code>getInviteInfo(token)</code></strong>: Public API. Lấy thông tin lời mời từ token.</li>
+                        <li><strong><code>acceptInvite(req, token)</code></strong>: Chấp nhận lời mời dựa trên token và ID người dùng đăng nhập.</li>
+                    </ul>
+                </div>
+
+                <div class="method-section">
+                    <h3>4.5. FriendRequestService (<code>friend-request.service.ts</code>)</h3>
+                    <ul>
+                        <li><strong><code>createInvite(senderId, dto)</code></strong>: Tính <code>expiresAt</code> (+24 giờ). Sinh token dạng UUID v4. Gọi repo tạo lời mời.</li>
+                        <li><strong><code>getInviteInfo(token)</code></strong>: Lấy lời mời. Nếu không có: ném <code>NotFoundException</code>. Nếu status khác PENDING: ném <code>BadRequestException</code>. Nếu quá hạn <code>expiresAt</code>: cập nhật thành <code>EXPIRED</code> và ném <code>BadRequestException</code>.</li>
+                        <li><strong><code>acceptInvite(token, receiverId)</code></strong>: Verify bằng <code>getInviteInfo(token)</code>. Check không tự mời bản thân. Cập nhật <code>status = ACCEPTED</code>.</li>
+                        <li><strong><code>checkConnection(userId1, userId2)</code></strong>: Kiểm tra trạng thái bạn bè (có một `FriendRequest` trạng thái `ACCEPTED`).</li>
+                    </ul>
+                </div>
+
+                <h2>5. DTOs (Data Transfer Objects)</h2>
+                <ul>
+                    <li><strong><code>CreateMessageDto</code></strong>: Yêu cầu <code>content</code> và <code>receiverId</code>.</li>
+                    <li><strong><code>MessageResponseDto</code></strong>: id, content, senderId, receiverId, createdAt.</li>
+                    <li><strong><code>CreateFriendRequestDto</code></strong>: Cho phép <code>receiverId</code> là optional UUID.</li>
+                    <li><strong><code>FriendRequestResponseDto</code></strong>: id, token, senderId, receiverId, status, expiresAt, createdAt.</li>
+                </ul>
+
+                <h2>6. Các Pattern quan trọng</h2>
+                
+                <h3>Pattern 1: Lazy Update (Cập nhật trễ trạng thái hết hạn)</h3>
+                <pre><code>if (new Date() > invite.expiresAt) {
+  await this.friendRequestRepository.update({
+    where: { id: invite.id },
+    data: { status: RequestStatus.EXPIRED },
+  });
+  throw new BadRequestException('Invite link has expired');
+}</code></pre>
+                <p><strong>Tại sao dùng pattern này?</strong> Tránh overhead cho hệ thống khi không cần các tác vụ chạy nền (Cron jobs) quét DB đổi trạng thái định kỳ. Việc update chỉ xảy ra khi User truy cập tài nguyên (VD: API getInviteInfo).</p>
+                
+                <h3>Pattern 2: Biến Query Params thành Prisma OR condition</h3>
+                <pre><code>return this.findMany({
+  where: {
+    OR: [
+      { senderId: userId1, receiverId: userId2 },
+      { senderId: userId2, receiverId: userId1 },
+    ],
+  },
+  orderBy: { createdAt: 'asc' },
+});</code></pre>
+                <p><strong>Tại sao dùng pattern này?</strong> Rất tự nhiên để quét một hội thoại 2 chiều trong cơ sở dữ liệu.</p>
+
+                <h2>7. API Design Review</h2>
+                <ul>
+                    <li><code>POST /messages</code> — 201 Created ✅</li>
+                    <li><code>GET  /messages/:userId</code> — 200 OK ✅</li>
+                    <li><code>POST /friend-requests/invite</code> — 201 Created ⚠️ (Thiên hướng verb-oriented, nên dùng /friend-requests)</li>
+                    <li><code>GET  /friend-requests/info/:token</code> — 200 OK ⚠️ (Thiên hướng verb-oriented, nên dùng /friend-requests/:token)</li>
+                    <li><code>POST /friend-requests/accept/:token</code> — 201 Created ⚠️ (Tốt hơn là PATCH /friend-requests/:token/accept)</li>
+                </ul>
+
+                <h2>8. Cách Debug khi gặp lỗi</h2>
+                <h3>Lỗi 400 BadRequest khi "Get Invitation Info" hoặc "Accept Invite"</h3>
+                <ul>
+                    <li>Xem thông báo lỗi trả về.</li>
+                    <li>Nếu "Invite link is already X", kiểm tra lại trong database cột <code>status</code> đã thành <code>ACCEPTED</code> hay <code>EXPIRED</code> chưa. Lời mời chỉ được thao tác khi còn <code>PENDING</code>.</li>
+                    <li>Nếu "Invite link has expired", kiểm tra cột <code>expiresAt</code>. Hệ thống tự update thành EXPIRED nếu gọi API quá thời hạn này.</li>
+                    <li>Nếu "You cannot accept your own invite", đảm bảo người đăng nhập không phải chính là <code>senderId</code>.</li>
+                </ul>
+                <pre><code>rtk grep "Invite link has expired" src/messages
+# Test DB query
+SELECT id, token, status, "expiresAt" FROM "FriendRequest" WHERE token='&lt;token&gt;';</code></pre>
+
+                <h3>Lỗi 401 Unauthorized</h3>
+                <ul>
+                    <li>Kiểm tra request đã đính kèm Bearer token hợp lệ trên Header chưa.</li>
+                    <li>Endpoint <code>getInviteInfo</code> là ngoại lệ vì nó Public (không guard).</li>
+                </ul>
+
+                <h2>9. Đánh giá — Đã tốt chưa?</h2>
+                <h3>✅ Đã làm tốt</h3>
+                <ul>
+                    <li><strong>Tách Repository Layer:</strong> Giữ nguyên sự thuần túy của Service Layer chỉ cho Business Logic.</li>
+                    <li><strong>Lazy Update Status:</strong> Tiết kiệm tài nguyên không cần cron job.</li>
+                    <li><strong>Tính năng Invitation Mở:</strong> Cung cấp tùy chọn tạo link với <code>receiverId</code> là optional, có thể chia sẻ rộng rãi.</li>
+                </ul>
+                <h3>❌ Cần cải thiện</h3>
+                <ul>
+                    <li><strong>Bảo mật gửi tin nhắn:</strong> Hiện tại bất cứ ai cũng nhắn được cho người khác (tiềm ẩn spam). Cần tích hợp <code>checkConnection</code> để đảm bảo đã kết bạn mới được nhắn. Ném lỗi 403 Forbidden nếu không phải bạn bè.</li>
+                    <li><strong>Thiếu phân trang (Pagination):</strong> <code>findConversation</code> đang lấy toàn bộ log tin nhắn. Cần implement cursor-based pagination hoặc skip/take để giảm tải cho DB.</li>
+                </ul>
+
+                <h2>10. Biến môi trường cần thiết</h2>
+                <pre><code class="language-env">DATABASE_URL=          # Kết nối CSDL thông qua Prisma
+JWT_SECRET=            # Cung cấp cho cơ chế Guard giải mã Token xác thực</code></pre>
+
+                <h2>11. Khi AI agent làm việc với module này</h2>
+                <ul>
+                    <li>Mọi logic tính toán, xác thực thời gian, kiểm tra role phải đưa vào <strong>Service</strong>.</li>
+                    <li><strong>Repository</strong> đảm trách mọi truy vấn đến DB. Không import/sử dụng trực tiếp Prisma Client ở Controller hay Service.</li>
+                    <li>Tuyệt đối không xóa logic kiểm tra <code>status !== RequestStatus.PENDING</code>.</li>
+                    <li>Logic kiểm tra <code>new Date() > expiresAt</code> phải luôn đi trước việc update database.</li>
+                    <li>Luôn kiểm soát đầu ra API thông qua thư viện <code>class-transformer</code> (<code>plainToInstance</code>) và cấu trúc DTO.</li>
+                    <li>Khi lỗi truy vấn tin nhắn, thử hoán đổi <code>senderId</code> và <code>receiverId</code> vì Prisma OR có thể rỗng nếu UUID bị lệch. Theo vết <code>expiresAt</code> để check timezone bugs.</li>
+                </ul>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.scrollToSection = function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.classList.remove('section-highlight');
+            void el.offsetWidth;
+            el.classList.add('section-highlight');
+            
+            document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+            const active = document.querySelector(`#toc a[data-target="${id}"]`);
+            if (active) {
+                active.classList.add('active');
+                active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        };
+
+        mermaid.initialize({
+            startOnLoad: true,
+            securityLevel: 'loose',
+            theme: 'base',
+            themeVariables: {
+                background: '#1e1e1e',
+                mainBkg: '#2d2d30',
+                primaryTextColor: '#d4d4d4',
+                lineColor: '#569cd6',
+                fontFamily: 'Inter, Segoe UI, sans-serif'
+            }
+        });
+
+        (function buildTOC() {
+            const main = document.getElementById('main-content');
+            const toc = document.getElementById('toc');
+            const headings = main.querySelectorAll('h2, h3, h4');
+            const ul = document.createElement('ul');
+            headings.forEach((h, i) => {
+                if (!h.id) h.id = 'h-' + i;
+                const li = document.createElement('li');
+                li.className = 'toc-' + h.tagName.toLowerCase();
+                const a = document.createElement('a');
+                a.href = '#' + h.id;
+                a.textContent = h.textContent.replace(/^[▶✅❌⚠️ℹ️📄⚙️🌐🗄️]+\s*/, '');
+                a.dataset.target = h.id;
+                a.onclick = (e) => { e.preventDefault(); scrollToSection(h.id); };
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+            toc.appendChild(ul);
+        })();
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+                    const active = document.querySelector(`#toc a[data-target="${entry.target.id}"]`);
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+        document.querySelectorAll('h2, h3, h4').forEach(h => observer.observe(h));
+    </script>
+</body>
+</html>

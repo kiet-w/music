@@ -12,6 +12,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 
 import { useAlbumStore } from '@/store/useAlbumStore';
+import { useDownloadHistoryStore } from '@/store/useDownloadHistoryStore';
 
 interface DownloaderProps {
   onDownloadStarted?: (url: string) => void;
@@ -26,6 +27,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
   const { albums, loadAlbums: originalLoadAlbums } = useAlbumStore();
+  const { addHistory } = useDownloadHistoryStore();
   const [selectedAlbumId, setSelectedAlbumId] = useState<string>('');
   const [isDownloading, setIsDownloading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -57,11 +59,16 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
       
       let isCompleted = false;
 
-      const handleSuccess = () => {
+      const handleSuccess = (updatedTrack?: any) => {
         if (isCompleted) return;
         isCompleted = true;
         setStatus(t('success'));
         setIsDownloading(false);
+        
+        // Add to history
+        const album = (Array.isArray(albums) ? albums : []).find(a => a.id === selectedAlbumId);
+        addHistory(updatedTrack || song, album?.title || 'Single');
+
         setUrl('');
         setTitle('');
         setArtist('');
@@ -87,7 +94,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
               (payload) => {
                 const updatedSong = payload.new as any;
                 if (updatedSong.url && !isCompleted) {
-                  handleSuccess();
+                  handleSuccess(updatedSong);
                   if (channel) supabase.removeChannel(channel);
                 }
               }
@@ -112,7 +119,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
         try {
           const updatedSong = await fetchTrack(accessToken, songId);
           if (updatedSong.url && !isCompleted) {
-            handleSuccess();
+            handleSuccess(updatedSong);
             if (channel) supabase.removeChannel(channel);
           } else if (!isCompleted) {
             setTimeout(poll, 3000);
@@ -192,7 +199,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
           className="w-full h-11 rounded-xl bg-background/50 border-white/5 focus-visible:ring-primary/20 text-white/70 px-3 outline-none appearance-none"
         >
           <option value="">No Album (Single)</option>
-          {albums.map((album) => (
+          {(Array.isArray(albums) ? albums : []).map((album) => (
             <option key={album.id} value={album.id}>
               {album.title}
             </option>

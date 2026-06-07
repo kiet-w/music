@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class ImportDto {
   @IsString()
@@ -6,10 +6,14 @@ export class ImportDto {
   fileId: string;
 
   @IsString()
-  @IsNotEmpty()
-  accessToken: string;
+  @IsOptional()
+  fileName?: string;
 
   @IsString()
-  @IsNotEmpty()
-  albumId: string;
+  @IsOptional()
+  driveToken?: string;
+
+  @IsString()
+  @IsOptional()
+  albumId?: string;
 }
