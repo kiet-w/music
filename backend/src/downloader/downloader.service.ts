@@ -8,8 +8,11 @@ import {
 import * as fs from 'fs';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { IDownloaderProvider } from '../common/interfaces/downloader-provider.interface';
-import ytDlp from 'yt-dlp-exec';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import * as ffmpegStatic from 'ffmpeg-static';
+
+const execFileAsync = promisify(execFile);
 
 @Injectable()
 export class DownloaderService implements IDownloaderProvider {
@@ -24,19 +27,21 @@ export class DownloaderService implements IDownloaderProvider {
     try {
       this.logger.info({ url, outputPath }, 'Starting download');
       
-      await ytDlp(url, {
-        f: 'bestaudio/best',
-        extractorArgs: 'youtube:player_client=web',
-        noPlaylist: true,
-        retries: 3,
-        fragmentRetries: 3,
-        socketTimeout: 30,
-        x: true,
-        audioFormat: 'mp3',
-        audioQuality: this.audioBitrate,
-        ffmpegLocation: ffmpegStatic as unknown as string,
-        o: outputPath,
-      });
+      const args = [
+        '-f', 'bestaudio/best',
+        '--extractor-args', 'youtube:player_client=web',
+        '--no-playlist',
+        '--retries', '3',
+        '--fragment-retries', '3',
+        '--socket-timeout', '30',
+        '-x',
+        '--audio-format', 'mp3',
+        '--audio-quality', this.audioBitrate,
+        '--ffmpeg-location', ffmpegStatic as unknown as string,
+        '-o', outputPath,
+        url,
+      ];
+      await execFileAsync('./yt-dlp', args);
 
       this.logger.info({ outputPath }, 'Download completed');
     } catch (error: any) {
