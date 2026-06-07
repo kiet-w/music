@@ -10,8 +10,8 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { IDownloaderProvider } from '../common/interfaces/downloader-provider.interface';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
-import * as ffmpegStatic from 'ffmpeg-static';
 
+const ffmpegStatic = require('ffmpeg-static');
 const execFileAsync = promisify(execFile);
 
 @Injectable()
