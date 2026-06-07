@@ -26,10 +26,9 @@ export class DownloaderService implements IDownloaderProvider {
   async download(url: string, outputPath: string): Promise<void> {
     try {
       this.logger.info({ url, outputPath }, 'Starting download');
-      
       const args = [
         '-f', 'bestaudio/best',
-        '--extractor-args', 'youtube:player_client=web',
+        '--extractor-args', 'youtube:player_client=android',
         '--no-playlist',
         '--retries', '3',
         '--fragment-retries', '3',
@@ -38,9 +37,13 @@ export class DownloaderService implements IDownloaderProvider {
         '--audio-format', 'mp3',
         '--audio-quality', this.audioBitrate,
         '--ffmpeg-location', ffmpegStatic as unknown as string,
-        '-o', outputPath,
-        url,
       ];
+
+      if (fs.existsSync('./cookies.txt')) {
+        args.push('--cookies', './cookies.txt');
+      }
+
+      args.push('-o', outputPath, url);
       await execFileAsync('./yt-dlp', args);
 
       this.logger.info({ outputPath }, 'Download completed');
