@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Post,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -57,12 +58,25 @@ export class AuthController {
     return this.authService.me(user.id);
   }
 
+  @Get('google/status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check Google Drive link status' })
+  async googleStatus(@CurrentUser() user: any) {
+    return this.authService.getGoogleStatus(user.id);
+  }
+
   @Get('users')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Return all users' })
-  async findAll() {
-    return this.authService.findAll();
+  async findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const skip = page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
+    const take = limit ? parseInt(limit, 10) : 50;
+    return this.authService.findAll(skip, take);
   }
 }

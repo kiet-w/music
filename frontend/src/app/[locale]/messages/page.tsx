@@ -2,19 +2,29 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { ChevronLeft } from 'lucide-react';
 import { UserList, User } from '@/components/molecules/Chat/UserList';
 import { ChatWindow } from '@/components/molecules/Chat/ChatWindow';
 import { ChatInput } from '@/components/molecules/Chat/ChatInput';
+import { Button } from '@/components/atoms/ui/button';
 import { useChatStore } from '@/store/useChatStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { fetchUsers } from '@/lib/api';
+import { fetchUsers, createInvite } from '@/lib/api';
+import { useSearchParams } from 'next/navigation';
+
+import { MainContainer } from '@/components/templates/wrappers/MainContainer';
+
+import { cn } from '@/lib/utils';
 
 export default function MessagesPage() {
   const t = useTranslations('Chat');
   const { user: currentUser, accessToken } = useAuthStore();
+  const searchParams = useSearchParams();
+  const targetUserId = searchParams.get('u');
   const { 
     messages, 
     activeReceiverId, 
+    unreadMessages,
     setActiveReceiverId, 
     sendMessage, 
     subscribeToMessages, 
@@ -28,10 +38,16 @@ export default function MessagesPage() {
     if (accessToken) {
       fetchUsers(accessToken).then(data => {
         // Filter out the current user from the list
-        setUsers(data.filter((u: User) => u.id !== currentUser?.id));
+        const filteredUsers = data.filter((u: User) => u.id !== currentUser?.id);
+        setUsers(filteredUsers);
+
+        // If targetUserId is provided in URL, set it as active
+        if (targetUserId && filteredUsers.some((u: User) => u.id === targetUserId)) {
+          setActiveReceiverId(targetUserId, accessToken);
+        }
       });
     }
-  }, [accessToken, currentUser?.id]);
+  }, [accessToken, currentUser?.id, targetUserId, setActiveReceiverId]);
 
   useEffect(() => {
     if (currentUser?.id) {
@@ -40,7 +56,7 @@ export default function MessagesPage() {
     return () => unsubscribeFromMessages();
   }, [currentUser?.id, subscribeToMessages, unsubscribeFromMessages]);
 
-  const handleSelectUser = (userId: string) => {
+  const handleSelectUser = (userId: string | null) => {
     if (accessToken) {
       setActiveReceiverId(userId, accessToken);
     }
@@ -55,20 +71,44 @@ export default function MessagesPage() {
     }
   };
 
+  const handleCreateInvite = async () => {
+    if (!accessToken) return;
+    try {
+      const { token } = await createInvite(accessToken);
+      const inviteUrl = `${window.location.origin}/${searchParams.get('locale')}/invite?token=${token}`;
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(inviteUrl);
+      alert(t('invite_success_copied') || 'Link copied to clipboard!');
+    } catch (error) {
+      console.error('Failed to create invite:', error);
+    }
+  };
+
   const activeChatPartner = users.find(u => u.id === activeReceiverId);
 
   return (
-    <main className="min-h-screen pt-24 pb-32 px-4 md:px-8 max-w-6xl mx-auto flex flex-col gap-6">
+    <MainContainer className="flex flex-col gap-6">
       <header className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-white shadow-text">{t('title')}</h1>
+        <Button 
+          onClick={handleCreateInvite}
+          className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl"
+        >
+          {t('invite_button')}
+        </Button>
       </header>
 
-      <div className="flex-1 glass-dark rounded-3xl border border-white/10 overflow-hidden flex flex-col md:flex-row h-[70vh] min-h-[500px]">
+      <div className="flex-1 glass-dark rounded-3xl border border-white/10 overflow-hidden flex flex-col h-[70vh] min-h-[500px]">
         {/* Sidebar - User List */}
-        <aside className="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/10 p-4 overflow-y-auto">
+        <aside className={cn(
+          "w-full border-b border-white/10 p-4 overflow-y-auto",
+          activeReceiverId ? "hidden" : "block"
+        )}>
           <UserList 
             users={users} 
             activeUserId={activeReceiverId} 
+            unreadUserIds={unreadMessages}
             onSelectUser={handleSelectUser} 
           />
           {users.length === 0 && (
@@ -79,14 +119,25 @@ export default function MessagesPage() {
         </aside>
 
         {/* Main Chat Area */}
-        <section className="flex-1 flex flex-col h-full overflow-hidden">
+        <section className={cn(
+          "flex-1 flex flex-col h-full overflow-hidden",
+          activeReceiverId ? "block" : "hidden"
+        )}>
           {activeReceiverId ? (
             <>
               {/* Chat Header */}
               <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-white/5">
-                <div>
-                  <h2 className="text-white font-bold">{activeChatPartner?.name || activeChatPartner?.email}</h2>
-                  <p className="text-[10px] text-white/40">{activeChatPartner?.email}</p>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => handleSelectUser(null)}
+                    className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors text-white"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <div>
+                    <h2 className="text-white font-bold">{activeChatPartner?.name || activeChatPartner?.email}</h2>
+                    <p className="text-[10px] text-white/40">{activeChatPartner?.email}</p>
+                  </div>
                 </div>
               </div>
               
@@ -109,6 +160,6 @@ export default function MessagesPage() {
           )}
         </section>
       </div>
-    </main>
+    </MainContainer>
   );
 }

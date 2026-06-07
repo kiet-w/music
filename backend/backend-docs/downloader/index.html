@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>downloader — Technical Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#060d1b; --surf:#0d1829; --surf2:#111f34; --bdr:#1a2d45;
+  --txt:#c8d6e5; --dim:#6b8199; --bright:#e8f4ff;
+  --acc:#00c8f0; --accg:#00c8f012;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(#1a2d45 1px,transparent 1px);background-size:28px 28px;opacity:.28;pointer-events:none;z-index:0}
+
+/* ─── SIDEBAR ─────────────────────────────────── */
+.sb{width:228px;min-width:228px;height:100vh;position:sticky;top:0;background:rgba(6,11,24,.92);backdrop-filter:blur(14px);border-right:1px solid var(--bdr);overflow-y:auto;z-index:50;display:flex;flex-direction:column}
+.sb-top{padding:18px 16px 12px;border-bottom:1px solid var(--bdr)}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:4px}
+.sb-title{font-size:13px;font-weight:700;color:var(--bright)}
+.sb-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.sb-sec{padding:8px 0}
+.sb-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:7px 16px 3px}
+.sbl{display:flex;align-items:center;gap:8px;padding:6px 16px;font-size:12px;color:var(--dim);cursor:pointer;border-left:2px solid transparent;transition:all .14s;text-decoration:none}
+.sbl:hover, .sbl.active{color:var(--bright);border-left-color:var(--acc);background:var(--accg)}
+
+/* ─── MAIN ─────────────────────────────────────── */
+.main{flex:1;overflow-x:hidden;position:relative;z-index:1;max-width:calc(100vw - 228px); padding: 40px;}
+
+/* MARKDOWN STYLES */
+.md-content h1 { font-size: 28px; color: var(--bright); margin-bottom: 20px; border-bottom: 1px solid var(--bdr); padding-bottom: 10px; }
+.md-content h2 { font-size: 20px; color: var(--bright); margin-top: 30px; margin-bottom: 15px; }
+.md-content h3 { font-size: 16px; color: var(--acc); margin-top: 20px; margin-bottom: 10px; }
+.md-content p { margin-bottom: 15px; line-height: 1.6; font-size: 14px; }
+.md-content ul, .md-content ol { margin-bottom: 15px; padding-left: 20px; font-size: 14px; line-height: 1.6; }
+.md-content li { margin-bottom: 5px; }
+.md-content pre { background: #040a12; border: 1px solid var(--bdr); border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow-x: auto; margin-bottom: 15px; color: #abb2bf; }
+.md-content code { font-family: 'JetBrains Mono', monospace; background: var(--surf2); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+.md-content table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+.md-content th { background: var(--surf2); padding: 10px; text-align: left; border-bottom: 1px solid var(--bdr); color: var(--dim); font-family: 'JetBrains Mono', monospace; }
+.md-content td { padding: 10px; border-bottom: 1px solid var(--bdr); }
+.md-content blockquote { border-left: 3px solid var(--acc); color: var(--dim); margin-bottom: 15px; background: var(--surf); padding: 10px 15px; border-radius: 4px; }
+.md-content strong { color: var(--bright); }
+.md-content hr { border: 0; height: 1px; background: var(--bdr); margin: 30px 0; }
+
+@media(max-width:960px){
+  .sb{display:none}
+  .main{max-width:100vw; padding: 20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-top">
+    <div class="sb-tag">NestJS Docs</div>
+    <div class="sb-title">DOWNLOADER Module</div>
+    <div class="sb-sub">Technical Documentation</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Navigation</div>
+    <a class="sbl" href="#">Overview</a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="md-content">
+    <h1>Downloader Module Documentation</h1>
+<h2>1. Tổng quan Kiến trúc (Component Overview)</h2>
+<p>Module <code>Downloader</code> chịu trách nhiệm tải nhạc (cụ thể là trích xuất âm thanh) từ các nguồn bên ngoài (chủ yếu là YouTube) thông qua công cụ dòng lệnh <code>yt-dlp</code>. Module này cung cấp dịch vụ <code>DownloaderService</code> để tải file âm thanh chất lượng cao (320kbps MP3) và dọn dẹp file tạm sau khi sử dụng. </p>
+<h2>2. Các Dependencies (Dependencies Injection)</h2>
+<ul>
+<li><strong><code>PinoLogger</code> (nestjs-pino)</strong>: Được inject qua <code>@InjectPinoLogger(DownloaderService.name)</code> để ghi log có cấu trúc các sự kiện: bắt đầu tải, tải hoàn tất, lỗi, và việc dọn dẹp file.</li>
+<li><strong><code>child_process</code> (Node.js)</strong>: Sử dụng hàm <code>execFile</code> (đã được promisify) để thực thi lệnh <code>yt-dlp</code> trên hệ điều hành.</li>
+<li><strong><code>fs</code> (Node.js)</strong>: Module File System của Node.js dùng để kiểm tra sự tồn tại và xóa các file tạm (<code>existsSync</code>, <code>unlinkSync</code>).</li>
+<li><strong><code>IDownloaderProvider</code></strong>: Một interface (<code>../common/interfaces/downloader-provider.interface</code>) mà service này tuân thủ, giúp định hình chuẩn giao tiếp (contract) cho việc tải file.</li>
+</ul>
+<h2>3. Phân tích chi tiết Controller, Service, Guard, v.v.</h2>
+<h3>3.1. DownloaderModule (<code>downloader.module.ts</code>)</h3>
+<ul>
+<li>Khai báo <code>@Module()</code>: Cung cấp (<code>providers</code>) và xuất (<code>exports</code>) <code>DownloaderService</code> để các module khác có thể import và sử dụng. Không có Controller nào trong module này.</li>
+</ul>
+<h3>3.2. DownloaderService (<code>downloader.service.ts</code>)</h3>
+<p>Các Decorators:</p>
+<ul>
+<li><code>@Injectable()</code>: Đánh dấu class là một provider có thể được inject vào các thành phần khác.</li>
+<li><code>@InjectPinoLogger()</code>: Inject logger với context cụ thể là <code>DownloaderService</code>.</li>
+</ul>
+<p><strong>Các Properties:</strong></p>
+<ul>
+<li><code>private readonly audioBitrate = &#39;320K&#39;</code>: Định nghĩa chất lượng âm thanh mong muốn khi tải bằng <code>yt-dlp</code>.</li>
+</ul>
+<p><strong>Các Public Methods:</strong></p>
+<ul>
+<li><strong><code>download(url: string, outputPath: string): Promise&lt;void&gt;</code></strong>:<ul>
+<li>Tham số: <code>url</code> (đường dẫn video cần tải), <code>outputPath</code> (đường dẫn lưu file trên ổ cứng).</li>
+<li>Logic: <ul>
+<li>Ghi log thông báo bắt đầu tải.</li>
+<li>Xây dựng mảng arguments (<code>args</code>) cho lệnh <code>yt-dlp</code>. Cấu hình bao gồm: lấy audio tốt nhất (<code>-f bestaudio/best</code>), giả lập web client để tránh lỗi chặn IP (<code>--extractor-args youtube:player_client=web</code>), thử lại 3 lần nếu lỗi (<code>--retries 3</code>, <code>--fragment-retries 3</code>), timeout 30 giây (<code>--socket-timeout 30</code>), trích xuất âm thanh định dạng MP3 chất lượng 320K (<code>-x</code>, <code>--audio-format mp3</code>, <code>--audio-quality 320K</code>).</li>
+<li>Gọi <code>execFileAsync(&#39;yt-dlp&#39;, args)</code> để thực thi lệnh.</li>
+<li>Xử lý lỗi (Catch block): Dựa vào thông báo lỗi (<code>stderr</code>) trả về từ tiến trình:<ul>
+<li>Nếu chứa <code>Requested format is not available</code> -&gt; Ném <code>BadRequestException</code>.</li>
+<li>Nếu chứa <code>Video unavailable</code> -&gt; Ném <code>NotFoundException</code>.</li>
+<li>Ngược lại -&gt; Ghi log lỗi có giới hạn (<code>hint: stderr.slice(0, 200)</code>) để bảo vệ dữ liệu và ném <code>InternalServerErrorException</code>.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong><code>cleanup(filePath: string): Promise&lt;void&gt;</code></strong>:<ul>
+<li>Tham số: <code>filePath</code> (Đường dẫn file cần xóa).</li>
+<li>Logic: Kiểm tra xem file có tồn tại trên ổ cứng bằng <code>fs.existsSync(filePath)</code>. Nếu có, thực hiện xóa file đồng bộ bằng <code>fs.unlinkSync(filePath)</code>. Bắt lỗi và ghi log nếu việc xóa thất bại (ví dụ: bị khóa bởi process khác).</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>4. System Data Flow</h2>
+<p><strong>1. Phương thức <code>download(url, outputPath)</code></strong></p>
+<ul>
+<li>Flow: Caller -&gt; <code>DownloaderService</code> (<code>download()</code>) -&gt; OS Child Process (<code>yt-dlp</code> via <code>execFileAsync</code>) -&gt; File System (Lưu file tại <code>outputPath</code>) -&gt; Trả về kết quả cho <code>DownloaderService</code> -&gt; Caller.</li>
+</ul>
+<p><strong>2. Phương thức <code>cleanup(filePath)</code></strong></p>
+<ul>
+<li>Flow: Caller -&gt; <code>DownloaderService</code> (<code>cleanup()</code>) -&gt; Node.js File System (<code>fs.existsSync</code> -&gt; <code>fs.unlinkSync</code>) -&gt; Hệ điều hành (Xóa file) -&gt; Caller.</li>
+</ul>
+<hr>
+<hr>
+<h1>Downloader Module — AI Coding Skill Context</h1>
+<blockquote>
+<p>File này dùng làm context cho AI coding agent khi làm việc với Downloader Module.</p>
+</blockquote>
+<hr>
+<h2>1. Kiến trúc tổng thể — Tại sao tổ chức như vậy?</h2>
+<pre><code>Service Caller (Ví dụ: TrackService)
+    │
+    ▼
+DownloaderService       ← Đóng gói toàn bộ logic tương tác với yt-dlp
+    │
+    ▼
+[OS Child Process]      ← Thực thi tiến trình yt-dlp
+    │
+    ▼
+[File System]           ← Lưu file mp3 và dọn dẹp sau khi xong
+</code></pre>
+<p><strong>Tại sao tách các layer?</strong></p>
+<ul>
+<li><strong>Đóng gói công cụ ngoại vi (External Tool Wrapping):</strong> Thay vì để logic <code>exec()</code> rải rác khắp nơi, <code>DownloaderService</code> đóng gói mọi chi tiết về cách cấu hình, các tham số dòng lệnh dài dòng của <code>yt-dlp</code> và cách phân loại lỗi vào một nơi duy nhất.</li>
+<li><strong>Tuân thủ Interface Segregation:</strong> Việc <code>DownloaderService</code> implements <code>IDownloaderProvider</code> giúp hệ thống không bị trói buộc chặt vào <code>yt-dlp</code>. Trong tương lai, nếu muốn đổi sang một thư viện tải nhạc khác, chỉ cần tạo service mới implement interface này mà không cần sửa code ở các module gọi nó.</li>
+</ul>
+<hr>
+<h2>2. Các Dependencies</h2>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Vai trò</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>child_process</code> (execFileAsync)</td>
+<td>Thực thi công cụ dòng lệnh <code>yt-dlp</code> trên hệ điều hành với tư cách là một tiến trình con.</td>
+</tr>
+<tr>
+<td><code>fs</code> (Node.js)</td>
+<td>Giao tiếp với File System để kiểm tra và xóa file nhạc tạm thời sau khi xử lý xong.</td>
+</tr>
+<tr>
+<td><code>PinoLogger</code></td>
+<td>Ghi log chuẩn cấu trúc (structured logging) theo vết các hoạt động tải và dọn dẹp file, đặc biệt xử lý log lỗi tinh gọn.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. Entry Points — Đi đâu về đâu</h2>
+<!-- Copy block này cho mỗi phương thức service do không có controller --><h3>Service.download(url, outputPath)</h3>
+<pre><code>Caller gọi: { url, outputPath }
+    │
+    ▼ DownloaderService.download(url, outputPath)
+    │   1. Ghi log bắt đầu tải (logger.info).
+    │   2. Build arguments cho yt-dlp (định dạng mp3, 320kbps, web client).
+    │   3. execFileAsync(&#39;yt-dlp&#39;, args) → Chạy tiến trình tải.
+    │   4. Ghi log hoàn thành.
+    │
+    ▼ Trả về: void (khi file đã nằm trên ổ cứng ở outputPath)
+
+Lỗi có thể xảy ra:
+- [400] BadRequestException → Khi yt-dlp báo không hỗ trợ format cho video này.
+- [404] NotFoundException → Khi video bị private hoặc không tồn tại.
+- [500] InternalServerErrorException → Khi yt-dlp gặp lỗi bất thường (mạng, chặn IP).
+</code></pre>
+<h3>Service.cleanup(filePath)</h3>
+<pre><code>Caller gọi: { filePath }
+    │
+    ▼ DownloaderService.cleanup(filePath)
+    │   1. fs.existsSync(filePath) → Kiểm tra file có tồn tại không.
+    │   2. Nếu có, fs.unlinkSync(filePath) → Xóa file.
+    │   3. Ghi log hoàn tất xóa hoặc lỗi.
+    │
+    ▼ Trả về: void
+</code></pre>
+<hr>
+<h2>4. Đánh giá — Đã tốt chưa?</h2>
+<h3>✅ Đã làm tốt</h3>
+<table>
+<thead>
+<tr>
+<th>Điểm tốt</th>
+<th>Lý do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Phân loại lỗi <code>yt-dlp</code></td>
+<td>Code không ném lỗi chung chung mà đã bóc tách <code>stderr</code> của lệnh <code>yt-dlp</code> để phân loại lỗi như <code>Format unavailable</code> (400) hoặc <code>Video unavailable</code> (404), giúp client nhận đúng mã lỗi HTTP hợp lý.</td>
+</tr>
+<tr>
+<td>Bảo vệ quyền riêng tư log</td>
+<td>Khi gặp lỗi <code>InternalServerErrorException</code>, service giới hạn độ dài của log lỗi (cắt bớt 200 ký tự) thay vì in toàn bộ <code>stderr</code> có thể chứa thông tin môi trường nhạy cảm.</td>
+</tr>
+<tr>
+<td>Xử lý chặn IP từ YouTube</td>
+<td>Việc dùng <code>--extractor-args youtube:player_client=web</code> là cách thực hành tốt để né các lỗi &quot;sign in to confirm you&#39;re not a bot&quot; của YouTube đang gây khó dễ cho <code>yt-dlp</code>.</td>
+</tr>
+</tbody></table>
+<h3>❌ Chưa tốt / Cần cải thiện</h3>
+<p><strong>1. Sử dụng API đồng bộ (sync) của File System</strong></p>
+<pre><code class="language-typescript">// HIỆN TẠI — vấn đề:
+// Sử dụng fs.existsSync và fs.unlinkSync trong hàm async sẽ chặn (block) event loop của Node.js.
+if (fs.existsSync(filePath)) {
+  fs.unlinkSync(filePath);
+}
+
+// NÊN SỬA — lý do:
+// Nên sử dụng API async/promise của fs để không làm ảnh hưởng tới hiệu năng hệ thống khi tải/xóa nhiều file.
+import * as fs from &#39;fs/promises&#39;;
+// ...
+try {
+  await fs.unlink(filePath);
+} catch (error) {
+  if (error.code !== &#39;ENOENT&#39;) {
+    // log lỗi
+  }
+}
+</code></pre>
+<p><strong>2. Quản lý timeout chưa triệt để ở Node.js level</strong></p>
+<pre><code class="language-typescript">// HIỆN TẠI:
+// Timeout chỉ được set cho `yt-dlp` qua `--socket-timeout 30`. 
+// Tuy nhiên nếu `yt-dlp` bị treo (zombie process), promise execFileAsync có thể không bao giờ resolve.
+await execFileAsync(&#39;yt-dlp&#39;, args);
+
+// NÊN SỬA:
+// Truyền thêm options `timeout` vào hàm execFileAsync để Node.js tự động kill process nếu chạy quá lâu.
+await execFileAsync(&#39;yt-dlp&#39;, args, { timeout: 60000 }); // 60s timeout
+</code></pre>
+<hr>
+<h2>5. API Design Review</h2>
+<p>Không có HTTP Controller trong module này, do đó không có thông tin đánh giá RESTful API. Mọi tương tác được thực hiện thông qua các service layer gọi xuống.</p>
+<hr>
+<h2>6. Cách Debug khi gặp lỗi</h2>
+<h3>Lỗi 500 InternalServerErrorException (yt-dlp failed)</h3>
+<pre><code>Checklist:
+1. Máy chủ (Server/Docker container) đã cài đặt thư viện dòng lệnh `yt-dlp` chưa? (Dùng lệnh `rtk which yt-dlp` để kiểm tra).
+2. Phiên bản `yt-dlp` có quá cũ và bị YouTube chặn không? (Thường xuyên phải cập nhật: `yt-dlp -U`).
+3. Ổ cứng server có bị đầy không? (Lệnh `df -h`).
+
+Command debug:
+→ Kiểm tra log bằng câu lệnh tìm lỗi: grep -r &#39;\[Downloader\] Unexpected error&#39; /var/log/
+→ Có thể thử copy trực tiếp command log trong service và chạy trên terminal máy chủ để xem nguyên nhân chi tiết.
+</code></pre>
+<hr>
+<h2>7. Các Pattern quan trọng trong module này</h2>
+<h3>Pattern 1: Wrapper / Adapter Pattern</h3>
+<pre><code class="language-typescript">// Tại sao dùng pattern này?
+// → Tạo một abstraction layer quanh công cụ dòng lệnh yt-dlp.
+// → Cô lập toàn bộ các logic về arguments, parsing stderr vào một chỗ.
+
+export class DownloaderService implements IDownloaderProvider {
+   // ...
+}
+
+// Nếu KHÔNG dùng pattern này thì sao?
+// → Các service khác (như bài hát, album) muốn tải nhạc sẽ phải tự gọi thư viện `exec` và tự xử lý các arguments của yt-dlp, dẫn đến rác code và khó thay đổi sau này.
+</code></pre>
+<hr>
+<h2>8. Biến môi trường cần thiết</h2>
+<pre><code class="language-env"># Module này hiện tại không sử dụng trực tiếp biến môi trường nào từ ConfigService. 
+# Tuy nhiên, nó yêu cầu phải cài đặt `yt-dlp` trên môi trường hệ điều hành host.
+</code></pre>
+<hr>
+<h2>9. Khi AI agent làm việc với module này</h2>
+<p><strong>Trước khi thêm feature mới:</strong></p>
+<ul>
+<li>Bất cứ tùy chọn dòng lệnh nào mới cho <code>yt-dlp</code> cần được kiểm tra kỹ vì nó có thể thay đổi kết quả đầu ra (chậm hơn, file lớn hơn, bị lỗi với nguồn khác).</li>
+<li>Phải cập nhật test case trong <code>downloader.service.spec.ts</code> mỗi khi thay đổi tham số <code>--audio-quality</code>, <code>--audio-format</code>, v.v.</li>
+</ul>
+<p><strong>Khi sửa phần nhạy cảm của module:</strong></p>
+<ul>
+<li>KHÔNG thay đổi cách bắt lỗi qua <code>stderr.includes(...)</code> nếu không chắc chắn về định dạng output của <code>yt-dlp</code>.</li>
+</ul>
+<p><strong>Khi debug:</strong></p>
+<ul>
+<li>Bắt đầu debug bằng cách chạy thủ công lệnh <code>yt-dlp</code> truyền thống ở bên ngoài (terminal server) để chắc chắn rằng mạng/IP server chưa bị YouTube đưa vào blacklist.</li>
+</ul>
+<hr>
+
+  </div>
+</div>
+
+</body>
+</html>

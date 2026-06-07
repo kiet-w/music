@@ -93,10 +93,24 @@ export class AuthService {
     };
   }
 
-  async findAll() {
-    return this.userRepository.findMany({
-      select: { id: true, email: true, name: true },
-    });
+  async findAll(skip: number = 0, take: number = 50) {
+    const [total, data] = await Promise.all([
+      this.userRepository.count(),
+      this.userRepository.findMany({
+        skip,
+        take,
+        select: { id: true, email: true, name: true },
+        orderBy: { createdAt: 'desc' },
+      })
+    ]);
+
+    return {
+      data,
+      total,
+      page: Math.floor(skip / take) + 1,
+      limit: take,
+      totalPages: Math.ceil(total / take)
+    };
   }
 
   // ─── Private Helpers ──────────────────────────────────────────

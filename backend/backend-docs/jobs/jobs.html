@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jobs Module — Technical Docs</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        /* ── CSS Variables ── */
+        :root {
+          /* Backgrounds */
+          --bg:             #f4f2ee;
+          --sidebar-bg:     #eceae5;
+          --panel-bg:       #fafaf8;
+
+          /* Text */
+          --text:           #1a1a18;
+          --text-muted:     #5f5e5a;
+
+          /* Syntax Highlighting */
+          --kw:             #185fa5;  /* keyword — blue */
+          --fn:             #854f0b;  /* function — amber */
+          --str:            #0f6e56;  /* string — teal */
+
+          /* Accent / Brand */
+          --accent:         #d85a30;  /* Claude coral/orange */
+          --border:         #d3d1c7;
+
+          /* Semantic */
+          --success:        #2c7a39;  /* rgb(44,122,57) */
+          --warn:           #854f0b;
+          --error:          #ab2b3f;  /* rgb(171,43,63) */
+
+          /* ─── SVG Component Palette (Light) ─────────── */
+          --svg-mod:         #f4f2ee;
+          --svg-ctrl:        #e6f1fb;
+          --svg-ctrl-stroke: #185fa5;
+          --svg-svc:         #e1f5ee;
+          --svg-svc-stroke:  #0f6e56;
+          --svg-repo:        #faeeda;
+          --svg-repo-stroke: #854f0b;
+          --svg-infra:       #eeedfe;
+          --svg-infra-stroke:#534ab7;
+        }
+
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Consolas', monospace;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            font-size: 15px;
+        }
+
+        /* ── Layout ── */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 32px 20px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+            z-index: 100;
+        }
+        .sidebar-title {
+            font-size: 0.75em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar nav ul { list-style: none; }
+        .sidebar nav li { margin-bottom: 4px; }
+        .sidebar nav a {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar nav a:hover { background: var(--panel-bg); color: var(--accent); transform: translateX(4px); }
+        .sidebar nav a.active { background: var(--accent); color: #fff !important; font-weight: 600; }
+
+        .toc-h3 > a { padding-left: 24px; font-size: 0.85em; color: var(--text-muted); }
+        .toc-h4 > a { padding-left: 40px; font-size: 0.8em; color: var(--text-muted); }
+
+        /* ── Main Content ── */
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding-bottom: 100px;
+        }
+
+        /* ── Hero Section (Landing Page Style) ── */
+        .hero {
+            padding: 120px 60px 80px;
+            text-align: center;
+            background: linear-gradient(180deg, #252526 0%, #1e1e1e 100%);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 60px;
+        }
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .hero p {
+            font-size: 1.25em;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+        }
+
+        /* ── Main Body Container ── */
+        .main-body {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* ── Typography ── */
+        h1 { font-size: 2.4em; color: var(--fn); margin-bottom: 40px; }
+        h2 {
+            font-size: 1.8em;
+            color: var(--kw);
+            margin: 64px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            scroll-margin-top: 40px;
+        }
+        h3 {
+            font-size: 1.4em;
+            color: var(--fn);
+            margin: 48px 0 16px;
+            scroll-margin-top: 40px;
+        }
+        h4 {
+            font-size: 1em;
+            color: var(--success);
+            margin: 32px 0 12px;
+            scroll-margin-top: 40px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        p { margin-bottom: 20px; }
+        ul, ol { margin: 0 0 24px 28px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text); font-weight: 700; }
+        em { color: var(--str); font-style: normal; }
+
+        /* ── SVG Diagrams (Custom Style) ── */
+        .svg-container {
+            width: 100%;
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .svg-container svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+        /* SVG Internal Styles (Matched to CSS Variables) */
+        .svg-bg { fill: transparent; }
+        .svg-mod { fill: var(--sidebar-bg); stroke: var(--border); stroke-width: 2; rx: 18; }
+        .svg-ctrl { fill: var(--svg-ctrl); stroke: var(--svg-ctrl-stroke); stroke-width: 2; rx: 12; }
+        .svg-svc { fill: var(--svg-svc); stroke: var(--svg-svc-stroke); stroke-width: 2; rx: 12; }
+        .svg-repo { fill: var(--svg-repo); stroke: var(--svg-repo-stroke); stroke-width: 2; rx: 12; }
+        .svg-infra { fill: var(--svg-infra); stroke: var(--svg-infra-stroke); stroke-width: 2; rx: 12; }
+        .svg-txt { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; fill: var(--text); }
+        .svg-small { font-family: 'Inter', sans-serif; font-size: 13px; fill: var(--text-muted); }
+        .svg-arrow { stroke: var(--border); stroke-width: 2.5; fill: none; }
+
+        /* ── Inline code & Blocks ── */
+        code {
+            background: var(--panel-bg);
+            color: var(--str);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            border: 1px solid var(--border);
+        }
+        pre {
+            background: #1e1e1e;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            overflow-x: auto;
+            margin-bottom: 32px;
+        }
+        pre code { background: none; border: none; padding: 0; color: #d4d4d4; }
+
+        /* ── Tables ── */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 32px; border-radius: 10px; overflow: hidden; }
+        th { background: var(--panel-bg); color: var(--kw); border: 1px solid var(--border); padding: 14px 18px; text-align: left; }
+        td { border: 1px solid var(--border); padding: 12px 18px; }
+        tr:nth-child(even) td { background: var(--panel-bg); }
+
+        /* ── Method Section ── */
+        .method-section {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 56px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .method-signature {
+            background: #121212;
+            border-left: 5px solid var(--accent);
+            border-radius: 6px;
+            padding: 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95em;
+            margin: 20px 0 32px;
+            color: #d4d4d4;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Animation */
+        @keyframes sectionFlash {
+            0% { outline: 3px solid var(--accent); outline-offset: 6px; background: rgba(216,90,48,0.1); }
+            100% { outline: 3px solid transparent; outline-offset: 15px; }
+        }
+        .section-highlight { animation: sectionFlash 1.2s ease-out forwards; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title">📄 Jobs Module</div>
+            <nav id="toc"></nav>
+        </aside>
+
+        <main class="content" id="main-content">
+            <section class="hero">
+                <div class="hero-badge">Backend Module</div>
+                <h1>Jobs Module</h1>
+                <p>Thiết lập và quản lý các background jobs (hàng đợi công việc) trong hệ thống sử dụng BullMQ và Redis. Đảm nhiệm việc tải bài hát từ YouTube, tải lên Supabase Storage và cập nhật cơ sở dữ liệu một cách bất đồng bộ.</p>
+            </section>
+            
+            <div class="main-body">
+                <h2>1. Kiến trúc tổng thể & System Data Flow</h2>
+                <p>Module <code>Jobs</code> chịu trách nhiệm thiết lập và quản lý các background jobs trong hệ thống sử dụng BullMQ và Redis. Cụ thể, module này đang xử lý hàng đợi <code>conversion</code>. Kiến trúc này giúp hệ thống xử lý các tác vụ nặng một cách bất đồng bộ mà không block main thread (luồng chính) của ứng dụng.</p>
+                
+                <p>Việc tách các layer theo Microservice/Worker pattern đem lại những lợi ích quan trọng:</p>
+                <ul>
+                    <li><strong>Bất đồng bộ (Asynchronous processing):</strong> Phản hồi lại client ngay lập tức, trong khi xử lý chạy ngầm.</li>
+                    <li><strong>Mở rộng linh hoạt:</strong> Scale bằng cách chạy nhiều worker process độc lập nhau mà không lo tắc nghẽn server web chính.</li>
+                    <li><strong>Bộ nhớ hiệu quả:</strong> Dùng stream qua <code>StorageService.uploadStream</code> thay vì tải về RAM giúp tránh Out Of Memory (OOM).</li>
+                </ul>
+
+                <div class="svg-container">
+                    <svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                          <path d="M0,0 L0,6 L9,3 z" fill="#d3d1c7" stroke="none" />
+                        </marker>
+                      </defs>
+
+                      <rect class="svg-bg" width="900" height="600" />
+
+                      <!-- Title -->
+                      <text x="40" y="50" class="svg-txt" font-size="24">System Data Flow: "conversion" queue</text>
+                      <text x="40" y="75" class="svg-small">Biểu diễn luồng xử lý bất đồng bộ tải file nhạc từ YouTube lên Supabase</text>
+
+                      <!-- External/Trigger: Redis/BullMQ -->
+                      <rect x="40" y="120" width="180" height="60" class="svg-repo" />
+                      <text x="130" y="148" text-anchor="middle" class="svg-txt">Redis Server</text>
+                      <text x="130" y="166" text-anchor="middle" class="svg-small">BullMQ Queue</text>
+
+                      <!-- Process Module -->
+                      <rect x="300" y="100" width="300" height="460" class="svg-mod" />
+                      <text x="450" y="130" text-anchor="middle" class="svg-txt">ConversionProcessor</text>
+
+                      <!-- Step 1: Download -->
+                      <rect x="330" y="160" width="240" height="50" class="svg-svc" />
+                      <text x="450" y="184" text-anchor="middle" class="svg-txt">1. DownloaderService</text>
+                      <text x="450" y="200" text-anchor="middle" class="svg-small">.download()</text>
+
+                      <!-- Step 2: Stream -->
+                      <rect x="330" y="240" width="240" height="50" class="svg-svc" />
+                      <text x="450" y="264" text-anchor="middle" class="svg-txt">2. fs.createReadStream</text>
+                      <text x="450" y="280" text-anchor="middle" class="svg-small">Đọc file dạng stream</text>
+
+                      <!-- Step 3: Storage -->
+                      <rect x="330" y="320" width="240" height="50" class="svg-svc" />
+                      <text x="450" y="344" text-anchor="middle" class="svg-txt">3. StorageService</text>
+                      <text x="450" y="360" text-anchor="middle" class="svg-small">.uploadStream() &amp; .getPublicUrl()</text>
+
+                      <!-- Step 4: DB Update -->
+                      <rect x="330" y="400" width="240" height="50" class="svg-repo" />
+                      <text x="450" y="424" text-anchor="middle" class="svg-txt">4. PrismaService</text>
+                      <text x="450" y="440" text-anchor="middle" class="svg-small">track.update(publicUrl)</text>
+
+                      <!-- Step 5: Cleanup -->
+                      <rect x="330" y="480" width="240" height="50" class="svg-svc" />
+                      <text x="450" y="504" text-anchor="middle" class="svg-txt">5. DownloaderService</text>
+                      <text x="450" y="520" text-anchor="middle" class="svg-small">.cleanup()</text>
+
+                      <!-- Externals -->
+                      <rect x="680" y="155" width="180" height="60" class="svg-repo" />
+                      <text x="770" y="183" text-anchor="middle" class="svg-txt">YouTube</text>
+                      <text x="770" y="201" text-anchor="middle" class="svg-small">Download source</text>
+
+                      <rect x="680" y="235" width="180" height="60" class="svg-repo" />
+                      <text x="770" y="263" text-anchor="middle" class="svg-txt">Local System</text>
+                      <text x="770" y="281" text-anchor="middle" class="svg-small">temp/[songId].mp3</text>
+
+                      <rect x="680" y="315" width="180" height="60" class="svg-repo" />
+                      <text x="770" y="343" text-anchor="middle" class="svg-txt">Supabase Storage</text>
+                      <text x="770" y="361" text-anchor="middle" class="svg-small">Cloud Bucket</text>
+
+                      <rect x="680" y="395" width="180" height="60" class="svg-repo" />
+                      <text x="770" y="423" text-anchor="middle" class="svg-txt">PostgreSQL</text>
+                      <text x="770" y="441" text-anchor="middle" class="svg-small">Database</text>
+
+                      <!-- Arrows -->
+                      <!-- Redis to Processor -->
+                      <path d="M 220 150 L 300 150" class="svg-arrow" marker-end="url(#arrow)" />
+                      <!-- Internal Flow -->
+                      <path d="M 450 210 L 450 240" class="svg-arrow" marker-end="url(#arrow)" />
+                      <path d="M 450 290 L 450 320" class="svg-arrow" marker-end="url(#arrow)" />
+                      <path d="M 450 370 L 450 400" class="svg-arrow" marker-end="url(#arrow)" />
+                      <path d="M 450 450 L 450 480" class="svg-arrow" marker-end="url(#arrow)" />
+                      <!-- To Externals -->
+                      <path d="M 570 185 L 680 185" class="svg-arrow" marker-end="url(#arrow)" />
+                      <path d="M 570 265 L 680 265" class="svg-arrow" marker-end="url(#arrow)" />
+                      <path d="M 570 345 L 680 345" class="svg-arrow" marker-end="url(#arrow)" />
+                      <path d="M 570 425 L 680 425" class="svg-arrow" marker-end="url(#arrow)" />
+
+                      <text x="260" y="140" class="svg-small" fill="#854f0b" text-anchor="middle">dequeue job</text>
+                    </svg>
+                </div>
+
+                <h2>2. Các Dependencies</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dependency</th>
+                            <th>Vai trò</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>BullModule</strong></td>
+                            <td>Kết nối Redis và đăng ký/cung cấp Queue (hàng đợi) cũng như Worker.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DownloaderService</strong></td>
+                            <td>Xử lý việc tải file audio từ YouTube về ổ cứng lưu tạm thời, và xóa file khi hoàn tất.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>StorageService</strong></td>
+                            <td>Tương tác với dịch vụ Storage (như Supabase) để upload file nhạc (stream) và sinh ra public URL.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PrismaService</strong></td>
+                            <td>Truy cập Database để cập nhật đường dẫn bài hát cuối cùng vào bảng <code>Track</code> sau khi tải thành công.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PinoLogger</strong></td>
+                            <td>Ghi chú log theo ngữ cảnh của job (songId, userId), giúp dễ dàng theo dõi lỗi trong background job.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>3. Phân tích chi tiết Module &amp; Processor</h2>
+                
+                <h3>3.1. JobsModule (<code>jobs.module.ts</code>)</h3>
+                <p>Khởi tạo cấu hình và đăng ký worker:</p>
+                <ul>
+                    <li><strong>imports:</strong> 
+                        <ul>
+                            <li><code>BullModule.forRoot(...)</code>: Khởi tạo cấu hình kết nối BullMQ chung toàn hệ thống, đọc cấu hình kết nối Redis từ biến môi trường <code>REDIS_HOST</code> và <code>REDIS_PORT</code>.</li>
+                            <li><code>BullModule.registerQueue({ name: 'conversion' })</code>: Đăng ký một queue cụ thể tên là <code>conversion</code>.</li>
+                            <li><code>DownloaderModule</code>, <code>StorageModule</code>: Các module liên quan cung cấp service hỗ trợ tải/upload file.</li>
+                        </ul>
+                    </li>
+                    <li><strong>providers:</strong> Đăng ký <code>ConversionProcessor</code> là background worker xử lý job cho queue.</li>
+                    <li><strong>exports:</strong> <code>BullModule</code> để các module khác (Controller/Service) có thể đẩy job vào hàng đợi.</li>
+                </ul>
+
+                <h3>3.2. ConversionProcessor (<code>conversion.processor.ts</code>)</h3>
+                <div class="method-section">
+                    <h4>Worker Host Process()</h4>
+                    <div class="method-signature">@Processor('conversion')<br>class ConversionProcessor extends WorkerHost {<br>&nbsp;&nbsp;async process(job: Job&lt;any, any, string&gt;): Promise&lt;any&gt; { ... }<br>}</div>
+                    <p><strong>Logic thực thi tuần tự:</strong></p>
+                    <ol>
+                        <li>Tạo thư mục tạm <code>temp</code> ở root directory (<code>process.cwd()</code>) nếu chưa tồn tại.</li>
+                        <li>Xác định đường dẫn file đầu ra <code>outputPath</code> (<code>temp/[songId].mp3</code>).</li>
+                        <li><strong>Tải file:</strong> Gọi <code>downloaderService.download(url, outputPath)</code> để tải âm thanh từ YouTube.</li>
+                        <li><strong>Upload stream:</strong> Tạo <code>ReadStream</code> từ <code>outputPath</code>. Gọi <code>storageService.uploadStream(fileStream, 'music', storagePath)</code> để tải luồng dữ liệu lên bucket <code>music</code>.</li>
+                        <li><strong>Lấy URL:</strong> Gọi <code>storageService.getPublicUrl('music', storagePath)</code>.</li>
+                        <li><strong>Cập nhật Database:</strong> Gọi <code>prisma.track.update</code> lưu <code>publicUrl</code>.</li>
+                        <li><strong>Dọn dẹp:</strong> Xóa file tạm thông qua <code>downloaderService.cleanup()</code>.</li>
+                        <li><strong>Return:</strong> Trả về kết quả cho BullMQ đánh dấu <code>completed</code>.</li>
+                    </ol>
+                    <p><strong>Xử lý ngoại lệ (Catch):</strong> Bất cứ lỗi nào xảy ra sẽ trigger catch block. Gọi <code>this.logger.error</code>, sau đó chạy <code>downloaderService.cleanup(outputPath)</code> để dọn file tạm, và ném (throw) lỗi để BullMQ đánh dấu là <code>failed</code>.</p>
+                </div>
+
+                <h2>4. Các Pattern quan trọng</h2>
+                
+                <h3>Pattern 1: Worker/Queue Pattern (với BullMQ)</h3>
+                <pre><code class="language-typescript">// Tại sao dùng pattern này?
+// → Xử lý bất đồng bộ những tác vụ I/O chậm chạp (như Download và Upload) 
+//   mà không treo HTTP Endpoint.
+// → Đảm bảo khả năng Retry tự động và Scale up thêm Node dễ dàng.
+
+@Processor('conversion')
+export class ConversionProcessor extends WorkerHost {
+  async process(job: Job) { /*...*/ }
+}</code></pre>
+                <p>Nếu KHÔNG dùng pattern này: Client gọi API tải nhạc phải chờ hàng chục giây đến phút dẫn tới timeout. Server dễ treo khi có nhiều truy cập song song.</p>
+
+                <h3>Pattern 2: Stream Uploading</h3>
+                <pre><code class="language-typescript">// Tại sao dùng pattern này?
+// → Chuyển tiếp ngay lập tức dòng dữ liệu (byte) lên cloud qua mạng 
+//   thay vì đọc toàn bộ bài hát vào bộ nhớ RAM.
+
+const fileStream = fs.createReadStream(outputPath);
+await this.storageService.uploadStream(fileStream, 'music', storagePath);</code></pre>
+                <p>Nếu KHÔNG dùng pattern này: <code>fs.readFileSync()</code> một file 50MB thì mất 50MB RAM. Nếu có 100 job cùng lúc thì mất 5GB RAM, gây OOM (Out of Memory) trên server.</p>
+
+                <h2>5. Đánh giá — Đã tốt chưa?</h2>
+                
+                <h3>✅ Đã làm tốt</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Điểm tốt</th>
+                            <th>Lý do</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Sử dụng Streaming để Upload</strong></td>
+                            <td>Tạo <code>fs.createReadStream</code> thay vì đọc vào memory (Buffer) giúp ứng dụng không bị crash vì tràn RAM khi xử lý nhiều job.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Quản lý tài nguyên File</strong></td>
+                            <td>Logic <code>cleanup()</code> được đặt cẩn thận ở cả luồng thành công và luồng lỗi (try-catch), đảm bảo ổ cứng không bị đầy.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hệ thống Queue chuẩn</strong></td>
+                            <td>Đảm bảo tính ổn định, tự động retry, theo dõi trạng thái dễ dàng.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>❌ Cần cải thiện</h3>
+                <p><strong>1. Đường dẫn thư mục temp Hardcode:</strong></p>
+                <pre><code class="language-typescript">// HIỆN TẠI — vấn đề:
+const tempDir = path.join(process.cwd(), 'temp');
+// Việc gán trực tiếp tên thư mục tạm trong thư mục làm việc không tốt. Trong môi trường Container (Docker), thư mục này có thể không được cấp quyền ghi.
+
+// NÊN SỬA — lý do:
+// Nên sử dụng package `os` mặc định của Node.js để trỏ tới thư mục TMP chuẩn của OS.
+import * as os from 'os';
+const tempDir = path.join(os.tmpdir(), 'music-conversion');</code></pre>
+
+                <p><strong>2. Không có logic cập nhật trạng thái lỗi vào DB:</strong></p>
+                <pre><code class="language-typescript">// NÊN SỬA:
+// Ngoài việc throw lỗi cho BullMQ, nên update DB để UI có thể hiển thị trạng thái "FAILED" cho người dùng.
+} catch (error) {
+  // ...
+  await this.prisma.track.update({
+    where: { id: songId },
+    data: { status: 'FAILED', error: error.message }, // Cần thêm trường status vào schema
+  });
+  throw error;
+}</code></pre>
+
+                <h2>6. Cách Debug khi gặp lỗi</h2>
+                
+                <h3>Lỗi Worker không chạy (Job stuck ở trạng thái 'waiting' hoặc 'delayed')</h3>
+                <ul>
+                    <li>Redis Server có đang chạy không?</li>
+                    <li>Biến môi trường <code>REDIS_HOST</code> và <code>REDIS_PORT</code> có đúng không? (Nếu dùng localhost qua Docker có thể không map đúng).</li>
+                    <li>NestJS Server đã được start chưa?</li>
+                </ul>
+                <pre><code class="language-bash"># Debug CLI commands
+rtk env | grep REDIS
+redis-cli ping</code></pre>
+
+                <h3>Lỗi Quá trình Tải / Upload thất bại (Job rơi vào trạng thái 'failed')</h3>
+                <ul>
+                    <li>Kiểm tra URL bài hát (YouTube) có hợp lệ hoặc có bị hạn chế vùng (Region block) không.</li>
+                    <li>Kiểm tra Supabase Storage có đầy hoặc cấu hình kết nối có sai không.</li>
+                    <li>Kiểm tra cấp quyền (Permissions) trên thư mục gốc cho ứng dụng để ghi vào <code>./temp</code>.</li>
+                </ul>
+                <p>Log sẽ in ra lỗi với message: <code>"Job failed"</code> kèm <code>songId</code>, <code>userId</code>, <code>error.message</code> qua Pino Logger. Xem log này để xác định nguyên nhân chính xác.</p>
+
+                <h2>7. Khi AI agent làm việc với module này</h2>
+                <ul>
+                    <li>Mọi logic xử lý liên quan đến background task nặng đều nên đẩy vào Processor thay vì viết vào HTTP Controller.</li>
+                    <li>Luôn inject logger để track ID của Job, User, Song nhằm phục vụ quá trình debug.</li>
+                    <li><strong>Quan trọng:</strong> Đảm bảo lệnh <code>downloaderService.cleanup()</code> được thực thi trong TẤT CẢ các kịch bản (Thành công và Thất bại) để ngăn rò rỉ dung lượng ổ đĩa.</li>
+                    <li>KHÔNG thay đổi cách đọc file qua stream thành <code>readFileSync()</code>.</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.scrollToSection = function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.classList.remove('section-highlight');
+            void el.offsetWidth;
+            el.classList.add('section-highlight');
+            
+            document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+            const active = document.querySelector(`#toc a[data-target="${id}"]`);
+            if (active) {
+                active.classList.add('active');
+                active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        };
+
+        mermaid.initialize({
+            startOnLoad: true,
+            securityLevel: 'loose',
+            theme: 'base',
+            themeVariables: {
+                background: '#1e1e1e',
+                mainBkg: '#2d2d30',
+                primaryTextColor: '#d4d4d4',
+                lineColor: '#569cd6',
+                fontFamily: 'Inter, Segoe UI, sans-serif'
+            }
+        });
+
+        (function buildTOC() {
+            const main = document.getElementById('main-content');
+            const toc = document.getElementById('toc');
+            const headings = main.querySelectorAll('h2, h3, h4');
+            const ul = document.createElement('ul');
+            headings.forEach((h, i) => {
+                if (!h.id) h.id = 'h-' + i;
+                const li = document.createElement('li');
+                li.className = 'toc-' + h.tagName.toLowerCase();
+                const a = document.createElement('a');
+                a.href = '#' + h.id;
+                a.textContent = h.textContent.replace(/^[▶✅❌⚠️ℹ️📄⚙️🌐🗄️]+\s*/, '');
+                a.dataset.target = h.id;
+                a.onclick = (e) => { e.preventDefault(); scrollToSection(h.id); };
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+            toc.appendChild(ul);
+        })();
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+                    const active = document.querySelector(`#toc a[data-target="${entry.target.id}"]`);
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+        document.querySelectorAll('h2, h3, h4').forEach(h => observer.observe(h));
+    </script>
+</body>
+</html>

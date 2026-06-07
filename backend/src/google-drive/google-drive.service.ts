@@ -1,11 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject, BadRequestException, NotFoundException } from '@nestjs/common';
 import { google } from 'googleapis';
+import { PrismaService } from '../prisma/prisma.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { randomUUID } from 'crypto';
+import { StorageService } from '../storage/storage.service';
+import { SongRepository } from '../songs/repositories/song.repository';
+import { AlbumService } from '../albums/album.service';
+import { AlbumRepository } from '../albums/repositories/album.repository';
+import { ImportDto } from './dto/import.dto';
 
 @Injectable()
 export class GoogleDriveService {
   private oauth2Client;
 
-  constructor() {
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly storageService: StorageService,
+    private readonly songRepository: SongRepository,
+    private readonly albumService: AlbumService,
+    private readonly albumRepository: AlbumRepository,
+  ) {
     this.oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
@@ -13,11 +29,124 @@ export class GoogleDriveService {
     );
   }
 
-  async listFiles(accessToken: string) {
-    this.oauth2Client.setCredentials({ access_token: accessToken });
+  async generateAuthUrl(userId: string) {
+    const state = randomUUID();
+    // Store state with userId in cache for 5 minutes
+    await this.cacheManager.set(`google_auth_state:${state}`, userId, 300000);
+
+    return this.oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      prompt: 'consent',
+      scope: ['https://www.googleapis.com/auth/drive.readonly'],
+      state: state,
+    });
+  }
+
+  async isConnected(userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { googleRefreshToken: true },
+    });
+    return !!user?.googleRefreshToken;
+  }
+
+  async exchangeCodeForTokens(userId: string, code: string, state: string) {
+    const cachedUserId = await this.cacheManager.get(`google_auth_state:${state}`);
+    if (!cachedUserId || cachedUserId !== userId) {
+      throw new UnauthorizedException('Invalid or expired state parameter');
+    }
+
+    const { tokens } = await this.oauth2Client.getToken(code);
+    
+    // Clear state from cache
+    await this.cacheManager.del(`google_auth_state:${state}`);
+
+    // Save tokens to user
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        googleAccessToken: tokens.access_token,
+        googleRefreshToken: tokens.refresh_token,
+        googleTokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+      },
+    });
+
+    return { success: true };
+  }
+
+  async importFile(userId: string, importDto: ImportDto) {
+    const { fileId, albumId, fileName, driveToken } = importDto;
+    
+    // 1. Resolve Album
+    const finalAlbumId = await this.resolveAlbumId(userId, albumId);
+
+    // 2. Get Metadata & Validate
+    const metadata = await this.getFileMetadata(userId, fileId, driveToken);
+    this.validateMp3(metadata, fileName);
+
+    // 3. Download
+    const stream = await this.downloadFile(userId, fileId, driveToken);
+
+    // 4. Sanitize & Upload
+    const originalName = fileName || metadata.name || 'unknown';
+    const sanitizedName = this.sanitizeFileName(originalName);
+    const storagePath = `songs/${finalAlbumId}/${Date.now()}_${sanitizedName}`;
+    
+    const path = await this.storageService.uploadStream(
+      stream,
+      'music',
+      storagePath,
+      metadata.mimeType || 'audio/mpeg',
+    );
+    const url = await this.storageService.getPublicUrl('music', path);
+
+    // 5. Save to DB
+    return this.songRepository.create({
+      data: {
+        title: originalName.replace(/\.[^/.]+$/, ''),
+        artist: 'Unknown Artist',
+        url,
+        albumId: finalAlbumId,
+        sourceType: 'google-drive',
+        sourceId: fileId,
+      },
+    });
+  }
+
+  private async resolveAlbumId(userId: string, albumId?: string): Promise<string> {
+    if (albumId) {
+      const album = await this.albumRepository.findUnique({
+        where: { id: albumId },
+      });
+      if (!album || album.userId !== userId) {
+        throw new NotFoundException('Album not found');
+      }
+      return album.id;
+    }
+    const defaultAlbum = await this.albumService.findOrCreateDefault(userId);
+    return defaultAlbum.id;
+  }
+
+  private validateMp3(metadata: any, fileName?: string) {
+    const isMp3Mime = metadata.mimeType === 'audio/mpeg' || metadata.mimeType === 'audio/mp3';
+    const isMp3Ext = (fileName || metadata.name)?.toLowerCase().endsWith('.mp3');
+
+    if (!isMp3Mime && !isMp3Ext) {
+      throw new BadRequestException('Chỉ hỗ trợ file định dạng MP3');
+    }
+  }
+
+  private sanitizeFileName(name: string): string {
+    return name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9.-]/g, '_');
+  }
+
+  async listFiles(userId: string) {
+    await this.setCredentials(userId);
     const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
     
-    console.log('Searching for MP3 files in Google Drive (including Shared Drives)...');
     try {
       const res = await drive.files.list({
         pageSize: 100,
@@ -28,7 +157,6 @@ export class GoogleDriveService {
       });
       
       const files = res.data.files || [];
-      console.log(`Successfully fetched ${files.length} total files from Drive.`);
       
       // Strictly filter for MP3 files or shortcuts to MP3 files
       const musicFiles = files.filter(file => {
@@ -46,7 +174,7 @@ export class GoogleDriveService {
       });
 
       // Map shortcuts to their targets
-      const resolvedFiles = musicFiles.map(file => {
+      return musicFiles.map(file => {
         if (file.mimeType === 'application/vnd.google-apps.shortcut' && file.shortcutDetails?.targetId) {
           return {
             ...file,
@@ -57,22 +185,17 @@ export class GoogleDriveService {
         }
         return file;
       });
-
-      console.log(`Filtered down to ${resolvedFiles.length} music files.`);
-      return resolvedFiles;
     } catch (error: any) {
-      console.error('CRITICAL ERROR in listFiles:');
-      if (error.response) {
-        console.error('Google API Error Response:', JSON.stringify(error.response.data, null, 2));
-      } else {
-        console.error('Error Message:', error.message);
-      }
       throw error;
     }
   }
 
-  async getFileMetadata(accessToken: string, fileId: string) {
-    this.oauth2Client.setCredentials({ access_token: accessToken });
+  async getFileMetadata(userId: string, fileId: string, accessToken?: string) {
+    if (accessToken) {
+      this.oauth2Client.setCredentials({ access_token: accessToken });
+    } else {
+      await this.setCredentials(userId);
+    }
     const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
     const res = await drive.files.get({
       fileId,
@@ -82,8 +205,12 @@ export class GoogleDriveService {
     return res.data;
   }
 
-  async downloadFile(accessToken: string, fileId: string): Promise<any> {
-    this.oauth2Client.setCredentials({ access_token: accessToken });
+  async downloadFile(userId: string, fileId: string, accessToken?: string): Promise<any> {
+    if (accessToken) {
+      this.oauth2Client.setCredentials({ access_token: accessToken });
+    } else {
+      await this.setCredentials(userId);
+    }
     const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
 
     const res = await drive.files.get(
@@ -96,5 +223,41 @@ export class GoogleDriveService {
       { responseType: 'stream' },
     );
     return res.data;
+  }
+
+  private async setCredentials(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.googleRefreshToken) {
+      throw new UnauthorizedException('Google Drive not connected');
+    }
+
+    this.oauth2Client.setCredentials({
+      refresh_token: user.googleRefreshToken,
+      access_token: user.googleAccessToken,
+      expiry_date: user.googleTokenExpiry?.getTime(),
+    });
+
+    // Handle token refresh automatically by the library
+    this.oauth2Client.on('tokens', async (tokens) => {
+      if (tokens.refresh_token) {
+        // Rarely happens unless offline access is requested and first time
+        await this.prisma.user.update({
+          where: { id: userId },
+          data: { googleRefreshToken: tokens.refresh_token },
+        });
+      }
+      if (tokens.access_token) {
+        await this.prisma.user.update({
+          where: { id: userId },
+          data: {
+            googleAccessToken: tokens.access_token,
+            googleTokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+          },
+        });
+      }
+    });
   }
 }

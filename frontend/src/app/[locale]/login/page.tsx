@@ -1,6 +1,5 @@
-import React from 'react';
-import LoginTemplate from '@/components/templates/LoginTemplate';
+import { LoginPage } from '@/components/pages/LoginPage';
 
-export default function LoginPage({ params: { locale } }: { params: { locale: string } }) {
-  return <LoginTemplate locale={locale} />;
+export default function Page({ params: { locale } }: { params: { locale: string } }) {
+  return <LoginPage locale={locale} />;
 }

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Songs Module — Technical Docs</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        /* ── CSS Variables ── */
+        :root {
+          /* Backgrounds */
+          --bg:             #f4f2ee;
+          --sidebar-bg:     #eceae5;
+          --panel-bg:       #fafaf8;
+
+          /* Text */
+          --text:           #1a1a18;
+          --text-muted:     #5f5e5a;
+
+          /* Syntax Highlighting */
+          --kw:             #185fa5;  /* keyword — blue */
+          --fn:             #854f0b;  /* function — amber */
+          --str:            #0f6e56;  /* string — teal */
+
+          /* Accent / Brand */
+          --accent:         #d85a30;  /* Claude coral/orange */
+          --border:         #d3d1c7;
+
+          /* Semantic */
+          --success:        #2c7a39;  /* rgb(44,122,57) */
+          --warn:           #854f0b;
+          --error:          #ab2b3f;  /* rgb(171,43,63) */
+
+          /* ─── SVG Component Palette (Light) ─────────── */
+          --svg-mod:         #f4f2ee;
+          --svg-ctrl:        #e6f1fb;
+          --svg-ctrl-stroke: #185fa5;
+          --svg-svc:         #e1f5ee;
+          --svg-svc-stroke:  #0f6e56;
+          --svg-repo:        #faeeda;
+          --svg-repo-stroke: #854f0b;
+          --svg-infra:       #eeedfe;
+          --svg-infra-stroke:#534ab7;
+        }
+
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Consolas', monospace;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            font-size: 15px;
+        }
+
+        /* ── Layout ── */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 32px 20px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+            z-index: 100;
+        }
+        .sidebar-title {
+            font-size: 0.75em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar nav ul { list-style: none; }
+        .sidebar nav li { margin-bottom: 4px; }
+        .sidebar nav a {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar nav a:hover { background: var(--panel-bg); color: var(--accent); transform: translateX(4px); }
+        .sidebar nav a.active { background: var(--accent); color: #fff !important; font-weight: 600; }
+
+        .toc-h3 > a { padding-left: 24px; font-size: 0.85em; color: var(--text-muted); }
+        .toc-h4 > a { padding-left: 40px; font-size: 0.8em; color: var(--text-muted); }
+
+        /* ── Main Content ── */
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding-bottom: 100px;
+        }
+
+        /* ── Hero Section (Landing Page Style) ── */
+        .hero {
+            padding: 120px 60px 80px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg) 0%, var(--sidebar-bg) 100%);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 60px;
+        }
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: var(--fn);
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .hero p {
+            font-size: 1.25em;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+        }
+
+        /* ── Main Body Container ── */
+        .main-body {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* ── Typography ── */
+        h1 { font-size: 2.4em; color: var(--fn); margin-bottom: 40px; }
+        h2 {
+            font-size: 1.8em;
+            color: var(--kw);
+            margin: 64px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            scroll-margin-top: 40px;
+        }
+        h3 {
+            font-size: 1.4em;
+            color: var(--fn);
+            margin: 48px 0 16px;
+            scroll-margin-top: 40px;
+        }
+        h4 {
+            font-size: 1em;
+            color: var(--success);
+            margin: 32px 0 12px;
+            scroll-margin-top: 40px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        p { margin-bottom: 20px; }
+        ul, ol { margin: 0 0 24px 28px; }
+        li { margin-bottom: 10px; }
+        strong { font-weight: 700; }
+        em { color: var(--str); font-style: normal; }
+
+        /* ── SVG Diagrams (Custom Style) ── */
+        .svg-container {
+            width: 100%;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .svg-container svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+        /* SVG Internal Styles (Matched to CSS Variables) */
+        .svg-bg { fill: transparent; }
+        .svg-mod { fill: var(--sidebar-bg); stroke: var(--border); stroke-width: 2; rx: 18; }
+        .svg-ctrl { fill: var(--svg-ctrl); stroke: var(--svg-ctrl-stroke); stroke-width: 2; rx: 12; }
+        .svg-svc { fill: var(--svg-svc); stroke: var(--svg-svc-stroke); stroke-width: 2; rx: 12; }
+        .svg-repo { fill: var(--svg-repo); stroke: var(--svg-repo-stroke); stroke-width: 2; rx: 12; }
+        .svg-infra { fill: var(--svg-infra); stroke: var(--svg-infra-stroke); stroke-width: 2; rx: 12; }
+        .svg-txt { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; fill: var(--text); }
+        .svg-small { font-family: 'Inter', sans-serif; font-size: 13px; fill: var(--text-muted); }
+        .svg-arrow { stroke: var(--text-muted); stroke-width: 2.5; fill: none; }
+
+        /* ── Inline code & Blocks ── */
+        code {
+            background: var(--panel-bg);
+            color: var(--str);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            border: 1px solid var(--border);
+        }
+        pre {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            overflow-x: auto;
+            margin-bottom: 32px;
+        }
+        pre code { background: none; border: none; padding: 0; color: var(--text); }
+
+        /* ── Tables ── */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 32px; border-radius: 10px; overflow: hidden; }
+        th { background: var(--sidebar-bg); color: var(--kw); border: 1px solid var(--border); padding: 14px 18px; text-align: left; }
+        td { border: 1px solid var(--border); padding: 12px 18px; }
+        tr:nth-child(even) td { background: var(--panel-bg); }
+
+        /* ── Method Section ── */
+        .method-section {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 56px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .method-signature {
+            background: var(--sidebar-bg);
+            border-left: 5px solid var(--accent);
+            border-radius: 6px;
+            padding: 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95em;
+            margin: 20px 0 32px;
+            color: var(--fn);
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Animation */
+        @keyframes sectionFlash {
+            0% { outline: 3px solid var(--accent); outline-offset: 6px; background: rgba(216,90,48,0.1); }
+            100% { outline: 3px solid transparent; outline-offset: 15px; }
+        }
+        .section-highlight { animation: sectionFlash 1.2s ease-out forwards; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title">📄 Songs Module</div>
+            <nav id="toc"></nav>
+        </aside>
+
+        <main class="content" id="main-content">
+            <section class="hero">
+                <div class="hero-badge">Backend Module</div>
+                <h1>Songs Module</h1>
+                <p>Quản lý các bài hát (Track) trong hệ thống: lấy danh sách, xóa, di chuyển bài hát và xử lý thêm bài hát từ YouTube qua Background Jobs (BullMQ).</p>
+            </section>
+            
+            <div class="main-body">
+
+                <h2>1. Tổng quan Kiến trúc</h2>
+                <p>Module <code>Songs</code> chịu trách nhiệm quản lý các bài hát (Track) trong hệ thống. Tính năng cốt lõi của module bao gồm: thêm bài hát mới từ nguồn YouTube, lấy danh sách tất cả bài hát của một người dùng (hỗ trợ phân trang), lấy chi tiết bài hát, xóa bài hát, và di chuyển bài hát giữa các Album.</p>
+                <p>Module này có sự kết nối chặt chẽ với <code>AlbumsModule</code> để xác thực quyền sở hữu album và <code>JobsModule</code> (sử dụng BullMQ) để đẩy tác vụ xử lý/tải âm thanh xuống chạy ngầm (Background Job) để tránh block main thread.</p>
+
+                <h3>Sơ đồ Kiến trúc</h3>
+                <div class="svg-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650">
+                        <defs>
+                            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="var(--text-muted)" />
+                            </marker>
+                        </defs>
+                        <rect width="1000" height="650" class="svg-bg" />
+                        
+                        <!-- Client -->
+                        <text x="500" y="50" text-anchor="middle" class="svg-txt" style="font-size: 18px;">HTTP Request (Client)</text>
+                        <path d="M500,60 L500,100" class="svg-arrow" marker-end="url(#arrow)" />
+
+                        <!-- Core Pipeline Panel -->
+                        <rect x="250" y="100" width="500" height="340" class="svg-mod" />
+                        <text x="270" y="130" class="svg-txt">Songs Module Core</text>
+
+                        <!-- JwtAuthGuard -->
+                        <rect x="350" y="150" width="300" height="50" class="svg-svc" />
+                        <text x="500" y="180" text-anchor="middle" class="svg-txt">JwtAuthGuard</text>
+                        <text x="500" y="220" text-anchor="middle" class="svg-small">Middleware bảo vệ (Xác thực User)</text>
+                        <path d="M500,200 L500,240" class="svg-arrow" marker-end="url(#arrow)" />
+
+                        <!-- Controller -->
+                        <rect x="350" y="240" width="300" height="60" class="svg-ctrl" />
+                        <text x="500" y="275" text-anchor="middle" class="svg-txt">SongController</text>
+                        <path d="M500,300 L500,340" class="svg-arrow" marker-end="url(#arrow)" />
+
+                        <!-- Service -->
+                        <rect x="350" y="340" width="300" height="60" class="svg-svc" />
+                        <text x="500" y="375" text-anchor="middle" class="svg-txt">SongService</text>
+
+                        <!-- External dependencies -->
+                        <path d="M650,370 L750,370" class="svg-arrow" marker-end="url(#arrow)" />
+                        <rect x="750" y="340" width="220" height="60" class="svg-infra" />
+                        <text x="860" y="375" text-anchor="middle" class="svg-txt">JobsModule (BullMQ)</text>
+                        <text x="860" y="420" text-anchor="middle" class="svg-small">conversionQueue (Async tasks)</text>
+
+                        <path d="M350,370 L250,370" class="svg-arrow" marker-end="url(#arrow)" />
+                        <rect x="30" y="340" width="220" height="60" class="svg-svc" />
+                        <text x="140" y="375" text-anchor="middle" class="svg-txt">AlbumsModule</text>
+                        <text x="140" y="420" text-anchor="middle" class="svg-small">Xác thực / lấy default Album</text>
+
+                        <!-- Repository -->
+                        <path d="M500,400 L500,460" class="svg-arrow" marker-end="url(#arrow)" />
+                        <rect x="350" y="460" width="300" height="60" class="svg-repo" />
+                        <text x="500" y="495" text-anchor="middle" class="svg-txt">SongRepository</text>
+
+                        <!-- DB -->
+                        <path d="M500,520 L500,560" class="svg-arrow" marker-end="url(#arrow)" />
+                        <rect x="350" y="560" width="300" height="60" class="svg-infra" />
+                        <text x="500" y="595" text-anchor="middle" class="svg-txt">PostgreSQL (Track Table)</text>
+                    </svg>
+                </div>
+
+                <h2>2. Các Dependencies</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dependency</th>
+                            <th>Vai trò</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>JobsModule</code> / <code>conversionQueue</code></td>
+                            <td>Cung cấp hàng đợi <code>conversion</code> thông qua BullMQ để xử lý việc convert video từ YouTube sang audio một cách bất đồng bộ. Tránh làm treo request HTTP.</td>
+                        </tr>
+                        <tr>
+                            <td><code>AlbumsModule</code></td>
+                            <td>Nhúng <code>AlbumService</code> và <code>AlbumRepository</code> giúp tái sử dụng logic xác thực quyền truy cập album của người dùng mà không cần viết lại logic ở module Song.</td>
+                        </tr>
+                        <tr>
+                            <td><code>SongRepository</code></td>
+                            <td>Kế thừa <code>BaseRepository</code>, làm tầng giao tiếp với database (Prisma) cho entity <code>Track</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><code>PinoLogger</code> (nestjs-pino)</td>
+                            <td>Dùng để ghi log cấu trúc chuẩn (thông tin, cảnh báo vi phạm quyền truy cập, debug) trong quá trình xử lý logic.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+                <h2>3. System Data Flow & API Entry Points</h2>
+
+                <div class="method-section">
+                    <h3>1. POST /songs/youtube (Create from YouTube)</h3>
+                    <div class="method-signature">@Post('youtube')<br>createFromYoutube(@User() user, @Body() createSongDto: CreateSongYoutubeDto)</div>
+                    <p>Nhận URL và thông tin bài hát từ body, gọi <code>SongService.createFromYoutube()</code> để lưu record tạm thời có <code>sourceType: 'youtube'</code>, sau đó đẩy job <code>convert</code> vào background worker thông qua <code>conversionQueue</code> để download video và chuyển đổi audio async. Trả về DTO thông tin bài hát (SongResponseDto) sau lọc.</p>
+                    <div class="svg-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 220">
+                            <defs>
+                                <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L9,3 z" fill="var(--text-muted)" />
+                                </marker>
+                            </defs>
+                            <rect width="1000" height="220" class="svg-bg" />
+                            
+                            <rect x="20" y="80" width="100" height="50" class="svg-mod" />
+                            <text x="70" y="110" text-anchor="middle" class="svg-txt">Client</text>
+                            
+                            <path d="M120,105 L180,105" class="svg-arrow" marker-end="url(#arrow)" />
+                            <text x="150" y="95" text-anchor="middle" class="svg-small">Body: {url, title}</text>
+
+                            <rect x="180" y="80" width="150" height="50" class="svg-ctrl" />
+                            <text x="255" y="110" text-anchor="middle" class="svg-txt">SongController</text>
+
+                            <path d="M330,105 L390,105" class="svg-arrow" marker-end="url(#arrow)" />
+
+                            <rect x="390" y="80" width="140" height="50" class="svg-svc" />
+                            <text x="460" y="110" text-anchor="middle" class="svg-txt">SongService</text>
+
+                            <path d="M530,105 L590,105" class="svg-arrow" marker-end="url(#arrow)" />
+
+                            <rect x="590" y="80" width="150" height="50" class="svg-repo" />
+                            <text x="665" y="110" text-anchor="middle" class="svg-txt">SongRepository</text>
+
+                            <path d="M740,105 L800,105" class="svg-arrow" marker-end="url(#arrow)" />
+
+                            <rect x="800" y="80" width="120" height="50" class="svg-infra" />
+                            <text x="860" y="110" text-anchor="middle" class="svg-txt">Database</text>
+                            <text x="860" y="150" text-anchor="middle" class="svg-small">Lưu track tạm</text>
+
+                            <!-- Branch to BullMQ -->
+                            <path d="M460,130 L460,165 L590,165" class="svg-arrow" marker-end="url(#arrow)" />
+                            <rect x="590" y="145" width="150" height="40" class="svg-infra" />
+                            <text x="665" y="170" text-anchor="middle" class="svg-txt">BullMQ (Queue)</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="method-section">
+                    <h3>2. GET /songs (Find All)</h3>
+                    <div class="method-signature">@Get()<br>findAll(@User() user, @Query('page') page, @Query('limit') limit)</div>
+                    <p>Lấy danh sách tất cả bài hát của một người dùng dựa theo <code>album.userId = user.id</code>. Có hỗ trợ phân trang bằng việc parse thủ công <code>page</code> và <code>limit</code> để tính <code>skip</code> và <code>take</code>. Gọi đồng thời (Promise.all) <code>count()</code> và <code>findMany()</code> để lấy cả tổng số và dữ liệu list. Trả về cấu trúc có <code>data, total, page, limit, totalPages</code>.</p>
+                </div>
+
+                <div class="method-section">
+                    <h3>3. GET /songs/:id (Find One)</h3>
+                    <div class="method-signature">@Get(':id')<br>findOne(@User() user, @Param('id') id: string)</div>
+                    <p>Lấy thông tin chi tiết của một bài hát bằng <code>id</code>. <code>SongService</code> sẽ gọi hàm helper nội bộ <code>findAndValidateSong()</code> nhằm tìm track trong DB, đồng thời kiểm tra track này có nằm trong album mà user đang sở hữu không.</p>
+                </div>
+
+                <div class="method-section">
+                    <h3>4. DELETE /songs/:id (Remove)</h3>
+                    <div class="method-signature">@Delete(':id')<br>@HttpCode(204)<br>remove(@User() user, @Param('id') id: string)</div>
+                    <p>Xóa bài hát theo <code>id</code>. Sau khi <code>findAndValidateSong()</code> thành công xác nhận quyền sở hữu, sẽ gọi <code>SongRepository.delete()</code>. Sử dụng status code chuẩn <code>204 No Content</code>.</p>
+                </div>
+
+                <div class="method-section">
+                    <h3>5. PATCH /songs/:id/move (Move to Album)</h3>
+                    <div class="method-signature">@Patch(':id/move')<br>moveToAlbum(@User() user, @Param('id') id: string, @Body('albumId') albumId: string)</div>
+                    <p>Chuyển bài hát sang một album khác. Trước hết, <code>findAndValidateSong()</code> xác nhận track tồn tại và thuộc về user. Sau đó <code>getValidatedAlbumId()</code> gọi qua AlbumService để đảm bảo album đích (từ body params) cũng đang tồn tại và thuộc về user. Nếu mọi thứ hợp lệ, cập nhật <code>albumId</code> mới vào DB.</p>
+                </div>
+
+
+                <h2>4. Đánh giá & Cải thiện</h2>
+                
+                <h3>✅ Đã làm tốt</h3>
+                <ul>
+                    <li><strong>Background Job / Non-blocking:</strong> Sử dụng hàng đợi BullMQ để tránh gây nghẽn luồng xử lý HTTP khi thao tác tải và convert audio Youtube.</li>
+                    <li><strong>Data DTO Formatting (Serialization):</strong> Sử dụng <code>plainToInstance</code> với cấu hình <code>excludeExtraneousValues: true</code> trong helper <code>mapToResponse</code> đảm bảo Response trả về chuẩn, tự động che giấu các trường nhạy cảm trong DB (ví dụ password liên quan, cờ flag, ngày cập nhật, ...).</li>
+                    <li><strong>Quản lý quyền bài hát:</strong> Cách kiểm tra quyền truy cập thông qua relationship với Album (<code>album: { userId }</code>) được dùng nhất quán ở mọi function liên quan.</li>
+                    <li><strong>RESTful API & Status Codes:</strong> Đặt tên route resource sạch đẹp, dùng đúng Verb (POST, GET, PATCH, DELETE) và status code (vd dùng <code>@HttpCode(204)</code> cho DELETE).</li>
+                </ul>
+
+                <h3>❌ Cần cải thiện / Refactor</h3>
+                <p><strong>Vấn đề: Xử lý tính Pagination thủ công ở Controller</strong></p>
+                <p>Hiện tại, Controller tự phân tích chuỗi query sang Int, rồi tự tính công thức skip/take. Việc này không an toàn và làm lặp lại code ở nhiều chỗ (ví dụ so với Auth module hoặc các module khác sau này).</p>
+                <pre><code>// HIỆN TẠI — vấn đề:
+const skip = page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
+const take = limit ? parseInt(limit, 10) : 50;
+
+// NÊN SỬA — lý do:
+// Nên dùng custom Pipe hoặc một Decorator (vd: PaginationParams) kết hợp DTO để thống nhất cơ chế phân trang toàn app.
+@Query() paginationDto: PaginationDto</code></pre>
+
+
+                <h2>5. Cách Debug & Biến môi trường</h2>
+                
+                <h3>1. Debug Lỗi 404 NotFoundException (Track/Album)</h3>
+                <p>Thông thường khi gặp lỗi này, log ghi là "Song not found or access denied" hoặc "Album not found or access denied". Cần kiểm tra theo thứ tự:</p>
+                <ol>
+                    <li>Đảm bảo chuỗi UUID <code>id</code> của bài hát đúng định dạng.</li>
+                    <li>Kiểm tra <code>albumId</code> đích xem album này có thuộc quyền sở hữu của user (đại diện qua JWT token) không. Mọi bài hát hợp lệ phải nằm trong Album do user tạo.</li>
+                </ol>
+
+                <h3>2. Debug Lỗi: Bài hát tạo từ Youtube mãi không xử lý xong (không nghe được)</h3>
+                <ol>
+                    <li>Logic download xử lý qua BullMQ. Hãy chắc chắn Redis server đang chạy và kết nối bình thường ở <code>JobsModule</code>.</li>
+                    <li>Đọc log xuất ra từ Worker để xem job <code>convert</code> có bị timeout không, hoặc script parser/downloader từ Youtube bị block do network/captcha không.</li>
+                </ol>
+                
+                <h3>3. Biến môi trường cần thiết</h3>
+                <p>Do sự phụ thuộc vào JobsModule và hàng đợi, module Songs gián tiếp yêu cầu các biến môi trường của Redis:</p>
+                <pre><code># Required configuration cho BullMQ kết nối tới Redis
+REDIS_HOST=127.0.0.1      # Host của redis
+REDIS_PORT=6379           # Port của redis</code></pre>
+                
+                <h3>4. Hướng dẫn dành cho AI / Maintainer</h3>
+                <ul>
+                    <li>Mọi truy vấn tới <code>Track</code> luôn phải đi kèm cơ chế kiểm chứng quyền sở hữu qua <code>Album</code> (điều kiện truy vấn luôn có <code>album: { userId }</code>). Tuyệt đối không query độc lập chỉ bằng <code>id</code> track.</li>
+                    <li>Khi nâng cấp / sửa tính năng Upload (ví dụ up file mp3 trực tiếp): Bắt buộc phải duy trì việc tách biệt task nặng bằng mô hình Message Queue (BullMQ). Tuyệt đối không nhúng logic xử lý/lưu file I/O block thẳng vào thread chính của Controller hoặc Service.</li>
+                    <li>Mọi endpoint mới trả dữ liệu về entity Track phải đi qua helper function <code>mapToResponse()</code> hoặc <code>mapToResponseArray()</code> để serialize DTO chính xác.</li>
+                </ul>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.scrollToSection = function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.classList.remove('section-highlight');
+            void el.offsetWidth;
+            el.classList.add('section-highlight');
+            
+            document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+            const active = document.querySelector(`#toc a[data-target="${id}"]`);
+            if (active) {
+                active.classList.add('active');
+                active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        };
+
+        mermaid.initialize({
+            startOnLoad: true,
+            securityLevel: 'loose',
+            theme: 'base',
+            themeVariables: {
+                background: '#f4f2ee',
+                mainBkg: '#eceae5',
+                primaryTextColor: '#1a1a18',
+                lineColor: '#185fa5',
+                fontFamily: 'Inter, Segoe UI, sans-serif'
+            }
+        });
+
+        (function buildTOC() {
+            const main = document.getElementById('main-content');
+            const toc = document.getElementById('toc');
+            const headings = main.querySelectorAll('h2, h3, h4');
+            const ul = document.createElement('ul');
+            headings.forEach((h, i) => {
+                if (!h.id) h.id = 'h-' + i;
+                const li = document.createElement('li');
+                li.className = 'toc-' + h.tagName.toLowerCase();
+                const a = document.createElement('a');
+                a.href = '#' + h.id;
+                a.textContent = h.textContent.replace(/^[▶✅❌⚠️ℹ️📄⚙️🌐🗄️]+\s*/, '');
+                a.dataset.target = h.id;
+                a.onclick = (e) => { e.preventDefault(); scrollToSection(h.id); };
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+            toc.appendChild(ul);
+        })();
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+                    const active = document.querySelector(`#toc a[data-target="${entry.target.id}"]`);
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+        document.querySelectorAll('h2, h3, h4').forEach(h => observer.observe(h));
+    </script>
+</body>
+</html>

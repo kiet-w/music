@@ -2,6 +2,8 @@
 import {
   Injectable,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -9,7 +11,7 @@ import * as fs from 'fs';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { IDownloaderProvider } from '../common/interfaces/downloader-provider.interface';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(require('child_process').execFile);
 
 @Injectable()
 export class DownloaderService implements IDownloaderProvider {
@@ -24,9 +26,20 @@ export class DownloaderService implements IDownloaderProvider {
     try {
       this.logger.info({ url, outputPath }, 'Starting download');
       // Extract audio using 'bestaudio/best' with web client to avoid 'format not available' errors.
-      await execAsync(
-        `yt-dlp -f "bestaudio/best" --extractor-args "youtube:player_client=web" --no-playlist --retries 3 --fragment-retries 3 --socket-timeout 30 -x --audio-format mp3 --audio-quality ${this.audioBitrate} -o "${outputPath}" "${url}"`,
-      );
+      const args = [
+        '-f', 'bestaudio/best',
+        '--extractor-args', 'youtube:player_client=web',
+        '--no-playlist',
+        '--retries', '3',
+        '--fragment-retries', '3',
+        '--socket-timeout', '30',
+        '-x',
+        '--audio-format', 'mp3',
+        '--audio-quality', this.audioBitrate,
+        '-o', outputPath,
+        url,
+      ];
+      await execFileAsync('yt-dlp', args);
       this.logger.info({ outputPath }, 'Download completed');
     } catch (error: any) {
       const exitCode = error.code ?? 'unknown';
@@ -35,14 +48,14 @@ export class DownloaderService implements IDownloaderProvider {
       // Classify errors more specifically
       if (stderr.includes('Requested format is not available')) {
         this.logger.error({ exitCode }, '[Downloader] Format unavailable');
-        throw new InternalServerErrorException(
+        throw new BadRequestException(
           'Audio format not available for this video',
         );
       }
 
       if (stderr.includes('Video unavailable')) {
         this.logger.error({ exitCode }, '[Downloader] Video unavailable');
-        throw new InternalServerErrorException(
+        throw new NotFoundException(
           'Video is unavailable or private',
         );
       }

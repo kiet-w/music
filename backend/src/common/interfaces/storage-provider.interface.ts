@@ -10,6 +10,12 @@ export interface IStorageProvider {
     destinationPath: string,
     contentType?: string,
   ): Promise<string>;
+  uploadStream(
+    stream: any,
+    bucketName: string,
+    destinationPath: string,
+    contentType?: string,
+  ): Promise<string>;
   getPublicUrl(bucketName: string, path: string): Promise<string>;
   delete(bucketName: string, path: string): Promise<void>;
 }

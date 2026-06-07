@@ -5,6 +5,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as fs from 'fs';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
@@ -17,22 +18,16 @@ export class StorageService implements IStorageProvider {
   constructor(
     @InjectPinoLogger(StorageService.name)
     private readonly logger: PinoLogger,
+    private readonly configService: ConfigService,
   ) {
-    const rawUrl = process.env.SUPABASE_URL;
-    const rawKey = process.env.SUPABASE_KEY;
+    this.initializeSupabase();
+  }
 
-    // Helper to validate URL
-    const isValidUrl = (url: string | undefined): boolean => {
-      if (!url) return false;
-      try {
-        const parsed = new URL(url);
-        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-      } catch {
-        return false;
-      }
-    };
+  private initializeSupabase() {
+    const rawUrl = this.configService.get<string>('SUPABASE_URL');
+    const rawKey = this.configService.get<string>('SUPABASE_KEY');
 
-    const isConfigured = isValidUrl(rawUrl) && !!rawKey;
+    const isConfigured = this.isValidUrl(rawUrl) && !!rawKey;
 
     if (!isConfigured) {
       this.logger.error(
@@ -47,6 +42,16 @@ export class StorageService implements IStorageProvider {
     );
   }
 
+  private isValidUrl(url: string | undefined): boolean {
+    if (!url) return false;
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+
   async upload(
     filePath: string,
     bucketName: string,
@@ -58,11 +63,13 @@ export class StorageService implements IStorageProvider {
         'Uploading file',
       );
 
-      if (!fs.existsSync(filePath)) {
+      try {
+        await fs.promises.access(filePath);
+      } catch {
         throw new Error(`File not found at path: ${filePath}`);
       }
 
-      const fileBuffer = fs.readFileSync(filePath);
+      const fileBuffer = await fs.promises.readFile(filePath);
       const { data, error } = await this.supabase.storage
         .from(bucketName)
         .upload(destinationPath, fileBuffer, {

@@ -1,6 +1,5 @@
-import React from 'react';
-import RegisterTemplate from '@/components/templates/RegisterTemplate';
+import { RegisterPage } from '@/components/pages/RegisterPage';
 
-export default function RegisterPage({ params: { locale } }: { params: { locale: string } }) {
-  return <RegisterTemplate locale={locale} />;
+export default function Page({ params: { locale } }: { params: { locale: string } }) {
+  return <RegisterPage locale={locale} />;
 }

@@ -1,18 +1,1 @@
-[
-  {"id": "BE-1", "task": "Update Prisma Schema", "status": "todo"},
-  {"id": "BE-2", "task": "Install backend dependencies (google-auth-library)", "status": "todo"},
-  {"id": "BE-3", "task": "Update UserRepository (findByGoogleId, create with optional passwordHash)", "status": "todo"},
-  {"id": "BE-4", "task": "Implement Google ID token verification in AuthService", "status": "todo"},
-  {"id": "BE-5", "task": "Create POST /auth/google endpoint in AuthController", "status": "todo"},
-  {"id": "BE-6", "task": "Implement Google Login business logic in AuthService", "status": "todo"},
-  {"id": "FE-1", "task": "Install frontend dependencies (@react-oauth/google)", "status": "todo"},
-  {"id": "FE-2", "task": "Configure Google Client ID in .env.local", "status": "todo"},
-  {"id": "FE-3", "task": "Update frontend API client with googleLogin method", "status": "todo"},
-  {"id": "FE-4", "task": "Add Google Login Button component", "status": "todo"},
-  {"id": "FE-5", "task": "Handle Google Login callback and update AuthStore", "status": "todo"},
-  {"id": "FE-6", "task": "Update Login Page UI layout", "status": "todo"},
-  {"id": "INT-1", "task": "Verify API Contract between FE and BE", "status": "todo"},
-  {"id": "INT-2", "task": "Verify User Creation in Database", "status": "todo"},
-  {"id": "INT-3", "task": "Handle login with existing email via Google", "status": "todo"},
-  {"id": "INT-4", "task": "Final End-to-End manual test", "status": "todo"}
-]
+{"tasks":[{"id":"task-1","title":"Refactor AuthService","status":"done"}]}

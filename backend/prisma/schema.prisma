@@ -3,21 +3,27 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  passwordHash String?
-  googleId     String?   @unique
-  name         String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  albums       Album[]
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  passwordHash       String?
+  googleId           String?   @unique
+  googleAccessToken  String?
+  googleRefreshToken String?
+  googleTokenExpiry  DateTime?
+  name               String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  albums             Album[]
+  sentMessages       Message[] @relation("SentMessages")
+  receivedMessages   Message[] @relation("ReceivedMessages")
+  sentRequests       FriendRequest[] @relation("SentRequests")
+  receivedRequests   FriendRequest[] @relation("ReceivedRequests")
 }
 
 model Message {
@@ -27,8 +33,8 @@ model Message {
   receiverId String
   createdAt  DateTime @default(now())
 
-  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@index([senderId])
   @@index([receiverId])
@@ -63,4 +69,28 @@ model Track {
   album      Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
   @@index([albumId])
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model FriendRequest {
+  id         String        @id @default(uuid())
+  token      String        @unique
+  senderId   String
+  receiverId String?
+  status     RequestStatus @default(PENDING)
+  expiresAt  DateTime
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  sender     User  @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User? @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([token])
 }

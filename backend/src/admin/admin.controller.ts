@@ -7,27 +7,35 @@ import {
   HttpStatus,
   Body,
 } from '@nestjs/common';
-import { SongRepository } from '../songs/repositories/song.repository';
-import { StorageCleanupService } from '../storage/storage-cleanup.service';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { AdminService } from './admin.service';
+
+/**
+ * DTO cho việc dọn dẹp storage.
+ * Được định nghĩa tại đây vì chỉ dùng trong AdminController (Quy tắc 4).
+ */
+export class CleanupStorageDto {
+  @IsString()
+  @IsNotEmpty()
+  bucketName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  path: string;
+}
 
 @Controller('admin')
 export class AdminController {
-  constructor(
-    private readonly songRepository: SongRepository,
-    private readonly storageCleanupService: StorageCleanupService,
-  ) {}
+  constructor(private readonly adminService: AdminService) {}
 
   @Delete('tracks/:id')
   async deleteTrack(@Param('id') id: string) {
-    return this.songRepository.delete({
-      where: { id },
-    });
+    return this.adminService.deleteTrack(id);
   }
 
   @Post('storage/cleanup')
   @HttpCode(HttpStatus.OK)
-  async cleanupStorage(@Body() body: { bucketName: string; path: string }) {
-    await this.storageCleanupService.cleanupFile(body.bucketName, body.path);
-    return { message: 'Storage cleanup initiated', file: body.path };
+  async cleanupStorage(@Body() cleanupDto: CleanupStorageDto) {
+    return this.adminService.cleanupStorage(cleanupDto);
   }
 }

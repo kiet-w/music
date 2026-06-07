@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>common — Technical Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#060d1b; --surf:#0d1829; --surf2:#111f34; --bdr:#1a2d45;
+  --txt:#c8d6e5; --dim:#6b8199; --bright:#e8f4ff;
+  --acc:#00c8f0; --accg:#00c8f012;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(#1a2d45 1px,transparent 1px);background-size:28px 28px;opacity:.28;pointer-events:none;z-index:0}
+
+/* ─── SIDEBAR ─────────────────────────────────── */
+.sb{width:228px;min-width:228px;height:100vh;position:sticky;top:0;background:rgba(6,11,24,.92);backdrop-filter:blur(14px);border-right:1px solid var(--bdr);overflow-y:auto;z-index:50;display:flex;flex-direction:column}
+.sb-top{padding:18px 16px 12px;border-bottom:1px solid var(--bdr)}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:4px}
+.sb-title{font-size:13px;font-weight:700;color:var(--bright)}
+.sb-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.sb-sec{padding:8px 0}
+.sb-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:7px 16px 3px}
+.sbl{display:flex;align-items:center;gap:8px;padding:6px 16px;font-size:12px;color:var(--dim);cursor:pointer;border-left:2px solid transparent;transition:all .14s;text-decoration:none}
+.sbl:hover, .sbl.active{color:var(--bright);border-left-color:var(--acc);background:var(--accg)}
+
+/* ─── MAIN ─────────────────────────────────────── */
+.main{flex:1;overflow-x:hidden;position:relative;z-index:1;max-width:calc(100vw - 228px); padding: 40px;}
+
+/* MARKDOWN STYLES */
+.md-content h1 { font-size: 28px; color: var(--bright); margin-bottom: 20px; border-bottom: 1px solid var(--bdr); padding-bottom: 10px; }
+.md-content h2 { font-size: 20px; color: var(--bright); margin-top: 30px; margin-bottom: 15px; }
+.md-content h3 { font-size: 16px; color: var(--acc); margin-top: 20px; margin-bottom: 10px; }
+.md-content p { margin-bottom: 15px; line-height: 1.6; font-size: 14px; }
+.md-content ul, .md-content ol { margin-bottom: 15px; padding-left: 20px; font-size: 14px; line-height: 1.6; }
+.md-content li { margin-bottom: 5px; }
+.md-content pre { background: #040a12; border: 1px solid var(--bdr); border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow-x: auto; margin-bottom: 15px; color: #abb2bf; }
+.md-content code { font-family: 'JetBrains Mono', monospace; background: var(--surf2); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+.md-content table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+.md-content th { background: var(--surf2); padding: 10px; text-align: left; border-bottom: 1px solid var(--bdr); color: var(--dim); font-family: 'JetBrains Mono', monospace; }
+.md-content td { padding: 10px; border-bottom: 1px solid var(--bdr); }
+.md-content blockquote { border-left: 3px solid var(--acc); color: var(--dim); margin-bottom: 15px; background: var(--surf); padding: 10px 15px; border-radius: 4px; }
+.md-content strong { color: var(--bright); }
+.md-content hr { border: 0; height: 1px; background: var(--bdr); margin: 30px 0; }
+
+@media(max-width:960px){
+  .sb{display:none}
+  .main{max-width:100vw; padding: 20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-top">
+    <div class="sb-tag">NestJS Docs</div>
+    <div class="sb-title">COMMON Module</div>
+    <div class="sb-sub">Technical Documentation</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Navigation</div>
+    <a class="sbl" href="#">Overview</a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="md-content">
+    <h1>Common Module Documentation</h1>
+<h2>1. Tổng quan Kiến trúc (Component Overview)</h2>
+<p>Thư mục <code>Common</code> không phải là một module tính năng thông thường mà là nơi chứa các thành phần chia sẻ (shared components) được sử dụng xuyên suốt toàn bộ ứng dụng NestJS. Nó bao gồm các Filters (xử lý lỗi tập trung), Interceptors (can thiệp luồng request/response), Interfaces (định nghĩa hợp đồng cho các provider như storage, downloader) và Repositories (lớp truy xuất cơ sở dữ liệu cơ bản).</p>
+<h2>2. Các Dependencies (Dependencies Injection)</h2>
+<ul>
+<li><strong><code>HttpAdapterHost</code></strong>: Được inject vào <code>AllExceptionsFilter</code> để có thể truy xuất HTTP adapter hiện tại (ví dụ Express) nhằm phản hồi request.</li>
+<li><strong><code>PinoLogger</code> (nestjs-pino)</strong>: Dùng trong <code>AllExceptionsFilter</code> và <code>LoggingInterceptor</code> để ghi log có cấu trúc về request, response và các lỗi (error/warn).</li>
+<li><strong><code>PrismaService</code></strong>: Được inject vào <code>BaseRepository</code> để cung cấp Prisma Client phục vụ việc truy vấn database.</li>
+</ul>
+<h2>3. Phân tích chi tiết Controller, Service, Guard, v.v.</h2>
+<h3>3.1. Filters</h3>
+<ul>
+<li><strong><code>AllExceptionsFilter</code> (<code>all-exceptions.filter.ts</code>)</strong>:<ul>
+<li>Decorator: <code>@Catch()</code> (bắt mọi loại exception).</li>
+<li>Kế thừa: <code>ExceptionFilter</code>.</li>
+<li>Logic: Phương thức <code>catch()</code> xác định status code từ exception. Nếu là <code>HttpException</code>, trích xuất thông báo lỗi chuẩn. Nếu là lỗi <code>Error</code> nói chung và đặc biệt là lỗi của Prisma (<code>PrismaClientKnownRequestError</code>), thực hiện map các mã lỗi Prisma sang HTTP Status Code tương ứng (P2002 -&gt; <code>409 CONFLICT</code>, P2025 -&gt; <code>404 NOT_FOUND</code>). Xây dựng body response theo format chung (statusCode, message, code, timestamp, path). Tùy thuộc vào statusCode (&gt;= 500 hay nhỏ hơn) sẽ gọi <code>logger.error</code> hoặc <code>logger.warn</code>.</li>
+</ul>
+</li>
+<li><strong><code>HttpExceptionFilter</code> (<code>http-exception.filter.ts</code>)</strong>:<ul>
+<li>Decorator: <code>@Catch(HttpException)</code> (chỉ bắt lỗi HttpException).</li>
+<li>Kế thừa: <code>ExceptionFilter</code>.</li>
+<li>Logic: Phương thức <code>catch()</code> định dạng trực tiếp các HttpException thành JSON payload chuẩn chứa <code>statusCode</code>, <code>message</code>, <code>timestamp</code>, <code>path</code>.</li>
+</ul>
+</li>
+</ul>
+<h3>3.2. Interceptors</h3>
+<ul>
+<li><strong><code>LoggingInterceptor</code> (<code>logging.interceptor.ts</code>)</strong>:<ul>
+<li>Decorator: <code>@Injectable()</code>.</li>
+<li>Kế thừa: <code>NestInterceptor</code>.</li>
+<li>Logic: Phương thức <code>intercept()</code> lấy thông tin request (method, url, query, body, params). Dùng RxJS <code>tap</code> để đo đạc thời gian xử lý (duration). Khi request hoàn tất thành công, ghi log mức <code>info</code>. Khi request thất bại, ghi log mức <code>error</code> kèm theo stack trace và error message.</li>
+</ul>
+</li>
+</ul>
+<h3>3.3. Interfaces</h3>
+<ul>
+<li><strong><code>IDownloaderProvider</code> (<code>downloader-provider.interface.ts</code>)</strong>: Định nghĩa các hàm <code>download(url, outputPath)</code> và <code>cleanup(filePath)</code>.</li>
+<li><strong><code>IStorageProvider</code> (<code>storage-provider.interface.ts</code>)</strong>: Định nghĩa các thao tác lưu trữ file như <code>upload</code>, <code>uploadBuffer</code>, <code>uploadStream</code>, <code>getPublicUrl</code>, và <code>delete</code>.</li>
+</ul>
+<h3>3.4. Repositories</h3>
+<ul>
+<li><strong><code>BaseRepository</code> (<code>base.repository.ts</code>)</strong>:<ul>
+<li>Logic: Một abstract class generic (Generic type <code>T</code> và <code>Delegate</code>) bao bọc các lời gọi tới Prisma (<code>findMany</code>, <code>findUnique</code>, <code>count</code>, <code>findFirst</code>, <code>create</code>, <code>update</code>, <code>delete</code>).</li>
+<li>Helper <code>handlePrismaError(error)</code>: Hàm private/protected dịch các mã lỗi Prisma (P2002, P2025, P2003) thành các <code>HttpException</code> tương ứng của NestJS (<code>ConflictException</code>, <code>NotFoundException</code>, <code>BadRequestException</code>) để xử lý thống nhất. Tất cả các thao tác query đều được đặt trong khối try/catch và ném lỗi qua <code>handlePrismaError</code>.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>4. System Data Flow</h2>
+<p><strong>1. Luồng xử lý lỗi bằng <code>AllExceptionsFilter</code></strong></p>
+<ul>
+<li>Flow: Component bất kỳ ném ra Exception -&gt; NestJS kích hoạt <code>AllExceptionsFilter.catch()</code> -&gt; Xác định loại Exception (HttpException hoặc PrismaError) -&gt; Dịch mã lỗi Prisma (nếu có) -&gt; Tạo response payload chuẩn -&gt; Ghi log (Pino logger) -&gt; <code>httpAdapter.reply()</code> -&gt; Client nhận HTTP Error Response.</li>
+</ul>
+<p><strong>2. Luồng truy cập Database qua <code>BaseRepository</code></strong></p>
+<ul>
+<li>Flow: Service gọi <code>Repository.findUnique()</code> (hoặc hàm tương tự kế thừa từ BaseRepository) -&gt; <code>BaseRepository</code> bọc query Prisma trong try/catch -&gt; Gửi truy vấn DB -&gt; DB trả kết quả (thành công) -&gt; Trả về kết quả cho Service. NẾU lỗi (ví dụ trùng lặp khoá P2002) -&gt; catch -&gt; <code>handlePrismaError()</code> -&gt; Ném <code>ConflictException</code> -&gt; Filter bắt lỗi trả về Client.</li>
+</ul>
+<p><strong>3. Luồng Request Logging với <code>LoggingInterceptor</code></strong></p>
+<ul>
+<li>Flow: Client Request -&gt; <code>LoggingInterceptor.intercept()</code> -&gt; Bắt đầu tính giờ -&gt; Chuyển Request tới Route Handler (<code>next.handle()</code>) -&gt; Logic hoàn tất / sinh lỗi -&gt; <code>tap()</code> bắt sự kiện hoàn thành/lỗi -&gt; Tính toán <code>duration</code> -&gt; Ghi log qua <code>PinoLogger</code> -&gt; Response trả về Client.</li>
+</ul>
+<hr>
+<hr>
+<h1>Common Module — AI Coding Skill Context</h1>
+<blockquote>
+<p>File này dùng làm context cho AI coding agent khi làm việc với Common module.</p>
+</blockquote>
+<hr>
+<h2>1. Kiến trúc tổng thể — Tại sao tổ chức như vậy?</h2>
+<pre><code class="language-text">Global Level / Module Level
+    │
+    ▼
+LoggingInterceptor      ← Ghi nhận mọi Request đi vào và thời gian phản hồi.
+    │
+    ▼
+[Business Modules]      ← Thực thi nghiệp vụ, sử dụng Repositories kế thừa BaseRepository.
+    │
+    ▼
+AllExceptionsFilter     ← Bắt mọi lỗi xảy ra ở bất cứ đâu và định dạng lại trước khi trả cho user.
+</code></pre>
+<p><strong>Tại sao tách các layer?</strong></p>
+<ul>
+<li>Các thành phần trong <code>common/</code> được thiết kế để tách biệt các vấn đề chung (cross-cutting concerns) ra khỏi logic nghiệp vụ (business logic).</li>
+<li>Chứa các <code>abstract class</code> (như <code>BaseRepository</code>) hoặc <code>interface</code> để tuân thủ nguyên lý Dependency Inversion, giúp mã dễ dàng mock khi test và thay đổi provider (ví dụ thay S3 bằng GCS dễ dàng thông qua <code>IStorageProvider</code>).</li>
+</ul>
+<hr>
+<h2>2. Các Dependencies</h2>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Vai trò</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>PinoLogger</code></td>
+<td>Ghi log thống nhất chuẩn JSON (structured logging) trên toàn ứng dụng.</td>
+</tr>
+<tr>
+<td><code>HttpAdapterHost</code></td>
+<td>Cung cấp phương thức để phản hồi trả về client trực tiếp từ Filter mà không phụ thuộc cứng vào Express/Fastify.</td>
+</tr>
+<tr>
+<td><code>PrismaService</code></td>
+<td>Được sử dụng trong <code>BaseRepository</code> làm cơ sở thực hiện các thao tác DB.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. Entry Points — Đi đâu về đâu</h2>
+<blockquote>
+<p>Vì Common không chứa Controller định tuyến trực tiếp, các &quot;Entry Points&quot; ở đây là các thời điểm hệ thống can thiệp vào request lifecycle.</p>
+</blockquote>
+<h3>Filter Xử lý Lỗi (Exception Handling)</h3>
+<pre><code class="language-text">Nơi bất kỳ sinh lỗi (ví dụ: Service ném BadRequestException)
+    │
+    ▼ AllExceptionsFilter.catch(exception)
+    │   1. Phân loại Exception (HttpException hay Prisma Error).
+    │   2. Map mã P2002 -&gt; Conflict, P2025 -&gt; NotFound.
+    │   3. Ghi log error/warn.
+    │
+    ▼ Trả về JSON: { statusCode, message, code, timestamp, path }
+</code></pre>
+<h3>Logging Interceptor (Interception Lifecycle)</h3>
+<pre><code class="language-text">Mọi HTTP Request đi vào API
+    │
+    ▼ LoggingInterceptor.intercept()
+    │   1. Lưu thời gian `now`.
+    │   2. Chuyển cho Controller.
+    │   3. Khi Request xong -&gt; tap() tính toán duration và gọi `logger.info()`.
+</code></pre>
+<hr>
+<h2>4. Đánh giá — Đã tốt chưa?</h2>
+<h3>✅ Đã làm tốt</h3>
+<table>
+<thead>
+<tr>
+<th>Điểm tốt</th>
+<th>Lý do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Bắt lỗi Prisma tập trung</td>
+<td>Xử lý lỗi <code>PrismaClientKnownRequestError</code> trong <code>AllExceptionsFilter</code> và <code>BaseRepository</code> giúp service không phải try-catch lặp lại liên tục cho lỗi trùng lặp (P2002) hay không tìm thấy (P2025).</td>
+</tr>
+<tr>
+<td>Kế thừa BaseRepository</td>
+<td>Việc đóng gói các hàm Prisma cơ bản trong <code>BaseRepository</code> giúp giảm code lặp ở các class con.</td>
+</tr>
+<tr>
+<td>Logging chi tiết</td>
+<td><code>LoggingInterceptor</code> log kèm <code>duration</code>, <code>query</code>, <code>params</code> rất hữu ích khi truy vết latency hoặc debug bug theo từng request cụ thể.</td>
+</tr>
+</tbody></table>
+<h3>❌ Chưa tốt / Cần cải thiện</h3>
+<p><strong>1. Trùng lặp logic bắt lỗi Prisma</strong></p>
+<pre><code class="language-typescript">// HIỆN TẠI — vấn đề:
+// AllExceptionsFilter đang cố gắng map lỗi Prisma (P2002, P2025), trong khi BaseRepository cũng thực hiện việc ném NotFound/Conflict exception dựa trên cùng mã lỗi đó qua hàm `handlePrismaError()`. Sự trùng lặp này không cần thiết, BaseRepository đã biến đổi nó thành HttpException nên Filter không bao giờ bắt được PrismaClientKnownRequestError trừ phi truy vấn DB nằm ngoài BaseRepository.
+
+// NÊN SỬA — lý do:
+// Nếu muốn giữ Prisma exception mapping, nên tập trung để 1 nơi duy nhất là Filter. Nếu dùng BaseRepository thì bỏ mapping ở Filter cho gọn.
+</code></pre>
+<p><strong>2. Có 2 Filter xử lý Http Exceptions</strong></p>
+<pre><code class="language-typescript">// HIỆN TẠI:
+// Tồn tại cả `AllExceptionsFilter` và `HttpExceptionFilter`. `AllExceptionsFilter` đã bọc toàn bộ trường hợp của `HttpException`.
+
+// NÊN SỬA:
+// Xóa bỏ `HttpExceptionFilter` dư thừa, chỉ cấu hình `AllExceptionsFilter` làm global filter ở main.ts.
+</code></pre>
+<hr>
+<h2>5. API Design Review</h2>
+<blockquote>
+<p>Không có REST endpoints trong thư mục Common, bỏ qua phần Endpoint Naming.</p>
+</blockquote>
+<h3>Response Shape (Của Global Filter)</h3>
+<pre><code class="language-typescript">// Exception Response trả về:
+{
+  statusCode: number, // HTTP Code
+  message: string,    // Chi tiết lỗi
+  code: string,       // Custom code như ERR_CONFLICT, ERR_BAD_REQUEST
+  timestamp: string,  // ISO time
+  path: string        // Request URL
+}
+</code></pre>
+<hr>
+<h2>6. Cách Debug khi gặp lỗi</h2>
+<h3>Lỗi 500 Internal Server Error ẩn</h3>
+<pre><code class="language-text">Checklist:
+1. Xem log backend sinh bởi `PinoLogger` có message &quot;Unhandled Exception&quot; do `AllExceptionsFilter` sinh ra.
+2. Kiểm tra xem lỗi đó có thuộc về Prisma (các mã ngoại lệ chưa định nghĩa ở Filter) hay là từ code logic.
+
+Command debug:
+→ Chạy `rtk log backend` để theo dõi log JSON. Tìm từ khóa `&quot;statusCode&quot;: 500`.
+</code></pre>
+<hr>
+<h2>7. Các Pattern quan trọng trong module này</h2>
+<h3>Pattern 1: Base Repository (Abstract Class Wrapper)</h3>
+<pre><code class="language-typescript">// Tại sao dùng pattern này?
+// → Abstract đi phần thao tác cơ bản với database. Code các Repo con chỉ việc `export class UserRepository extends BaseRepository&lt;User, Prisma.UserDelegate&gt;`.
+
+export abstract class BaseRepository&lt;T, Delegate&gt; {
+  constructor(protected prisma: PrismaService, protected delegate: Delegate) {}
+  
+  async findUnique(args: any): Promise&lt;T | null&gt; {
+    try {
+      return await (this.delegate as any).findUnique(args);
+    } catch (error) {
+      return this.handlePrismaError(error);
+    }
+  }
+}
+
+// Nếu KHÔNG dùng pattern này thì sao?
+// → Mỗi repository phải viết lại hàm try/catch và ánh xạ error cho từng phương thức crud cơ bản.
+</code></pre>
+<h3>Pattern 2: Global Exception Handling</h3>
+<pre><code class="language-typescript">// Tại sao dùng pattern này?
+// → Giúp Controller không bao giờ cần try/catch, luôn ném exception và có một lớp duy nhất đón để format lại chuỗi JSON trả về cho frontend đồng nhất.
+
+@Catch()
+export class AllExceptionsFilter implements ExceptionFilter { ... }
+</code></pre>
+<hr>
+<h2>8. Biến môi trường cần thiết</h2>
+<pre><code class="language-env"># Mặc dù không trực tiếp gọi, thư mục này dựa vào Prisma và Logger, do đó gián tiếp cần:
+DATABASE_URL=          # Kết nối đến DB cho Prisma
+</code></pre>
+<hr>
+<h2>9. Khi AI agent làm việc với module này</h2>
+<p><strong>Trước khi thêm tính năng vào Common:</strong></p>
+<ul>
+<li>Phải chắc chắn thành phần này được chia sẻ và sử dụng bởi ít nhất 2 module khác nhau.</li>
+<li>Interface phải được định nghĩa rõ ràng (chỉ chứa <code>signature</code>, không chứa <code>implementation</code>).</li>
+</ul>
+<p><strong>Khi sửa Filters/Interceptors:</strong></p>
+<ul>
+<li>Lưu ý thay đổi format response của <code>AllExceptionsFilter</code> sẽ ảnh hưởng đến CÁCH frontend bắt lỗi (frontend dựa vào <code>statusCode</code> hoặc <code>code</code>).</li>
+<li>Cẩn thận khi thêm logic nặng vào <code>LoggingInterceptor</code> vì nó chạy ở MỌI request, làm chậm hệ thống.</li>
+</ul>
+<p><strong>Khi debug:</strong></p>
+<ul>
+<li>Lỗi từ DB luôn ném qua <code>BaseRepository</code>, hãy xem log <code>Pino</code> bắt tại <code>AllExceptionsFilter</code>.</li>
+</ul>
+<hr>
+
+  </div>
+</div>
+
+</body>
+</html>

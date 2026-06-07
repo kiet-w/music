@@ -1,143 +1,98 @@
 # Codegraph Overview
 
-This document summarizes the three SQLite codegraph databases in the project:
+Generated from the three checked-in CodeGraph SQLite databases:
 
 - `.codegraph/codegraph.db`
 - `backend/.codegraph/codegraph.db`
 - `frontend/.codegraph/codegraph.db`
 
-The goal is to give a fast, project-wide view of what each graph covers and how the backend and frontend fit together.
+The root graph is the broadest view and includes both backend and frontend paths. The backend and frontend graphs are narrower views that are easier to query when the area of interest is already known.
 
-## 1. Graph Scope
+## Database Inventory
 
-### Root graph
+| Graph | Files | Nodes | Edges | Unresolved refs | Notes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Root | 108 | 682 | 1,117 | 0 | Cross-project graph covering backend, frontend, Android/Capacitor files, and shared config. |
+| Backend | 51 | 375 | 604 | 0 | Focused NestJS graph. |
+| Frontend | 57 | 309 | 498 | 0 | Focused Next.js/Capacitor graph. |
 
-The root `.codegraph` is the broadest view of the repository.
+## Schema
 
-- Nodes: `682`
-- Files indexed: `108`
-- Edges: `1117`
-- Unresolved refs: `0`
+Each database uses the same core tables:
 
-Node kinds in the root graph:
+- `files`: indexed file path, language, size, timestamps, node count, and file-level errors.
+- `nodes`: indexed symbols such as files, imports, classes, methods, functions, interfaces, constants, and routes.
+- `edges`: relationships between nodes. The observed relationship kinds are `contains`, `imports`, `calls`, and `references`.
+- `unresolved_refs`: references the indexer could not resolve. All three current graphs report `0`.
+- `nodes_fts` and related `nodes_fts_*` tables: full-text search index for node lookup.
+- `schema_versions`: graph schema version tracking.
+- `project_metadata`: present but currently empty.
 
-- `import`: `332`
-- `file`: `105`
-- `method`: `89`
-- `function`: `54`
-- `class`: `36`
-- `constant`: `31`
-- `interface`: `18`
-- `route`: `14`
-- `namespace`: `3`
+## Language Coverage
 
-Edge kinds in the root graph:
+| Graph | Languages |
+| --- | --- |
+| Root | TypeScript: 61 files / 435 nodes; TSX: 25 / 194; XML: 10 / 10; JavaScript: 6 / 23; Java: 3 / 20; properties: 2 / 0; YAML: 1 / 0 |
+| Backend | TypeScript: 49 files / 365 nodes; JavaScript: 2 / 10 |
+| Frontend | TSX: 27 files / 200 nodes; TypeScript: 11 / 66; XML: 10 / 10; JavaScript: 4 / 13; Java: 3 / 20; properties: 2 / 0 |
 
-- `contains`: `559`
-- `imports`: `332`
-- `calls`: `161`
-- `references`: `57`
-- `implements`: `3`
-- `extends`: `2`
-- `instantiates`: `2`
-- `decorates`: `1`
+## Node And Edge Shape
 
-### Backend graph
+The backend graph is controller/service heavy:
 
-The backend graph is a narrower NestJS-only view.
+- Top node kinds: `import` 181, `method` 86, `file` 51, `class` 33, `route` 14.
+- Edge kinds: `contains` 310, `imports` 181, `calls` 55, `references` 50.
 
-- Nodes: `375`
-- Files indexed: `51`
-- Edges: `604`
-- Unresolved refs: `0`
+The frontend graph is component/helper heavy:
 
-Node kinds in the backend graph:
+- Top node kinds: `import` 152, `file` 55, `function` 52, `constant` 26, `interface` 16, `class` 3.
+- Edge kinds: `contains` 250, `imports` 152, `calls` 10.
 
-- `import`: `181`
-- `method`: `86`
-- `file`: `51`
-- `class`: `33`
-- `route`: `14`
-- `constant`: `4`
-- `function`: `4`
-- `interface`: `2`
+The root graph combines both:
 
-Edge kinds in the backend graph:
+- Top node kinds: `import` 332, `file` 105, `method` 89, `function` 54, `class` 36, `constant` 31, `interface` 18, `route` 14.
+- Edge kinds: `contains` 559, `imports` 332, `calls` 161, `references` 57.
 
-- `contains`: `310`
-- `imports`: `181`
-- `calls`: `55`
-- `references`: `50`
-- `implements`: `3`
-- `extends`: `2`
-- `instantiates`: `2`
-- `decorates`: `1`
+## High-Density Files
 
-### Frontend graph
+These files have the highest indexed node counts and are good starting points for manual reading.
 
-The frontend graph is the Next.js / React / Capacitor view.
+Backend:
 
-- Nodes: `309`
-- Files indexed: `57`
-- Edges: `498`
-- Unresolved refs: `0`
+- `backend/src/songs/song.controller.ts`
+- `backend/src/albums/album.controller.ts`
+- `backend/src/app.module.ts`
+- `backend/src/google-drive/google-drive.controller.ts`
+- `backend/src/jobs/conversion.processor.ts`
+- `backend/src/songs/song.service.ts`
+- `backend/src/storage/storage.service.ts`
+- `backend/src/albums/dto/album-response.dto.ts`
+- `backend/src/downloader/downloader.service.ts`
+- `backend/src/admin/admin.controller.ts`
+- `backend/src/songs/dto/song-response.dto.ts`
+- `backend/src/common/repositories/base.repository.ts`
 
-Node kinds in the frontend graph:
+Frontend:
 
-- `import`: `152`
-- `file`: `55`
-- `function`: `52`
-- `constant`: `26`
-- `interface`: `16`
-- `class`: `3`
-- `namespace`: `3`
-- `method`: `2`
+- `frontend/src/components/templates/AlbumDetailClient.tsx`
+- `frontend/src/components/molecules/Library/Library.tsx`
+- `frontend/src/lib/api.ts`
+- `frontend/src/components/molecules/Downloader/Downloader.tsx`
+- `frontend/src/app/[locale]/albums/AlbumsClient.tsx`
+- `frontend/src/components/atoms/ui/card.tsx`
+- `frontend/src/app/[locale]/HomePageClient.tsx`
+- `frontend/src/components/google-drive/DrivePicker.tsx`
+- `frontend/src/lib/supabase.ts`
+- `frontend/src/app/[locale]/music/page.tsx`
+- `frontend/src/components/molecules/AddToPlaylist/AddToPlaylistDialog.tsx`
+- `frontend/src/components/molecules/Navigation/BottomTabBar.tsx`
+- `frontend/src/components/molecules/Player/Player.tsx`
 
-Edge kinds in the frontend graph:
+## Backend API Surface
 
-- `contains`: `250`
-- `imports`: `152`
-- `calls`: `86`
-- `references`: `10`
-
-## 2. What the Project Is
-
-This is a music application with:
-
-- A NestJS backend for auth, albums, songs, Google Drive import, YouTube conversion, and storage
-- A Next.js frontend for browsing, downloading, playing, and managing music
-- Local offline playback support through Capacitor filesystem APIs
-- Real-time refresh via Supabase subscriptions
-
-## 3. Backend Structure
-
-### Core modules
-
-- `src/auth`: register, login, and `/auth/me`
-- `src/albums`: album creation and retrieval
-- `src/songs`: song creation from YouTube, listing, detail lookup, delete, and move-to-album
-- `src/google-drive`: Drive file listing and import
-- `src/storage`: Supabase storage upload, public URL lookup, and delete
-- `src/downloader`: `yt-dlp` based download pipeline
-- `src/jobs`: BullMQ conversion worker
-- `src/admin`: admin cleanup and track deletion utilities
-- `src/prisma`: Prisma wiring
-- `src/common`: filters, interceptors, interfaces, repositories
-- `src/core`: root controller/service
-
-### Backend entry points
-
-- `backend/src/main.ts` bootstraps Nest, CORS, validation, Swagger, logging, and global filters
-- `backend/src/app.module.ts` wires together config, cache, logging, and feature modules
-
-### Backend API surface
-
-Routes captured in the graph and source:
+The backend graph indexes route nodes for the older core API:
 
 - `GET /`
-- `POST /auth/register`
-- `POST /auth/login`
-- `GET /auth/me`
 - `POST /albums`
 - `GET /albums`
 - `GET /albums/:id`
@@ -152,127 +107,138 @@ Routes captured in the graph and source:
 - `DELETE /admin/tracks/:id`
 - `POST /admin/storage/cleanup`
 
-## 4. Backend Data Flow
+Source cross-checking shows additional or newer routes that are not fully represented in the graph route nodes:
 
-### Auth flow
+- `POST /auth/register`
+- `POST /auth/login`
+- `POST /auth/google`
+- `GET /auth/users`
+- `GET /auth/me`
+- `GET /google-drive/auth-url`
+- `POST /google-drive/exchange-code`
+- `POST /messages`
+- `GET /messages/:userId`
+- `POST /friend-requests/invite`
+- `GET /friend-requests/info/:token`
+- `POST /friend-requests/accept/:token`
 
-1. Client registers or logs in through `/auth/register` or `/auth/login`
-2. Backend hashes passwords with bcrypt and returns a JWT access token
-3. Frontend stores the token in localStorage
-4. `GET /auth/me` re-validates the session during hydration
+Treat the route nodes as useful but stale for auth, messaging, and newer Google Drive OAuth work.
 
-### YouTube-to-library flow
+## Frontend Data Flow
 
-1. Client posts `url`, `title`, `artist`, and optional `albumId` to `POST /songs/youtube`
-2. `SongService` creates a song record
-3. A BullMQ job is queued on `conversion`
-4. `ConversionProcessor` downloads audio with `yt-dlp`
-5. The file is uploaded to Supabase Storage
-6. The track row is updated with the public URL
-7. Temporary files are cleaned up
+`frontend/src/lib/api.ts` is the main HTTP boundary. It wraps `fetch`, attaches auth headers, and exposes helpers for:
 
-### Google Drive import flow
+- Auth: register, Google login, email/password login, and `/auth/me`.
+- Albums: create/list/detail.
+- Songs: list, YouTube import, move, delete.
+- Google Drive: OAuth URL, code exchange, file listing, and import.
 
-1. Frontend obtains a Google access token
-2. Backend lists candidate audio files from Drive
-3. Backend resolves shortcuts and filters audio-like files
-4. Import endpoint downloads and stores the file into the library
+Important frontend entry points:
 
-### Album and song ownership
+- `frontend/src/store/useAuthStore.ts`: auth token and user session state.
+- `frontend/src/components/auth/AuthGate.tsx`: protected route gating.
+- `frontend/src/app/[locale]/layout.tsx`: localized app shell.
+- `frontend/src/app/[locale]/HomePageClient.tsx`: home/library data loading.
+- `frontend/src/app/[locale]/albums/AlbumsClient.tsx`: album list and creation.
+- `frontend/src/components/templates/AlbumDetailClient.tsx`: album detail and track interaction.
+- `frontend/src/components/molecules/Library/Library.tsx`: library view.
+- `frontend/src/components/molecules/Downloader/Downloader.tsx`: YouTube import UI.
+- `frontend/src/components/google-drive/DrivePicker.tsx`: Google Drive selection/import UI.
 
-- User ownership is enforced by matching `userId` on album and song lookups
-- A song can only be moved to an album owned by the same user
-- Default albums are created lazily when the user imports a YouTube track without choosing an album
+## Known Index Errors
 
-## 5. Frontend Structure
+Root graph error log:
 
-### App layer
+- `frontend/src/components/UpdaterInit.tsx` could not be read because the file no longer exists.
 
-- `src/app/[locale]` contains localized routes
-- `layout.tsx` wraps the app with `NextIntlClientProvider`, `AuthGate`, `PlayerBar`, and `BottomTabBar`
-- `page.tsx` and the localized feature pages render the main experience
+Frontend graph error log:
 
-### Shared frontend layers
+- `src/components/UpdaterInit.tsx` could not be read because the file no longer exists.
+- `src/middleware.ts` could not be read because the file no longer exists.
 
-- `src/components`: UI atoms, molecules, templates, auth, Google Drive, and layout pieces
-- `src/hooks`: realtime sync and offline storage hooks
-- `src/lib`: API client and Supabase setup
-- `src/store`: Zustand stores for auth, albums, and player state
-- `src/messages`: English and Vietnamese localization files
+These errors mean the graphs were generated before some frontend files were removed or moved. Rebuild the affected graph before relying on exact frontend coverage.
 
-### Key frontend modules
+## Practical Query Examples
 
-- `src/lib/api.ts`: all backend fetch helpers
-- `src/store/useAuthStore.ts`: token hydration, session persistence, and `/auth/me` verification
-- `src/hooks/useSupabaseRealtime.ts`: Supabase table subscriptions for live refresh
-- `src/hooks/useOfflineStorage.ts`: local file download and retrieval for offline playback
-- `src/components/auth/AuthGate.tsx`: route protection and redirect logic
-- `src/components/molecules/Library/Library.tsx`: track list, download/delete/move/play actions
-- `src/app/[locale]/albums/AlbumsClient.tsx`: album browsing and creation
-- `src/app/[locale]/HomePageClient.tsx`: album overview landing page
+The local `sqlite3` CLI is not installed in this environment, but Python's standard `sqlite3` module works:
 
-## 6. Frontend Data Flow
+```bash
+rtk proxy python3 - <<'PY'
+import sqlite3
 
-### Session hydration
+con = sqlite3.connect(".codegraph/codegraph.db")
+for row in con.execute("""
+    select kind, name, file_path, start_line
+    from nodes
+    where name like '%Album%'
+    order by file_path, start_line
+    limit 50
+"""):
+    print(row)
+con.close()
+PY
+```
 
-1. `useAuthStore` reads persisted auth from localStorage
-2. `AuthGate` waits for hydration
-3. If the route is protected and there is no session, the user is redirected to login
-4. If the token exists, `/auth/me` is called to validate it
+Find indexed backend routes:
 
-### Album browsing
+```bash
+rtk proxy python3 - <<'PY'
+import sqlite3
 
-1. `HomePageClient` fetches albums from `GET /albums`
-2. `AlbumsClient` fetches the same data and supports creation through `POST /albums`
-3. Realtime events on the `Album` table refresh the UI automatically
+con = sqlite3.connect("backend/.codegraph/codegraph.db")
+for row in con.execute("""
+    select name, file_path, start_line
+    from nodes
+    where kind = 'route'
+    order by file_path, start_line
+"""):
+    print(row)
+con.close()
+PY
+```
 
-### Library browsing
+Find high-density frontend files:
 
-1. `Library` fetches tracks from `GET /songs`
-2. Tracks can be played, deleted, moved to an album, or downloaded for offline use
-3. Realtime events on the `Track` table refresh the list
+```bash
+rtk proxy python3 - <<'PY'
+import sqlite3
 
-### Offline playback
+con = sqlite3.connect("frontend/.codegraph/codegraph.db")
+for row in con.execute("""
+    select path, node_count
+    from files
+    order by node_count desc, path
+    limit 20
+"""):
+    print(row)
+con.close()
+PY
+```
 
-1. `useOfflineStorage` downloads a track to Capacitor filesystem storage
-2. On web, it converts the file into a data URI
-3. On native platforms, it returns a file URI through Capacitor
+## Recommended Reading Order
 
-## 7. Most Connected Files
-
-The following files are the busiest hubs in the graph and are the best starting points when reading the code:
-
-- `backend/src/songs/song.controller.ts`
-- `backend/src/albums/album.controller.ts`
-- `backend/src/app.module.ts`
-- `backend/src/google-drive/google-drive.controller.ts`
-- `backend/src/jobs/conversion.processor.ts`
-- `backend/src/songs/song.service.ts`
-- `backend/src/storage/storage.service.ts`
-- `frontend/src/components/templates/AlbumDetailClient.tsx`
-- `frontend/src/components/molecules/Library/Library.tsx`
-- `frontend/src/lib/api.ts`
-- `frontend/src/components/molecules/Downloader/Downloader.tsx`
-- `frontend/src/app/[locale]/albums/AlbumsClient.tsx`
-
-## 8. Notes And Caveats
-
-- `project_metadata` is empty in all three databases, so there is no embedded project summary to read from the graph itself.
-- The graph captured the core backend routes and the main frontend modules, but the backend auth routes had to be confirmed from source because they were not surfaced in the route-node dump.
-- The root graph is the best single place to understand cross-cutting relationships; the backend and frontend graphs are better when you want a focused view of one side only.
-
-## 9. Practical Reading Order
-
-If you are onboarding someone or reviewing the architecture, start here:
+For backend behavior:
 
 1. `backend/src/main.ts`
 2. `backend/src/app.module.ts`
 3. `backend/src/auth/auth.controller.ts`
-4. `backend/src/albums/album.service.ts`
-5. `backend/src/songs/song.service.ts`
-6. `backend/src/jobs/conversion.processor.ts`
-7. `frontend/src/store/useAuthStore.ts`
-8. `frontend/src/app/[locale]/layout.tsx`
-9. `frontend/src/components/molecules/Library/Library.tsx`
-10. `frontend/src/lib/api.ts`
+4. `backend/src/auth/auth.service.ts`
+5. `backend/src/albums/album.controller.ts`
+6. `backend/src/albums/album.service.ts`
+7. `backend/src/songs/song.controller.ts`
+8. `backend/src/songs/song.service.ts`
+9. `backend/src/google-drive/google-drive.controller.ts`
+10. `backend/src/google-drive/google-drive.service.ts`
 
+For frontend behavior:
+
+1. `frontend/src/lib/api.ts`
+2. `frontend/src/store/useAuthStore.ts`
+3. `frontend/src/components/auth/AuthGate.tsx`
+4. `frontend/src/app/[locale]/layout.tsx`
+5. `frontend/src/app/[locale]/HomePageClient.tsx`
+6. `frontend/src/app/[locale]/albums/AlbumsClient.tsx`
+7. `frontend/src/components/templates/AlbumDetailClient.tsx`
+8. `frontend/src/components/molecules/Library/Library.tsx`
+9. `frontend/src/components/molecules/Downloader/Downloader.tsx`
+10. `frontend/src/components/google-drive/DrivePicker.tsx`

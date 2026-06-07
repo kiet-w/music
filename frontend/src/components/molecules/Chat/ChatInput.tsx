@@ -22,7 +22,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border-t border-white/10">
+    <form onSubmit={handleSubmit} className="p-4 pb-6 border-t border-white/10">
       <div className="flex gap-2">
         <input
           type="text"

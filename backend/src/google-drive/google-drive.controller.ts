@@ -1,12 +1,11 @@
-import { Controller, Get, Post, Body, Query, UseGuards, NotFoundException, BadRequestException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, UseGuards, InternalServerErrorException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { GoogleDriveService } from './google-drive.service';
-import { StorageService } from '../storage/storage.service';
-import { SongRepository } from '../songs/repositories/song.repository';
-import { AlbumService } from '../albums/album.service';
-import { AlbumRepository } from '../albums/repositories/album.repository';
 import { ImportDto } from './dto/import.dto';
+import { ExchangeCodeDto } from './dto/exchange-code.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 
@@ -17,12 +16,9 @@ import { CurrentUser } from '../auth/current-user.decorator';
 export class GoogleDriveController {
   constructor(
     private readonly googleDriveService: GoogleDriveService,
-    private readonly storageService: StorageService,
-    private readonly songRepository: SongRepository,
-    private readonly albumService: AlbumService,
-    private readonly albumRepository: AlbumRepository,
     @InjectPinoLogger(GoogleDriveController.name)
     private readonly logger: PinoLogger,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   @Get('ping')
@@ -30,83 +26,42 @@ export class GoogleDriveController {
     return { status: 'ok', timestamp: new Date().toISOString(), version: '2.0-debug' };
   }
 
+  @Get('status')
+  @ApiOperation({ summary: 'Check if Google Drive is connected' })
+  async getStatus(@CurrentUser() user: any) {
+    const cacheKey = `gdrive-status-${user.id}`;
+    const cached = await this.cacheManager.get(cacheKey);
+    if (cached !== undefined) {
+      return { connected: cached };
+    }
+
+    const connected = await this.googleDriveService.isConnected(user.id);
+    await this.cacheManager.set(cacheKey, connected, 300000); // 5 minutes cache
+    return { connected };
+  }
+
+  @Get('auth-url')
+  @ApiOperation({ summary: 'Generate Google OAuth URL' })
+  async getAuthUrl(@CurrentUser() user: any) {
+    const url = await this.googleDriveService.generateAuthUrl(user.id);
+    return { url };
+  }
+
+  @Post('exchange-code')
+  @ApiOperation({ summary: 'Exchange Google OAuth code for tokens' })
+  async exchangeCode(@CurrentUser() user: any, @Body() dto: ExchangeCodeDto) {
+    return await this.googleDriveService.exchangeCodeForTokens(user.id, dto.code, dto.state);
+  }
+
   @Get('files')
   @ApiOperation({ summary: 'List music files from Google Drive' })
-  async listFiles(@CurrentUser() user: any, @Query('token') token: string) {
-    try {
-      return await this.googleDriveService.listFiles(token);
-    } catch (error: any) {
-      this.logger.error({ userId: user.id, error: error.message }, 'Error in listFiles controller');
-      return {
-        error: true,
-        message: error.message,
-        details: error.response?.data || error,
-      };
-    }
+  async listFiles(@CurrentUser() user: any) {
+    return await this.googleDriveService.listFiles(user.id);
   }
 
   @Post('import')
   @ApiOperation({ summary: 'Import a file from Google Drive' })
   async importFile(@CurrentUser() user: any, @Body() importDto: ImportDto) {
-    const { fileId, accessToken, albumId } = importDto;
-    let finalAlbumId = albumId;
-
-    if (finalAlbumId) {
-      const album = await this.albumRepository.findUnique({
-        where: { id: finalAlbumId },
-      });
-      if (!album || album.userId !== user.id) {
-        throw new NotFoundException('Album not found');
-      }
-    } else {
-      const defaultAlbum = await this.albumService.findOrCreateDefault(user.id);
-      finalAlbumId = defaultAlbum.id;
-    }
-
-    const metadata = await this.googleDriveService.getFileMetadata(
-      accessToken,
-      fileId,
-    );
-
-    // Strict MP3 Validation
-    const isMp3Mime = metadata.mimeType === 'audio/mpeg' || metadata.mimeType === 'audio/mp3';
-    const isMp3Ext = metadata.name?.toLowerCase().endsWith('.mp3');
-
-    if (!isMp3Mime && !isMp3Ext) {
-      this.logger.warn({ fileId, mimeType: metadata.mimeType, name: metadata.name }, 'Rejection: Only MP3 files are allowed');
-      throw new BadRequestException('Chỉ hỗ trợ file định dạng MP3');
-    }
-
-    const stream = await this.googleDriveService.downloadFile(
-      accessToken,
-      fileId,
-    );
-
-    // Làm sạch tên file để upload lên Storage (bỏ dấu, ký tự đặc biệt)
-    const originalName = metadata.name || 'unknown';
-    const sanitizedName = originalName
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Bỏ dấu tiếng Việt
-      .replace(/[^a-zA-Z0-9.-]/g, '_'); // Thay ký tự đặc biệt bằng dấu gạch dưới
-
-    const storagePath = `songs/${finalAlbumId}/${Date.now()}_${sanitizedName}`;
-    const path = await this.storageService.uploadStream(
-      stream,
-      'music',
-      storagePath,
-      metadata.mimeType || 'audio/mpeg',
-    );
-    const url = await this.storageService.getPublicUrl('music', path);
-
-    return this.songRepository.create({
-      data: {
-        title: originalName.replace(/\.[^/.]+$/, ''), // Giữ nguyên tên gốc có dấu cho DB
-        artist: 'Unknown Artist',
-        url,
-        albumId: finalAlbumId,
-        sourceType: 'google-drive',
-        sourceId: fileId,
-      },
-    });
+    return await this.googleDriveService.importFile(user.id, importDto);
   }
 }

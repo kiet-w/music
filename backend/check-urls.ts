@@ -1,5 +1,6 @@
+import { config } from 'dotenv';
+config({ override: true });
 import { PrismaClient } from '@prisma/client';
-import 'dotenv/config';
 
 async function main() {
   const prisma = new PrismaClient();

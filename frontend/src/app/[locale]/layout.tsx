@@ -1,17 +1,20 @@
+import type { ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import dynamic from 'next/dynamic';
-import { AuthGate } from '@/components/auth/AuthGate';
-import { NavWrapper } from '@/components/auth/NavWrapper';
-import { GoogleAuthProvider } from '@/components/providers/GoogleAuthProvider';
+
+import { AuthGate } from '@/components/templates/wrappers/AuthGate';
+import { NavWrapper } from '@/components/templates/wrappers/NavWrapper';
+import { GoogleAuthProvider } from '@/components/templates/wrappers/GoogleAuthProvider';
+import { ChatProvider } from '@/components/templates/wrappers/ChatProvider';
 
 const PlayerBar = dynamic(() => import('@/components/molecules/PlayerBar'), {
-  ssr: false
+  ssr: false,
 });
-
-const BottomTabBar = dynamic(() => import('@/components/molecules/Navigation/BottomTabBar'), {
-  ssr: false
-});
+const BottomTabBar = dynamic(
+  () => import('@/components/molecules/Navigation/BottomTabBar'),
+  { ssr: false },
+);
 
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'vi' }];
@@ -19,23 +22,25 @@ export function generateStaticParams() {
 
 export default async function LocaleLayout({
   children,
-  params: { locale }
+  params: { locale },
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   params: { locale: string };
 }) {
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider messages={messages} locale={locale}>
       <GoogleAuthProvider>
-        <AuthGate>
-          {children}
-          <NavWrapper>
-            <PlayerBar />
-            <BottomTabBar />
-          </NavWrapper>
-        </AuthGate>
+        <ChatProvider>
+          <AuthGate>
+            {children}
+            <NavWrapper>
+              <PlayerBar />
+              <BottomTabBar />
+            </NavWrapper>
+          </AuthGate>
+        </ChatProvider>
       </GoogleAuthProvider>
     </NextIntlClientProvider>
   );

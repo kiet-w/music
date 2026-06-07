@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Module — Technical Docs</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        /* ── CSS Variables ── */
+        :root {
+          /* Backgrounds */
+          --bg:             #f4f2ee;
+          --sidebar-bg:     #eceae5;
+          --panel-bg:       #fafaf8;
+
+          /* Text */
+          --text:           #1a1a18;
+          --text-muted:     #5f5e5a;
+
+          /* Syntax Highlighting */
+          --kw:             #185fa5;  /* keyword — blue */
+          --fn:             #854f0b;  /* function — amber */
+          --str:            #0f6e56;  /* string — teal */
+
+          /* Accent / Brand */
+          --accent:         #d85a30;  /* Claude coral/orange */
+          --border:         #d3d1c7;
+
+          /* Semantic */
+          --success:        #2c7a39;  /* rgb(44,122,57) */
+          --warn:           #854f0b;
+          --error:          #ab2b3f;  /* rgb(171,43,63) */
+
+          /* ─── SVG Component Palette (Light) ─────────── */
+          --svg-mod:         #f4f2ee;
+          --svg-ctrl:        #e6f1fb;
+          --svg-ctrl-stroke: #185fa5;
+          --svg-svc:         #e1f5ee;
+          --svg-svc-stroke:  #0f6e56;
+          --svg-repo:        #faeeda;
+          --svg-repo-stroke: #854f0b;
+          --svg-infra:       #eeedfe;
+          --svg-infra-stroke:#534ab7;
+        }
+
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Consolas', monospace;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            font-size: 15px;
+        }
+
+        /* ── Layout ── */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 32px 20px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+            z-index: 100;
+        }
+        .sidebar-title {
+            font-size: 0.75em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar nav ul { list-style: none; }
+        .sidebar nav li { margin-bottom: 4px; }
+        .sidebar nav a {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar nav a:hover { background: var(--panel-bg); color: var(--accent); transform: translateX(4px); }
+        .sidebar nav a.active { background: var(--accent); color: #fff !important; font-weight: 600; }
+
+        .toc-h3 > a { padding-left: 24px; font-size: 0.85em; color: var(--text-muted); }
+        .toc-h4 > a { padding-left: 40px; font-size: 0.8em; color: var(--text-muted); }
+
+        /* ── Main Content ── */
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding-bottom: 100px;
+        }
+
+        /* ── Hero Section (Landing Page Style) ── */
+        .hero {
+            padding: 120px 60px 80px;
+            text-align: center;
+            background: var(--sidebar-bg); /* Sửa nền cho hợp light theme */
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 60px;
+        }
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: var(--text);
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .hero p {
+            font-size: 1.25em;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+        }
+
+        /* ── Main Body Container ── */
+        .main-body {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* ── Typography ── */
+        h1 { font-size: 2.4em; color: var(--fn); margin-bottom: 40px; }
+        h2 {
+            font-size: 1.8em;
+            color: var(--kw);
+            margin: 64px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            scroll-margin-top: 40px;
+        }
+        h3 {
+            font-size: 1.4em;
+            color: var(--fn);
+            margin: 48px 0 16px;
+            scroll-margin-top: 40px;
+        }
+        h4 {
+            font-size: 1em;
+            color: var(--success);
+            margin: 32px 0 12px;
+            scroll-margin-top: 40px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        p { margin-bottom: 20px; }
+        ul, ol { margin: 0 0 24px 28px; }
+        li { margin-bottom: 10px; }
+        strong { color: var(--text); font-weight: 700; }
+        em { color: var(--str); font-style: normal; }
+
+        /* ── SVG Diagrams (Custom Style) ── */
+        .svg-container {
+            width: 100%;
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .svg-container svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+        /* SVG Internal Styles (Matched to CSS Variables) */
+        .svg-bg { fill: transparent; }
+        .svg-mod { fill: var(--sidebar-bg); stroke: var(--border); stroke-width: 2; rx: 18; }
+        .svg-ctrl { fill: var(--svg-ctrl); stroke: var(--svg-ctrl-stroke); stroke-width: 2; rx: 12; }
+        .svg-svc { fill: var(--svg-svc); stroke: var(--svg-svc-stroke); stroke-width: 2; rx: 12; }
+        .svg-repo { fill: var(--svg-repo); stroke: var(--svg-repo-stroke); stroke-width: 2; rx: 12; }
+        .svg-infra { fill: var(--svg-infra); stroke: var(--svg-infra-stroke); stroke-width: 2; rx: 12; }
+        .svg-txt { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; fill: #1a1a18; }
+        .svg-small { font-family: 'Inter', sans-serif; font-size: 13px; fill: #5f5e5a; }
+        .svg-arrow { stroke: #5f5e5a; stroke-width: 2.5; fill: none; }
+
+        /* ── Inline code & Blocks ── */
+        code {
+            background: #e6e4df;
+            color: var(--str);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            border: 1px solid var(--border);
+        }
+        pre {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            overflow-x: auto;
+            margin-bottom: 32px;
+        }
+        pre code { background: none; border: none; padding: 0; color: var(--text); }
+
+        /* ── Tables ── */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 32px; border-radius: 10px; overflow: hidden; }
+        th { background: #e6e4df; color: var(--kw); border: 1px solid var(--border); padding: 14px 18px; text-align: left; }
+        td { border: 1px solid var(--border); padding: 12px 18px; }
+        tr:nth-child(even) td { background: #f0ede8; }
+
+        /* ── Method Section ── */
+        .method-section {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 56px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .method-signature {
+            background: #eceae5;
+            border-left: 5px solid var(--accent);
+            border-radius: 6px;
+            padding: 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95em;
+            margin: 20px 0 32px;
+            color: var(--fn);
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a3a197; }
+
+        /* Animation */
+        @keyframes sectionFlash {
+            0% { outline: 3px solid var(--accent); outline-offset: 6px; background: rgba(216,90,48,0.1); }
+            100% { outline: 3px solid transparent; outline-offset: 15px; }
+        }
+        .section-highlight { animation: sectionFlash 1.2s ease-out forwards; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title">📄 Auth Module</div>
+            <nav id="toc"></nav>
+        </aside>
+
+        <main class="content" id="main-content">
+            <section class="hero">
+                <div class="hero-badge">Backend Module</div>
+                <h1>Auth Module</h1>
+                <p>Xử lý toàn bộ các luồng xác thực và cấp quyền truy cập vào hệ thống. Bao gồm đăng ký, đăng nhập email/password, đăng nhập Google OAuth, và liên kết Google Drive.</p>
+            </section>
+            
+            <div class="main-body">
+                <h2>1. Kiến trúc tổng thể (Component Overview)</h2>
+                <p>Module <code>Auth</code> chịu trách nhiệm xử lý toàn bộ các luồng xác thực (authentication) và cấp quyền truy cập vào hệ thống.</p>
+                
+                <div class="svg-container">
+                    <svg viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Definitions -->
+                        <defs>
+                            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#5f5e5a" />
+                            </marker>
+                        </defs>
+                        
+                        <!-- Request Entry -->
+                        <rect x="50" y="160" width="160" height="80" class="svg-infra" />
+                        <text x="130" y="195" class="svg-txt" text-anchor="middle">HTTP Request</text>
+                        <text x="130" y="215" class="svg-small" text-anchor="middle">Client App</text>
+                        
+                        <!-- Flow arrow 1 -->
+                        <path d="M 210 200 L 260 200" class="svg-arrow" marker-end="url(#arrow)" />
+                        
+                        <!-- Controller Layer -->
+                        <rect x="270" y="80" width="180" height="100" class="svg-ctrl" />
+                        <text x="360" y="125" class="svg-txt" text-anchor="middle">AuthController</text>
+                        <text x="360" y="145" class="svg-small" text-anchor="middle">Routes &amp; Payloads</text>
+                        
+                        <!-- Guard Layer -->
+                        <rect x="270" y="220" width="180" height="100" class="svg-ctrl" />
+                        <text x="360" y="265" class="svg-txt" text-anchor="middle">JwtAuthGuard</text>
+                        <text x="360" y="285" class="svg-small" text-anchor="middle">Token Protection</text>
+                        
+                        <!-- Flow arrow 2 (Ctrl to Service) -->
+                        <path d="M 450 130 L 510 130" class="svg-arrow" marker-end="url(#arrow)" />
+                        <!-- Flow arrow 3 (Guard to Controller conceptually) -->
+                        <path d="M 360 220 L 360 180" class="svg-arrow" marker-end="url(#arrow)" stroke-dasharray="5,5" />
+                        
+                        <!-- Service Layer -->
+                        <rect x="520" y="80" width="180" height="240" class="svg-svc" />
+                        <text x="610" y="180" class="svg-txt" text-anchor="middle">AuthService</text>
+                        <text x="610" y="200" class="svg-small" text-anchor="middle">Business Logic</text>
+                        <text x="610" y="220" class="svg-small" text-anchor="middle">Hashing &amp; Tokens</text>
+                        
+                        <!-- Flow arrow 4 -->
+                        <path d="M 700 200 L 760 200" class="svg-arrow" marker-end="url(#arrow)" />
+                        
+                        <!-- Repository Layer -->
+                        <rect x="770" y="150" width="180" height="100" class="svg-repo" />
+                        <text x="860" y="195" class="svg-txt" text-anchor="middle">UserRepository</text>
+                        <text x="860" y="215" class="svg-small" text-anchor="middle">Prisma Client</text>
+                    </svg>
+                </div>
+                
+                <p><strong>Tại sao tách các layer?</strong></p>
+                <ul>
+                    <li><strong>Separation of Concerns:</strong> Controller chỉ xử lý HTTP request/response. Service xử lý nghiệp vụ, Repository xử lý query DB.</li>
+                    <li>Giúp code dễ test hơn (có thể dễ dàng mock Repository để test Service).</li>
+                    <li>Tăng khả năng tái sử dụng (Guard, Decorator, Repository có thể dùng ở module khác).</li>
+                </ul>
+
+                <h2>2. Các Dependencies</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dependency</th>
+                            <th>Vai trò</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>UserRepository</code></td>
+                            <td>Giao tiếp với Database để query và thao tác với entity <code>User</code> qua Prisma.</td>
+                        </tr>
+                        <tr>
+                            <td><code>JwtModule</code> / <code>JwtService</code></td>
+                            <td>Cung cấp <code>JwtService</code> dùng để tạo và xác thực JSON Web Token (JWT).</td>
+                        </tr>
+                        <tr>
+                            <td><code>ConfigService</code></td>
+                            <td>Truy xuất các biến môi trường cấu hình (<code>JWT_SECRET</code>, <code>JWT_EXPIRES_IN</code>, <code>GOOGLE_CLIENT_ID</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><code>PinoLogger</code></td>
+                            <td>Dùng để ghi log các sự kiện trong quá trình xác thực (thành công/lỗi).</td>
+                        </tr>
+                        <tr>
+                            <td><code>OAuth2Client</code></td>
+                            <td>SDK của Google (<code>google-auth-library</code>) để xác thực <code>idToken</code> lấy từ client.</td>
+                        </tr>
+                        <tr>
+                            <td><code>PrismaModule</code></td>
+                            <td>Cung cấp Prisma instance cho quá trình tương tác DB.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>3. System Data Flow</h2>
+                <div class="svg-container">
+                    <svg viewBox="0 0 1000 450" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#5f5e5a" />
+                            </marker>
+                        </defs>
+                        
+                        <!-- Client -->
+                        <rect x="50" y="180" width="140" height="80" class="svg-infra" />
+                        <text x="120" y="220" class="svg-txt" text-anchor="middle">Client App</text>
+                        
+                        <!-- API Route -->
+                        <path d="M 190 220 L 250 220" class="svg-arrow" marker-end="url(#arrow)" />
+                        
+                        <!-- Controller -->
+                        <rect x="260" y="80" width="160" height="280" class="svg-ctrl" />
+                        <text x="340" y="120" class="svg-txt" text-anchor="middle">AuthController</text>
+                        <text x="340" y="160" class="svg-small" text-anchor="middle">/register</text>
+                        <text x="340" y="190" class="svg-small" text-anchor="middle">/login</text>
+                        <text x="340" y="220" class="svg-small" text-anchor="middle">/google</text>
+                        <text x="340" y="250" class="svg-small" text-anchor="middle">/me</text>
+                        <text x="340" y="280" class="svg-small" text-anchor="middle">/users</text>
+
+                        <!-- Guard Interceptor -->
+                        <rect x="300" y="380" width="260" height="60" class="svg-ctrl" style="stroke-dasharray: 4,4;" />
+                        <text x="430" y="415" class="svg-txt" text-anchor="middle">JwtAuthGuard</text>
+                        <path d="M 340 360 L 340 380" class="svg-arrow" />
+                        
+                        <!-- To Service -->
+                        <path d="M 420 220 L 480 220" class="svg-arrow" marker-end="url(#arrow)" />
+                        
+                        <!-- Service -->
+                        <rect x="490" y="80" width="220" height="280" class="svg-svc" />
+                        <text x="600" y="120" class="svg-txt" text-anchor="middle">AuthService</text>
+                        <rect x="510" y="140" width="180" height="40" class="svg-mod" style="fill:#fff;"/>
+                        <text x="600" y="165" class="svg-small" text-anchor="middle">bcrypt Hash/Compare</text>
+                        
+                        <rect x="510" y="190" width="180" height="40" class="svg-mod" style="fill:#fff;"/>
+                        <text x="600" y="215" class="svg-small" text-anchor="middle">JWT Sign / Verify</text>
+                        
+                        <rect x="510" y="240" width="180" height="40" class="svg-mod" style="fill:#fff;"/>
+                        <text x="600" y="265" class="svg-small" text-anchor="middle">Google SDK</text>
+                        
+                        <!-- To DB -->
+                        <path d="M 710 220 L 770 220" class="svg-arrow" marker-end="url(#arrow)" />
+                        
+                        <!-- Database -->
+                        <rect x="780" y="140" width="160" height="160" class="svg-repo" />
+                        <text x="860" y="190" class="svg-txt" text-anchor="middle">PostgreSQL</text>
+                        <text x="860" y="215" class="svg-small" text-anchor="middle">User Table</text>
+                        <text x="860" y="240" class="svg-small" text-anchor="middle">Credentials</text>
+                    </svg>
+                </div>
+
+                <h3>Chi tiết Luồng Dữ Liệu</h3>
+                <ul>
+                    <li><strong>1. POST <code>/auth/register</code>:</strong> Client → Controller (<code>register()</code>) → Service (<code>register()</code>) → Repository (<code>findByEmail()</code>) → DB (Kiểm tra) → Service (Băm password qua <code>bcrypt</code>) → Repository (<code>create()</code>) → DB (Lưu) → Service (<code>buildAuthResponse()</code>) → Client.</li>
+                    <li><strong>2. POST <code>/auth/login</code>:</strong> Client → Controller (<code>login()</code>) → Service (<code>login()</code>) → Repository (<code>findByEmail()</code>) → DB (Lấy hash) → Service (<code>bcrypt.compare()</code>) → Service (<code>buildAuthResponse()</code>) → Client.</li>
+                    <li><strong>3. POST <code>/auth/google</code>:</strong> Client → Controller (<code>googleLogin()</code>) → Service (<code>verifyGoogleToken()</code>) → API Google Auth → Service (<code>findOrCreateGoogleUser()</code>) → Repository → DB → Service (<code>buildAuthResponse()</code>) → Client.</li>
+                    <li><strong>4. GET <code>/auth/me</code>:</strong> Client → <code>JwtAuthGuard</code> → <code>JwtService.verifyAsync()</code> → Guard gán payload vào <code>request.user</code> → Controller (<code>me()</code>) → Service (<code>me()</code>) → Repository → DB → Client.</li>
+                    <li><strong>5. GET <code>/auth/google/status</code>:</strong> Client → <code>JwtAuthGuard</code> → Controller → Service (<code>getGoogleStatus()</code>) → Repository → DB → Client.</li>
+                    <li><strong>6. GET <code>/auth/users</code>:</strong> Client → <code>JwtAuthGuard</code> → Controller (xử lý query params) → Service (<code>findAll()</code>) → Repository (<code>count()</code> &amp; <code>findMany()</code>) qua <code>Promise.all</code> → DB → Client.</li>
+                </ul>
+
+                <h2>4. Phân tích Chi tiết Component</h2>
+
+                <div class="method-section">
+                    <h3>AuthController (<code>auth.controller.ts</code>)</h3>
+                    <p>Các Decorators được sử dụng: <code>@ApiTags</code>, <code>@Controller</code>, <code>@Post</code>, <code>@Get</code>, <code>@HttpCode</code>, <code>@UseGuards(JwtAuthGuard)</code>, <code>@ApiBearerAuth()</code>, <code>@Body()</code>, <code>@Query()</code>, <code>@CurrentUser()</code>.</p>
+                    
+                    <h4>Public Endpoints</h4>
+                    <ul>
+                        <li><strong><code>register(registerDto: RegisterDto)</code></strong>: Trả về 201 Created hoặc 409 Conflict.</li>
+                        <li><strong><code>login(loginDto: LoginDto)</code></strong>: Trả về 200 OK hoặc 401 Unauthorized.</li>
+                        <li><strong><code>googleLogin(googleLoginDto: GoogleLoginDto)</code></strong>: Trả về 200 OK.</li>
+                        <li><strong><code>me(user)</code></strong>: Yêu cầu JWT. Lấy user id và email từ token nhờ <code>@CurrentUser()</code>.</li>
+                        <li><strong><code>googleStatus(user)</code></strong>: Yêu cầu JWT. Trả về trạng thái liên kết Google của user.</li>
+                        <li><strong><code>findAll(page, limit)</code></strong>: Yêu cầu JWT. Lấy tất cả user với phân trang.</li>
+                    </ul>
+                </div>
+
+                <div class="method-section">
+                    <h3>AuthService (<code>auth.service.ts</code>)</h3>
+                    <h4>Public Methods</h4>
+                    <ul>
+                        <li><strong><code>register(dto)</code></strong>: Chuẩn hóa email. Kiểm tra trùng (ném <code>ConflictException</code> nếu có). Băm password với <code>bcrypt.hash</code>, tạo user mới. Ghi log. Gọi <code>buildAuthResponse()</code>.</li>
+                        <li><strong><code>login(dto)</code></strong>: Tìm user. So khớp mật khẩu với <code>bcrypt.compare</code>. Gọi <code>buildAuthResponse()</code>. Ném <code>UnauthorizedException</code> nếu sai.</li>
+                        <li><strong><code>googleLogin(idToken)</code></strong>: Gọi <code>verifyGoogleToken</code>, sau đó <code>findOrCreateGoogleUser</code>. Sinh token.</li>
+                        <li><strong><code>me(userId)</code></strong>: Truy vấn user theo id từ repository. Trả về thông tin cơ bản.</li>
+                        <li><strong><code>getGoogleStatus(userId)</code></strong>: Dựa vào <code>googleRefreshToken</code> để biết user đã liên kết Google Drive chưa.</li>
+                        <li><strong><code>findAll(skip, take)</code></strong>: Gọi <code>count()</code> và <code>findMany()</code> qua <code>Promise.all</code>.</li>
+                    </ul>
+
+                    <h4>Private Helpers</h4>
+                    <ul>
+                        <li><strong><code>buildAuthResponse(user)</code></strong>: Tạo JWT Access Token (payload: sub = user.id, email = user.email), trả về cấu trúc <code>AuthResponseDto</code>.</li>
+                        <li><strong><code>verifyGoogleToken(idToken)</code></strong>: Xác thực với Google. Nếu không có payload, ném lỗi <code>UnauthorizedException</code>.</li>
+                        <li><strong><code>findOrCreateGoogleUser(googleId, email, name)</code></strong>: Tìm theo googleId. Nếu không có, tìm theo email để liên kết (update googleId). Nếu chưa tồn tại, tạo mới.</li>
+                    </ul>
+                </div>
+
+                <div class="method-section">
+                    <h3>UserRepository, Guard, và Decorator</h3>
+                    <h4>UserRepository (<code>user.repository.ts</code>)</h4>
+                    <p>Kế thừa <code>BaseRepository&lt;User, Prisma.UserDelegate&gt;</code>. Inject <code>PrismaService</code>. Cung cấp các hàm: <code>findByEmail(email)</code>, <code>findByGoogleId(googleId)</code>.</p>
+                    
+                    <h4>JwtAuthGuard (<code>jwt-auth.guard.ts</code>)</h4>
+                    <p>Kế thừa <code>CanActivate</code>. Trích xuất token. Nếu không có token → ghi log warn → 401. Dùng <code>jwtService.verifyAsync</code>. Thành công → gán vào <code>request['user']</code>.</p>
+                    
+                    <h4>CurrentUser Decorator (<code>current-user.decorator.ts</code>)</h4>
+                    <p>Lấy giá trị <code>request.user</code> được <code>JwtAuthGuard</code> gán, đưa vào Controller dưới dạng tham số.</p>
+                </div>
+
+                <h2>5. API Design Review &amp; Trạng thái</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Mô tả</th>
+                            <th>Đánh giá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>POST /auth/register</code></td>
+                            <td>Đăng ký tài khoản (201 Created)</td>
+                            <td>✅ Rõ ràng, dễ hiểu.</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST /auth/login</code></td>
+                            <td>Đăng nhập truyền thống (200 OK)</td>
+                            <td>✅ Rõ ràng.</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST /auth/google</code></td>
+                            <td>Đăng nhập qua Google (200 OK)</td>
+                            <td>✅ Chuẩn cho OAuth provider.</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /auth/me</code></td>
+                            <td>Lấy profile (200 OK)</td>
+                            <td>✅ Naming chuẩn RESTful.</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /auth/google/status</code></td>
+                            <td>Kiểm tra liên kết Google</td>
+                            <td>⚠️ Tạm ổn (tốt hơn nên ở <code>/users/me/...</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /auth/users</code></td>
+                            <td>Lấy danh sách Users</td>
+                            <td>❌ Không nên đặt ở auth module. Cần dời sang <code>UsersController</code>.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Response Shape chung:</strong> Trả về <code>{ accessToken: string, user: { id, email, name } }</code>.</p>
+
+                <h2>6. Đánh giá &amp; Patterns</h2>
+                <div class="method-section">
+                    <h3>✅ Điểm tốt</h3>
+                    <ul>
+                        <li><strong>Clean Architecture:</strong> Controller thuần HTTP. Repository xử lý DB. Service xử lý logic.</li>
+                        <li><strong>Error Logging:</strong> Sử dụng <code>PinoLogger</code> rất hữu ích cho security audit.</li>
+                        <li><strong>Account Linking:</strong> OAuth xử lý hoàn hảo việc liên kết với account email/password đã tồn tại trước đó thay vì báo lỗi.</li>
+                    </ul>
+
+                    <h3>❌ Cần cải thiện</h3>
+                    <ul>
+                        <li><strong>Pagination thủ công:</strong> Hiện tại đang tự parse <code>page</code>, <code>limit</code> ở Controller. Nên tạo <code>PaginationDto</code> kết hợp Pipe validate.</li>
+                        <li><strong>Thiếu Role Guard:</strong> Endpoint <code>GET /auth/users</code> chưa kiểm tra quyền ADMIN, có rủi ro lộ data.</li>
+                    </ul>
+
+                    <h3>Pattern Áp dụng</h3>
+                    <ul>
+                        <li><strong>Repository Pattern:</strong> Giảm sự ràng buộc giữa Service và ORM. Dễ test hơn.</li>
+                        <li><strong>Custom Parameter Decorator:</strong> Giấu đi chi tiết của Express <code>request.user</code> bằng <code>@CurrentUser()</code>.</li>
+                    </ul>
+                </div>
+
+                <h2>7. Hướng dẫn Debug</h2>
+                <div class="method-section">
+                    <h3>Lỗi 401 Unauthorized</h3>
+                    <ul>
+                        <li>Đã truyền token vào request header <code>Authorization: Bearer &lt;token&gt;</code> chưa?</li>
+                        <li>Token đã hết hạn chưa? (Decode ra xem claim <code>exp</code>).</li>
+                        <li>Giá trị <code>JWT_SECRET</code> trong <code>.env</code> đã đúng chưa?</li>
+                        <li><strong>Command:</strong> Xem log backend có báo <em>'Auth failed: Invalid token'</em> không.</li>
+                    </ul>
+
+                    <h3>Lỗi 401 "Google authentication failed"</h3>
+                    <ul>
+                        <li>Token <code>idToken</code> gửi lên từ Client có đúng không?</li>
+                        <li>Client ID trên Frontend có match với <code>GOOGLE_CLIENT_ID</code> trên Backend không?</li>
+                        <li><strong>Command:</strong> Xem log báo <em>"Google login failed"</em>.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.scrollToSection = function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.classList.remove('section-highlight');
+            void el.offsetWidth;
+            el.classList.add('section-highlight');
+            
+            document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+            const active = document.querySelector(`#toc a[data-target="${id}"]`);
+            if (active) {
+                active.classList.add('active');
+                active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        };
+
+        mermaid.initialize({
+            startOnLoad: true,
+            securityLevel: 'loose',
+            theme: 'base',
+            themeVariables: {
+                background: '#f4f2ee',
+                mainBkg: '#fafaf8',
+                primaryTextColor: '#1a1a18',
+                lineColor: '#185fa5',
+                fontFamily: 'Inter, Segoe UI, sans-serif'
+            }
+        });
+
+        (function buildTOC() {
+            const main = document.getElementById('main-content');
+            const toc = document.getElementById('toc');
+            const headings = main.querySelectorAll('h2, h3, h4');
+            const ul = document.createElement('ul');
+            headings.forEach((h, i) => {
+                if (!h.id) h.id = 'h-' + i;
+                const li = document.createElement('li');
+                li.className = 'toc-' + h.tagName.toLowerCase();
+                const a = document.createElement('a');
+                a.href = '#' + h.id;
+                a.textContent = h.textContent.replace(/^[▶✅❌⚠️ℹ️📄⚙️🌐🗄️]+\s*/, '');
+                a.dataset.target = h.id;
+                a.onclick = (e) => { e.preventDefault(); scrollToSection(h.id); };
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+            toc.appendChild(ul);
+        })();
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('#toc a').forEach(l => l.classList.remove('active'));
+                    const active = document.querySelector(`#toc a[data-target="${entry.target.id}"]`);
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+        document.querySelectorAll('h2, h3, h4').forEach(h => observer.observe(h));
+    </script>
+</body>
+</html>

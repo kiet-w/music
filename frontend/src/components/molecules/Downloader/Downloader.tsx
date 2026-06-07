@@ -66,7 +66,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
         setIsDownloading(false);
         
         // Add to history
-        const album = albums.find(a => a.id === selectedAlbumId);
+        const album = (Array.isArray(albums) ? albums : []).find(a => a.id === selectedAlbumId);
         addHistory(updatedTrack || song, album?.title || 'Single');
 
         setUrl('');
@@ -199,7 +199,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
           className="w-full h-11 rounded-xl bg-background/50 border-white/5 focus-visible:ring-primary/20 text-white/70 px-3 outline-none appearance-none"
         >
           <option value="">No Album (Single)</option>
-          {albums.map((album) => (
+          {(Array.isArray(albums) ? albums : []).map((album) => (
             <option key={album.id} value={album.id}>
               {album.title}
             </option>

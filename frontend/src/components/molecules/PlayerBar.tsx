@@ -28,7 +28,7 @@ export default function PlayerBar() {
     <motion.div 
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="fixed bottom-[96px] left-0 right-0 mx-auto w-[calc(100%-2rem)] max-w-[390px] glass-dark shadow-soft rounded-[2rem] flex flex-col p-4 z-40 border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
+      className="fixed bottom-[96px] left-0 right-0 mx-auto w-[calc(100%-2rem)] max-w-[360px] glass-dark shadow-soft rounded-[2rem] flex flex-col p-4 z-40 border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
     >
       <div className="flex items-center w-full gap-4">
         <div className="flex items-center flex-1 min-w-0 gap-3">

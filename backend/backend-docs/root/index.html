@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>root — Technical Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#060d1b; --surf:#0d1829; --surf2:#111f34; --bdr:#1a2d45;
+  --txt:#c8d6e5; --dim:#6b8199; --bright:#e8f4ff;
+  --acc:#00c8f0; --accg:#00c8f012;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(#1a2d45 1px,transparent 1px);background-size:28px 28px;opacity:.28;pointer-events:none;z-index:0}
+
+/* ─── SIDEBAR ─────────────────────────────────── */
+.sb{width:228px;min-width:228px;height:100vh;position:sticky;top:0;background:rgba(6,11,24,.92);backdrop-filter:blur(14px);border-right:1px solid var(--bdr);overflow-y:auto;z-index:50;display:flex;flex-direction:column}
+.sb-top{padding:18px 16px 12px;border-bottom:1px solid var(--bdr)}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:4px}
+.sb-title{font-size:13px;font-weight:700;color:var(--bright)}
+.sb-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.sb-sec{padding:8px 0}
+.sb-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:7px 16px 3px}
+.sbl{display:flex;align-items:center;gap:8px;padding:6px 16px;font-size:12px;color:var(--dim);cursor:pointer;border-left:2px solid transparent;transition:all .14s;text-decoration:none}
+.sbl:hover, .sbl.active{color:var(--bright);border-left-color:var(--acc);background:var(--accg)}
+
+/* ─── MAIN ─────────────────────────────────────── */
+.main{flex:1;overflow-x:hidden;position:relative;z-index:1;max-width:calc(100vw - 228px); padding: 40px;}
+
+/* MARKDOWN STYLES */
+.md-content h1 { font-size: 28px; color: var(--bright); margin-bottom: 20px; border-bottom: 1px solid var(--bdr); padding-bottom: 10px; }
+.md-content h2 { font-size: 20px; color: var(--bright); margin-top: 30px; margin-bottom: 15px; }
+.md-content h3 { font-size: 16px; color: var(--acc); margin-top: 20px; margin-bottom: 10px; }
+.md-content p { margin-bottom: 15px; line-height: 1.6; font-size: 14px; }
+.md-content ul, .md-content ol { margin-bottom: 15px; padding-left: 20px; font-size: 14px; line-height: 1.6; }
+.md-content li { margin-bottom: 5px; }
+.md-content pre { background: #040a12; border: 1px solid var(--bdr); border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow-x: auto; margin-bottom: 15px; color: #abb2bf; }
+.md-content code { font-family: 'JetBrains Mono', monospace; background: var(--surf2); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+.md-content table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+.md-content th { background: var(--surf2); padding: 10px; text-align: left; border-bottom: 1px solid var(--bdr); color: var(--dim); font-family: 'JetBrains Mono', monospace; }
+.md-content td { padding: 10px; border-bottom: 1px solid var(--bdr); }
+.md-content blockquote { border-left: 3px solid var(--acc); color: var(--dim); margin-bottom: 15px; background: var(--surf); padding: 10px 15px; border-radius: 4px; }
+.md-content strong { color: var(--bright); }
+.md-content hr { border: 0; height: 1px; background: var(--bdr); margin: 30px 0; }
+
+@media(max-width:960px){
+  .sb{display:none}
+  .main{max-width:100vw; padding: 20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-top">
+    <div class="sb-tag">NestJS Docs</div>
+    <div class="sb-title">ROOT Module</div>
+    <div class="sb-sub">Technical Documentation</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Navigation</div>
+    <a class="sbl" href="#">Overview</a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="md-content">
+    <h1>Root Documentation</h1>
+<h2>1. Tổng quan Kiến trúc (Component Overview)</h2>
+<p>Module <code>Root</code> đóng vai trò là entry point chính của toàn bộ ứng dụng NestJS. Nó chịu trách nhiệm khởi tạo ứng dụng, thiết lập các middleware, interceptors, filters toàn cục và nạp toàn bộ các sub-modules chức năng của hệ thống (như Auth, Songs, Albums, v.v.). Nó cũng quản lý cấu hình các module dùng chung (global modules) như <code>ConfigModule</code> để đọc biến môi trường, <code>LoggerModule</code> (nestjs-pino) để ghi log, và <code>CacheModule</code> để caching.</p>
+<h2>2. Các Dependencies (Dependencies Injection)</h2>
+<ul>
+<li><strong><code>ConfigModule</code></strong>: Nạp và quản lý các biến môi trường (từ <code>.env</code>), được cấu hình là module global (<code>isGlobal: true</code>) để mọi module khác đều có thể sử dụng <code>ConfigService</code> mà không cần import lại.</li>
+<li><strong><code>LoggerModule</code> (nestjs-pino)</strong>: Cung cấp hệ thống logging toàn cục, ghi đè logger mặc định của NestJS. Phân biệt log level theo môi trường (production/development) và tích hợp transport <code>pino-pretty</code> ở môi trường dev.</li>
+<li><strong><code>CacheModule</code></strong>: Khởi tạo in-memory cache dùng chung toàn cục (<code>isGlobal: true</code>) với thời gian sống (TTL) mặc định là 60 giây.</li>
+<li><strong>Các Sub-Modules</strong>: <code>DownloaderModule</code>, <code>StorageModule</code>, <code>JobsModule</code>, <code>PrismaModule</code>, <code>SongsModule</code>, <code>AlbumsModule</code>, <code>GoogleDriveModule</code>, <code>AdminModule</code>, <code>AuthModule</code>, <code>MessagesModule</code>. Đóng vai trò cấu trúc các domain nghiệp vụ con.</li>
+</ul>
+<h2>3. Phân tích chi tiết Controller, Service, Guard, v.v.</h2>
+<h3>3.1. Entry point: <code>main.ts</code></h3>
+<ul>
+<li><strong><code>bootstrap()</code> (Function)</strong>: Hàm chính khởi chạy server.<ul>
+<li>Gọi <code>config({ override: true })</code> từ <code>dotenv</code> ở đầu file để đảm bảo biến môi trường từ <code>.env</code> được ưu tiên.</li>
+<li>Sử dụng <code>NestFactory.create</code> với option <code>{ bufferLogs: true }</code> để đảm bảo log ban đầu được giữ lại cho đến khi custom logger được khởi tạo.</li>
+<li>Cấu hình custom logger: Lấy <code>Logger</code> của pino từ DI container và gọi <code>app.useLogger(logger)</code>.</li>
+<li>Cấu hình CORS với <code>app.enableCors(...)</code>, cho phép tất cả các nguồn gốc, credentials <code>true</code>, và các HTTP methods cơ bản.</li>
+<li>Thiết lập Global Filter: Cài đặt <code>AllExceptionsFilter</code> (kế thừa <code>BaseExceptionFilter</code>) để bắt và xử lý mọi exception toàn cục, sử dụng <code>HttpAdapterHost</code> và pino logger.</li>
+<li>Thiết lập Global Pipe: Sử dụng <code>ValidationPipe</code> toàn cục với các options: <code>whitelist: true</code> (lọc bỏ các field không có trong DTO), <code>forbidNonWhitelisted: true</code> (báo lỗi nếu có field lạ), <code>transform: true</code> (tự động chuyển đổi kiểu dữ liệu payload sang DTO object).</li>
+<li>Cấu hình Swagger: Sử dụng <code>DocumentBuilder</code> để khởi tạo mô tả API và <code>SwaggerModule.setup</code> để phục vụ tài liệu Swagger tại đường dẫn <code>/api</code>.</li>
+<li>Mở cổng HTTP: Khởi động server tại cổng <code>process.env.PORT</code> (mặc định 3000), sau đó ghi log khi server chạy thành công.</li>
+</ul>
+</li>
+</ul>
+<h3>3.2. AppModule (<code>app.module.ts</code>)</h3>
+<p>Các Decorators:</p>
+<ul>
+<li><code>@Module()</code>: Khai báo lớp <code>AppModule</code> là một NestJS module.</li>
+</ul>
+<p><strong>Các thành phần (Properties):</strong></p>
+<ul>
+<li><strong><code>imports</code></strong>: Khai báo danh sách các module được nạp. Chứa cả thư viện bên ngoài (ConfigModule, LoggerModule, CacheModule) và các module nghiệp vụ nội bộ.</li>
+<li><strong><code>controllers</code></strong>: Đăng ký <code>AppController</code> (một controller kiểm tra health check đơn giản của core).</li>
+<li><strong><code>providers</code></strong>: <ul>
+<li>Khai báo <code>AppService</code>.</li>
+<li>Đăng ký một Global Interceptor: Cung cấp <code>LoggingInterceptor</code> sử dụng token <code>APP_INTERCEPTOR</code>. Điều này có nghĩa mọi HTTP request/response sẽ tự động đi qua <code>LoggingInterceptor</code> trước/sau khi tới controller.</li>
+</ul>
+</li>
+</ul>
+<h3>3.3. Root Configurations (Các file cấu hình gốc)</h3>
+<ul>
+<li><strong><code>package.json</code></strong>: Chứa thông định project, scripts chạy (build, start, lint, test) và danh sách dependencies. Dự án sử dụng <code>@nestjs/core</code>, <code>@prisma/client</code>, <code>bullmq</code> (cho hàng đợi), <code>nestjs-pino</code>, <code>supabase-js</code>, <code>googleapis</code>.</li>
+<li><strong><code>.env</code></strong>: Lưu trữ biến môi trường bảo mật: <code>DATABASE_URL</code> (kết nối Supabase Postgres qua pooler), <code>DIRECT_URL</code>, cổng chạy <code>PORT=3002</code>, thông tin OAuth của Google, <code>JWT_SECRET</code> cho việc tạo và giải mã token.</li>
+<li><strong><code>nest-cli.json</code></strong>: Cấu hình CLI cho NestJS, xác định thư mục <code>src</code> và cài đặt dọn dẹp thư mục build trước khi biên dịch <code>deleteOutDir: true</code>.</li>
+<li><strong><code>tsconfig.json</code></strong>: Thiết lập cấu hình TypeScript compiler (ví dụ: tắt <code>strictNullChecks</code>, bật <code>experimentalDecorators</code>).</li>
+</ul>
+<hr>
+<h2>4. System Data Flow</h2>
+<p><strong>1. Quá trình khởi động ứng dụng (Application Bootstrap)</strong></p>
+<ul>
+<li>Flow: <code>main.ts</code> khởi chạy <code>bootstrap()</code> -&gt; Gọi thư viện <code>dotenv</code> để nạp <code>.env</code> -&gt; Gọi <code>NestFactory.create(AppModule)</code> -&gt; Khởi tạo DI Container và khởi tạo các global module (<code>ConfigModule</code>, <code>LoggerModule</code>, <code>CacheModule</code>) -&gt; Khởi tạo tất cả các Sub-Modules -&gt; Set custom pino logger -&gt; Gắn CORS middleware -&gt; Gắn Global <code>AllExceptionsFilter</code> -&gt; Gắn Global <code>ValidationPipe</code> -&gt; Khởi tạo Swagger -&gt; <code>app.listen()</code> -&gt; Server sẵn sàng nhận Request.</li>
+</ul>
+<p><strong>2. Luồng Request Cơ bản (khi đi qua Root config)</strong></p>
+<ul>
+<li>Flow: Client Request -&gt; NestJS Server -&gt; CORS Middleware (kiểm tra header) -&gt; Global <code>LoggingInterceptor</code> (Ghi nhận request bắt đầu) -&gt; Global <code>ValidationPipe</code> (nếu là request có body tới Controller, tự động validate DTO) -&gt; Controller (của Sub-Module) -&gt; Service (của Sub-Module) -&gt; Trả về kết quả -&gt; Global <code>LoggingInterceptor</code> (Ghi nhận thời gian và status trả về) -&gt; Trả về Client.
+<em>(Nếu trong quá trình có lỗi xảy ra: Bất cứ nơi nào throw Exception -&gt; <code>AllExceptionsFilter</code> bắt được -&gt; Xử lý định dạng lỗi &amp; Ghi log qua Pino -&gt; Trả về HTTP Error Response cho Client).</em></li>
+</ul>
+<hr>
+<hr>
+<h1>Root Module — AI Coding Skill Context</h1>
+<blockquote>
+<p>File này dùng làm context cho AI coding agent khi làm việc với Root Module.</p>
+</blockquote>
+<hr>
+<h2>1. Kiến trúc tổng thể — Tại sao tổ chức như vậy?</h2>
+<pre><code>main.ts (Entry Point)
+    │
+    ▼
+NestFactory             ← Khởi tạo ứng dụng, thiết lập Global Configs (Pipes, Filters, CORS, Swagger, Logger)
+    │
+    ▼
+AppModule               ← Module trung tâm kết nối toàn bộ hệ thống
+    │
+    ├── Global Modules  ← ConfigModule (Env), LoggerModule (Pino), CacheModule
+    ├── Interceptors    ← LoggingInterceptor (Global)
+    └── Sub-Modules     ← Auth, Songs, Albums, Prisma, Jobs, Storage, v.v.
+</code></pre>
+<p><strong>Tại sao tách các layer?</strong></p>
+<ul>
+<li><strong>Centralized Configuration:</strong> Tất cả các tuỳ chỉnh toàn cục (global pipeline) được thiết lập ở <code>main.ts</code> giúp người quản trị dễ dàng nhìn thấy toàn bộ middleware hoặc rules của ứng dụng trong nháy mắt. <code>AppModule</code> chỉ làm nhiệm vụ &quot;lắp ráp&quot; các building blocks (modules).</li>
+<li><strong>Global Pipes/Filters/Interceptors:</strong> Bằng cách khai báo ở <code>main.ts</code> hoặc qua <code>APP_INTERCEPTOR</code> ở <code>app.module.ts</code>, chúng ta không cần phải định nghĩa rải rác ở từng endpoint/module. Mọi logic bắt lỗi và validate DTO được đồng nhất.</li>
+</ul>
+<hr>
+<h2>2. Các Dependencies</h2>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Vai trò</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ConfigModule</code></td>
+<td>Nạp biến môi trường từ file <code>.env</code> thành biến global dùng chung cho toàn bộ app.</td>
+</tr>
+<tr>
+<td><code>LoggerModule</code></td>
+<td>Thay thế hệ thống log mặc định của Nest bằng thư viện Pino, giúp in log dưới dạng JSON có cấu trúc khi ở production, hỗ trợ tracking dễ hơn.</td>
+</tr>
+<tr>
+<td><code>CacheModule</code></td>
+<td>Cung cấp In-Memory Caching mặc định cho toàn app với TTL 60s.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. Entry Points — Đi đâu về đâu</h2>
+<p><em>(Root module không trực tiếp xử lý logic nghiệp vụ qua HTTP endpoint ngoài việc khởi động ứng dụng và các route health-check cơ bản do <code>AppController</code> đảm nhiệm).</em></p>
+<h3>Server Bootstrap</h3>
+<pre><code>Lệnh khởi chạy: npm run start / node dist/main.js
+    │
+    ▼ main.ts: bootstrap()
+    │   1. Load `.env` (dotenv) để nạp cấu hình hệ thống
+    │   2. Khởi tạo AppContext thông qua AppModule
+    │   3. Thiết lập CORS, Filters, ValidationPipe
+    │
+    ▼ Khởi động HTTP Server trên PORT
+    │
+    ▼ Trả về: Ứng dụng sẵn sàng trên cổng chỉ định (ví dụ: 3002).
+
+Lỗi có thể xảy ra:
+- Crash ngay lúc khởi động do thiếu biến môi trường quan trọng, cổng bị chiếm, hoặc kết nối DB ở submodule lỗi.
+</code></pre>
+<hr>
+<h2>4. Đánh giá — Đã tốt chưa?</h2>
+<h3>✅ Đã làm tốt</h3>
+<table>
+<thead>
+<tr>
+<th>Điểm tốt</th>
+<th>Lý do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Sử dụng <code>nestjs-pino</code> thay cho default logger</td>
+<td>Hiệu năng tốt hơn và log xuất ra dưới chuẩn JSON, cực kỳ phù hợp cho ELK stack / Datadog khi deploy lên server cloud.</td>
+</tr>
+<tr>
+<td>Validation Pipe chặt chẽ</td>
+<td>Option <code>whitelist: true</code> và <code>forbidNonWhitelisted: true</code> tự động gạt bỏ các thuộc tính rác/không mong muốn khỏi request, ngăn chặn việc khai thác lỗ hổng Mass Assignment.</td>
+</tr>
+<tr>
+<td>Tách biệt môi trường cho Logger</td>
+<td>Config logger pino-pretty cho <code>development</code> dễ nhìn log, nhưng dùng dạng thô trên <code>production</code> tối ưu tài nguyên.</td>
+</tr>
+</tbody></table>
+<h3>❌ Chưa tốt / Cần cải thiện</h3>
+<p><strong>1. Khai báo CacheModule chưa tối ưu cho Scale</strong></p>
+<pre><code class="language-typescript">// HIỆN TẠI — vấn đề:
+CacheModule.register({
+  isGlobal: true,
+  ttl: 60000,
+}),
+
+// NÊN SỬA — lý do:
+// Nếu server scale ra nhiều instance (horizonal scaling), in-memory cache sẽ bị lệch (inconsistent) giữa các nodes. Nên sử dụng Redis làm store thay vì default in-memory.
+</code></pre>
+<p><strong>2. Cấu hình .env chưa có Validation</strong></p>
+<pre><code class="language-typescript">// HIỆN TẠI:
+ConfigModule.forRoot({
+  isGlobal: true,
+}),
+
+// NÊN SỬA:
+// Nên tích hợp thư viện Joi để validate các biến môi trường khi start app, tránh trường hợp quên điền biến gây lỗi ẩn ở Runtime.
+ConfigModule.forRoot({
+  isGlobal: true,
+  validationSchema: Joi.object({
+    PORT: Joi.number().default(3000),
+    DATABASE_URL: Joi.string().required(),
+  })
+})
+</code></pre>
+<hr>
+<h2>5. API Design Review</h2>
+<h3>Endpoint Naming</h3>
+<pre><code>(Chưa có endpoint cụ thể trong Root Module, xem thêm ở các Sub-Module)
+</code></pre>
+<h3>Response Shape</h3>
+<pre><code class="language-typescript">// Định dạng Response chung khi có lỗi (xử lý bởi AllExceptionsFilter):
+// (Tham khảo luồng chung của hệ thống)
+</code></pre>
+<h3>HTTP Status Codes</h3>
+<pre><code>(Dựa trên ValidationPipe, các lỗi sai payload sẽ tự động map ra status 400 Bad Request)
+</code></pre>
+<hr>
+<h2>6. Cách Debug khi gặp lỗi</h2>
+<h3>Lỗi Ứng dụng Crash khi vừa khởi động (Exit Code 1)</h3>
+<pre><code>Checklist:
+1. Kiểm tra lại file `.env` xem đã cung cấp đủ các biến chưa.
+2. Kiểm tra xem port (mặc định 3002 trong `.env`) có đang bị chiếm bởi một process khác không.
+
+Command debug:
+→ Chạy `rtk env` để kiểm tra các cấu hình môi trường đang nạp
+→ Chạy lệnh start bằng tay để xem callstack lỗi trên console.
+</code></pre>
+<h3>Lỗi Validation Pipe (Client phàn nàn 400 Bad Request với field lạ)</h3>
+<pre><code>Checklist:
+1. Xác định DTO của endpoint đang thiếu khai báo `@IsString()`, `@IsOptional()`... nên bị `whitelist` hoặc `forbidNonWhitelisted` bắt lại.
+2. Cập nhật class DTO đó bằng các class-validator decorators cho khớp với Payload mong muốn.
+</code></pre>
+<hr>
+<h2>7. Các Pattern quan trọng trong module này</h2>
+<h3>Pattern 1: Global Decorator/Interceptor qua APP_* Token</h3>
+<pre><code class="language-typescript">// Tại sao dùng pattern này?
+// → Đăng ký Interceptor ở `app.module.ts` qua token `APP_INTERCEPTOR` giúp Interceptor tự động áp dụng lên mọi route mà vẫn có khả năng inject các dependencies (ví dụ nếu cần gọi Database log) nhờ sức mạnh của DI container.
+
+{
+  provide: APP_INTERCEPTOR,
+  useClass: LoggingInterceptor,
+}
+
+// Nếu KHÔNG dùng pattern này thì sao?
+// → Bạn sẽ phải dùng `app.useGlobalInterceptors(new LoggingInterceptor())` ở `main.ts`, lúc này Interceptor sẽ nằm ngoài tầm quản lý của DI container của NestJS, không thể `@Inject()` service khác được.
+</code></pre>
+<hr>
+<h2>8. Biến môi trường cần thiết</h2>
+<pre><code class="language-env">PORT=                  # Cổng mà server sẽ lắng nghe (mặc định 3000 nếu không có)
+DATABASE_URL=          # Chuỗi kết nối Database Postgres
+NODE_ENV=              # Phân định môi trường: &quot;development&quot; / &quot;production&quot; (ảnh hưởng log format)
+</code></pre>
+<hr>
+<h2>9. Khi AI agent làm việc với module này</h2>
+<p><strong>Trước khi thêm feature mới:</strong></p>
+<ul>
+<li>Bất cứ module độc lập nghiệp vụ nào được tạo ra, bắt buộc phải khai báo vào list <code>imports</code> của <code>AppModule</code> thì nó mới có hiệu lực.</li>
+<li>Bất cứ module cấu hình chia sẻ nào (như Mailer, S3 Storage) muốn gọi mọi nơi không cần import lại, cần set <code>isGlobal: true</code> lúc đăng ký.</li>
+</ul>
+<p><strong>Khi sửa cấu hình toàn cục (<code>main.ts</code>):</strong></p>
+<ul>
+<li>KHÔNG vô hiệu hóa <code>whitelist: true</code> và <code>forbidNonWhitelisted: true</code> của <code>ValidationPipe</code> vì đây là cơ chế phòng vệ bảo mật cơ bản nhất của ứng dụng.</li>
+</ul>
+<p><strong>Khi debug:</strong></p>
+<ul>
+<li>Bắt đầu debug bằng cách quan sát log console nhờ pino-pretty, do cấu hình filter global, mọi exception sẽ được bắn thẳng ra màn hình dev ở định dạng có timestamp.</li>
+</ul>
+<hr>
+
+  </div>
+</div>
+
+</body>
+</html>

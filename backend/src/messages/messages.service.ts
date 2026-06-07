@@ -7,15 +7,23 @@ import { Message } from '@prisma/client';
 export class MessagesService {
   constructor(private readonly messageRepository: MessageRepository) {}
 
-  async create(senderId: string, createMessageDto: CreateMessageDto): Promise<Message> {
+  async create(
+    senderId: string,
+    createMessageDto: CreateMessageDto,
+  ): Promise<Message> {
     return this.messageRepository.create({
-      content: createMessageDto.content,
-      sender: { connect: { id: senderId } },
-      receiver: { connect: { id: createMessageDto.receiverId } },
+      data: {
+        content: createMessageDto.content,
+        sender: { connect: { id: senderId } },
+        receiver: { connect: { id: createMessageDto.receiverId } },
+      },
     });
   }
 
-  async findAllByConversation(userId1: string, userId2: string): Promise<Message[]> {
+  async findAllByConversation(
+    userId1: string,
+    userId2: string,
+  ): Promise<Message[]> {
     return this.messageRepository.findConversation(userId1, userId2);
   }
 }
