@@ -1,0 +1,54 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch: # Cho phép bấm nút chạy thủ công trên GitHub
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Build Next.js Web App
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_URL: https://music-backend-cb0i.onrender.com
+          NEXT_PUBLIC_SUPABASE_URL: https://ukpsubptfzmuszcnnjoy.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_TNnJegwYpZFyjCxS65y2YQ_DervIDza
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: 931570596250-ppnot6976skb6t2jkh8o75875g50gs40.apps.googleusercontent.com
+        run: npm run build
+
+      - name: Sync Capacitor
+        working-directory: ./frontend
+        run: npx cap sync android
+
+      - name: Cấp quyền chạy cho Gradle
+        working-directory: ./frontend/android
+        run: chmod +x gradlew
+
+      - name: Tiến hành Build APK
+        working-directory: ./frontend/android
+        run: ./gradlew assembleDebug
+
+      - name: Trả file APK về cho người dùng tải
+        uses: actions/upload-artifact@v4
+        with:
+          name: Music-App-Android.apk
+          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
