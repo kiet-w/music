@@ -2,12 +2,12 @@
   "/_not-found": "app/_not-found.js",
   "/api/auth/callback/google/page": "app/api/auth/callback/google/page.js",
   "/page": "app/page.js",
-  "/[locale]/albums/detail/page": "app/[locale]/albums/detail/page.js",
-  "/[locale]/invite/page": "app/[locale]/invite/page.js",
-  "/[locale]/albums/page": "app/[locale]/albums/page.js",
   "/[locale]/login/page": "app/[locale]/login/page.js",
   "/[locale]/music/page": "app/[locale]/music/page.js",
-  "/[locale]/messages/page": "app/[locale]/messages/page.js",
   "/[locale]/page": "app/[locale]/page.js",
-  "/[locale]/register/page": "app/[locale]/register/page.js"
+  "/[locale]/invite/page": "app/[locale]/invite/page.js",
+  "/[locale]/register/page": "app/[locale]/register/page.js",
+  "/[locale]/albums/detail/page": "app/[locale]/albums/detail/page.js",
+  "/[locale]/albums/page": "app/[locale]/albums/page.js",
+  "/[locale]/messages/page": "app/[locale]/messages/page.js"
 }
