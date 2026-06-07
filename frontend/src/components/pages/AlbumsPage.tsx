@@ -26,8 +26,9 @@ export function AlbumsPage({ locale }: AlbumsPageProps) {
   const loadAlbums = useCallback(async () => {
     if (!appToken) return;
     try {
-      const data = await fetchAlbums(appToken, { cache: 'no-store' });
-      setAlbums(data);
+      const result = await fetchAlbums(appToken, { cache: 'no-store' });
+      const data = result.data ? result.data : result;
+      setAlbums(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error('Failed to load albums:', err);
       if (err.message?.includes('401') || err.message?.toLowerCase()?.includes('unauthorized')) {
@@ -47,8 +48,9 @@ export function AlbumsPage({ locale }: AlbumsPageProps) {
     e.preventDefault();
     if (!newTitle.trim() || !appToken) return;
     try {
-      const newAlbum = await createAlbum(appToken, { title: newTitle, artist: newArtist });
-      setAlbums([...albums, newAlbum]);
+      const result = await createAlbum(appToken, { title: newTitle, artist: newArtist });
+      const newAlbum = result.data ? result.data : result;
+      setAlbums([...(Array.isArray(albums) ? albums : []), newAlbum]);
       setIsCreating(false);
       setNewTitle('');
       setNewArtist('');
