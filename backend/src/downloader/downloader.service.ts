@@ -5,13 +5,11 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import * as fs from 'fs';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { IDownloaderProvider } from '../common/interfaces/downloader-provider.interface';
-
-const execFileAsync = promisify(require('child_process').execFile);
+import ytDlp from 'yt-dlp-exec';
+import * as ffmpegStatic from 'ffmpeg-static';
 
 @Injectable()
 export class DownloaderService implements IDownloaderProvider {
@@ -25,21 +23,21 @@ export class DownloaderService implements IDownloaderProvider {
   async download(url: string, outputPath: string): Promise<void> {
     try {
       this.logger.info({ url, outputPath }, 'Starting download');
-      // Extract audio using 'bestaudio/best' with web client to avoid 'format not available' errors.
-      const args = [
-        '-f', 'bestaudio/best',
-        '--extractor-args', 'youtube:player_client=web',
-        '--no-playlist',
-        '--retries', '3',
-        '--fragment-retries', '3',
-        '--socket-timeout', '30',
-        '-x',
-        '--audio-format', 'mp3',
-        '--audio-quality', this.audioBitrate,
-        '-o', outputPath,
-        url,
-      ];
-      await execFileAsync('yt-dlp', args);
+      
+      await ytDlp(url, {
+        f: 'bestaudio/best',
+        extractorArgs: 'youtube:player_client=web',
+        noPlaylist: true,
+        retries: 3,
+        fragmentRetries: 3,
+        socketTimeout: 30,
+        x: true,
+        audioFormat: 'mp3',
+        audioQuality: this.audioBitrate,
+        ffmpegLocation: ffmpegStatic as unknown as string,
+        o: outputPath,
+      });
+
       this.logger.info({ outputPath }, 'Download completed');
     } catch (error: any) {
       const exitCode = error.code ?? 'unknown';
