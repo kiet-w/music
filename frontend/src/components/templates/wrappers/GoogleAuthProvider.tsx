@@ -9,9 +9,10 @@ type GoogleAuthProviderProps = {
 
 export function GoogleAuthProvider({ children }: GoogleAuthProviderProps) {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform();
 
-  if (!clientId) {
-    if (typeof window !== 'undefined') {
+  if (!clientId || isNative) {
+    if (typeof window !== 'undefined' && !isNative) {
       console.warn('NEXT_PUBLIC_GOOGLE_CLIENT_ID is not defined');
     }
 
