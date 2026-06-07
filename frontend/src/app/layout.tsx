@@ -8,6 +8,7 @@ const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
   style: ['normal', 'italic'],
   variable: '--font-instrument',
+  adjustFontFallback: false,
 });
 
 export const metadata = {
