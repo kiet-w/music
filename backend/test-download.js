@@ -12,7 +12,6 @@ async function test() {
     
     const args = [
         '-f', 'bestaudio/best',
-        '--extractor-args', 'youtube:player_client=tv',
         '--no-playlist',
         '--fragment-retries', '3',
         '--socket-timeout', '30',
@@ -20,6 +19,7 @@ async function test() {
         '--audio-format', 'mp3',
         '--audio-quality', '320K',
         '--ffmpeg-location', ffmpegStatic,
+        '--cookies', 'cookies.txt',
         '-o', outputPath,
         url,
     ];
@@ -31,4 +31,4 @@ async function test() {
     console.error('Error:', err);
   }
 }
-test();
+test(); 

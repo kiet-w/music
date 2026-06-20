@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DownloaderService } from './downloader.service';
+import { DownloaderService } from './services/downloader.service';
 
 @Module({
   providers: [DownloaderService],

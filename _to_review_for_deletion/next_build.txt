@@ -1,5 +1,0 @@
-Next.js Build
-═══════════════════════════════════════
-Already built (using cache)
-
-Errors: 1 | Warnings: 0

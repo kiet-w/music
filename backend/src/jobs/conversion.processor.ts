@@ -1,8 +1,8 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
-import { DownloaderService } from '../downloader/downloader.service';
-import { StorageService } from '../storage/storage.service';
+import { DownloaderService } from '../downloader/services/downloader.service';
+import { StorageService } from '../storage/services/storage.service';
 import { PrismaService } from '../prisma/prisma.service';
 import * as path from 'path';
 import * as fs from 'fs';

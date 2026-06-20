@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { StorageService } from './storage.service';
-import { StorageCleanupService } from './storage-cleanup.service';
+import { StorageService } from './services/storage.service';
+import { StorageCleanupService } from './services/storage-cleanup.service';
 
 @Module({
   providers: [

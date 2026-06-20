@@ -63,7 +63,8 @@ This backend service manages music metadata, handles YouTube downloads/conversio
   - **Contextual Logging:** Log enough context for debugging (exit codes, internal paths) but truncate external tool output (e.g., first 200 chars of `stderr`).
 - **Error Handling:** Global `HttpExceptionFilter` ensures consistent error responses.
 - **Interfaces:** Use `IDownloaderProvider` and `IStorageProvider` to allow for alternative implementations (e.g., swapping Supabase for S3).
-- **Repositories:** Database logic is abstracted into repository classes (e.g., `SongRepository`).
+- **Module/Folder Structure:** Chia các feature/domain ra thành các folder riêng biệt theo chức năng (VD: `notes`, `songs`). Mỗi folder/module bắt buộc phải tách biệt các file `dto`, `repository`, `service`, `controller`.
+- **Repositories:** Database logic is abstracted into repository classes (e.g., `SongRepository`). Khuyến khích sử dụng một `BaseRepository` (root repository) cho các query lặp lại nhiều lần.
 
 ## Backend Structure (NestJS)
 *Always check existing modules and components before creating new ones.*

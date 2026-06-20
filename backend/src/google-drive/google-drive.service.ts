@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { randomUUID } from 'crypto';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '../storage/services/storage.service';
 import { SongRepository } from '../songs/repositories/song.repository';
 import { AlbumService } from '../albums/album.service';
 import { AlbumRepository } from '../albums/repositories/album.repository';

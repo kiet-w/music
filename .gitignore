@@ -1,11 +1,65 @@
+# Node dependencies
 node_modules/
+**/node_modules/
+
+# Next.js build output
 .next/
+**/.next/
 out/
+**/out/
+
+# NestJS build output
 dist/
-*.log
+**/dist/
+
+# Env files (sensitive)
 .env*
-frontend/node_modules/
-backend/node_modules/
-frontend/.next/
-frontend/out/
-backend/dist/
+**/.env*
+
+# Logs & temp build infos
+*.log
+**/*.log
+**/*.tsbuildinfo
+backend/yt-dlp.tsbuildinfo
+
+# Personal Editor configs
+.vscode/
+**/.vscode/
+.idea/
+**/.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+**/.DS_Store
+
+# AI tools cache and temporary folders (.*)
+.codegraph/
+**/.codegraph/
+.codex/
+**/.codex/
+.gemini/
+**/.gemini/
+.serena/
+**/.serena/
+.superpowers/
+**/.superpowers/
+
+# Documentations & Draft folders (as requested)
+front/
+**/front/
+docs/
+**/docs/
+frontend-docs/
+**/frontend-docs/
+backend-docs/
+**/backend-docs/
+_to_review_for_deletion/
+**/_to_review_for_deletion/
+
+# Backend specific files
+backend/cookies.txt
+backend/yt-dlp
+backend/temp/
