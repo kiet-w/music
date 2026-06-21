@@ -48,7 +48,7 @@ export default function PlayerBar() {
               </div>
             )}
           </motion.div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-[14px] font-bold truncate tracking-tight text-white">{currentTrack.title}</p>
             <p className="text-[11px] text-white/40 truncate font-medium">{currentTrack.artist}</p>
           </div>

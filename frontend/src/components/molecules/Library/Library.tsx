@@ -197,15 +197,16 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
   }, [accessToken]);
 
   const formatDuration = useCallback((seconds: number | null) => {
-    if (seconds === null) return '--:--';
+    if (seconds === null || isNaN(seconds)) return '--:--';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }, []);
 
   const { memoizedTracks, totalDuration } = React.useMemo(() => {
-    const duration = tracks.reduce((acc, track) => acc + (track.duration || 0), 0);
-    return { memoizedTracks: tracks, totalDuration: duration };
+    const validTracks = tracks.filter(t => t.url);
+    const duration = validTracks.reduce((acc, track) => acc + (track.duration || 0), 0);
+    return { memoizedTracks: validTracks, totalDuration: duration };
   }, [tracks]);
 
   const stats = React.useMemo(() => ({
@@ -249,12 +250,12 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
             >
               <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                 <span className={cn(
-                  "font-medium leading-tight truncate transition-colors",
+                  "block font-medium leading-tight truncate transition-colors",
                   isActive ? "text-primary" : isFailed ? "text-red-400" : "text-foreground/90 group-hover:text-primary"
                 )}>
                   {track.title} {isFailed && '(Processing Failed)'}
                 </span>
-                <span className="text-xs text-muted-foreground truncate">
+                <span className="block text-xs text-muted-foreground truncate">
                   {track.artist || track.album?.title || 'Unknown Artist'}
                 </span>
               </div>
