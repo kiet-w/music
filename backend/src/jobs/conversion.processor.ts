@@ -1,4 +1,4 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { DownloaderService } from '../downloader/services/downloader.service';
@@ -57,5 +57,10 @@ export class ConversionProcessor extends WorkerHost {
       await this.downloaderService.cleanup(outputPath);
       throw error;
     }
+  }
+
+  @OnWorkerEvent('error')
+  onError(err: Error) {
+    this.logger.error({ error: err.message }, 'BullMQ worker encountered an error');
   }
 }
