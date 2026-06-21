@@ -37,6 +37,8 @@ npx cap open android  # or ios
 *   **Modern Modals & Alerts**: Removed raw browser alert popups, replacing them with custom styled glassmorphic confirm modals (for track deletions) and dropdown selector grids (for moving tracks between albums).
 *   **Toast Notifications**: Built in the `sonner` notification package to display success/error updates in a non-blocking toast overlay.
 *   **Instant Playback on Cache Hit**: Integrates with the backend's duplicate track detection (YouTube video ID cache). If a song has been previously converted, the frontend retrieves the public URL immediately, bypassing the conversion loading state.
+*   **Optimized Realtime Delta Sync**: Refactored the realtime synchronization hook in `Library.tsx` to subscribe with server-side filtering (`userId=eq.${userId}`) and apply delta updates locally (`INSERT`, `UPDATE`, `DELETE`) inside React state. This eliminates redundant full-library reload calls (`findAll` API requests) during song conversion and import, leading to instant updates and lower database load.
+*   **Scoped Album Realtime Sync**: Scoped the realtime subscriptions in `AlbumDetailPage.tsx` specifically to the current album ID (`id=eq.${id}`) and its associated tracks (`albumId=eq.${id}`) to suppress unnecessary re-fetches from other users' activities.
 *   **Docker Containerization**: Provided a multi-stage optimized `Dockerfile` leveraging Next.js standalone outputs to compile and host the web app efficiently in containerized environments (Kubernetes/Swarm/VPS). Run local builds using:
     ```bash
     docker build -t music-frontend:latest ./frontend
