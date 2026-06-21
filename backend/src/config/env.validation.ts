@@ -70,7 +70,7 @@ export const envValidationSchema = Joi.object({
   // Required CORS origin configurations
   CORS_ORIGINS: Joi.string().when('NODE_ENV', {
     is: 'test',
-    then: Joi.string().optional().default('http://localhost:3000'),
+    then: Joi.string().optional(),
     otherwise: Joi.string().required(),
   }),
 
