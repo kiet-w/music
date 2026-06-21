@@ -40,6 +40,29 @@ interface LibraryProps {
   albumId?: string;
 }
 
+const TrackDuration = ({ trackUrl, initialDuration, formatDuration }: { trackUrl: string; initialDuration: number | null; formatDuration: (seconds: number | null) => string }) => {
+  const [duration, setDuration] = useState<number | null>(initialDuration);
+
+  useEffect(() => {
+    if ((initialDuration === null || isNaN(initialDuration)) && trackUrl) {
+      const audio = new Audio(trackUrl);
+      audio.preload = 'metadata';
+      const onLoadedMetadata = () => {
+        setDuration(audio.duration);
+      };
+      audio.addEventListener('loadedmetadata', onLoadedMetadata);
+      return () => {
+        audio.removeEventListener('loadedmetadata', onLoadedMetadata);
+        audio.src = '';
+      };
+    } else {
+      setDuration(initialDuration);
+    }
+  }, [initialDuration, trackUrl]);
+
+  return <>{formatDuration(duration)}</>;
+};
+
 export default function Library({ onTrackSelect, currentTrackId, albumId }: LibraryProps) {
   const t = useTranslations('Music');
   const { accessToken, user, isHydrated } = useAuthStore();
@@ -261,7 +284,7 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
               </div>
               <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
                 <span className="text-[10px] text-muted-foreground/60 font-medium tracking-wider mr-1">
-                  {isFailed ? 'Error' : formatDuration(track.duration)}
+                  {isFailed ? 'Error' : <TrackDuration trackUrl={track.url} initialDuration={track.duration} formatDuration={formatDuration} />}
                 </span>
                 {!isFailed && (
                   <div className="flex items-center gap-1">

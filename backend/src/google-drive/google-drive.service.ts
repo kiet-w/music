@@ -124,6 +124,7 @@ export class GoogleDriveService implements OnModuleInit {
         artist: 'Unknown Artist',
         url,
         albumId: finalAlbumId,
+        userId,
         sourceType: 'google-drive',
         sourceId: fileId,
       },
