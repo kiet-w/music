@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
@@ -10,11 +10,15 @@ export class EncryptionService {
   private readonly tagLength = 16;
 
   constructor(private readonly configService: ConfigService) {
-    let keyHex = this.configService.get<string>('ENCRYPTION_KEY');
-    if (!keyHex || keyHex.length !== 64) {
-      // Fallback for tests or unconfigured environments
-      keyHex = '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff';
+    const keyHex = this.configService.get<string>('ENCRYPTION_KEY');
+    const hexRegex = /^[0-9a-fA-F]{64}$/;
+    
+    if (!keyHex || !hexRegex.test(keyHex)) {
+      const logger = new Logger('EncryptionService');
+      logger.error('FATAL ERROR: ENCRYPTION_KEY must be a 64-character hex string.');
+      throw new Error('ENCRYPTION_KEY is missing or invalid. It must be a 64-character hex string.');
     }
+    
     this.key = Buffer.from(keyHex, 'hex');
   }
 
