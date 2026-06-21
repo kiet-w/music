@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.env*
+*.md
+docs
+backend-docs
+test
+coverage
+temp
+.codegraph
+cookies.txt
