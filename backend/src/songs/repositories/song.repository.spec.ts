@@ -39,7 +39,7 @@ describe('SongRepository', () => {
       const expectedSong = { id: '1', ...songData };
       mockPrismaService.track.create.mockResolvedValue(expectedSong);
 
-      const result = await repository.create({ data: songData });
+      const result = await repository.create({ data: songData } as any);
 
       expect(result).toEqual(expectedSong);
       expect(mockPrismaService.track.create).toHaveBeenCalledWith({

@@ -26,6 +26,8 @@ Detailed technical documentation and Data Flow for every single module can be fo
 npm install
 
 # 2. Setup environment variables (Check .env)
+# Create encryption key using: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# Configure CORS_ORIGINS, ENCRYPTION_KEY, JWT_SECRET
 
 # 3. Run database migrations
 npx prisma migrate dev
@@ -33,3 +35,12 @@ npx prisma migrate dev
 # 4. Start development server
 npm run start:dev
 ```
+
+## 🔒 Production Hardening & Security Features
+
+*   **Role-Based Access Control (RBAC)**: Added `@Roles()` decorator and `RolesGuard` mapping `UserRole` (`USER` | `ADMIN`) stored inside Prisma. Administrative controller `AdminController` and endpoint `/auth/users` are restricted to `ADMIN` users.
+*   **Token Encryption**: Built an AES-256-GCM `EncryptionService` to automatically encrypt and decrypt `googleAccessToken` and `googleRefreshToken` stored in PostgreSQL. Legacy tokens are migrated automatically during module bootstrapping.
+*   **Rate Limiting**: Configured `@nestjs/throttler` to prevent abuse. Critical endpoints such as authentication (`/auth/login`, `/auth/register`) and download (`/songs/youtube`) are throttled.
+*   **yt-dlp Pinned Installer**: Pre-install is powered by a robust checksum installer `install-ytdlp.sh` that pins version `2024.12.23` and validates it against its SHA-256 signature to prevent supply-chain attacks.
+*   **BullMQ Optimization**: Audio task workers restrict concurrency to `2` jobs maximum to preserve local CPU limits and employ a 3-retry exponential backoff delay scheme.
+*   **BaseRepository Type Safety**: Removed loose types and abstracted parameters using type-safe Prisma delegate methods.

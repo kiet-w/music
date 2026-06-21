@@ -22,7 +22,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
   const t = useTranslations('Music');
   const router = useRouter();
   const locale = useLocale();
-  const { accessToken, clearSession } = useAuthStore();
+  const { accessToken } = useAuthStore();
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
@@ -79,6 +79,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
 
       // 1. Supabase Realtime Subscription (if configured)
       let channel: any = null;
+      let isSubscribed = false;
       if (isConfigured && supabase) {
         try {
           channel = supabase
@@ -94,13 +95,14 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
               (payload) => {
                 const updatedSong = payload.new as any;
                 if (updatedSong.url && !isCompleted) {
-                  handleSuccess(updatedSong);
-                  if (channel) supabase.removeChannel(channel);
+                   handleSuccess(updatedSong);
+                   if (channel) supabase.removeChannel(channel);
                 }
               }
             )
             .subscribe((status) => {
               if (status === 'SUBSCRIBED') {
+                isSubscribed = true;
                 setStatus(t('converting'));
               }
             });
@@ -126,17 +128,16 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
           }
         } catch (err: any) {
           console.error('Polling error:', err);
-          if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
-            isCompleted = true;
-            clearSession();
-            router.push(`/${locale}/login`);
-            return;
-          }
           if (!isCompleted) setTimeout(poll, 5000);
         }
       };
 
-      setTimeout(poll, 3000);
+      setTimeout(() => {
+        if (!isSubscribed && !isCompleted) {
+          console.log('Supabase realtime not subscribed within 4s. Starting HTTP polling fallback...');
+          poll();
+        }
+      }, 4000);
 
       // 3. Fallback timeout to cleanup
       setTimeout(() => {
@@ -150,15 +151,10 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
 
     } catch (error: any) {
       console.error('Error starting download:', error);
-      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-        clearSession();
-        router.push(`/${locale}/login`);
-      } else {
-        setStatus('Error starting download');
-      }
+      setStatus('Error starting download');
       setIsDownloading(false);
     }
-  }, [url, title, artist, selectedAlbumId, t, onDownloadStarted, accessToken, router, clearSession, locale]);
+  }, [url, title, artist, selectedAlbumId, t, onDownloadStarted, accessToken, router, locale]);
 
   return (
     <div className="w-full space-y-4 p-5 rounded-2xl bg-secondary/5 border-none shadow-inner">

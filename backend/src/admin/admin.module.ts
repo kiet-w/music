@@ -3,9 +3,10 @@ import { AdminController } from './controllers/admin.controller';
 import { AdminService } from './services/admin.service';
 import { SongsModule } from '../songs/songs.module';
 import { StorageModule } from '../storage/storage.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [SongsModule, StorageModule],
+  imports: [SongsModule, StorageModule, AuthModule],
   controllers: [AdminController],
   providers: [AdminService],
 })

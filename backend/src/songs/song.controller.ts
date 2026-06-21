@@ -18,6 +18,7 @@ import { CreateSongYoutubeDto } from './dto/create-song-youtube.dto';
 import { SongResponseDto } from './dto/song-response.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @ApiTags('songs')
 @ApiBearerAuth()
@@ -34,6 +35,7 @@ export class SongController {
     type: SongResponseDto,
   })
   @Post('youtube')
+  @UseGuards(ThrottlerGuard)
   async createFromYoutube(
     @CurrentUser() user: any,
     @Body() createSongDto: CreateSongYoutubeDto,

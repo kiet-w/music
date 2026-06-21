@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import { Play, Plus, Trash2, FolderInput, Download, CheckCircle2, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Play, Plus, Trash2, FolderInput, Download, CheckCircle2, Loader2, X } from 'lucide-react';
 import { useOfflineStorage } from '@/hooks/useOfflineStorage';
 import { Button } from '@/components/atoms/ui/button';
 import { cn } from '@/lib/utils';
@@ -10,7 +10,8 @@ import { fetchTracks, deleteTrack, moveTrackToAlbum } from '@/lib/api';
 import dynamic from 'next/dynamic';
 import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useRouter } from 'next/navigation';
+import { useAlbumStore } from '@/store/useAlbumStore';
+import { toast } from 'sonner';
 
 const AddToPlaylistDialog = dynamic(() => import('../AddToPlaylist/AddToPlaylistDialog'), {
   ssr: false,
@@ -41,9 +42,52 @@ interface LibraryProps {
 
 export default function Library({ onTrackSelect, currentTrackId, albumId }: LibraryProps) {
   const t = useTranslations('Music');
-  const router = useRouter();
-  const locale = useLocale();
-  const { accessToken, isHydrated, clearSession } = useAuthStore();
+  const { accessToken, isHydrated } = useAuthStore();
+  const { albums } = useAlbumStore();
+  const [deleteModalState, setDeleteModalState] = useState<{
+    isOpen: boolean;
+    track: Track | null;
+  }>({
+    isOpen: false,
+    track: null,
+  });
+  const [moveModalState, setMoveModalState] = useState<{
+    isOpen: boolean;
+    track: Track | null;
+  }>({
+    isOpen: false,
+    track: null,
+  });
+
+  const confirmDelete = async () => {
+    const { track } = deleteModalState;
+    if (!track || !accessToken) return;
+    try {
+      await deleteTrack(accessToken, track.id);
+      toast.success(t('delete_success') || 'Đã xóa bài hát khỏi thư viện.');
+      loadTracks();
+    } catch (error: any) {
+      console.error('Error deleting track:', error);
+      toast.error(error.message || 'Lỗi khi xóa bài hát.');
+    } finally {
+      setDeleteModalState({ isOpen: false, track: null });
+    }
+  };
+
+  const confirmMove = async (targetAlbumId: string) => {
+    const { track } = moveModalState;
+    if (!track || !accessToken) return;
+    try {
+      await moveTrackToAlbum(accessToken, track.id, targetAlbumId);
+      toast.success(t('move_success') || 'Đã di chuyển bài hát sang album mới.');
+      loadTracks();
+    } catch (error: any) {
+      console.error('Error moving track:', error);
+      toast.error(error.message || 'Lỗi khi di chuyển bài hát.');
+    } finally {
+      setMoveModalState({ isOpen: false, track: null });
+    }
+  };
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogState, setDialogState] = useState<{ isOpen: boolean; songTitle: string }>({
@@ -94,13 +138,9 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
       })
       .catch((err) => {
         console.error('Error fetching tracks:', err);
-        if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
-          clearSession();
-          router.push(`/${locale}/login`);
-        }
       })
       .finally(() => setLoading(false));
-  }, [albumId, accessToken, isHydrated, clearSession, router, locale]);
+  }, [albumId, accessToken, isHydrated]);
 
   useEffect(() => {
     loadTracks();
@@ -114,42 +154,17 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
     setDialogState({ isOpen: true, songTitle: title });
   }, []);
 
-  const handleDeleteClick = useCallback(async (e: React.MouseEvent, track: Track) => {
+  const handleDeleteClick = useCallback((e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
     if (!accessToken) return;
+    setDeleteModalState({ isOpen: true, track });
+  }, [accessToken]);
 
-    if (window.confirm(t('delete_warning'))) {
-      try {
-        await deleteTrack(accessToken, track.id);
-        loadTracks();
-      } catch (error: any) {
-        console.error('Error deleting track:', error);
-        if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-          clearSession();
-          router.push(`/${locale}/login`);
-        }
-      }
-    }
-  }, [loadTracks, t, accessToken, clearSession, router, locale]);
-
-  const handleMoveClick = useCallback(async (e: React.MouseEvent, track: Track) => {
+  const handleMoveClick = useCallback((e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
     if (!accessToken) return;
-
-    const targetAlbumId = window.prompt(t('select_album'));
-    if (targetAlbumId) {
-      try {
-        await moveTrackToAlbum(accessToken, track.id, targetAlbumId);
-        loadTracks();
-      } catch (error: any) {
-        console.error('Error moving track:', error);
-        if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-          clearSession();
-          router.push(`/${locale}/login`);
-        }
-      }
-    }
-  }, [loadTracks, t, accessToken, clearSession, router, locale]);
+    setMoveModalState({ isOpen: true, track });
+  }, [accessToken]);
 
   const formatDuration = useCallback((seconds: number | null) => {
     if (seconds === null) return '--:--';
@@ -305,6 +320,85 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
         songTitle={dialogState.songTitle}
         onClose={() => setDialogState({ ...dialogState, isOpen: false })}
       />
+
+      {/* Custom Delete Modal */}
+      {deleteModalState.isOpen && deleteModalState.track && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div
+            onClick={() => setDeleteModalState({ isOpen: false, track: null })}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          <div className="relative w-full max-w-md p-6 mx-4 animate-in zoom-in-95 duration-200">
+            <div className="glass-dark rounded-3xl p-6 shadow-soft border border-white/10 text-center">
+              <h3 className="text-xl font-bold text-white mb-2">{t('delete_warning') || 'Xóa bài hát?'}</h3>
+              <p className="text-sm text-white/60 mb-6">
+                Bạn có chắc chắn muốn xóa bài hát "{deleteModalState.track.title}" khỏi thư viện? Hành động này không thể hoàn tác.
+              </p>
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => setDeleteModalState({ isOpen: false, track: null })}
+                  className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3"
+                >
+                  Hủy
+                </Button>
+                <Button
+                  onClick={confirmDelete}
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-xl py-3 font-bold"
+                >
+                  Xóa
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Move Modal */}
+      {moveModalState.isOpen && moveModalState.track && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div
+            onClick={() => setMoveModalState({ isOpen: false, track: null })}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          <div className="relative w-full max-w-md p-6 mx-4 animate-in zoom-in-95 duration-200">
+            <div className="glass-dark rounded-3xl p-6 shadow-soft border border-white/10">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-white">{t('select_album') || 'Di chuyển bài hát'}</h3>
+                  <p className="text-sm text-white/40 mt-1">Chọn album cho "{moveModalState.track.title}"</p>
+                </div>
+                <button
+                  onClick={() => setMoveModalState({ isOpen: false, track: null })}
+                  className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                >
+                  <X size={20} className="text-white/60" />
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
+                {albums && albums.length > 0 ? (
+                  albums.map((album: any) => (
+                    <button
+                      key={album.id}
+                      onClick={() => confirmMove(album.id)}
+                      className="flex items-center justify-between p-4 rounded-xl border border-transparent bg-white/5 hover:bg-white/10 hover:border-white/10 text-white/80 transition-all text-left"
+                    >
+                      <div>
+                        <div className="font-semibold text-sm">{album.title}</div>
+                        {album.artist && <div className="text-xs text-white/40">{album.artist}</div>}
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-sm text-white/40 p-4 text-center">
+                    Không tìm thấy album nào. Vui lòng tạo album trước.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

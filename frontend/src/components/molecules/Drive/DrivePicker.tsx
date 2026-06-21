@@ -4,10 +4,11 @@ import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, File, Music, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GoogleDriveFile } from "@/hooks/useGoogleDrive";
+import { GoogleDriveFile, useGoogleDrive } from "@/hooks/useGoogleDrive";
 import { importFromDrive } from "@/lib/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 interface DrivePickerProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export const DrivePicker = ({
 }: DrivePickerProps) => {
   const t = useTranslations('Music');
   const { accessToken: appToken } = useAuthStore();
+  const { login: driveLogin } = useGoogleDrive();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedAlbumId, setSelectedAlbumId] = useState(initialAlbumId);
@@ -62,8 +64,8 @@ export const DrivePicker = ({
 
   const handleImport = async () => {
     if (!appToken || selectedIds.size === 0 || !selectedAlbumId) {
-      if (!appToken) alert('Vui lòng đăng nhập trước khi nhập nhạc.');
-      if (!selectedAlbumId) alert('Vui lòng chọn Album trước khi nhập nhạc.');
+      if (!appToken) toast.error('Vui lòng đăng nhập trước khi nhập nhạc.');
+      if (!selectedAlbumId) toast.error('Vui lòng chọn Album trước khi nhập nhạc.');
       return;
     }
 
@@ -72,15 +74,25 @@ export const DrivePicker = ({
     setImportProgress({ current: 0, total: ids.length });
 
     try {
-      for (let i = 0; i < ids.length; i++) {
-        setImportProgress({ current: i + 1, total: ids.length });
-        await importFromDrive(appToken, ids[i], selectedAlbumId);
+      const concurrencyLimit = 3;
+      let completedCount = 0;
+
+      for (let i = 0; i < ids.length; i += concurrencyLimit) {
+        const batch = ids.slice(i, i + concurrencyLimit);
+        await Promise.all(
+          batch.map(async (id) => {
+            await importFromDrive(appToken, id, selectedAlbumId);
+            completedCount++;
+            setImportProgress({ current: completedCount, total: ids.length });
+          })
+        );
       }
+      toast.success('Nhập nhạc thành công!');
       onImportComplete?.();
       onClose();
     } catch (error: any) {
       console.error("Import failed:", error);
-      alert(error.message || "Một số file gặp lỗi khi nhập. Vui lòng thử lại.");
+      toast.error(error.message || "Một số file gặp lỗi khi nhập. Vui lòng thử lại.");
     } finally {
       setIsImporting(false);
       setImportProgress(null);
@@ -167,12 +179,11 @@ export const DrivePicker = ({
                       {/* Thêm nút login ngay tại đây nếu bị lỗi kết nối */}
                       <button 
                         onClick={() => {
-                          const useGoogleDriveHook = require('@/hooks/useGoogleDrive').useGoogleDrive;
-                          // Note: This is a bit hacky because we don't have the login function here
-                          // Better to pass it as a prop or handle it via a shared state
-                          // But since we fixed useGoogleDrive, this state should ideally not be reached
-                          // unless the token expires while the modal is open.
-                          window.location.reload(); // Quick fix: reload will trigger the template's logic
+                          if (appToken) {
+                            driveLogin(appToken);
+                          } else {
+                            toast.error('Vui lòng đăng nhập để kết nối.');
+                          }
                         }}
                         className="bg-blue-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:scale-105 transition-all shadow-lg shadow-blue-500/20"
                       >

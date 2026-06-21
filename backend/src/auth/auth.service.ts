@@ -117,8 +117,8 @@ export class AuthService {
 
   private buildAuthResponse(user: User): AuthResponseDto {
     return {
-      accessToken: this.jwtService.sign({ sub: user.id, email: user.email }),
-      user: { id: user.id, email: user.email, name: user.name },
+      accessToken: this.jwtService.sign({ sub: user.id, email: user.email, role: user.role }),
+      user: { id: user.id, email: user.email, name: user.name, role: user.role },
     };
   }
 

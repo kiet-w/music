@@ -9,6 +9,32 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
+function redact(obj: any): any {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(redact);
+  }
+  const redacted: any = {};
+  const sensitiveKeys = [
+    'password',
+    'driveToken',
+    'accessToken',
+    'googleAccessToken',
+    'googleRefreshToken',
+    'token',
+  ];
+  for (const key of Object.keys(obj)) {
+    if (sensitiveKeys.includes(key)) {
+      redacted[key] = '[REDACTED]';
+    } else {
+      redacted[key] = redact(obj[key]);
+    }
+  }
+  return redacted;
+}
+
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   constructor(
@@ -32,6 +58,7 @@ export class LoggingInterceptor implements NestInterceptor {
               url,
               query,
               params,
+              body: redact(body),
               duration: `${duration}ms`,
               statusCode: response.statusCode,
             },
@@ -46,6 +73,7 @@ export class LoggingInterceptor implements NestInterceptor {
               url,
               query,
               params,
+              body: redact(body),
               duration: `${duration}ms`,
               error: error.message,
               stack: error.stack,

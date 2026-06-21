@@ -7,7 +7,7 @@ const withNextIntl = createNextIntlPlugin(
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'export',
+  output: process.env.NEXT_STANDALONE ? 'standalone' : 'export',
   images: {
     unoptimized: true,
   },

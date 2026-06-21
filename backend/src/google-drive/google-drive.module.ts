@@ -5,10 +5,11 @@ import { MusicController } from './music.controller';
 import { SongsModule } from '../songs/songs.module';
 import { StorageModule } from '../storage/storage.module';
 import { AlbumsModule } from '../albums/albums.module';
+import { EncryptionService } from '../common/services/encryption.service';
 
 @Module({
   imports: [SongsModule, StorageModule, AlbumsModule],
-  providers: [GoogleDriveService],
+  providers: [GoogleDriveService, EncryptionService],
   controllers: [GoogleDriveController, MusicController],
   exports: [GoogleDriveService],
 })

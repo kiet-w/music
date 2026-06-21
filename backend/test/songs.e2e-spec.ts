@@ -23,6 +23,7 @@ describe('SongsController (e2e)', () => {
       create: jest.fn(),
       delete: jest.fn(),
       update: jest.fn(),
+      count: jest.fn(),
     },
     album: {
       findUnique: jest.fn(),
@@ -80,6 +81,7 @@ describe('SongsController (e2e)', () => {
     const mockSongs = [
       { id: '1', title: 'Song 1', artist: 'Artist 1', url: 'http://link.com' },
     ];
+    mockPrismaService.track.count.mockResolvedValue(1);
     mockPrismaService.track.findMany.mockResolvedValue(mockSongs);
 
     return request(app.getHttpServer())
@@ -87,8 +89,8 @@ describe('SongsController (e2e)', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].title).toBe('Song 1');
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.data[0].title).toBe('Song 1');
         expect(mockPrismaService.track.findMany).toHaveBeenCalledWith(expect.objectContaining({
           where: { album: { userId: mockUser.id } }
         }));

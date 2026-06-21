@@ -15,7 +15,7 @@ interface AlbumDetailPageProps {
 }
 
 export function AlbumDetailPage({ locale }: AlbumDetailPageProps) {
-  const { accessToken: appToken, isHydrated, clearSession } = useAuthStore();
+  const { accessToken: appToken, isHydrated } = useAuthStore();
   const t = useTranslations('Music');
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,14 +32,10 @@ export function AlbumDetailPage({ locale }: AlbumDetailPageProps) {
       setAlbum(data);
     } catch (err: any) {
       console.error('Failed to reload album:', err);
-      if (err.message?.includes('401') || err.message?.toLowerCase()?.includes('unauthorized')) {
-        clearSession();
-        router.push(`/${locale}/login`);
-      }
     } finally {
       setLoading(false);
     }
-  }, [id, appToken, clearSession, router, locale]);
+  }, [id, appToken]);
 
   useEffect(() => {
     if (isHydrated && appToken) {

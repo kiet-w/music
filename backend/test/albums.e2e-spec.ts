@@ -20,6 +20,7 @@ describe('AlbumsController (e2e)', () => {
       findUnique: jest.fn(),
       findFirst: jest.fn(),
       create: jest.fn(),
+      count: jest.fn(),
     },
     user: {
       findUnique: jest.fn(),
@@ -62,6 +63,7 @@ describe('AlbumsController (e2e)', () => {
   });
 
   it('/albums (GET) - should not leak cached albums between users', async () => {
+    mockPrismaService.album.count.mockResolvedValue(1);
     mockPrismaService.album.findMany
       .mockResolvedValueOnce([
         { id: 'album-user-1', title: 'User 1 Album', userId: mockUser.id },
@@ -75,8 +77,8 @@ describe('AlbumsController (e2e)', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe('album-user-1');
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.data[0].id).toBe('album-user-1');
       });
 
     await request(app.getHttpServer())
@@ -84,8 +86,8 @@ describe('AlbumsController (e2e)', () => {
       .set('Authorization', `Bearer ${secondAuthToken}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe('album-user-2');
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.data[0].id).toBe('album-user-2');
       });
 
     expect(mockPrismaService.album.findMany).toHaveBeenNthCalledWith(
@@ -104,6 +106,7 @@ describe('AlbumsController (e2e)', () => {
 
   it('/albums (GET) - should return all albums for the user', async () => {
     const mockAlbums = [{ id: '1', title: 'Album 1', artist: 'Artist 1', userId: mockUser.id }];
+    mockPrismaService.album.count.mockResolvedValue(1);
     mockPrismaService.album.findMany.mockResolvedValue(mockAlbums);
 
     return request(app.getHttpServer())
@@ -111,8 +114,8 @@ describe('AlbumsController (e2e)', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].title).toBe('Album 1');
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.data[0].title).toBe('Album 1');
         expect(mockPrismaService.album.findMany).toHaveBeenCalledWith(expect.objectContaining({
           where: { userId: mockUser.id }
         }));

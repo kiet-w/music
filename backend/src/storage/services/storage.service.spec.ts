@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StorageService } from './storage.service';
+import { ConfigService } from '@nestjs/config';
 import { getLoggerToken } from 'nestjs-pino';
 
 describe('StorageService', () => {
@@ -16,6 +17,12 @@ describe('StorageService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         StorageService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue('mock-value'),
+          },
+        },
         {
           provide: getLoggerToken(StorageService.name),
           useValue: mockPinoLogger,

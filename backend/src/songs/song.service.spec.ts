@@ -29,6 +29,7 @@ describe('SongService', () => {
     findFirst: jest.fn(),
     delete: jest.fn(),
     update: jest.fn(),
+    count: jest.fn(),
   };
 
   const mockAlbumRepository = {
@@ -109,7 +110,11 @@ describe('SongService', () => {
           sourceType: 'youtube',
         },
       });
-      expect(queue.add).toHaveBeenCalledWith('convert', { url, songId: 'song-123', userId: mockUserId });
+      expect(queue.add).toHaveBeenCalledWith(
+        'convert',
+        { url, songId: 'song-123', userId: mockUserId },
+        { attempts: 3, backoff: { type: 'exponential', delay: 5000 } }
+      );
     });
 
     it('should throw NotFoundException if provided albumId does not belong to the user', async () => {
@@ -139,13 +144,18 @@ describe('SongService', () => {
   describe('findAll', () => {
     it('should return songs belonging to the user', async () => {
       const mockSongs = [{ id: '1', title: 'Song 1' }];
+      mockSongRepository.count.mockResolvedValue(1);
       mockSongRepository.findMany.mockResolvedValue(mockSongs);
 
       const result = await service.findAll(mockUserId);
 
-      expect(result).toEqual(mockSongs);
+      expect(result.data).toEqual(mockSongs);
+      expect(result.total).toBe(1);
       expect(songRepository.findMany).toHaveBeenCalledWith({
         where: { album: { userId: mockUserId } },
+        skip: 0,
+        take: 50,
+        orderBy: { createdAt: 'desc' },
         include: { album: true },
       });
     });
@@ -166,10 +176,9 @@ describe('SongService', () => {
       });
     });
 
-    it('should return null if song does not exist or belong to user', async () => {
+    it('should throw NotFoundException if song does not exist or belong to user', async () => {
       mockSongRepository.findFirst.mockResolvedValue(null);
-      const result = await service.findOne(mockUserId, 'non-existent');
-      expect(result).toBeNull();
+      await expect(service.findOne(mockUserId, 'non-existent')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -183,6 +192,7 @@ describe('SongService', () => {
 
       expect(songRepository.findFirst).toHaveBeenCalledWith({
         where: { id: songId, album: { userId: mockUserId } },
+        include: { album: true },
       });
       expect(songRepository.delete).toHaveBeenCalledWith({ where: { id: songId } });
     });

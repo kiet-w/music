@@ -46,8 +46,32 @@ async function customFetch(url: string, options: RequestInit = {}) {
     
     // Global error side effects (e.g. redirecting on 401) can be added here
     if (res.status === 401 && typeof window !== 'undefined') {
-      // Potentially clear local storage or redirect to login
-      console.warn('Unauthorized access detected, consider redirecting to login');
+      import('@/store/useAuthStore')
+        .then(async ({ useAuthStore }) => {
+          await useAuthStore.getState().clearSession();
+          
+          let locale = 'vi';
+          const pathSegments = window.location.pathname.split('/');
+          if (pathSegments[1] && pathSegments[1].length === 2) {
+            locale = pathSegments[1];
+          } else {
+            locale = localStorage.getItem('NEXT_LOCALE') || 'vi';
+          }
+
+          if (!window.location.pathname.endsWith('/login')) {
+            window.location.href = `/${locale}/login`;
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to clear session on 401:', err);
+          let locale = 'vi';
+          try {
+            locale = localStorage.getItem('NEXT_LOCALE') || 'vi';
+          } catch {}
+          if (!window.location.pathname.endsWith('/login')) {
+            window.location.href = `/${locale}/login`;
+          }
+        });
     }
 
     throw error;
@@ -94,18 +118,20 @@ export async function fetchMe(appToken: string): Promise<AuthUser> {
 }
 
 export async function fetchAlbums(appToken: string, options?: RequestInit) {
-  return customFetch(`${API_URL}/albums`, { 
+  const result = await customFetch(`${API_URL}/albums`, { 
     ...options,
     headers: getAuthHeaders(appToken)
   });
+  return result?.data ?? result ?? [];
 }
 
 export async function createAlbum(appToken: string, data: { title: string; artist?: string; coverUrl?: string }) {
-  return customFetch(`${API_URL}/albums`, {
+  const result = await customFetch(`${API_URL}/albums`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
     body: JSON.stringify(data),
   });
+  return result?.data ?? result;
 }
 
 export async function fetchTracks(appToken: string) {
@@ -113,29 +139,32 @@ export async function fetchTracks(appToken: string) {
     cache: 'no-store',
     headers: getAuthHeaders(appToken)
   });
-  return result.data ? result.data : result;
+  return result?.data ?? result ?? [];
 }
 
 export async function fetchAlbum(appToken: string, id: string) {
-  return customFetch(`${API_URL}/albums/${id}`, { 
+  const result = await customFetch(`${API_URL}/albums/${id}`, { 
     cache: 'no-store',
     headers: getAuthHeaders(appToken)
   });
+  return result?.data ?? result;
 }
 
 export async function fetchTrack(appToken: string, id: string) {
-  return customFetch(`${API_URL}/songs/${id}`, { 
+  const result = await customFetch(`${API_URL}/songs/${id}`, { 
     cache: 'no-store',
     headers: getAuthHeaders(appToken)
   });
+  return result?.data ?? result;
 }
 
 export async function downloadFromYoutube(appToken: string, url: string, title: string, artist?: string, albumId?: string) {
-  return customFetch(`${API_URL}/songs/youtube`, {
+  const result = await customFetch(`${API_URL}/songs/youtube`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
     body: JSON.stringify({ url, title, artist, albumId }),
   });
+  return result?.data ?? result;
 }
 
 export async function deleteTrack(appToken: string, id: string) {
@@ -147,69 +176,78 @@ export async function deleteTrack(appToken: string, id: string) {
 }
 
 export async function moveTrackToAlbum(appToken: string, id: string, albumId: string) {
-  return customFetch(`${API_URL}/songs/${id}/move`, {
+  const result = await customFetch(`${API_URL}/songs/${id}/move`, {
     method: 'PATCH',
     headers: getAuthHeaders(appToken),
     body: JSON.stringify({ albumId }),
   });
+  return result?.data ?? result;
 }
 
 export async function fetchGoogleDriveAuthUrl(appToken: string) {
-  return customFetch(`${API_URL}/google-drive/auth-url`, {
+  const result = await customFetch(`${API_URL}/google-drive/auth-url`, {
     headers: getAuthHeaders(appToken)
   });
+  return result?.data ?? result;
 }
 
 export async function fetchGoogleDriveStatus(appToken: string) {
-  return customFetch(`${API_URL}/auth/google/status`, {
+  const result = await customFetch(`${API_URL}/auth/google/status`, {
     headers: getAuthHeaders(appToken)
   });
+  return result?.data ?? result;
 }
 
 export async function importMusic(appToken: string, fileId: string, fileName: string, driveToken?: string, albumId?: string) {
-  return customFetch(`${API_URL}/music/import`, {
+  const result = await customFetch(`${API_URL}/music/import`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
     body: JSON.stringify({ fileId, fileName, driveToken, albumId }),
   });
+  return result?.data ?? result;
 }
 
 export async function exchangeGoogleDriveCode(appToken: string, code: string, state: string) {
-  return customFetch(`${API_URL}/google-drive/exchange-code`, {
+  const result = await customFetch(`${API_URL}/google-drive/exchange-code`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
     body: JSON.stringify({ code, state }),
   });
+  return result?.data ?? result;
 }
 
 export async function fetchGoogleDriveFiles(appToken: string) {
-  return customFetch(`${API_URL}/google-drive/files`, { 
+  const result = await customFetch(`${API_URL}/google-drive/files`, { 
     cache: 'no-store',
     headers: getAuthHeaders(appToken)
   });
+  return result?.data ?? result ?? [];
 }
 
 export async function importFromDrive(appToken: string, fileId: string, albumId?: string) {
-  return customFetch(`${API_URL}/google-drive/import`, {
+  const result = await customFetch(`${API_URL}/google-drive/import`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
     body: JSON.stringify({ fileId, albumId }),
   });
+  return result?.data ?? result;
 }
 
 export async function sendMessage(appToken: string, receiverId: string, content: string) {
-  return customFetch(`${API_URL}/messages`, {
+  const result = await customFetch(`${API_URL}/messages`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
     body: JSON.stringify({ receiverId, content }),
   });
+  return result?.data ?? result;
 }
 
 export async function fetchChatHistory(appToken: string, userId: string) {
-  return customFetch(`${API_URL}/messages/${userId}`, {
+  const result = await customFetch(`${API_URL}/messages/${userId}`, {
     cache: 'no-store',
     headers: getAuthHeaders(appToken),
   });
+  return result?.data ?? result ?? [];
 }
 
 export async function fetchUsers(appToken: string) {
@@ -217,29 +255,32 @@ export async function fetchUsers(appToken: string) {
     const result = await customFetch(`${API_URL}/auth/users`, {
       headers: getAuthHeaders(appToken),
     });
-    return result.data ? result.data : result;
+    return result?.data ?? result ?? [];
   } catch {
     return [];
   }
 }
 
 export async function createInvite(appToken: string, receiverId?: string) {
-  return customFetch(`${API_URL}/friend-requests/invite`, {
+  const result = await customFetch(`${API_URL}/friend-requests/invite`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
     body: JSON.stringify({ receiverId }),
   });
+  return result?.data ?? result;
 }
 
 export async function getInviteInfo(token: string) {
-  return customFetch(`${API_URL}/friend-requests/info/${token}`, {
+  const result = await customFetch(`${API_URL}/friend-requests/info/${token}`, {
     cache: 'no-store',
   });
+  return result?.data ?? result;
 }
 
 export async function acceptInvite(appToken: string, token: string) {
-  return customFetch(`${API_URL}/friend-requests/accept/${token}`, {
+  const result = await customFetch(`${API_URL}/friend-requests/accept/${token}`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
   });
+  return result?.data ?? result;
 }

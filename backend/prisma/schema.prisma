@@ -17,6 +17,7 @@ model User {
   googleRefreshToken String?
   googleTokenExpiry  DateTime?
   name               String?
+  role               UserRole  @default(USER)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   albums             Album[]
@@ -24,6 +25,11 @@ model User {
   receivedMessages   Message[] @relation("ReceivedMessages")
   sentRequests       FriendRequest[] @relation("SentRequests")
   receivedRequests   FriendRequest[] @relation("ReceivedRequests")
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 
 model Message {

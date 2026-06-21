@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as path from 'path';
 import * as fs from 'fs';
 
-@Processor('conversion')
+@Processor('conversion', { concurrency: 2 })
 export class ConversionProcessor extends WorkerHost {
   constructor(
     @InjectPinoLogger(ConversionProcessor.name)

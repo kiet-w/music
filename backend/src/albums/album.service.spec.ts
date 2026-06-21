@@ -24,6 +24,7 @@ describe('AlbumService', () => {
     findByUserAndTitle: jest.fn(),
     findMany: jest.fn(),
     findFirst: jest.fn(),
+    count: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -130,15 +131,20 @@ describe('AlbumService', () => {
         { id: '1', title: 'A1', _count: { tracks: 5 } },
         { id: '2', title: 'A2', _count: { tracks: 0 } },
       ];
+      mockAlbumRepository.count.mockResolvedValue(2);
       mockAlbumRepository.findMany.mockResolvedValue(mockAlbums);
 
       const result = await service.findAll(mockUserId);
 
-      expect(result).toHaveLength(2);
-      expect(result[0]._count.songs).toBe(5);
-      expect(result[1]._count.songs).toBe(0);
+      expect(result.data).toHaveLength(2);
+      expect(result.total).toBe(2);
+      expect(result.data[0]._count.songs).toBe(5);
+      expect(result.data[1]._count.songs).toBe(0);
       expect(albumRepository.findMany).toHaveBeenCalledWith({
         where: { userId: mockUserId },
+        skip: 0,
+        take: 50,
+        orderBy: { createdAt: 'desc' },
         include: { _count: { select: { tracks: true } } },
       });
     });

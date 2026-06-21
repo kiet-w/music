@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, Inject, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject, BadRequestException, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { google } from 'googleapis';
 import { PrismaService } from '../prisma/prisma.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -9,9 +9,10 @@ import { SongRepository } from '../songs/repositories/song.repository';
 import { AlbumService } from '../albums/album.service';
 import { AlbumRepository } from '../albums/repositories/album.repository';
 import { ImportDto } from './dto/import.dto';
+import { EncryptionService } from '../common/services/encryption.service';
 
 @Injectable()
-export class GoogleDriveService {
+export class GoogleDriveService implements OnModuleInit {
   private oauth2Client;
 
   constructor(
@@ -21,6 +22,7 @@ export class GoogleDriveService {
     private readonly songRepository: SongRepository,
     private readonly albumService: AlbumService,
     private readonly albumRepository: AlbumRepository,
+    private readonly encryptionService: EncryptionService,
   ) {
     this.oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
@@ -65,8 +67,8 @@ export class GoogleDriveService {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        googleAccessToken: tokens.access_token,
-        googleRefreshToken: tokens.refresh_token,
+        googleAccessToken: tokens.access_token ? this.encryptionService.encrypt(tokens.access_token) : null,
+        googleRefreshToken: tokens.refresh_token ? this.encryptionService.encrypt(tokens.refresh_token) : null,
         googleTokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
       },
     });
@@ -234,9 +236,14 @@ export class GoogleDriveService {
       throw new UnauthorizedException('Google Drive not connected');
     }
 
+    const decryptedRefreshToken = this.encryptionService.decrypt(user.googleRefreshToken);
+    const decryptedAccessToken = user.googleAccessToken
+      ? this.encryptionService.decrypt(user.googleAccessToken)
+      : undefined;
+
     this.oauth2Client.setCredentials({
-      refresh_token: user.googleRefreshToken,
-      access_token: user.googleAccessToken,
+      refresh_token: decryptedRefreshToken,
+      access_token: decryptedAccessToken,
       expiry_date: user.googleTokenExpiry?.getTime(),
     });
 
@@ -246,18 +253,60 @@ export class GoogleDriveService {
         // Rarely happens unless offline access is requested and first time
         await this.prisma.user.update({
           where: { id: userId },
-          data: { googleRefreshToken: tokens.refresh_token },
+          data: { googleRefreshToken: this.encryptionService.encrypt(tokens.refresh_token) },
         });
       }
       if (tokens.access_token) {
         await this.prisma.user.update({
           where: { id: userId },
           data: {
-            googleAccessToken: tokens.access_token,
+            googleAccessToken: this.encryptionService.encrypt(tokens.access_token),
             googleTokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
           },
         });
       }
     });
+  }
+
+  async onModuleInit() {
+    await this.migrateTokens();
+  }
+
+  private async migrateTokens() {
+    if (!this.prisma?.user?.findMany) {
+      return;
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        googleRefreshToken: { not: null },
+      },
+      select: {
+        id: true,
+        googleRefreshToken: true,
+        googleAccessToken: true,
+      },
+    });
+
+    for (const user of users) {
+      let updated = false;
+      const updateData: any = {};
+
+      if (user.googleRefreshToken && !user.googleRefreshToken.includes(':')) {
+        updateData.googleRefreshToken = this.encryptionService.encrypt(user.googleRefreshToken);
+        updated = true;
+      }
+      if (user.googleAccessToken && !user.googleAccessToken.includes(':')) {
+        updateData.googleAccessToken = this.encryptionService.encrypt(user.googleAccessToken);
+        updated = true;
+      }
+
+      if (updated) {
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: updateData,
+        });
+      }
+    }
   }
 }

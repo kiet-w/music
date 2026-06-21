@@ -14,7 +14,7 @@ interface AlbumsPageProps {
 
 export function AlbumsPage({ locale }: AlbumsPageProps) {
   const t = useTranslations('Music');
-  const { accessToken: appToken, isHydrated, clearSession } = useAuthStore();
+  const { accessToken: appToken, isHydrated } = useAuthStore();
   const { albums, setAlbums, isLoading } = useAlbumStore();
   const router = useRouter();
   
@@ -27,16 +27,11 @@ export function AlbumsPage({ locale }: AlbumsPageProps) {
     if (!appToken) return;
     try {
       const result = await fetchAlbums(appToken, { cache: 'no-store' });
-      const data = result.data ? result.data : result;
-      setAlbums(Array.isArray(data) ? data : []);
+      setAlbums(Array.isArray(result) ? result : []);
     } catch (err: any) {
       console.error('Failed to load albums:', err);
-      if (err.message?.includes('401') || err.message?.toLowerCase()?.includes('unauthorized')) {
-        clearSession();
-        router.push(`/${locale}/login`);
-      }
     }
-  }, [appToken, setAlbums, clearSession, router, locale]);
+  }, [appToken, setAlbums]);
 
   useEffect(() => {
     if (isHydrated && appToken) {
@@ -48,18 +43,13 @@ export function AlbumsPage({ locale }: AlbumsPageProps) {
     e.preventDefault();
     if (!newTitle.trim() || !appToken) return;
     try {
-      const result = await createAlbum(appToken, { title: newTitle, artist: newArtist });
-      const newAlbum = result.data ? result.data : result;
+      const newAlbum = await createAlbum(appToken, { title: newTitle, artist: newArtist });
       setAlbums([...(Array.isArray(albums) ? albums : []), newAlbum]);
       setIsCreating(false);
       setNewTitle('');
       setNewArtist('');
     } catch (err: any) {
       console.error('Failed to create album', err);
-      if (err.message?.includes('401') || err.message?.toLowerCase()?.includes('unauthorized')) {
-        clearSession();
-        router.push(`/${locale}/login`);
-      }
     }
   };
 

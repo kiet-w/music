@@ -29,3 +29,14 @@ npm run build
 npx cap sync
 npx cap open android  # or ios
 ```
+
+## 🔒 Production Hardening & UI/UX Improvements
+
+*   **Capacitor Preferences Storage**: Automatically detects native platform deployments and uses `@capacitor/preferences` to persist auth sessions safely. Fallback to standard `localStorage` is maintained for web platforms.
+*   **Global 401 Unauthorized Routing**: Integrated intercepting hooks inside `customFetch` in `api.ts` to globally reset authentication state and redirect to `/[locale]/login` upon receiving `401` unauthorized HTTP statuses.
+*   **Modern Modals & Alerts**: Removed raw browser alert popups, replacing them with custom styled glassmorphic confirm modals (for track deletions) and dropdown selector grids (for moving tracks between albums).
+*   **Toast Notifications**: Built in the `sonner` notification package to display success/error updates in a non-blocking toast overlay.
+*   **Docker Containerization**: Provided a multi-stage optimized `Dockerfile` leveraging Next.js standalone outputs to compile and host the web app efficiently in containerized environments (Kubernetes/Swarm/VPS). Run local builds using:
+    ```bash
+    docker build -t music-frontend:latest ./frontend
+    ```

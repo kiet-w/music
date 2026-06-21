@@ -23,8 +23,7 @@ export const useAlbumStore = create<AlbumStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const result = await fetchAlbums(accessToken as string);
-      const data = result.data ? result.data : result;
-      set({ albums: Array.isArray(data) ? data : [], isLoaded: true });
+      set({ albums: Array.isArray(result) ? result : [], isLoaded: true });
     } catch (error) {
       console.error('Failed to load albums', error);
     } finally {

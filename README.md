@@ -115,3 +115,26 @@ Dự án đã được cấu hình `.gitignore` rất chặt chẽ tại thư m�
    - Thư mục tài liệu tự động: `backend-docs/`, `frontend-docs/`, `docs/`.
    - Các thư mục ẩn hỗ trợ AI/IDE: `.codegraph/`, `.gemini/`, `.serena/`, `.superpowers/`, `.vscode/`, `.idea/`.
 3. **File nhị phân nặng**: `backend/yt-dlp` được sử dụng local để tải nhạc và đã được ignore để không làm nặng Git repository.
+
+---
+
+## 🔒 Bản Cập Nhật Tối Ưu Hóa & Bảo Mật (Production Optimizations & Hardening)
+
+Hệ thống đã được tối ưu hóa toàn diện từ Phase 1 đến Phase 4 phục vụ môi trường Production:
+
+### 1. Backend Hardening
+*   **Role-Based Access Control (RBAC)**: Thêm hệ thống vai trò `USER` và `ADMIN`. Bảo vệ các endpoint quản trị (`AdminController` và `/auth/users`) thông qua `JwtAuthGuard` kết hợp `RolesGuard`.
+*   **CORS Whitelisting**: Giới hạn CORS chặt chẽ cho các nguồn được khai báo trong biến môi trường `CORS_ORIGINS`.
+*   **Rate Limiting**: Triển khai `@nestjs/throttler` giới hạn request trên toàn hệ thống và áp dụng throttle nghiêm ngặt trên các api nhạy cảm như login, register, và Youtube download.
+*   **OAuth Token Encryption**: Mã hóa hoàn toàn các token Google Access/Refresh trong DB bằng AES-256-GCM bảo vệ chống rò rỉ dữ liệu.
+*   **yt-dlp Supply Chain & Checksum Verification**: Tải bản release pinned `yt-dlp` kèm xác minh mã SHA-256 chặt chẽ trước khi thiết lập quyền chạy.
+*   **BullMQ Resilience**: Tối ưu luồng download nhạc với cơ chế retry exponential backoff và giới hạn xử lý tối đa 2 job song song bảo vệ tài nguyên CPU/RAM.
+*   **Repository Generics**: Nâng cao độ an toàn kiểu tĩnh (Type safety) cho `BaseRepository` thông qua Prisma type parameters.
+
+### 2. Frontend Hardening & UX Polish
+*   **Redact Sensitive Data**: Logging interceptor ở backend chủ động che (`[REDACTED]`) các trường token nhạy cảm trong body.
+*   **Google Access Token Revocation**: Client tự động thu hồi và hủy token bằng `window.google.accounts.oauth2.revoke()` ngay sau khi import thành công hoặc thất bại.
+*   **Secure Capacitor Native Storage**: Tự động phát hiện Capacitor native platform và sử dụng `@capacitor/preferences` lưu trữ token an toàn (fallback về `localStorage` trên Web).
+*   **Global 401 Interception**: Bắt lỗi `401 Unauthorized` tập trung tại API client để tự động xóa session và redirect người dùng về trang login.
+*   **Toast Notifications & Custom Modals**: Thay thế toàn bộ popup `alert()`, `confirm()`, `prompt()` mặc định bằng hệ thống Toast (`sonner`) mượt mà và các custom modal kính mờ cao cấp hỗ trợ chọn trực quan Album.
+*   **Containerization**: Cung cấp cấu hình Dockerfile đa tầng tối ưu Next.js Standalone phục vụ Kubernetes/VPS.

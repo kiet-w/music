@@ -16,6 +16,13 @@ import { StorageModule } from '../storage/storage.module';
     }),
     BullModule.registerQueue({
       name: 'conversion',
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+      },
     }),
     DownloaderModule,
     StorageModule,

@@ -11,6 +11,7 @@ import { useChatStore } from '@/store/useChatStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { fetchUsers, createInvite } from '@/lib/api';
 import { useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
 
@@ -79,7 +80,7 @@ export default function MessagesPage() {
       
       // Copy to clipboard
       await navigator.clipboard.writeText(inviteUrl);
-      alert(t('invite_success_copied') || 'Link copied to clipboard!');
+      toast.success(t('invite_success_copied') || 'Link copied to clipboard!');
     } catch (error) {
       console.error('Failed to create invite:', error);
     }

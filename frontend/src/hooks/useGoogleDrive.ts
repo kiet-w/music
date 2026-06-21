@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { fetchGoogleDriveFiles, fetchGoogleDriveAuthUrl, fetchGoogleDriveStatus, importMusic } from '@/lib/api';
+import { toast } from 'sonner';
 
 export interface GoogleDriveFile {
   id: string;
@@ -89,7 +90,7 @@ export function useGoogleDrive() {
       try {
         await loadGoogleScripts();
       } catch (err) {
-        alert('Failed to load Google API scripts');
+        toast.error('Failed to load Google API scripts');
         return reject(err);
       }
 
@@ -97,7 +98,7 @@ export function useGoogleDrive() {
       const google = window.google;
 
       if (!gapi || !google) {
-        alert('Google API not loaded yet');
+        toast.error('Google API not loaded yet');
         return reject(new Error('Google API not loaded'));
       }
 
@@ -134,12 +135,23 @@ export function useGoogleDrive() {
               const file = data.docs[0];
               try {
                 await importMusic(appToken, file.id, file.name, accessToken, albumId);
+                if (window.google?.accounts?.oauth2?.revoke) {
+                  window.google.accounts.oauth2.revoke(accessToken, () => {
+                    console.log('Google access token revoked successfully after import.');
+                  });
+                }
                 resolve();
               } catch (err) {
                 console.error('Import failed:', err);
+                if (window.google?.accounts?.oauth2?.revoke) {
+                  window.google.accounts.oauth2.revoke(accessToken, () => {});
+                }
                 reject(err);
               }
             } else if (data.action === google.picker.Action.CANCEL) {
+              if (window.google?.accounts?.oauth2?.revoke) {
+                window.google.accounts.oauth2.revoke(accessToken, () => {});
+              }
               resolve();
             }
           })
@@ -171,7 +183,7 @@ export function useGoogleDrive() {
     } catch (err: any) {
       console.error('Error fetching auth URL:', err);
       setError(err.message || 'Failed to get auth URL');
-      alert('Lỗi khởi tạo Google Drive: ' + err.message);
+      toast.error('Lỗi khởi tạo Google Drive: ' + err.message);
     } finally {
       setIsLoading(false);
     }

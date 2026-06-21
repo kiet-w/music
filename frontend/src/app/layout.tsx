@@ -2,6 +2,7 @@ import './globals.css';
 import { Instrument_Serif } from 'next/font/google';
 import { GeistSans } from 'geist/font/sans';
 import Script from 'next/script';
+import { Toaster } from 'sonner';
 
 const instrumentSerif = Instrument_Serif({ 
   weight: '400',
@@ -27,6 +28,7 @@ export default function RootLayout({
         <Script src="https://apis.google.com/js/api.js" strategy="beforeInteractive" />
         <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
         {children}
+        <Toaster richColors position="top-right" theme="dark" closeButton />
       </body>
     </html>
   );

@@ -45,6 +45,12 @@ export class SongService {
       url,
       songId: song.id,
       userId,
+    }, {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 5000,
+      },
     });
 
     return this.mapToResponse(song);

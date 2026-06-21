@@ -40,7 +40,7 @@ describe('AlbumRepository', () => {
       const expectedAlbum = { id: '1', ...albumData };
       mockPrismaService.album.create.mockResolvedValue(expectedAlbum);
 
-      const result = await repository.create({ data: albumData });
+      const result = await repository.create({ data: albumData } as any);
 
       expect(result).toEqual(expectedAlbum);
       expect(mockPrismaService.album.create).toHaveBeenCalledWith({
