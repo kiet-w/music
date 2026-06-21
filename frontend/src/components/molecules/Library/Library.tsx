@@ -42,7 +42,7 @@ interface LibraryProps {
 
 export default function Library({ onTrackSelect, currentTrackId, albumId }: LibraryProps) {
   const t = useTranslations('Music');
-  const { accessToken, isHydrated } = useAuthStore();
+  const { accessToken, user, isHydrated } = useAuthStore();
   const { albums } = useAlbumStore();
   const [deleteModalState, setDeleteModalState] = useState<{
     isOpen: boolean;
@@ -146,7 +146,37 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
     loadTracks();
   }, [loadTracks]);
 
-  useSupabaseRealtime(accessToken ? 'Track' : '', loadTracks);
+  const handleRealtimeTrackChange = useCallback((payload: any) => {
+    const { eventType, new: newRecord, old: oldRecord } = payload;
+
+    // If we're inside a specific album, filter out changes that don't belong to this album
+    if (albumId && eventType !== 'DELETE' && newRecord.albumId !== albumId) {
+      return;
+    }
+
+    setTracks((prevTracks) => {
+      switch (eventType) {
+        case 'INSERT': {
+          if (prevTracks.some(t => t.id === newRecord.id)) return prevTracks;
+          return [newRecord as Track, ...prevTracks];
+        }
+        case 'UPDATE':
+          return prevTracks.map((track) =>
+            track.id === newRecord.id ? { ...track, ...newRecord } : track
+          );
+        case 'DELETE':
+          return prevTracks.filter((track) => track.id !== oldRecord.id);
+        default:
+          return prevTracks;
+      }
+    });
+  }, [albumId]);
+
+  useSupabaseRealtime(
+    accessToken && user?.id ? 'Track' : '',
+    handleRealtimeTrackChange,
+    user?.id ? `userId=eq.${user.id}` : undefined
+  );
 
 
   const handleAddToPlaylist = useCallback((e: React.MouseEvent, title: string) => {

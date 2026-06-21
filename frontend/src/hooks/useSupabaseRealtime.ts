@@ -12,7 +12,8 @@ import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
  */
 export function useSupabaseRealtime<T extends { [key: string]: any }>(
   table: string,
-  callback: (payload: RealtimePostgresChangesPayload<T>) => void
+  callback: (payload: RealtimePostgresChangesPayload<T>) => void,
+  filter?: string
 ) {
   // Use a ref for the callback to avoid re-subscribing when callback changes
   const callbackRef = useRef(callback);
@@ -36,6 +37,7 @@ export function useSupabaseRealtime<T extends { [key: string]: any }>(
             event: '*',
             schema: 'public',
             table: table,
+            ...(filter ? { filter } : {}),
           },
           (payload) => {
             callbackRef.current(payload as RealtimePostgresChangesPayload<T>);
@@ -44,7 +46,7 @@ export function useSupabaseRealtime<T extends { [key: string]: any }>(
         
       channel.subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          console.log(`Subscribed to ${table} changes`);
+          console.log(`Subscribed to ${table} changes with filter: ${filter || 'none'}`);
         }
       });
 
@@ -57,5 +59,5 @@ export function useSupabaseRealtime<T extends { [key: string]: any }>(
     } catch (err) {
       console.error(`Supabase subscription error for table ${table}:`, err);
     }
-  }, [table]); // Only re-subscribe if table name changes
+  }, [table, filter]); // Re-subscribe if table name or filter changes
 }

@@ -46,8 +46,16 @@ export function AlbumDetailPage({ locale }: AlbumDetailPageProps) {
     }
   }, [isHydrated, appToken, loadAlbums, loadAlbum, router, locale]);
 
-  useSupabaseRealtime(appToken ? 'Album' : '', loadAlbum);
-  useSupabaseRealtime(appToken ? 'Track' : '', loadAlbum);
+  useSupabaseRealtime(
+    appToken && id ? 'Album' : '',
+    loadAlbum,
+    id ? `id=eq.${id}` : undefined
+  );
+  useSupabaseRealtime(
+    appToken && id ? 'Track' : '',
+    loadAlbum,
+    id ? `albumId=eq.${id}` : undefined
+  );
 
   const isAlbumActive = currentTrack?.albumId === id && isPlaying;
 

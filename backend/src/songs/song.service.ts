@@ -55,6 +55,7 @@ export class SongService {
             url: existingTrack.url,
             duration: existingTrack.duration,
             albumId: finalAlbumId,
+            userId,
             sourceType: 'youtube',
             sourceId: youtubeId,
           },
@@ -69,6 +70,7 @@ export class SongService {
         artist,
         url: '',
         albumId: finalAlbumId,
+        userId,
         sourceType: 'youtube',
         sourceId: youtubeId,
       },
@@ -100,9 +102,7 @@ export class SongService {
   async findAll(userId: string, skip: number = 0, take: number = 50) {
     this.logger.debug({ userId, skip, take }, 'Finding all songs for user');
     const where = {
-      album: {
-        userId,
-      },
+      userId,
     };
 
     const [total, songs] = await Promise.all([
@@ -205,9 +205,7 @@ export class SongService {
     const song = await this.songRepository.findFirst({
       where: {
         id,
-        album: {
-          userId,
-        },
+        userId,
       },
       include: { album: true },
     });

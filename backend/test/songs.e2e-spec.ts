@@ -93,7 +93,7 @@ describe('SongsController (e2e)', () => {
         expect(res.body.data[0].title).toBe('Song 1');
         expect(mockPrismaService.track.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
-            where: { album: { userId: mockUser.id } },
+            where: { userId: mockUser.id },
           }),
         );
       });

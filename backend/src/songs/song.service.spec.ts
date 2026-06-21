@@ -127,6 +127,7 @@ describe('SongService', () => {
           artist,
           url: '',
           albumId,
+          userId: mockUserId,
           sourceType: 'youtube',
           sourceId: youtubeId,
         },
@@ -193,6 +194,7 @@ describe('SongService', () => {
           artist: undefined,
           url: '',
           albumId: defaultAlbum.id,
+          userId: mockUserId,
           sourceType: 'youtube',
           sourceId: youtubeId,
         },
@@ -267,6 +269,7 @@ describe('SongService', () => {
           url: mockExistingTrack.url,
           duration: mockExistingTrack.duration,
           albumId,
+          userId: mockUserId,
           sourceType: 'youtube',
           sourceId: youtubeId,
         },
@@ -286,7 +289,7 @@ describe('SongService', () => {
       expect(result.data).toEqual(mockSongs);
       expect(result.total).toBe(1);
       expect(songRepository.findMany).toHaveBeenCalledWith({
-        where: { album: { userId: mockUserId } },
+        where: { userId: mockUserId },
         skip: 0,
         take: 50,
         orderBy: { createdAt: 'desc' },
@@ -305,7 +308,7 @@ describe('SongService', () => {
 
       expect(result).toEqual(mockSong);
       expect(songRepository.findFirst).toHaveBeenCalledWith({
-        where: { id: songId, album: { userId: mockUserId } },
+        where: { id: songId, userId: mockUserId },
         include: { album: true },
       });
     });
@@ -327,7 +330,7 @@ describe('SongService', () => {
       await service.remove(mockUserId, songId);
 
       expect(songRepository.findFirst).toHaveBeenCalledWith({
-        where: { id: songId, album: { userId: mockUserId } },
+        where: { id: songId, userId: mockUserId },
         include: { album: true },
       });
       expect(songRepository.delete).toHaveBeenCalledWith({

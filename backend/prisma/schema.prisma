@@ -21,6 +21,7 @@ model User {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   albums             Album[]
+  tracks             Track[]
   sentMessages       Message[] @relation("SentMessages")
   receivedMessages   Message[] @relation("ReceivedMessages")
   sentRequests       FriendRequest[] @relation("SentRequests")
@@ -69,12 +70,15 @@ model Track {
   url        String
   duration   Int?
   albumId    String
+  userId     String
   sourceType String?
   sourceId   String?
   createdAt  DateTime @default(now())
   album      Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([albumId])
+  @@index([userId])
 }
 
 enum RequestStatus {
