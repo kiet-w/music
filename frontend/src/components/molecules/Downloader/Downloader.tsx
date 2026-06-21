@@ -77,6 +77,12 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
         setTimeout(() => setStatus(null), 5000);
       };
 
+      // Handle immediate cache hit (no need to subscribe to updates if URL exists)
+      if (song.url) {
+        handleSuccess(song);
+        return;
+      }
+
       // 1. Supabase Realtime Subscription (if configured)
       let channel: any = null;
       let isSubscribed = false;
