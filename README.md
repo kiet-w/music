@@ -17,6 +17,10 @@ Music App là một ứng dụng phát nhạc cá nhân hiện đại, hỗ tr�
 * **Tải nhạc**: Tích hợp `yt-dlp` để tải nhạc từ YouTube
 * **Đồng bộ**: Google Drive API để duyệt và nhập tệp âm thanh (`mp3`)
 
+### 3. Tính năng Nổi bật (Core Features)
+* **YouTube to MP3 (`feat/youtube_to_mp3`)**: Hỗ trợ nhập link YouTube, hệ thống tự động tải và chuyển đổi video thành file âm thanh MP3 chất lượng cao lưu vào thư viện cá nhân thông qua công cụ `yt-dlp` kết hợp hệ thống hàng đợi `BullMQ`.
+* **Google Drive Import**: Kết nối an toàn với Google Drive cá nhân, cho phép duyệt và nhập các tệp MP3 có sẵn vào Music App. Hệ thống tự động trích xuất metadata (thời lượng, tên bài hát) và tối ưu hiển thị giao diện mượt mà.
+
 ---
 
 ## 📁 Cấu trúc thư mục dự án
