@@ -24,6 +24,25 @@ export class DownloaderService implements IDownloaderProvider {
   ) {}
 
   async download(url: string, outputPath: string): Promise<void> {
+    // Defense-in-depth: block SSRF even if DTO validation is bypassed
+    const ALLOWED_HOSTS = [
+      'youtube.com',
+      'www.youtube.com',
+      'm.youtube.com',
+      'music.youtube.com',
+      'youtu.be',
+      'www.youtu.be',
+    ];
+    try {
+      const parsedUrl = new URL(url);
+      if (!ALLOWED_HOSTS.includes(parsedUrl.hostname.toLowerCase())) {
+        throw new BadRequestException('Only YouTube URLs are allowed');
+      }
+    } catch (e) {
+      if (e instanceof BadRequestException) throw e;
+      throw new BadRequestException('Invalid URL format');
+    }
+
     try {
       this.logger.info({ url, outputPath }, 'Starting download');
       const args = [
