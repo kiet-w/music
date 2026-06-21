@@ -1,0 +1,111 @@
+name: CI — Lint, Test, Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Backend: Lint + Unit Test + E2E Test + Build
+  # ──────────────────────────────────────────────
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: "postgresql://test:test@localhost:5432/test_db?schema=public"
+      DIRECT_URL: "postgresql://test:test@localhost:5432/test_db?schema=public"
+      JWT_SECRET: "ci-test-secret-at-least-32-characters-long-for-security"
+      JWT_EXPIRES_IN: "7d"
+      ENCRYPTION_KEY: "e2a71abd771cdd72a0d8c294f1852b936dcbcab3f929bf6b0fe5f52af5fa6522"
+      SUPABASE_URL: "https://mock.supabase.co"
+      SUPABASE_KEY: "mock-supabase-key-for-ci"
+      GOOGLE_CLIENT_ID: "mock-google-client-id"
+      GOOGLE_CLIENT_SECRET: "mock-google-client-secret"
+      GOOGLE_REDIRECT_URI: "http://localhost:3000/api/auth/callback/google"
+      CORS_ORIGINS: "http://localhost:3000"
+      REDIS_HOST: "localhost"
+      REDIS_PORT: "6379"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: TypeScript type-check
+        run: npx tsc --noEmit
+
+      - name: Run unit tests
+        run: npm run test -- --ci --coverage
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+
+  # ──────────────────────────────────────────────
+  # Frontend: Type-check + Build
+  # ──────────────────────────────────────────────
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type-check
+        run: npx tsc --noEmit
+
+      - name: Build (static export)
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: "http://localhost:3000"
