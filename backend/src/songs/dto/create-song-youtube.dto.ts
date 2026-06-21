@@ -1,15 +1,10 @@
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-  MaxLength,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsYouTubeUrl } from '../../common/validators/is-youtube-url.validator';
 
 export class CreateSongYoutubeDto {
   @ApiProperty({ description: 'The YouTube URL of the song' })
-  @IsUrl()
+  @IsYouTubeUrl()
   @IsNotEmpty()
   @MaxLength(500)
   url: string;

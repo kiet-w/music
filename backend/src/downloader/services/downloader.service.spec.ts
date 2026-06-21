@@ -3,6 +3,7 @@ import { DownloaderService } from './downloader.service';
 import { execFile } from 'child_process';
 import { getLoggerToken } from 'nestjs-pino';
 import * as fs from 'fs';
+import { BadRequestException } from '@nestjs/common';
 
 jest.mock('child_process', () => ({
   execFile: jest.fn(),
@@ -84,6 +85,24 @@ describe('DownloaderService', () => {
         'https://youtube.com/watch?v=123',
       ],
       expect.any(Function),
+    );
+  });
+
+  it('should throw BadRequestException if URL is not a YouTube URL', async () => {
+    await expect(service.download('https://evil.com/video', '/tmp/song.mp3')).rejects.toThrow(
+      BadRequestException,
+    );
+    await expect(service.download('https://evil.com/video', '/tmp/song.mp3')).rejects.toThrow(
+      'Only YouTube URLs are allowed',
+    );
+  });
+
+  it('should throw BadRequestException if URL format is invalid', async () => {
+    await expect(service.download('not-a-url', '/tmp/song.mp3')).rejects.toThrow(
+      BadRequestException,
+    );
+    await expect(service.download('not-a-url', '/tmp/song.mp3')).rejects.toThrow(
+      'Invalid URL format',
     );
   });
 });
