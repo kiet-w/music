@@ -23,6 +23,8 @@ interface PlayerState {
   resume: () => void;
   togglePlay: () => void;
   seek: (time: number) => void;
+  volume: number;
+  setVolume: (volume: number) => void;
   reset: () => void;
 }
 
@@ -52,6 +54,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     howl: null,
     duration: 0,
     currentTime: 0,
+    volume: 1,
 
     play: (track: Track, localUrl?: string) => {
       const state = get();
@@ -66,6 +69,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         src: [playUrl],
         html5: true,
         format: ['mp3'],
+        volume: state.volume,
         onload: () => {
           set({ duration: newHowl.duration() });
         },
@@ -121,6 +125,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       if (howl) {
         howl.seek(time);
         set({ currentTime: time });
+      }
+    },
+
+    setVolume: (volume: number) => {
+      set({ volume });
+      const { howl } = get();
+      if (howl) {
+        howl.volume(volume);
       }
     },
 

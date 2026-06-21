@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume1, Volume2, VolumeX } from 'lucide-react';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { cn } from '@/lib/utils';
 
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PlayerBar() {
-  const { currentTrack, isPlaying, togglePlay, currentTime, duration, seek } = usePlayerStore();
+  const { currentTrack, isPlaying, togglePlay, currentTime, duration, seek, volume, setVolume } = usePlayerStore();
 
   if (!currentTrack) return null;
 
@@ -107,8 +107,33 @@ export default function PlayerBar() {
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
         </div>
-        <div className="flex justify-between mt-2 text-[10px] font-medium text-white/20 tabular-nums tracking-widest uppercase">
+        <div className="flex items-center justify-between mt-2 text-[10px] font-medium text-white/20 tabular-nums tracking-widest uppercase">
           <span>{formatTime(currentTime)}</span>
+          
+          <div className="flex items-center gap-1.5 w-20 group">
+            <button 
+              onClick={() => setVolume(volume === 0 ? 1 : 0)} 
+              className="hover:text-white transition-colors"
+            >
+              {volume === 0 ? <VolumeX size={12} /> : volume < 0.5 ? <Volume1 size={12} /> : <Volume2 size={12} />}
+            </button>
+            <div className="relative w-full h-1 bg-white/10 rounded-full overflow-hidden">
+              <motion.div 
+                className="absolute h-full bg-white/40 group-hover:bg-white transition-colors" 
+                style={{ width: `${volume * 100}%` }}
+              />
+              <input 
+                type="range" 
+                min="0" 
+                max="1" 
+                step="0.01"
+                value={volume} 
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </div>
+          </div>
+
           <span>{formatTime(duration)}</span>
         </div>
       </div>
