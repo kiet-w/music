@@ -8,13 +8,25 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
+  const corsOriginsEnv = process.env.CORS_ORIGINS;
+  if (!corsOriginsEnv) {
+    console.error('CORS_ORIGINS environment variable is missing. Application must fail-closed.');
+    throw new Error('CORS_ORIGINS environment variable is missing. Application must fail-closed.');
+  }
+
+  const corsOrigins = corsOriginsEnv
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+
+  if (corsOrigins.length === 0) {
+    console.error('CORS_ORIGINS environment variable is empty. Application must fail-closed.');
+    throw new Error('CORS_ORIGINS environment variable is empty. Application must fail-closed.');
+  }
+
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const logger = app.get(Logger);
   app.useLogger(logger);
-
-  const corsOrigins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
-    : true;
 
   app.enableCors({
     origin: corsOrigins,
