@@ -45,7 +45,7 @@ describe('DownloaderService', () => {
     expect(service).toBeDefined();
   });
 
-  it('downloads mp3 at 320kbps with safe optimized flags', async () => {
+  it('downloads mp3 at 128kbps with safe optimized flags', async () => {
     execFileMock.mockImplementation(
       (
         file: string,
@@ -64,8 +64,6 @@ describe('DownloaderService', () => {
       [
         '-f',
         'bestaudio/best',
-        '--extractor-args',
-        'youtube:player_client=android',
         '--no-playlist',
         '--retries',
         '3',
@@ -77,7 +75,7 @@ describe('DownloaderService', () => {
         '--audio-format',
         'mp3',
         '--audio-quality',
-        '320K',
+        '128K',
         '--ffmpeg-location',
         expect.any(String),
         '-o',

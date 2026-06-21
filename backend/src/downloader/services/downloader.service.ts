@@ -16,7 +16,7 @@ const execFileAsync = promisify(execFile);
 
 @Injectable()
 export class DownloaderService implements IDownloaderProvider {
-  private readonly audioBitrate = '320K';
+  private readonly audioBitrate = '128K';
 
   constructor(
     @InjectPinoLogger(DownloaderService.name)
@@ -48,8 +48,6 @@ export class DownloaderService implements IDownloaderProvider {
       const args = [
         '-f',
         'bestaudio/best',
-        '--extractor-args',
-        'youtube:player_client=android',
         '--no-playlist',
         '--retries',
         '3',

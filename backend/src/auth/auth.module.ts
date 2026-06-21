@@ -7,6 +7,7 @@ import { UserRepository } from './repositories/user.repository';
 import { PrismaModule } from '../prisma/prisma.module';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { EncryptionService } from '../common/services/encryption.service';
 
 @Global()
 @Module({
@@ -23,7 +24,7 @@ import { RolesGuard } from './guards/roles.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserRepository, JwtAuthGuard, RolesGuard],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, JwtModule],
+  providers: [AuthService, UserRepository, JwtAuthGuard, RolesGuard, EncryptionService],
+  exports: [AuthService, JwtAuthGuard, RolesGuard, JwtModule, EncryptionService],
 })
 export class AuthModule {}

@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-VERSION="2024.12.23"
+VERSION="2026.06.09"
 URL="https://github.com/yt-dlp/yt-dlp/releases/download/${VERSION}/yt-dlp"
-EXPECTED_HASH="eb5fef5807129b445d20a557cf57b5a9eaafb84d9f575bfcd51c5598cd70a133"
+EXPECTED_HASH="e5d57466682cfa9d61e9cf7c8a4f09b00f4a62af37d3bbdc4bcffdf63615feac"
 OUTPUT_FILE="yt-dlp"
 
 echo "Downloading yt-dlp version ${VERSION}..."

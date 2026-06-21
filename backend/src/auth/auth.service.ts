@@ -13,6 +13,7 @@ import { UserRepository } from './repositories/user.repository';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { EncryptionService } from '../common/services/encryption.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly encryptionService: EncryptionService,
     @InjectPinoLogger(AuthService.name)
     private readonly logger: PinoLogger,
   ) {
@@ -76,6 +78,57 @@ export class AuthService {
     } catch (error: any) {
       this.logger.error({ error: error.message }, 'Google login failed');
       throw new UnauthorizedException('Google authentication failed');
+    }
+  }
+
+  async googleUnifiedLogin(code: string, redirectUri?: string): Promise<AuthResponseDto> {
+    try {
+      const client = new OAuth2Client(
+        this.configService.get<string>('GOOGLE_CLIENT_ID'),
+        this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
+        redirectUri || this.configService.get<string>('GOOGLE_REDIRECT_URI'),
+      );
+
+      const { tokens } = await client.getToken(code);
+      if (!tokens.id_token) {
+        throw new UnauthorizedException('No ID Token received from Google');
+      }
+
+      const ticket = await client.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      });
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        throw new UnauthorizedException('Invalid ID Token payload');
+      }
+
+      const googleId = payload.sub;
+      const email = payload.email;
+      const name = payload.name;
+
+      const user = await this.findOrCreateGoogleUser(googleId, email, name);
+
+      // Save tokens to user
+      const updatedUser = await this.userRepository.update({
+        where: { id: user.id },
+        data: {
+          googleAccessToken: tokens.access_token
+            ? this.encryptionService.encrypt(tokens.access_token)
+            : null,
+          googleRefreshToken: tokens.refresh_token
+            ? this.encryptionService.encrypt(tokens.refresh_token)
+            : null,
+          googleTokenExpiry: tokens.expiry_date
+            ? new Date(tokens.expiry_date)
+            : null,
+        },
+      });
+
+      return this.buildAuthResponse(updatedUser);
+    } catch (error: any) {
+      this.logger.error({ error: error.message }, 'Unified Google login failed');
+      throw new UnauthorizedException('Unified Google authentication failed: ' + error.message);
     }
   }
 

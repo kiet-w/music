@@ -88,7 +88,8 @@ describe('SongService', () => {
 
   describe('createFromYoutube', () => {
     it('should create a song with a provided albumId if it belongs to the user', async () => {
-      const url = 'https://youtube.com/watch?v=123';
+      const url = 'https://youtube.com/watch?v=12345678901';
+      const youtubeId = '12345678901';
       const title = 'Test Song';
       const artist = 'Test Artist';
       const albumId = 'album-123';
@@ -97,6 +98,7 @@ describe('SongService', () => {
         id: albumId,
         userId: mockUserId,
       });
+      mockSongRepository.findFirst.mockResolvedValue(null); // Cache miss
       const mockSong = { id: 'song-123', title, artist, albumId };
       mockSongRepository.create.mockResolvedValue(mockSong);
 
@@ -112,6 +114,13 @@ describe('SongService', () => {
       expect(mockAlbumRepository.findUnique).toHaveBeenCalledWith({
         where: { id: albumId },
       });
+      expect(songRepository.findFirst).toHaveBeenCalledWith({
+        where: {
+          sourceType: 'youtube',
+          sourceId: youtubeId,
+          url: { not: '' },
+        },
+      });
       expect(songRepository.create).toHaveBeenCalledWith({
         data: {
           title,
@@ -119,6 +128,7 @@ describe('SongService', () => {
           url: '',
           albumId,
           sourceType: 'youtube',
+          sourceId: youtubeId,
         },
       });
       expect(queue.add).toHaveBeenCalledWith(
@@ -147,7 +157,8 @@ describe('SongService', () => {
     });
 
     it('should fallback to default album if no albumId is provided', async () => {
-      const url = 'https://youtube.com/watch?v=123';
+      const url = 'https://youtube.com/watch?v=12345678901';
+      const youtubeId = '12345678901';
       const title = 'Test Song';
       const defaultAlbum = {
         id: 'default-album',
@@ -156,6 +167,7 @@ describe('SongService', () => {
       };
 
       mockAlbumService.findOrCreateDefault.mockResolvedValue(defaultAlbum);
+      mockSongRepository.findFirst.mockResolvedValue(null); // Cache miss
       mockSongRepository.create.mockResolvedValue({
         id: 'song-123',
         title,
@@ -168,6 +180,98 @@ describe('SongService', () => {
       expect(mockAlbumService.findOrCreateDefault).toHaveBeenCalledWith(
         mockUserId,
       );
+      expect(songRepository.findFirst).toHaveBeenCalledWith({
+        where: {
+          sourceType: 'youtube',
+          sourceId: youtubeId,
+          url: { not: '' },
+        },
+      });
+      expect(songRepository.create).toHaveBeenCalledWith({
+        data: {
+          title,
+          artist: undefined,
+          url: '',
+          albumId: defaultAlbum.id,
+          sourceType: 'youtube',
+          sourceId: youtubeId,
+        },
+      });
+    });
+
+    it('should reuse existing track URL if same YouTube ID has been converted', async () => {
+      const url = 'https://youtube.com/watch?v=12345678901';
+      const youtubeId = '12345678901';
+      const title = 'Test Song';
+      const artist = 'Test Artist';
+      const albumId = 'album-123';
+
+      mockAlbumRepository.findUnique.mockResolvedValue({
+        id: albumId,
+        userId: mockUserId,
+      });
+
+      const mockExistingTrack = {
+        id: 'existing-song-id',
+        title: 'Existing Track Title',
+        artist: 'Original Artist',
+        url: 'https://supabase.storage/some-mp3.mp3',
+        duration: 180,
+        sourceType: 'youtube',
+        sourceId: youtubeId,
+      };
+
+      mockSongRepository.findFirst.mockResolvedValue(mockExistingTrack);
+
+      const mockNewSong = {
+        id: 'new-song-id',
+        title,
+        artist: artist,
+        url: mockExistingTrack.url,
+        duration: mockExistingTrack.duration,
+        albumId,
+        sourceType: 'youtube',
+        sourceId: youtubeId,
+      };
+      mockSongRepository.create.mockResolvedValue(mockNewSong);
+
+      const result = await service.createFromYoutube(
+        mockUserId,
+        url,
+        title,
+        artist,
+        albumId,
+      );
+
+      const expectedResponse = {
+        id: 'new-song-id',
+        title,
+        artist,
+        url: mockExistingTrack.url,
+        albumId,
+        sourceType: 'youtube',
+      };
+
+      expect(result).toEqual(expectedResponse);
+      expect(songRepository.findFirst).toHaveBeenCalledWith({
+        where: {
+          sourceType: 'youtube',
+          sourceId: youtubeId,
+          url: { not: '' },
+        },
+      });
+      expect(songRepository.create).toHaveBeenCalledWith({
+        data: {
+          title,
+          artist,
+          url: mockExistingTrack.url,
+          duration: mockExistingTrack.duration,
+          albumId,
+          sourceType: 'youtube',
+          sourceId: youtubeId,
+        },
+      });
+      expect(queue.add).not.toHaveBeenCalled();
     });
   });
 

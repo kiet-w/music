@@ -20,6 +20,7 @@ import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
+import { GoogleUnifiedLoginDto } from './dto/google-unified-login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
@@ -28,13 +29,14 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 
 @ApiTags('auth')
 @Controller('auth')
+@UseGuards(ThrottlerGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @UseGuards(ThrottlerGuard)
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User successfully registered' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
   async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
     return this.authService.register(registerDto);
@@ -42,8 +44,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ThrottlerGuard)
-  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiOperation({ summary: 'User login' })
   @ApiResponse({ status: 200, description: 'User successfully logged in' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
@@ -62,6 +63,23 @@ export class AuthController {
     @Body() googleLoginDto: GoogleLoginDto,
   ): Promise<AuthResponseDto> {
     return this.authService.googleLogin(googleLoginDto.idToken);
+  }
+
+  @Post('google-unified')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login and Sync Google Drive with Unified SSO' })
+  @ApiResponse({
+    status: 200,
+    description: 'User successfully logged in with Google and synced Drive',
+  })
+  @ApiResponse({ status: 401, description: 'Google authentication failed' })
+  async googleUnifiedLogin(
+    @Body() googleUnifiedLoginDto: GoogleUnifiedLoginDto,
+  ): Promise<AuthResponseDto> {
+    return this.authService.googleUnifiedLogin(
+      googleUnifiedLoginDto.code,
+      googleUnifiedLoginDto.redirectUri,
+    );
   }
 
   @Get('me')

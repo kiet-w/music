@@ -32,6 +32,36 @@ export class SongService {
     );
 
     const finalAlbumId = await this.getValidatedAlbumId(userId, albumId);
+    const youtubeId = this.extractYoutubeId(url);
+
+    if (youtubeId) {
+      const existingTrack = await this.songRepository.findFirst({
+        where: {
+          sourceType: 'youtube',
+          sourceId: youtubeId,
+          url: { not: '' },
+        },
+      });
+
+      if (existingTrack) {
+        this.logger.info(
+          { youtubeId, existingTrackId: existingTrack.id },
+          'Found existing track for YouTube ID, reusing storage URL',
+        );
+        const song = await this.songRepository.create({
+          data: {
+            title,
+            artist: artist || existingTrack.artist,
+            url: existingTrack.url,
+            duration: existingTrack.duration,
+            albumId: finalAlbumId,
+            sourceType: 'youtube',
+            sourceId: youtubeId,
+          },
+        });
+        return this.mapToResponse(song);
+      }
+    }
 
     const song = await this.songRepository.create({
       data: {
@@ -40,6 +70,7 @@ export class SongService {
         url: '',
         albumId: finalAlbumId,
         sourceType: 'youtube',
+        sourceId: youtubeId,
       },
     });
 
@@ -127,6 +158,26 @@ export class SongService {
   }
 
   // --- Private Helpers ---
+
+  private extractYoutubeId(url: string): string | null {
+    try {
+      if (url.includes('youtu.be/')) {
+        const parts = url.split('youtu.be/');
+        if (parts[1]) {
+          const id = parts[1].split(/[?#]/)[0];
+          if (id.length === 11) return id;
+        }
+      }
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      if (match && match[2] && match[2].length === 11) {
+        return match[2];
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
 
   private async getValidatedAlbumId(
     userId: string,
