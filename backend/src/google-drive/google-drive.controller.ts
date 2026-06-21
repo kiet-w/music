@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, UseGuards, InternalServerErrorException, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  InternalServerErrorException,
+  Inject,
+} from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
@@ -23,7 +31,11 @@ export class GoogleDriveController {
 
   @Get('ping')
   ping() {
-    return { status: 'ok', timestamp: new Date().toISOString(), version: '2.0-debug' };
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      version: '2.0-debug',
+    };
   }
 
   @Get('status')
@@ -50,7 +62,11 @@ export class GoogleDriveController {
   @Post('exchange-code')
   @ApiOperation({ summary: 'Exchange Google OAuth code for tokens' })
   async exchangeCode(@CurrentUser() user: any, @Body() dto: ExchangeCodeDto) {
-    return await this.googleDriveService.exchangeCodeForTokens(user.id, dto.code, dto.state);
+    return await this.googleDriveService.exchangeCodeForTokens(
+      user.id,
+      dto.code,
+      dto.state,
+    );
   }
 
   @Get('files')

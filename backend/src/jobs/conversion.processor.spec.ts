@@ -48,7 +48,10 @@ describe('ConversionProcessor', () => {
         { provide: DownloaderService, useValue: mockDownloaderService },
         { provide: StorageService, useValue: mockStorageService },
         { provide: PrismaService, useValue: mockPrismaService },
-        { provide: getLoggerToken(ConversionProcessor.name), useValue: mockPinoLogger },
+        {
+          provide: getLoggerToken(ConversionProcessor.name),
+          useValue: mockPinoLogger,
+        },
       ],
     }).compile();
 
@@ -76,8 +79,13 @@ describe('ConversionProcessor', () => {
     it('should download, upload, update db and cleanup on success', async () => {
       mockDownloaderService.download.mockResolvedValue(undefined);
       mockStorageService.uploadStream.mockResolvedValue('songs/song-123.mp3');
-      mockStorageService.getPublicUrl.mockResolvedValue('https://supabase.co/songs/song-123.mp3');
-      mockPrismaService.track.update.mockResolvedValue({ id: 'song-123', url: 'https://supabase.co/songs/song-123.mp3' });
+      mockStorageService.getPublicUrl.mockResolvedValue(
+        'https://supabase.co/songs/song-123.mp3',
+      );
+      mockPrismaService.track.update.mockResolvedValue({
+        id: 'song-123',
+        url: 'https://supabase.co/songs/song-123.mp3',
+      });
       (fs.existsSync as jest.Mock).mockReturnValue(true);
 
       const result = await processor.process(mockJob);
@@ -86,13 +94,22 @@ describe('ConversionProcessor', () => {
         storagePath: 'songs/song-123.mp3',
         publicUrl: 'https://supabase.co/songs/song-123.mp3',
       });
-      expect(downloaderService.download).toHaveBeenCalledWith(mockJob.data.url, expect.any(String));
-      expect(storageService.uploadStream).toHaveBeenCalledWith('mock-stream', 'music', 'songs/song-123.mp3');
+      expect(downloaderService.download).toHaveBeenCalledWith(
+        mockJob.data.url,
+        expect.any(String),
+      );
+      expect(storageService.uploadStream).toHaveBeenCalledWith(
+        'mock-stream',
+        'music',
+        'songs/song-123.mp3',
+      );
       expect(prisma.track.update).toHaveBeenCalledWith({
         where: { id: mockJob.data.songId },
         data: { url: 'https://supabase.co/songs/song-123.mp3' },
       } as any);
-      expect(downloaderService.cleanup).toHaveBeenCalledWith(expect.any(String));
+      expect(downloaderService.cleanup).toHaveBeenCalledWith(
+        expect.any(String),
+      );
     });
 
     it('should cleanup temp file and throw if download fails', async () => {
@@ -101,7 +118,9 @@ describe('ConversionProcessor', () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
 
       await expect(processor.process(mockJob)).rejects.toThrow(error);
-      expect(downloaderService.cleanup).toHaveBeenCalledWith(expect.any(String));
+      expect(downloaderService.cleanup).toHaveBeenCalledWith(
+        expect.any(String),
+      );
     });
   });
 });

@@ -28,7 +28,9 @@ async function bootstrap() {
   const httpAdapterHost = app.get(HttpAdapterHost);
   // Get pino logger instance for the filter
   const pinoLogger = app.get(Logger);
-  app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost, pinoLogger as any));
+  app.useGlobalFilters(
+    new AllExceptionsFilter(httpAdapterHost, pinoLogger as any),
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({

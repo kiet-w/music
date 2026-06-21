@@ -125,9 +125,7 @@ describe('AuthController (e2e)', () => {
 
   describe('/auth/me (GET)', () => {
     it('should return 401 if no token is provided', () => {
-      return request(app.getHttpServer())
-        .get('/auth/me')
-        .expect(401);
+      return request(app.getHttpServer()).get('/auth/me').expect(401);
     });
 
     it('should return user profile if token is valid', async () => {

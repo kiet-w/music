@@ -93,14 +93,25 @@ describe('SongService', () => {
       const artist = 'Test Artist';
       const albumId = 'album-123';
 
-      mockAlbumRepository.findUnique.mockResolvedValue({ id: albumId, userId: mockUserId });
+      mockAlbumRepository.findUnique.mockResolvedValue({
+        id: albumId,
+        userId: mockUserId,
+      });
       const mockSong = { id: 'song-123', title, artist, albumId };
       mockSongRepository.create.mockResolvedValue(mockSong);
 
-      const result = await service.createFromYoutube(mockUserId, url, title, artist, albumId);
+      const result = await service.createFromYoutube(
+        mockUserId,
+        url,
+        title,
+        artist,
+        albumId,
+      );
 
       expect(result).toEqual(mockSong);
-      expect(mockAlbumRepository.findUnique).toHaveBeenCalledWith({ where: { id: albumId } });
+      expect(mockAlbumRepository.findUnique).toHaveBeenCalledWith({
+        where: { id: albumId },
+      });
       expect(songRepository.create).toHaveBeenCalledWith({
         data: {
           title,
@@ -113,31 +124,50 @@ describe('SongService', () => {
       expect(queue.add).toHaveBeenCalledWith(
         'convert',
         { url, songId: 'song-123', userId: mockUserId },
-        { attempts: 3, backoff: { type: 'exponential', delay: 5000 } }
+        { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
       );
     });
 
     it('should throw NotFoundException if provided albumId does not belong to the user', async () => {
       const albumId = 'other-user-album';
-      mockAlbumRepository.findUnique.mockResolvedValue({ id: albumId, userId: 'other-user' });
+      mockAlbumRepository.findUnique.mockResolvedValue({
+        id: albumId,
+        userId: 'other-user',
+      });
 
       await expect(
-        service.createFromYoutube(mockUserId, 'url', 'title', 'artist', albumId)
+        service.createFromYoutube(
+          mockUserId,
+          'url',
+          'title',
+          'artist',
+          albumId,
+        ),
       ).rejects.toThrow(NotFoundException);
     });
 
     it('should fallback to default album if no albumId is provided', async () => {
       const url = 'https://youtube.com/watch?v=123';
       const title = 'Test Song';
-      const defaultAlbum = { id: 'default-album', title: 'Default', userId: mockUserId };
+      const defaultAlbum = {
+        id: 'default-album',
+        title: 'Default',
+        userId: mockUserId,
+      };
 
       mockAlbumService.findOrCreateDefault.mockResolvedValue(defaultAlbum);
-      mockSongRepository.create.mockResolvedValue({ id: 'song-123', title, albumId: defaultAlbum.id });
+      mockSongRepository.create.mockResolvedValue({
+        id: 'song-123',
+        title,
+        albumId: defaultAlbum.id,
+      });
 
       const result = await service.createFromYoutube(mockUserId, url, title);
 
       expect(result.albumId).toBe(defaultAlbum.id);
-      expect(mockAlbumService.findOrCreateDefault).toHaveBeenCalledWith(mockUserId);
+      expect(mockAlbumService.findOrCreateDefault).toHaveBeenCalledWith(
+        mockUserId,
+      );
     });
   });
 
@@ -178,7 +208,9 @@ describe('SongService', () => {
 
     it('should throw NotFoundException if song does not exist or belong to user', async () => {
       mockSongRepository.findFirst.mockResolvedValue(null);
-      await expect(service.findOne(mockUserId, 'non-existent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(mockUserId, 'non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -194,12 +226,16 @@ describe('SongService', () => {
         where: { id: songId, album: { userId: mockUserId } },
         include: { album: true },
       });
-      expect(songRepository.delete).toHaveBeenCalledWith({ where: { id: songId } });
+      expect(songRepository.delete).toHaveBeenCalledWith({
+        where: { id: songId },
+      });
     });
 
     it('should throw NotFoundException if song does not belong to user', async () => {
       mockSongRepository.findFirst.mockResolvedValue(null);
-      await expect(service.remove(mockUserId, 'other-song')).rejects.toThrow(NotFoundException);
+      await expect(service.remove(mockUserId, 'other-song')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -207,9 +243,12 @@ describe('SongService', () => {
     it('should update the albumId if both song and target album belong to the user', async () => {
       const songId = 'song-123';
       const albumId = 'new-album-123';
-      
+
       mockSongRepository.findFirst.mockResolvedValue({ id: songId });
-      mockAlbumRepository.findUnique.mockResolvedValue({ id: albumId, userId: mockUserId });
+      mockAlbumRepository.findUnique.mockResolvedValue({
+        id: albumId,
+        userId: mockUserId,
+      });
       mockSongRepository.update.mockResolvedValue({ id: songId, albumId });
 
       const result = await service.moveToAlbum(mockUserId, songId, albumId);
@@ -223,9 +262,14 @@ describe('SongService', () => {
 
     it('should throw NotFoundException if target album belongs to another user', async () => {
       mockSongRepository.findFirst.mockResolvedValue({ id: 'song-1' });
-      mockAlbumRepository.findUnique.mockResolvedValue({ id: 'other-album', userId: 'other-user' });
+      mockAlbumRepository.findUnique.mockResolvedValue({
+        id: 'other-album',
+        userId: 'other-user',
+      });
 
-      await expect(service.moveToAlbum(mockUserId, 'song-1', 'other-album')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.moveToAlbum(mockUserId, 'song-1', 'other-album'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

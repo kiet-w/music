@@ -67,7 +67,9 @@ describe('JwtAuthGuard', () => {
       }),
     } as unknown as ExecutionContext;
 
-    jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Invalid token'));
+    jest
+      .spyOn(jwtService, 'verifyAsync')
+      .mockRejectedValue(new Error('Invalid token'));
 
     await expect(guard.canActivate(context)).rejects.toThrow(
       UnauthorizedException,
@@ -93,6 +95,9 @@ describe('JwtAuthGuard', () => {
     const result = await guard.canActivate(context);
 
     expect(result).toBe(true);
-    expect(request['user']).toEqual({ id: 'user-id', email: 'test@example.com' });
+    expect(request['user']).toEqual({
+      id: 'user-id',
+      email: 'test@example.com',
+    });
   });
 });

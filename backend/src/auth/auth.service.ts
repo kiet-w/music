@@ -57,7 +57,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    const isPasswordValid = await bcrypt.compare(
+      dto.password,
+      user.passwordHash,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -77,7 +80,9 @@ export class AuthService {
   }
 
   async me(userId: string) {
-    const user = await this.userRepository.findUnique({ where: { id: userId } });
+    const user = await this.userRepository.findUnique({
+      where: { id: userId },
+    });
     if (!user) throw new UnauthorizedException();
     return { id: user.id, email: user.email, name: user.name };
   }
@@ -85,7 +90,9 @@ export class AuthService {
   async getGoogleStatus(
     userId: string,
   ): Promise<{ linked: boolean; email?: string }> {
-    const user = await this.userRepository.findUnique({ where: { id: userId } });
+    const user = await this.userRepository.findUnique({
+      where: { id: userId },
+    });
     if (!user) throw new UnauthorizedException('User not found');
     return {
       linked: !!user.googleRefreshToken,
@@ -101,7 +108,7 @@ export class AuthService {
         take,
         select: { id: true, email: true, name: true },
         orderBy: { createdAt: 'desc' },
-      })
+      }),
     ]);
 
     return {
@@ -109,7 +116,7 @@ export class AuthService {
       total,
       page: Math.floor(skip / take) + 1,
       limit: take,
-      totalPages: Math.ceil(total / take)
+      totalPages: Math.ceil(total / take),
     };
   }
 
@@ -117,8 +124,17 @@ export class AuthService {
 
   private buildAuthResponse(user: User): AuthResponseDto {
     return {
-      accessToken: this.jwtService.sign({ sub: user.id, email: user.email, role: user.role }),
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      accessToken: this.jwtService.sign({
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+      }),
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
     };
   }
 
@@ -131,7 +147,8 @@ export class AuthService {
     if (!payload) throw new UnauthorizedException('Invalid Google token');
 
     const { sub: googleId, email, name } = payload;
-    if (!email) throw new UnauthorizedException('Google account must have an email');
+    if (!email)
+      throw new UnauthorizedException('Google account must have an email');
 
     return { googleId, email, name };
   }
@@ -150,7 +167,10 @@ export class AuthService {
         where: { id: user.id },
         data: { googleId },
       });
-      this.logger.info({ userId: user.id }, 'Linked Google ID to existing user');
+      this.logger.info(
+        { userId: user.id },
+        'Linked Google ID to existing user',
+      );
       return user;
     }
 

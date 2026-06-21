@@ -78,7 +78,10 @@ describe('MessagesController (e2e)', () => {
     it('should return 401 if not authenticated', () => {
       return request(app.getHttpServer())
         .post('/messages')
-        .send({ receiverId: '550e8400-e29b-41d4-a716-446655440001', content: 'Hi' })
+        .send({
+          receiverId: '550e8400-e29b-41d4-a716-446655440001',
+          content: 'Hi',
+        })
         .expect(401);
     });
   });

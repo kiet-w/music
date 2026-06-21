@@ -12,7 +12,12 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { SongService } from './song.service';
 import { CreateSongYoutubeDto } from './dto/create-song-youtube.dto';
 import { SongResponseDto } from './dto/song-response.dto';
@@ -60,7 +65,8 @@ export class SongController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    const skip = page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
+    const skip =
+      page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
     const take = limit ? parseInt(limit, 10) : 50;
     return this.songService.findAll(user.id, skip, take);
   }
@@ -108,4 +114,3 @@ export class SongController {
     return this.songService.moveToAlbum(user.id, id, albumId);
   }
 }
-

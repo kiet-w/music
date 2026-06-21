@@ -28,9 +28,7 @@ jest.mock('googleapis', () => {
     files: {
       list: jest.fn().mockResolvedValue({
         data: {
-          files: [
-            { id: 'file-1', name: 'song.mp3', mimeType: 'audio/mpeg' },
-          ],
+          files: [{ id: 'file-1', name: 'song.mp3', mimeType: 'audio/mpeg' }],
         },
       }),
       get: jest.fn().mockResolvedValue({
@@ -128,13 +126,19 @@ describe('GoogleDriveService', () => {
     it('should generate URL and save state in cache', async () => {
       const url = await service.generateAuthUrl('user-123');
       expect(url).toBe('mock-auth-url');
-      expect(cacheManager.set).toHaveBeenCalledWith(expect.stringContaining('google_auth_state:'), 'user-123', 300000);
+      expect(cacheManager.set).toHaveBeenCalledWith(
+        expect.stringContaining('google_auth_state:'),
+        'user-123',
+        300000,
+      );
     });
   });
 
   describe('isConnected', () => {
     it('should return true if user has googleRefreshToken', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue({ googleRefreshToken: 'encrypted:token' });
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        googleRefreshToken: 'encrypted:token',
+      });
       const res = await service.isConnected('user-123');
       expect(res).toBe(true);
     });
@@ -149,10 +153,16 @@ describe('GoogleDriveService', () => {
   describe('exchangeCodeForTokens', () => {
     it('should exchange code and save encrypted tokens', async () => {
       mockCacheManager.get.mockResolvedValue('user-123');
-      const res = await service.exchangeCodeForTokens('user-123', 'code-123', 'state-123');
+      const res = await service.exchangeCodeForTokens(
+        'user-123',
+        'code-123',
+        'state-123',
+      );
 
       expect(res).toEqual({ success: true });
-      expect(cacheManager.del).toHaveBeenCalledWith('google_auth_state:state-123');
+      expect(cacheManager.del).toHaveBeenCalledWith(
+        'google_auth_state:state-123',
+      );
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'user-123' },
         data: {
@@ -165,15 +175,25 @@ describe('GoogleDriveService', () => {
 
     it('should throw UnauthorizedException if state is invalid', async () => {
       mockCacheManager.get.mockResolvedValue('other-user');
-      await expect(service.exchangeCodeForTokens('user-123', 'code-123', 'state-123')).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.exchangeCodeForTokens('user-123', 'code-123', 'state-123'),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
   describe('migrateTokens', () => {
     it('should migrate unencrypted tokens to encrypted ones', async () => {
       mockPrismaService.user.findMany.mockResolvedValue([
-        { id: 'user-1', googleRefreshToken: 'plain-token-1', googleAccessToken: 'plain-access-1' },
-        { id: 'user-2', googleRefreshToken: 'encrypted:token-2', googleAccessToken: 'encrypted:access-2' },
+        {
+          id: 'user-1',
+          googleRefreshToken: 'plain-token-1',
+          googleAccessToken: 'plain-access-1',
+        },
+        {
+          id: 'user-2',
+          googleRefreshToken: 'encrypted:token-2',
+          googleAccessToken: 'encrypted:access-2',
+        },
       ]);
 
       await service.onModuleInit();

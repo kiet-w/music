@@ -13,7 +13,8 @@ export class EncryptionService {
     let keyHex = this.configService.get<string>('ENCRYPTION_KEY');
     if (!keyHex || keyHex.length !== 64) {
       // Fallback for tests or unconfigured environments
-      keyHex = '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff';
+      keyHex =
+        '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff';
     }
     this.key = Buffer.from(keyHex, 'hex');
   }
@@ -22,18 +23,18 @@ export class EncryptionService {
     if (!text) return text;
     const iv = crypto.randomBytes(this.ivLength);
     const cipher = crypto.createCipheriv(this.algorithm, this.key, iv);
-    
+
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
+
     const authTag = cipher.getAuthTag();
-    
+
     return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
   }
 
   decrypt(encryptedText: string): string {
     if (!encryptedText) return encryptedText;
-    
+
     const parts = encryptedText.split(':');
     if (parts.length !== 3) {
       // Return as-is if it's not encrypted (e.g. legacy data)

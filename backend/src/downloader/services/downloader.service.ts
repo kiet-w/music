@@ -27,16 +27,24 @@ export class DownloaderService implements IDownloaderProvider {
     try {
       this.logger.info({ url, outputPath }, 'Starting download');
       const args = [
-        '-f', 'bestaudio/best',
-        '--extractor-args', 'youtube:player_client=android',
+        '-f',
+        'bestaudio/best',
+        '--extractor-args',
+        'youtube:player_client=android',
         '--no-playlist',
-        '--retries', '3',
-        '--fragment-retries', '3',
-        '--socket-timeout', '30',
+        '--retries',
+        '3',
+        '--fragment-retries',
+        '3',
+        '--socket-timeout',
+        '30',
         '-x',
-        '--audio-format', 'mp3',
-        '--audio-quality', this.audioBitrate,
-        '--ffmpeg-location', ffmpegStatic as unknown as string,
+        '--audio-format',
+        'mp3',
+        '--audio-quality',
+        this.audioBitrate,
+        '--ffmpeg-location',
+        ffmpegStatic as unknown as string,
       ];
 
       if (fs.existsSync('./cookies.txt')) {
@@ -61,9 +69,7 @@ export class DownloaderService implements IDownloaderProvider {
 
       if (stderr.includes('Video unavailable')) {
         this.logger.error({ exitCode }, '[Downloader] Video unavailable');
-        throw new NotFoundException(
-          'Video is unavailable or private',
-        );
+        throw new NotFoundException('Video is unavailable or private');
       }
 
       // Generic fallback with privacy-aware logging (no URL, truncated stderr)

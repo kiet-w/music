@@ -124,9 +124,9 @@ describe('AuthService', () => {
         passwordHash,
       });
 
-      await expect(service.login({ email: 'test@example.com', password: 'wrong' })).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        service.login({ email: 'test@example.com', password: 'wrong' }),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should return tokens for valid credentials', async () => {
@@ -141,7 +141,10 @@ describe('AuthService', () => {
       (userRepository.findByEmail as jest.Mock).mockResolvedValue(user);
       (jwtService.sign as jest.Mock).mockReturnValue('token');
 
-      const result = await service.login({ email: 'test@example.com', password: 'password' });
+      const result = await service.login({
+        email: 'test@example.com',
+        password: 'password',
+      });
 
       expect(result.accessToken).toBe('token');
       expect(result.user.email).toBe('test@example.com');
@@ -175,7 +178,9 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if user not found', async () => {
       (userRepository.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.getGoogleStatus('1')).rejects.toThrow(UnauthorizedException);
+      await expect(service.getGoogleStatus('1')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

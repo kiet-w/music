@@ -27,7 +27,10 @@ export class FriendRequestRepository extends BaseRepository<
     });
   }
 
-  async findPendingRequest(senderId: string, receiverId: string): Promise<FriendRequest | null> {
+  async findPendingRequest(
+    senderId: string,
+    receiverId: string,
+  ): Promise<FriendRequest | null> {
     return this.findFirst({
       where: {
         senderId,

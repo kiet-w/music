@@ -57,9 +57,7 @@ describe('AlbumsController (e2e)', () => {
   });
 
   it('/albums (GET) - should return 401 if unauthenticated', () => {
-    return request(app.getHttpServer())
-      .get('/albums')
-      .expect(401);
+    return request(app.getHttpServer()).get('/albums').expect(401);
   });
 
   it('/albums (GET) - should not leak cached albums between users', async () => {
@@ -69,7 +67,11 @@ describe('AlbumsController (e2e)', () => {
         { id: 'album-user-1', title: 'User 1 Album', userId: mockUser.id },
       ])
       .mockResolvedValueOnce([
-        { id: 'album-user-2', title: 'User 2 Album', userId: secondMockUser.id },
+        {
+          id: 'album-user-2',
+          title: 'User 2 Album',
+          userId: secondMockUser.id,
+        },
       ]);
 
     await request(app.getHttpServer())
@@ -105,7 +107,9 @@ describe('AlbumsController (e2e)', () => {
   });
 
   it('/albums (GET) - should return all albums for the user', async () => {
-    const mockAlbums = [{ id: '1', title: 'Album 1', artist: 'Artist 1', userId: mockUser.id }];
+    const mockAlbums = [
+      { id: '1', title: 'Album 1', artist: 'Artist 1', userId: mockUser.id },
+    ];
     mockPrismaService.album.count.mockResolvedValue(1);
     mockPrismaService.album.findMany.mockResolvedValue(mockAlbums);
 
@@ -116,14 +120,21 @@ describe('AlbumsController (e2e)', () => {
       .expect((res) => {
         expect(res.body.data).toHaveLength(1);
         expect(res.body.data[0].title).toBe('Album 1');
-        expect(mockPrismaService.album.findMany).toHaveBeenCalledWith(expect.objectContaining({
-          where: { userId: mockUser.id }
-        }));
+        expect(mockPrismaService.album.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: { userId: mockUser.id },
+          }),
+        );
       });
   });
 
   it('/albums/:id (GET) - should return one album', async () => {
-    const mockAlbum = { id: '1', title: 'Album 1', tracks: [], userId: mockUser.id };
+    const mockAlbum = {
+      id: '1',
+      title: 'Album 1',
+      tracks: [],
+      userId: mockUser.id,
+    };
     mockPrismaService.album.findFirst.mockResolvedValue(mockAlbum);
 
     return request(app.getHttpServer())
@@ -132,15 +143,21 @@ describe('AlbumsController (e2e)', () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.id).toBe('1');
-        expect(mockPrismaService.album.findFirst).toHaveBeenCalledWith(expect.objectContaining({
-          where: { id: '1', userId: mockUser.id }
-        }));
+        expect(mockPrismaService.album.findFirst).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: { id: '1', userId: mockUser.id },
+          }),
+        );
       });
   });
 
   it('/albums (POST) - should create an album', async () => {
     const createAlbumDto = { title: 'New Album', artist: 'New Artist' };
-    const mockCreatedAlbum = { id: '2', ...createAlbumDto, userId: mockUser.id };
+    const mockCreatedAlbum = {
+      id: '2',
+      ...createAlbumDto,
+      userId: mockUser.id,
+    };
     mockPrismaService.album.create.mockResolvedValue(mockCreatedAlbum);
 
     return request(app.getHttpServer())
@@ -151,11 +168,13 @@ describe('AlbumsController (e2e)', () => {
       .expect((res) => {
         expect(res.body.title).toBe('New Album');
         expect(res.body.id).toBe('2');
-        expect(mockPrismaService.album.create).toHaveBeenCalledWith(expect.objectContaining({
-          data: expect.objectContaining({
-            userId: mockUser.id
-          })
-        }));
+        expect(mockPrismaService.album.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              userId: mockUser.id,
+            }),
+          }),
+        );
       });
   });
 });
