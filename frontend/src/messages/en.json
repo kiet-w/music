@@ -8,6 +8,7 @@
     "preparing": "Preparing download...",
     "converting": "Converting to MP3...",
     "success": "Success! Added to library.",
+    "import_success": "Import successful!",
     "play": "Play",
     "playing": "Playing",
     "pause": "Pause",

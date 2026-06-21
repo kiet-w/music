@@ -62,7 +62,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
       const handleSuccess = (updatedTrack?: any) => {
         if (isCompleted) return;
         isCompleted = true;
-        setStatus(t('success'));
+        setStatus(t('import_success'));
         setIsDownloading(false);
         
         // Add to history
@@ -139,8 +139,8 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
       };
 
       setTimeout(() => {
-        if (!isSubscribed && !isCompleted) {
-          console.log('Supabase realtime not subscribed within 4s. Starting HTTP polling fallback...');
+        if (!isCompleted) {
+          console.log('Starting HTTP polling fallback...');
           poll();
         }
       }, 4000);
@@ -247,7 +247,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
               {status}
             </p>
           </motion.div>
-        ) : status === t('success') ? (
+        ) : status === t('import_success') ? (
           <motion.div
             key="success"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -255,7 +255,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
             className="flex items-center justify-center gap-2 p-3 rounded-xl bg-accent/10 border border-accent/20 text-accent text-sm font-bold"
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>Added to Library</span>
+            <span>{t('import_success')}</span>
           </motion.div>
         ) : status && (
           <motion.p 
