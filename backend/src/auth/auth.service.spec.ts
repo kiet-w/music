@@ -7,6 +7,7 @@ import { getLoggerToken } from 'nestjs-pino';
 
 import { AuthService } from './auth.service';
 import { UserRepository } from './repositories/user.repository';
+import { EncryptionService } from '../common/services/encryption.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -38,6 +39,13 @@ describe('AuthService', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn(),
+          },
+        },
+        {
+          provide: EncryptionService,
+          useValue: {
+            encrypt: jest.fn((val) => `encrypted:${val}`),
+            decrypt: jest.fn((val) => val.replace('encrypted:', '')),
           },
         },
         {

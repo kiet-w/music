@@ -100,6 +100,14 @@ export async function googleLogin(idToken: string): Promise<AuthResponse> {
   });
 }
 
+export async function googleUnifiedLogin(code: string, redirectUri?: string): Promise<AuthResponse> {
+  return customFetch(`${API_URL}/auth/google-unified`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ code, redirectUri }),
+  });
+}
+
 export async function login(data: {
   email: string;
   password: string;
