@@ -1,4 +1,11 @@
-import { Injectable, UnauthorizedException, Inject, BadRequestException, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  Inject,
+  BadRequestException,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { google } from 'googleapis';
 import { PrismaService } from '../prisma/prisma.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -53,13 +60,15 @@ export class GoogleDriveService implements OnModuleInit {
   }
 
   async exchangeCodeForTokens(userId: string, code: string, state: string) {
-    const cachedUserId = await this.cacheManager.get(`google_auth_state:${state}`);
+    const cachedUserId = await this.cacheManager.get(
+      `google_auth_state:${state}`,
+    );
     if (!cachedUserId || cachedUserId !== userId) {
       throw new UnauthorizedException('Invalid or expired state parameter');
     }
 
     const { tokens } = await this.oauth2Client.getToken(code);
-    
+
     // Clear state from cache
     await this.cacheManager.del(`google_auth_state:${state}`);
 
@@ -67,9 +76,15 @@ export class GoogleDriveService implements OnModuleInit {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        googleAccessToken: tokens.access_token ? this.encryptionService.encrypt(tokens.access_token) : null,
-        googleRefreshToken: tokens.refresh_token ? this.encryptionService.encrypt(tokens.refresh_token) : null,
-        googleTokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+        googleAccessToken: tokens.access_token
+          ? this.encryptionService.encrypt(tokens.access_token)
+          : null,
+        googleRefreshToken: tokens.refresh_token
+          ? this.encryptionService.encrypt(tokens.refresh_token)
+          : null,
+        googleTokenExpiry: tokens.expiry_date
+          ? new Date(tokens.expiry_date)
+          : null,
       },
     });
 
@@ -78,7 +93,7 @@ export class GoogleDriveService implements OnModuleInit {
 
   async importFile(userId: string, importDto: ImportDto) {
     const { fileId, albumId, fileName, driveToken } = importDto;
-    
+
     // 1. Resolve Album
     const finalAlbumId = await this.resolveAlbumId(userId, albumId);
 
@@ -93,7 +108,7 @@ export class GoogleDriveService implements OnModuleInit {
     const originalName = fileName || metadata.name || 'unknown';
     const sanitizedName = this.sanitizeFileName(originalName);
     const storagePath = `songs/${finalAlbumId}/${Date.now()}_${sanitizedName}`;
-    
+
     const path = await this.storageService.uploadStream(
       stream,
       'music',
@@ -115,7 +130,10 @@ export class GoogleDriveService implements OnModuleInit {
     });
   }
 
-  private async resolveAlbumId(userId: string, albumId?: string): Promise<string> {
+  private async resolveAlbumId(
+    userId: string,
+    albumId?: string,
+  ): Promise<string> {
     if (albumId) {
       const album = await this.albumRepository.findUnique({
         where: { id: albumId },
@@ -130,8 +148,11 @@ export class GoogleDriveService implements OnModuleInit {
   }
 
   private validateMp3(metadata: any, fileName?: string) {
-    const isMp3Mime = metadata.mimeType === 'audio/mpeg' || metadata.mimeType === 'audio/mp3';
-    const isMp3Ext = (fileName || metadata.name)?.toLowerCase().endsWith('.mp3');
+    const isMp3Mime =
+      metadata.mimeType === 'audio/mpeg' || metadata.mimeType === 'audio/mp3';
+    const isMp3Ext = (fileName || metadata.name)
+      ?.toLowerCase()
+      .endsWith('.mp3');
 
     if (!isMp3Mime && !isMp3Ext) {
       throw new BadRequestException('Chỉ hỗ trợ file định dạng MP3');
@@ -148,41 +169,46 @@ export class GoogleDriveService implements OnModuleInit {
   async listFiles(userId: string) {
     await this.setCredentials(userId);
     const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
-    
+
     try {
       const res = await drive.files.list({
         pageSize: 100,
-        fields: 'nextPageToken, files(id, name, mimeType, size, shortcutDetails, capabilities, driveId)',
+        fields:
+          'nextPageToken, files(id, name, mimeType, size, shortcutDetails, capabilities, driveId)',
         q: "trashed = false and (mimeType = 'audio/mpeg' or mimeType = 'application/vnd.google-apps.shortcut')",
         supportsAllDrives: true,
         includeItemsFromAllDrives: true,
       });
-      
+
       const files = res.data.files || [];
-      
+
       // Strictly filter for MP3 files or shortcuts to MP3 files
-      const musicFiles = files.filter(file => {
+      const musicFiles = files.filter((file) => {
         const name = file.name?.toLowerCase() || '';
         const mime = file.mimeType?.toLowerCase() || '';
         const isMp3Mime = mime === 'audio/mpeg' || mime === 'audio/mp3';
         const isMp3Ext = name.endsWith('.mp3');
-        
-        const isShortcutToMp3 = mime === 'application/vnd.google-apps.shortcut' && 
-                                 (file.shortcutDetails?.targetMimeType === 'audio/mpeg' || 
-                                  file.shortcutDetails?.targetMimeType === 'audio/mp3' ||
-                                  name.endsWith('.mp3'));
+
+        const isShortcutToMp3 =
+          mime === 'application/vnd.google-apps.shortcut' &&
+          (file.shortcutDetails?.targetMimeType === 'audio/mpeg' ||
+            file.shortcutDetails?.targetMimeType === 'audio/mp3' ||
+            name.endsWith('.mp3'));
 
         return isMp3Mime || isMp3Ext || isShortcutToMp3;
       });
 
       // Map shortcuts to their targets
-      return musicFiles.map(file => {
-        if (file.mimeType === 'application/vnd.google-apps.shortcut' && file.shortcutDetails?.targetId) {
+      return musicFiles.map((file) => {
+        if (
+          file.mimeType === 'application/vnd.google-apps.shortcut' &&
+          file.shortcutDetails?.targetId
+        ) {
           return {
             ...file,
             id: file.shortcutDetails.targetId,
             mimeType: file.shortcutDetails.targetMimeType || 'audio/mpeg',
-            isShortcut: true
+            isShortcut: true,
           };
         }
         return file;
@@ -207,7 +233,11 @@ export class GoogleDriveService implements OnModuleInit {
     return res.data;
   }
 
-  async downloadFile(userId: string, fileId: string, accessToken?: string): Promise<any> {
+  async downloadFile(
+    userId: string,
+    fileId: string,
+    accessToken?: string,
+  ): Promise<any> {
     if (accessToken) {
       this.oauth2Client.setCredentials({ access_token: accessToken });
     } else {
@@ -216,11 +246,11 @@ export class GoogleDriveService implements OnModuleInit {
     const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
 
     const res = await drive.files.get(
-      { 
-        fileId, 
+      {
+        fileId,
         alt: 'media',
         supportsAllDrives: true,
-        acknowledgeAbuse: true
+        acknowledgeAbuse: true,
       },
       { responseType: 'stream' },
     );
@@ -236,7 +266,9 @@ export class GoogleDriveService implements OnModuleInit {
       throw new UnauthorizedException('Google Drive not connected');
     }
 
-    const decryptedRefreshToken = this.encryptionService.decrypt(user.googleRefreshToken);
+    const decryptedRefreshToken = this.encryptionService.decrypt(
+      user.googleRefreshToken,
+    );
     const decryptedAccessToken = user.googleAccessToken
       ? this.encryptionService.decrypt(user.googleAccessToken)
       : undefined;
@@ -253,15 +285,23 @@ export class GoogleDriveService implements OnModuleInit {
         // Rarely happens unless offline access is requested and first time
         await this.prisma.user.update({
           where: { id: userId },
-          data: { googleRefreshToken: this.encryptionService.encrypt(tokens.refresh_token) },
+          data: {
+            googleRefreshToken: this.encryptionService.encrypt(
+              tokens.refresh_token,
+            ),
+          },
         });
       }
       if (tokens.access_token) {
         await this.prisma.user.update({
           where: { id: userId },
           data: {
-            googleAccessToken: this.encryptionService.encrypt(tokens.access_token),
-            googleTokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+            googleAccessToken: this.encryptionService.encrypt(
+              tokens.access_token,
+            ),
+            googleTokenExpiry: tokens.expiry_date
+              ? new Date(tokens.expiry_date)
+              : null,
           },
         });
       }
@@ -293,11 +333,15 @@ export class GoogleDriveService implements OnModuleInit {
       const updateData: any = {};
 
       if (user.googleRefreshToken && !user.googleRefreshToken.includes(':')) {
-        updateData.googleRefreshToken = this.encryptionService.encrypt(user.googleRefreshToken);
+        updateData.googleRefreshToken = this.encryptionService.encrypt(
+          user.googleRefreshToken,
+        );
         updated = true;
       }
       if (user.googleAccessToken && !user.googleAccessToken.includes(':')) {
-        updateData.googleAccessToken = this.encryptionService.encrypt(user.googleAccessToken);
+        updateData.googleAccessToken = this.encryptionService.encrypt(
+          user.googleAccessToken,
+        );
         updated = true;
       }
 

@@ -8,7 +8,12 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
 import { AuthResponseDto } from './dto/auth-response.dto';
@@ -48,9 +53,14 @@ export class AuthController {
   @Post('google')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with Google' })
-  @ApiResponse({ status: 200, description: 'User successfully logged in with Google' })
+  @ApiResponse({
+    status: 200,
+    description: 'User successfully logged in with Google',
+  })
   @ApiResponse({ status: 401, description: 'Invalid Google token' })
-  async googleLogin(@Body() googleLoginDto: GoogleLoginDto): Promise<AuthResponseDto> {
+  async googleLogin(
+    @Body() googleLoginDto: GoogleLoginDto,
+  ): Promise<AuthResponseDto> {
     return this.authService.googleLogin(googleLoginDto.idToken);
   }
 
@@ -78,11 +88,9 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Return all users' })
-  async findAll(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
-    const skip = page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
+  async findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
+    const skip =
+      page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
     const take = limit ? parseInt(limit, 10) : 50;
     return this.authService.findAll(skip, take);
   }

@@ -17,7 +17,7 @@ export abstract class BaseRepository<
     update(args: any): Promise<T>;
     delete(args: any): Promise<T>;
     count(args?: any): Promise<number>;
-  }
+  },
 > {
   constructor(
     protected readonly prisma: PrismaService,
@@ -34,9 +34,7 @@ export abstract class BaseRepository<
           );
         }
         case 'P2025':
-          throw new NotFoundException(
-            error.meta?.cause || 'Record not found',
-          );
+          throw new NotFoundException(error.meta?.cause || 'Record not found');
         case 'P2003':
           throw new BadRequestException('Foreign key constraint failed');
         default:
@@ -56,7 +54,9 @@ export abstract class BaseRepository<
     }
   }
 
-  async findUnique(args: Parameters<Delegate['findUnique']>[0]): Promise<T | null> {
+  async findUnique(
+    args: Parameters<Delegate['findUnique']>[0],
+  ): Promise<T | null> {
     try {
       return await this.delegate.findUnique(args);
     } catch (error) {
@@ -72,7 +72,9 @@ export abstract class BaseRepository<
     }
   }
 
-  async findFirst(args?: Parameters<Delegate['findFirst']>[0]): Promise<T | null> {
+  async findFirst(
+    args?: Parameters<Delegate['findFirst']>[0],
+  ): Promise<T | null> {
     try {
       return await this.delegate.findFirst(args);
     } catch (error) {

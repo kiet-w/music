@@ -39,7 +39,11 @@ describe('AdminController (e2e)', () => {
     await app.init();
 
     const jwtService = app.get(JwtService);
-    adminToken = jwtService.sign({ sub: 'admin-123', email: 'admin@example.com', role: 'ADMIN' });
+    adminToken = jwtService.sign({
+      sub: 'admin-123',
+      email: 'admin@example.com',
+      role: 'ADMIN',
+    });
   });
 
   afterAll(async () => {

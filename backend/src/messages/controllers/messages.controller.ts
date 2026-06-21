@@ -8,7 +8,12 @@ import {
   ClassSerializerInterceptor,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { MessagesService } from '../services/messages.service';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { MessageResponseDto } from '../dto/message-response.dto';
@@ -35,7 +40,10 @@ export class MessagesController {
     @CurrentUser() user: any,
     @Body() createMessageDto: CreateMessageDto,
   ): Promise<MessageResponseDto> {
-    const message = await this.messagesService.create(user.id, createMessageDto);
+    const message = await this.messagesService.create(
+      user.id,
+      createMessageDto,
+    );
     return plainToInstance(MessageResponseDto, message);
   }
 
@@ -50,7 +58,10 @@ export class MessagesController {
     @CurrentUser() user: any,
     @Param('userId') otherUserId: string,
   ): Promise<MessageResponseDto[]> {
-    const messages = await this.messagesService.findAllByConversation(user.id, otherUserId);
+    const messages = await this.messagesService.findAllByConversation(
+      user.id,
+      otherUserId,
+    );
     return plainToInstance(MessageResponseDto, messages);
   }
 }

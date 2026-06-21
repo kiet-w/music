@@ -51,7 +51,7 @@ export class AlbumService {
 
   async findAll(userId: string, skip: number = 0, take: number = 50) {
     this.logger.debug({ userId, skip, take }, 'Finding all albums for user');
-    
+
     const [total, albums] = await Promise.all([
       this.albumRepository.count({ where: { userId } }),
       this.albumRepository.findMany({
@@ -64,7 +64,7 @@ export class AlbumService {
             select: { tracks: true },
           },
         },
-      })
+      }),
     ]);
 
     return {
@@ -72,7 +72,7 @@ export class AlbumService {
       total,
       page: Math.floor(skip / take) + 1,
       limit: take,
-      totalPages: Math.ceil(total / take)
+      totalPages: Math.ceil(total / take),
     };
   }
 

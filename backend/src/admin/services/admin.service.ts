@@ -18,9 +18,9 @@ export class AdminService {
 
   async cleanupStorage(dto: CleanupStorageDto) {
     await this.storageCleanupService.cleanupFile(dto.bucketName, dto.path);
-    return { 
-      message: 'Storage cleanup initiated', 
-      file: dto.path 
+    return {
+      message: 'Storage cleanup initiated',
+      file: dto.path,
     };
   }
 }

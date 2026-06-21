@@ -91,9 +91,11 @@ describe('SongsController (e2e)', () => {
       .expect((res) => {
         expect(res.body.data).toHaveLength(1);
         expect(res.body.data[0].title).toBe('Song 1');
-        expect(mockPrismaService.track.findMany).toHaveBeenCalledWith(expect.objectContaining({
-          where: { album: { userId: mockUser.id } }
-        }));
+        expect(mockPrismaService.track.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: { album: { userId: mockUser.id } },
+          }),
+        );
       });
   });
 
@@ -140,7 +142,10 @@ describe('SongsController (e2e)', () => {
       sourceType: 'youtube',
     };
 
-    mockPrismaService.album.findUnique.mockResolvedValue({ id: 'custom-album-id', userId: mockUser.id });
+    mockPrismaService.album.findUnique.mockResolvedValue({
+      id: 'custom-album-id',
+      userId: mockUser.id,
+    });
     mockPrismaService.track.create.mockResolvedValue(mockSong);
     mockQueue.add.mockResolvedValue({ id: 'job-2' });
 
@@ -172,7 +177,10 @@ describe('SongsController (e2e)', () => {
     const updatedSong = { id: songId, albumId };
 
     mockPrismaService.track.findFirst.mockResolvedValue({ id: songId });
-    mockPrismaService.album.findUnique.mockResolvedValue({ id: albumId, userId: mockUser.id });
+    mockPrismaService.album.findUnique.mockResolvedValue({
+      id: albumId,
+      userId: mockUser.id,
+    });
     mockPrismaService.track.update.mockResolvedValue(updatedSong);
 
     return request(app.getHttpServer())

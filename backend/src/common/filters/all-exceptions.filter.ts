@@ -34,10 +34,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       const response = exception.getResponse();
       message =
-        typeof response === 'object' && response !== null && 'message' in response
+        typeof response === 'object' &&
+        response !== null &&
+        'message' in response
           ? (response as any).message
           : exception.message;
-      
+
       // Map common status codes to custom error codes
       if (httpStatus === HttpStatus.CONFLICT) code = 'ERR_CONFLICT';
       if (httpStatus === HttpStatus.NOT_FOUND) code = 'ERR_NOT_FOUND';
@@ -75,10 +77,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Logging strategy
     if (httpStatus >= 500) {
       this.logger.error(
-        { 
+        {
           err: exception instanceof Error ? exception : undefined,
           path,
-          statusCode: httpStatus 
+          statusCode: httpStatus,
         },
         `Unhandled Exception: ${message}`,
       );

@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/require-await */
-import {
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as fs from 'fs';
@@ -37,8 +34,8 @@ export class StorageService implements IStorageProvider {
     }
 
     this.supabase = createClient(
-      isConfigured ? rawUrl! : 'https://placeholder.supabase.co',
-      isConfigured ? rawKey! : 'placeholder-key',
+      isConfigured ? rawUrl : 'https://placeholder.supabase.co',
+      isConfigured ? rawKey : 'placeholder-key',
     );
   }
 
@@ -194,4 +191,3 @@ export class StorageService implements IStorageProvider {
     }
   }
 }
-

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
+import { envValidationSchema } from './config/env.validation';
 import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './core/app.controller';
 import { AppService } from './core/app.service';
@@ -21,12 +22,18 @@ import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 10,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
+      validationSchema: envValidationSchema,
+      validationOptions: {
+        abortEarly: true,
+      },
     }),
     LoggerModule.forRoot({
       pinoHttp: {

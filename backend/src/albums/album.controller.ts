@@ -10,7 +10,12 @@ import {
   NotFoundException,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AlbumService } from './album.service';
 import { AlbumResponseDto } from './dto/album-response.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
@@ -50,7 +55,8 @@ export class AlbumController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    const skip = page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
+    const skip =
+      page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
     const take = limit ? parseInt(limit, 10) : 50;
     return this.albumService.findAll(user.id, skip, take);
   }

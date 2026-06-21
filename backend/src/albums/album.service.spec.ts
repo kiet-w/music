@@ -75,7 +75,12 @@ describe('AlbumService', () => {
 
   describe('findOrCreateDefault', () => {
     it('should return existing default album if it exists', async () => {
-      const mockAlbum = { id: 'default-id', title: 'Default', userId: mockUserId, isDefault: true };
+      const mockAlbum = {
+        id: 'default-id',
+        title: 'Default',
+        userId: mockUserId,
+        isDefault: true,
+      };
       mockAlbumRepository.findDefault.mockResolvedValue(mockAlbum);
 
       const result = await service.findOrCreateDefault(mockUserId);
@@ -90,7 +95,12 @@ describe('AlbumService', () => {
 
     it('should create default album if it does not exist', async () => {
       mockAlbumRepository.findDefault.mockResolvedValueOnce(null);
-      const mockAlbum = { id: 'new-default-id', title: 'Default', userId: mockUserId, isDefault: true };
+      const mockAlbum = {
+        id: 'new-default-id',
+        title: 'Default',
+        userId: mockUserId,
+        isDefault: true,
+      };
       mockAlbumRepository.create.mockResolvedValue(mockAlbum);
 
       const result = await service.findOrCreateDefault(mockUserId);
@@ -111,8 +121,15 @@ describe('AlbumService', () => {
 
     it('should handle race condition during creation', async () => {
       mockAlbumRepository.findDefault.mockResolvedValueOnce(null);
-      mockAlbumRepository.create.mockRejectedValue(new Error('Unique constraint failed'));
-      const mockAlbum = { id: 'race-winner-id', title: 'Default', userId: mockUserId, isDefault: true };
+      mockAlbumRepository.create.mockRejectedValue(
+        new Error('Unique constraint failed'),
+      );
+      const mockAlbum = {
+        id: 'race-winner-id',
+        title: 'Default',
+        userId: mockUserId,
+        isDefault: true,
+      };
       mockAlbumRepository.findDefault.mockResolvedValueOnce(mockAlbum);
 
       const result = await service.findOrCreateDefault(mockUserId);
@@ -153,7 +170,12 @@ describe('AlbumService', () => {
   describe('findOne', () => {
     it('should return an album if it belongs to the user', async () => {
       const albumId = 'album-1';
-      const mockAlbum = { id: albumId, title: 'A1', userId: mockUserId, _count: { tracks: 10 } };
+      const mockAlbum = {
+        id: albumId,
+        title: 'A1',
+        userId: mockUserId,
+        _count: { tracks: 10 },
+      };
       mockAlbumRepository.findFirst.mockResolvedValue(mockAlbum);
 
       const result = await service.findOne(mockUserId, albumId);

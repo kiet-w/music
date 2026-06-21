@@ -26,8 +26,11 @@ export class SongService {
     artist?: string,
     albumId?: string,
   ): Promise<SongResponseDto> {
-    this.logger.info({ userId, url, title, artist, albumId }, 'Creating song from Youtube');
-    
+    this.logger.info(
+      { userId, url, title, artist, albumId },
+      'Creating song from Youtube',
+    );
+
     const finalAlbumId = await this.getValidatedAlbumId(userId, albumId);
 
     const song = await this.songRepository.create({
@@ -40,18 +43,25 @@ export class SongService {
       },
     });
 
-    this.logger.info({ songId: song.id }, 'Song record created, adding to conversion queue');
-    await this.conversionQueue.add('convert', {
-      url,
-      songId: song.id,
-      userId,
-    }, {
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 5000,
+    this.logger.info(
+      { songId: song.id },
+      'Song record created, adding to conversion queue',
+    );
+    await this.conversionQueue.add(
+      'convert',
+      {
+        url,
+        songId: song.id,
+        userId,
       },
-    });
+      {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+      },
+    );
 
     return this.mapToResponse(song);
   }
@@ -72,7 +82,7 @@ export class SongService {
         take,
         orderBy: { createdAt: 'desc' },
         include: { album: true },
-      })
+      }),
     ]);
 
     return {
@@ -80,7 +90,7 @@ export class SongService {
       total,
       page: Math.floor(skip / take) + 1,
       limit: take,
-      totalPages: Math.ceil(total / take)
+      totalPages: Math.ceil(total / take),
     };
   }
 
@@ -98,9 +108,13 @@ export class SongService {
     });
   }
 
-  async moveToAlbum(userId: string, id: string, albumId: string): Promise<SongResponseDto> {
+  async moveToAlbum(
+    userId: string,
+    id: string,
+    albumId: string,
+  ): Promise<SongResponseDto> {
     this.logger.info({ userId, id, albumId }, 'Moving song to album');
-    
+
     await this.findAndValidateSong(userId, id);
     const validatedAlbumId = await this.getValidatedAlbumId(userId, albumId);
 
@@ -114,13 +128,19 @@ export class SongService {
 
   // --- Private Helpers ---
 
-  private async getValidatedAlbumId(userId: string, albumId?: string): Promise<string> {
+  private async getValidatedAlbumId(
+    userId: string,
+    albumId?: string,
+  ): Promise<string> {
     if (albumId) {
       const album = await this.albumRepository.findUnique({
         where: { id: albumId },
       });
       if (!album || album.userId !== userId) {
-        this.logger.warn({ userId, albumId }, 'Album not found or access denied');
+        this.logger.warn(
+          { userId, albumId },
+          'Album not found or access denied',
+        );
         throw new NotFoundException('Album not found');
       }
       return albumId;
@@ -160,4 +180,3 @@ export class SongService {
     });
   }
 }
-

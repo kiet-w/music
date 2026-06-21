@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { FriendRequestRepository } from '../repositories/friend-request.repository';
 import { CreateFriendRequestDto } from '../dto/create-friend-request.dto';
 import { FriendRequest, RequestStatus } from '@prisma/client';
@@ -6,9 +10,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class FriendRequestService {
-  constructor(private readonly friendRequestRepository: FriendRequestRepository) {}
+  constructor(
+    private readonly friendRequestRepository: FriendRequestRepository,
+  ) {}
 
-  async createInvite(senderId: string, dto: CreateFriendRequestDto): Promise<FriendRequest> {
+  async createInvite(
+    senderId: string,
+    dto: CreateFriendRequestDto,
+  ): Promise<FriendRequest> {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
 
@@ -30,7 +39,9 @@ export class FriendRequestService {
     }
 
     if (invite.status !== RequestStatus.PENDING) {
-      throw new BadRequestException(`Invite link is already ${invite.status.toLowerCase()}`);
+      throw new BadRequestException(
+        `Invite link is already ${invite.status.toLowerCase()}`,
+      );
     }
 
     if (new Date() > invite.expiresAt) {
@@ -45,7 +56,10 @@ export class FriendRequestService {
     return invite;
   }
 
-  async acceptInvite(token: string, receiverId: string): Promise<FriendRequest> {
+  async acceptInvite(
+    token: string,
+    receiverId: string,
+  ): Promise<FriendRequest> {
     const invite = await this.getInviteInfo(token);
 
     if (invite.senderId === receiverId) {
@@ -65,8 +79,16 @@ export class FriendRequestService {
     const connection = await this.friendRequestRepository.findFirst({
       where: {
         OR: [
-          { senderId: userId1, receiverId: userId2, status: RequestStatus.ACCEPTED },
-          { senderId: userId2, receiverId: userId1, status: RequestStatus.ACCEPTED },
+          {
+            senderId: userId1,
+            receiverId: userId2,
+            status: RequestStatus.ACCEPTED,
+          },
+          {
+            senderId: userId2,
+            receiverId: userId1,
+            status: RequestStatus.ACCEPTED,
+          },
         ],
       },
     });
