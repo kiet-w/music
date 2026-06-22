@@ -1,43 +1,54 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, HttpUrl
-from app.services.youtube import convert_and_upload_task
-from app.worker import celery_app
-from celery.result import AsyncResult
+from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
+
+from app.worker import download_and_convert_task, redis_client
+from app.repositories.job_repository import AsyncJobRepository
+from app.core.database import get_async_db
 
 router = APIRouter(prefix="/youtube", tags=["youtube"])
 
 class YoutubeConvertRequest(BaseModel):
     url: HttpUrl
+    user_id: str
 
 @router.post("/convert")
-async def start_conversion(request: YoutubeConvertRequest):
-    # Basic validation of youtube URL
+async def start_conversion(request: YoutubeConvertRequest, db: AsyncSession = Depends(get_async_db)):
     url_str = str(request.url)
-    if "youtube.com" not in url_str and "youtu.be" not in url_str:
-        raise HTTPException(status_code=400, detail="Invalid YouTube URL")
+    if not any(domain in url_str for domain in ["youtube.com", "youtu.be", "soundcloud.com"]):
+        raise HTTPException(status_code=400, detail="Invalid Audio URL")
+    
+    job_id = str(uuid.uuid4())
+    job_repo = AsyncJobRepository(db)
+    
+    try:
+        await job_repo.create_job(job_id, url_str, request.user_id)
+    except Exception as e:
+        # Note: Handle specific Foreign Key violation exceptions gracefully in real prod
+        raise HTTPException(status_code=500, detail=str(e))
         
-    task = convert_and_upload_task.delay(url_str)
-    return {"task_id": task.id}
+    download_and_convert_task.send(job_id, url_str, request.user_id)
+    return {"job_id": job_id, "status": "PENDING"}
 
-@router.get("/status/{task_id}")
-async def get_status(task_id: str):
-    task_result = AsyncResult(task_id, app=celery_app)
-    if task_result.state == 'PENDING':
-        return {"state": task_result.state, "progress": 0, "status": "Pending..."}
-    elif task_result.state == 'PROCESSING':
-        return {
-            "state": task_result.state,
-            "progress": task_result.info.get("progress", 0),
-            "status": task_result.info.get("status", "")
-        }
-    elif task_result.state == 'SUCCESS':
-        return {
-            "state": task_result.state,
-            "progress": 100,
-            "status": task_result.info.get("status", ""),
-            "download_url": task_result.info.get("download_url"),
-            "filename": task_result.info.get("filename")
-        }
-    elif task_result.state == 'FAILURE':
-        return {"state": task_result.state, "error": str(task_result.info)}
-    return {"state": task_result.state}
+@router.get("/status/{job_id}")
+async def get_status(job_id: str, db: AsyncSession = Depends(get_async_db)):
+    job_repo = AsyncJobRepository(db)
+    job = await job_repo.get_job(job_id)
+    
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    progress = job.progress
+    if job.status == 'PROCESSING':
+        redis_prog = redis_client.get(f"job_progress:{job_id}")
+        if redis_prog is not None:
+            progress = int(redis_prog)
+    
+    return {
+        "job_id": job_id,
+        "status": job.status,
+        "progress": progress,
+        "error": job.errorMessage,
+        "download_url": job.downloadUrl
+    }
