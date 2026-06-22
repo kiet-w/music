@@ -3,7 +3,7 @@ config({ override: true });
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { Logger } from 'nestjs-pino';
+import { AppLogger } from './common/logger/app.logger';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
@@ -25,8 +25,11 @@ async function bootstrap() {
   }
 
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
-  const logger = app.get(Logger);
+
+  const logger = new AppLogger();
   app.useLogger(logger);
+
+
 
   app.enableCors({
     origin: corsOrigins,
@@ -38,10 +41,8 @@ async function bootstrap() {
   });
 
   const httpAdapterHost = app.get(HttpAdapterHost);
-  // Get pino logger instance for the filter
-  const pinoLogger = app.get(Logger);
   app.useGlobalFilters(
-    new AllExceptionsFilter(httpAdapterHost, pinoLogger as any),
+    new AllExceptionsFilter(httpAdapterHost, logger as any),
   );
 
   app.useGlobalPipes(
@@ -52,17 +53,16 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('Music API')
     .setDescription('The music application API description')
     .setVersion('1.0')
     .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, documentFactory);
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  const appLogger = app.get(Logger);
-  appLogger.log(`Application is running on: http://localhost:${port}`);
+  logger.log(`🚀 Backend Music App started on http://localhost:${port}`, 'Bootstrap');
 }
 void bootstrap();

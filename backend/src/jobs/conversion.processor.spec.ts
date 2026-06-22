@@ -3,6 +3,7 @@ import { ConversionProcessor } from './conversion.processor';
 import { DownloaderService } from '../downloader/services/downloader.service';
 import { StorageService } from '../storage/services/storage.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { AppLogger } from '../common/logger/app.logger';
 import { getLoggerToken } from 'nestjs-pino';
 import { Job } from 'bullmq';
 import * as fs from 'fs';
@@ -23,6 +24,19 @@ describe('ConversionProcessor', () => {
   const mockPinoLogger = {
     info: jest.fn(),
     error: jest.fn(),
+  };
+
+  const mockAppLogger = {
+    log: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    logRequest: jest.fn(),
+    startSection: jest.fn(),
+    endSection: jest.fn(),
+    step: jest.fn(),
+    subStep: jest.fn(),
+    processError: jest.fn(),
   };
 
   const mockDownloaderService = {
@@ -52,6 +66,7 @@ describe('ConversionProcessor', () => {
           provide: getLoggerToken(ConversionProcessor.name),
           useValue: mockPinoLogger,
         },
+        { provide: AppLogger, useValue: mockAppLogger },
       ],
     }).compile();
 

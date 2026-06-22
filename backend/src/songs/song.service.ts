@@ -126,7 +126,6 @@ export class SongService {
   }
 
   async findOne(userId: string, id: string): Promise<SongResponseDto> {
-    this.logger.debug({ userId, id }, 'Finding song by ID for user');
     const song = await this.findAndValidateSong(userId, id);
     return this.mapToResponse(song);
   }

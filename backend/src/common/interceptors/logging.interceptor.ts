@@ -45,13 +45,21 @@ export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
-    const { method, url, query, body, params } = request;
+    const { method, url, query, params, body } = request;
+    const userId = request.user?.id?.substring(0, 8) ?? 'anon';
     const now = Date.now();
+
+    const className = context.getClass().name;
+    const handlerName = context.getHandler().name;
+    const entrypoint = `${className}.${handlerName}`;
 
     return next.handle().pipe(
       tap({
         next: () => {
           const duration = Date.now() - now;
+          const status = response.statusCode;
+          const emoji = status >= 400 ? '⚠️' : '✅';
+
           this.logger.info(
             {
               method,
@@ -60,9 +68,11 @@ export class LoggingInterceptor implements NestInterceptor {
               params,
               body: redact(body),
               duration: `${duration}ms`,
-              statusCode: response.statusCode,
+              statusCode: status,
+              userId,
+              entrypoint,
             },
-            'Request completed',
+            `${emoji} ${method} ${url} → ${status} (${duration}ms) [${entrypoint}] user=${userId}`,
           );
         },
         error: (error) => {
@@ -76,9 +86,10 @@ export class LoggingInterceptor implements NestInterceptor {
               body: redact(body),
               duration: `${duration}ms`,
               error: error.message,
-              stack: error.stack,
+              userId,
+              entrypoint,
             },
-            'Request failed',
+            `❌ ${method} ${url} → FAIL (${duration}ms) [${entrypoint}] user=${userId} | ${error.message}`,
           );
         },
       }),

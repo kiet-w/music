@@ -26,6 +26,7 @@ model User {
   receivedMessages   Message[] @relation("ReceivedMessages")
   sentRequests       FriendRequest[] @relation("SentRequests")
   receivedRequests   FriendRequest[] @relation("ReceivedRequests")
+  downloadJobs       DownloadJob[]
 }
 
 enum UserRole {
@@ -103,4 +104,28 @@ model FriendRequest {
 
   @@index([senderId])
   @@index([token])
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model DownloadJob {
+  id           String    @id @default(uuid())
+  url          String
+  status       JobStatus @default(PENDING)
+  progress     Int       @default(0)
+  errorMessage String?
+  downloadUrl  String?
+  userId       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
 }

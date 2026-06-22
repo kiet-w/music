@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { AppLoggerModule } from './common/logger/app-logger.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import { envValidationSchema } from './config/env.validation';
@@ -22,6 +23,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    AppLoggerModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -37,16 +39,23 @@ import { ThrottlerModule } from '@nestjs/throttler';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
+        autoLogging: false,
         level: process.env.NODE_ENV === 'production' ? 'warn' : 'debug',
+        redact: {
+          paths: ['req.headers.authorization', 'req.headers.cookie'],
+          censor: '[REDACTED]',
+        },
         transport:
           process.env.NODE_ENV !== 'production'
             ? {
                 target: 'pino-pretty',
                 options: {
                   messageFormat: '[{context}] {msg}',
-                  ignore: 'context,hostname,pid',
+                  ignore:
+                    'context,hostname,pid,req.remoteAddress,req.remotePort,res.headers,reqId,responseTime,_separator',
                   colorize: true,
-                  translateTime: 'SYS:HH:MM:ss.l',
+                  translateTime: 'SYS:HH:MM:ss',
+                  hideObject: true,
                 },
               }
             : undefined,

@@ -93,7 +93,7 @@ npx cap open android
 
 ## Environment Variables
 Ensure these are set in your `.env.local`:
-- `NEXT_PUBLIC_API_URL`: Backend API URL (default: http://localhost:3002).
+- `NEXT_PUBLIC_API_URL`: Backend API URL (default: http://localhost:4000).
 - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anonymous API key.
 

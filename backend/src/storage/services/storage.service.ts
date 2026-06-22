@@ -5,6 +5,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as fs from 'fs';
+import * as WebSocket from 'ws';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { IStorageProvider } from '../../common/interfaces/storage-provider.interface';
 
@@ -36,6 +37,11 @@ export class StorageService implements IStorageProvider {
     this.supabase = createClient(
       isConfigured ? rawUrl : 'https://placeholder.supabase.co',
       isConfigured ? rawKey : 'placeholder-key',
+      {
+        realtime: {
+          transport: WebSocket as any,
+        },
+      }
     );
   }
 

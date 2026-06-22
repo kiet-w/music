@@ -12,7 +12,7 @@ COPY package.json package-lock.json ./
 COPY scripts/ ./scripts/
 
 # Install all dependencies (including devDependencies for build)
-RUN npm ci
+RUN npm install
 
 # ────────────────────────────────────────────────────
 # Stage 2: Generate Prisma Client + Build

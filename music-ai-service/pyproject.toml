@@ -11,10 +11,11 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0.51",
     "uvicorn>=0.49.0",
     "yt-dlp>=2024.4.9",
-    "celery>=5.4.0",
     "redis>=5.0.0",
     "supabase>=2.4.0",
     "python-dotenv>=1.2.2",
+    "dramatiq[redis]>=2.2.0",
+    "psycopg[binary]>=3.3.4",
 ]
 
 [dependency-groups]
