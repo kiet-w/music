@@ -1,5 +1,17 @@
 import { config } from 'dotenv';
 config({ override: true });
+
+// ── Sentry: must be initialized before anything else ──────────────────────
+import * as Sentry from '@sentry/node';
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV ?? 'development',
+    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
+  });
+}
+// ──────────────────────────────────────────────────────────────────────────
+
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
