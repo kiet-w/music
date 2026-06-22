@@ -3,6 +3,8 @@ from dramatiq.brokers.redis import RedisBroker
 import redis
 import tempfile
 import shutil
+import structlog
+import logging
 
 from app.core.config import settings
 from app.core.database import SessionLocal
@@ -13,6 +15,8 @@ from app.services.youtube_service import YouTubeService
 # Initialize Redis Broker at module level for Dramatiq
 broker = RedisBroker(url=settings.REDIS_URL)
 dramatiq.set_broker(broker)
+
+logger = structlog.get_logger()
 
 redis_client = redis.Redis.from_url(settings.REDIS_URL)
 
@@ -37,14 +41,14 @@ def download_and_convert_task(job_id: str, url: str, user_id: str):
         
         job_repo.update_job(job_id, status='COMPLETED', downloadUrl=public_url, progress=100)
         redis_client.setex(f"job_progress:{job_id}", 3600, 100)
-        print(f"Job {job_id} completed successfully.")
+        logger.info("job_completed", job_id=job_id)
             
     except Exception as e:
-        print(f"Job {job_id} failed: {str(e)}")
+        logger.error("job_failed", job_id=job_id, error=str(e))
         try:
             job_repo.update_job(job_id, status='FAILED', errorMessage=str(e))
         except Exception as db_e:
-            print(f"Failed to update DB error state: {db_e}")
+            logger.critical("db_update_failed", job_id=job_id, error=str(db_e))
     finally:
         db.close()
         # Explicit cleanup of temp_dir
