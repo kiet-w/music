@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -30,7 +31,7 @@ export class JwtAuthGuard implements CanActivate {
       request['user'] = {
         id: payload.sub,
         email: payload.email,
-        role: payload.role,
+        role: payload.role ?? UserRole.USER,
       };
       return true;
     } catch (error) {
