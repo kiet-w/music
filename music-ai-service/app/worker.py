@@ -1,15 +1,51 @@
-from dotenv import load_dotenv
-load_dotenv()
+import dramatiq
+from dramatiq.brokers.redis import RedisBroker
+import redis
+import tempfile
+import shutil
 
-import os
-from celery import Celery
+from app.core.config import settings
+from app.core.database import SessionLocal
+from app.repositories.job_repository import JobRepository
+from app.services.storage_service import StorageService
+from app.services.youtube_service import YouTubeService
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-celery_app = Celery("music_tasks", broker=REDIS_URL, backend=REDIS_URL)
+# Initialize Redis Broker at module level for Dramatiq
+broker = RedisBroker(url=settings.REDIS_URL)
+dramatiq.set_broker(broker)
 
-celery_app.conf.update(
-    task_track_started=True,
-    task_serializer='json',
-    result_serializer='json',
-    accept_content=['json'],
-)
+redis_client = redis.Redis.from_url(settings.REDIS_URL)
+
+@dramatiq.actor
+def download_and_convert_task(job_id: str, url: str, user_id: str):
+    # Initialize repo and services inside the task to prevent scale/test issues
+    db = SessionLocal()
+    job_repo = JobRepository(db)
+    storage_service = StorageService()
+    youtube_service = YouTubeService()
+    
+    temp_dir = tempfile.mkdtemp()
+
+    def update_progress(percent: float):
+        redis_client.setex(f"job_progress:{job_id}", 3600, int(percent))
+
+    try:
+        job_repo.update_job(job_id, status='PROCESSING')
+        
+        file_path = youtube_service.extract_and_download(url, temp_dir, update_progress)
+        public_url = storage_service.upload_mp3(user_id, job_id, file_path)
+        
+        job_repo.update_job(job_id, status='COMPLETED', downloadUrl=public_url, progress=100)
+        redis_client.setex(f"job_progress:{job_id}", 3600, 100)
+        print(f"Job {job_id} completed successfully.")
+            
+    except Exception as e:
+        print(f"Job {job_id} failed: {str(e)}")
+        try:
+            job_repo.update_job(job_id, status='FAILED', errorMessage=str(e))
+        except Exception as db_e:
+            print(f"Failed to update DB error state: {db_e}")
+    finally:
+        db.close()
+        # Explicit cleanup of temp_dir
+        shutil.rmtree(temp_dir, ignore_errors=True)
