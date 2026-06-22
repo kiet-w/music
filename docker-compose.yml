@@ -55,39 +55,42 @@ services:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
 
-  music-ai-api:
-    build:
-      context: ./music-ai-service
-      dockerfile: Dockerfile.api
-    ports:
-      - "8001:8000"
-    environment:
-      - REDIS_URL=redis://redis:6379/0
-      - DATABASE_URL=${DATABASE_URL}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
-    depends_on:
-      redis:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-
-  worker:
-    build:
-      context: ./music-ai-service
-      dockerfile: Dockerfile.worker
-    environment:
-      - REDIS_URL=redis://redis:6379/0
-      - DATABASE_URL=${DATABASE_URL}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
-    depends_on:
-      redis:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-    restart: unless-stopped
+  # Note: The legacy music-ai-service (music-ai-api and worker) has been disabled
+  # in favor of the unified NestJS + BullMQ queue pipeline on port 4000.
+  #
+  # music-ai-api:
+  #   build:
+  #     context: ./music-ai-service
+  #     dockerfile: Dockerfile.api
+  #   ports:
+  #     - "8001:8000"
+  #   environment:
+  #     - REDIS_URL=redis://redis:6379/0
+  #     - DATABASE_URL=${DATABASE_URL}
+  #     - SUPABASE_URL=${SUPABASE_URL}
+  #     - SUPABASE_KEY=${SUPABASE_KEY}
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #     db:
+  #       condition: service_healthy
+  #   restart: unless-stopped
+  #
+  # worker:
+  #   build:
+  #     context: ./music-ai-service
+  #     dockerfile: Dockerfile.worker
+  #   environment:
+  #     - REDIS_URL=redis://redis:6379/0
+  #     - DATABASE_URL=${DATABASE_URL}
+  #     - SUPABASE_URL=${SUPABASE_URL}
+  #     - SUPABASE_KEY=${SUPABASE_KEY}
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #     db:
+  #       condition: service_healthy
+  #   restart: unless-stopped
 
   frontend:
     build:
