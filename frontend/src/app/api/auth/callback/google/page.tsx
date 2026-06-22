@@ -13,12 +13,20 @@ import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 function GoogleCallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { accessToken } = useAuthStore();
+  const { accessToken, isHydrated, hydrate } = useAuthStore();
   
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
+    if (!isHydrated) {
+      hydrate();
+    }
+  }, [isHydrated, hydrate]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
     const code = searchParams.get('code');
     const state = searchParams.get('state');
 
@@ -34,16 +42,17 @@ function GoogleCallbackHandler() {
       return;
     }
 
-    if (!accessToken) {
+    const token = typeof accessToken === 'string' ? accessToken.trim() : '';
+    if (!token) {
       // If we lost the session, we can't exchange the token (since it's tied to the user)
-      // Redirect to login
-      router.replace(`/${locale}/login`);
+      // Redirect to login with error parameter
+      router.replace(`/${locale}/login?error=session_expired`);
       return;
     }
 
     const exchange = async () => {
       try {
-        await exchangeGoogleDriveCode(accessToken, code, state);
+        await exchangeGoogleDriveCode(token, code, state);
         setStatus('success');
         
         // Wait a bit to show success state then go back to music
@@ -58,7 +67,7 @@ function GoogleCallbackHandler() {
     };
 
     exchange();
-  }, [accessToken, searchParams, router]);
+  }, [isHydrated, accessToken, searchParams, router]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
