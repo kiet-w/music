@@ -118,7 +118,7 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
     songTitle: '',
   });
 
-  const { offlineTracks, downloadTrack, removeTrack, getLocalUri } = useOfflineStorage();
+  const { offlineTracks, downloadTrack, removeTrack, getLocalUri, isSupported } = useOfflineStorage();
   const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
 
   const handleDownload = async (e: React.MouseEvent, track: Track) => {
@@ -288,7 +288,7 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
                 </span>
                 {!isFailed && (
                   <div className="flex items-center gap-1">
-                    {isDownloading ? (
+                    {isSupported !== false && (isDownloading ? (
                       <Loader2 size={14} className="text-primary animate-spin mr-1" />
                     ) : isDownloaded ? (
                       <div className="flex items-center gap-1" title="Downloaded for offline">
@@ -313,7 +313,7 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
                       >
                         <Download size={14} />
                       </Button>
-                    )}
+                    ))}
                     <Button 
                       size="sm" 
                       variant="ghost"

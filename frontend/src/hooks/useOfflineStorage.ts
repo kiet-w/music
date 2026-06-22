@@ -6,9 +6,11 @@ import { Capacitor } from '@capacitor/core';
 
 export function useOfflineStorage() {
   const [offlineTracks, setOfflineTracks] = useState<Set<string>>(new Set());
+  const isSupported = Capacitor.getPlatform() !== 'web';
 
   // Load initial state
   useEffect(() => {
+    if (!isSupported) return;
     const checkExistingFiles = async () => {
       try {
         const result = await Filesystem.readdir({
@@ -28,6 +30,7 @@ export function useOfflineStorage() {
   }, []);
 
   const downloadTrack = useCallback(async (trackId: string, url: string) => {
+    if (!isSupported) return false;
     try {
       // Ensure directory exists
       await Filesystem.mkdir({
@@ -68,6 +71,7 @@ export function useOfflineStorage() {
   }, []);
 
   const removeTrack = useCallback(async (trackId: string) => {
+    if (!isSupported) return false;
     try {
       await Filesystem.deleteFile({
         path: `offline_music/${trackId}.mp3`,
@@ -86,6 +90,7 @@ export function useOfflineStorage() {
   }, []);
 
   const getLocalUri = useCallback(async (trackId: string): Promise<string | null> => {
+    if (!isSupported) return null;
     try {
       if (!offlineTracks.has(trackId)) return null;
       
@@ -123,5 +128,6 @@ export function useOfflineStorage() {
     downloadTrack,
     removeTrack,
     getLocalUri,
+    isSupported,
   };
 }
