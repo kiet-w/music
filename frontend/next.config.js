@@ -7,7 +7,7 @@ const withNextIntl = createNextIntlPlugin(
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: process.env.NEXT_STANDALONE ? 'standalone' : 'export',
+  output: 'standalone', // Always standalone for production Docker builds
   images: {
     unoptimized: true,
   },
