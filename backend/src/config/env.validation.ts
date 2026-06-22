@@ -15,6 +15,14 @@ export const envValidationSchema = Joi.object({
     otherwise: Joi.string().required(),
   }),
 
+  DIRECT_URL: Joi.string().when('NODE_ENV', {
+    is: 'test',
+    then: Joi.string()
+      .optional()
+      .default('postgresql://mock:mock@localhost:5432/mock'),
+    otherwise: Joi.string().required(),
+  }),
+
   // Required authentication configurations
   JWT_SECRET: Joi.string().when('NODE_ENV', {
     is: 'test',
