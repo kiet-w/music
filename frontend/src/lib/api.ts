@@ -18,8 +18,6 @@ export type AuthResponse = {
 
 const headers = {
   'Content-Type': 'application/json',
-  'bypass-tunnel-reminder': 'true',
-  'ngrok-skip-browser-warning': 'true',
 };
 
 export function getAuthHeaders(appToken?: string) {

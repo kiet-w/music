@@ -57,7 +57,7 @@ export class AlbumController {
   ) {
     const skip =
       page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
-    const take = limit ? parseInt(limit, 10) : 50;
+    const take = Math.min(limit ? parseInt(limit, 10) : 50, 100); // cap at 100
     return this.albumService.findAll(user.id, skip, take);
   }
 
