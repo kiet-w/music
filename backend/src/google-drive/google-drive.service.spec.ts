@@ -7,6 +7,7 @@ import { SongRepository } from '../songs/repositories/song.repository';
 import { AlbumService } from '../albums/album.service';
 import { AlbumRepository } from '../albums/repositories/album.repository';
 import { EncryptionService } from '../common/services/encryption.service';
+import { ConfigService } from '@nestjs/config';
 import { google } from 'googleapis';
 import { UnauthorizedException } from '@nestjs/common';
 
@@ -108,6 +109,19 @@ describe('GoogleDriveService', () => {
         { provide: AlbumService, useValue: mockAlbumService },
         { provide: AlbumRepository, useValue: mockAlbumRepository },
         { provide: EncryptionService, useValue: mockEncryptionService },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockImplementation((key: string) => {
+              const config: Record<string, string> = {
+                GOOGLE_CLIENT_ID: 'mock-client-id',
+                GOOGLE_CLIENT_SECRET: 'mock-client-secret',
+                GOOGLE_REDIRECT_URI: 'http://localhost/mock-redirect',
+              };
+              return config[key];
+            }),
+          },
+        },
       ],
     }).compile();
 
