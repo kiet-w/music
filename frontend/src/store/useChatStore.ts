@@ -18,6 +18,7 @@ type ChatState = {
   unreadMessages: string[]; // Array of senderIds with unread messages
   isSubscribed: boolean;
   isLoading: boolean;
+  activeChannel: any | null;
   setMessages: (messages: Message[]) => void;
   addMessage: (message: Message) => void;
   clearUnread: (senderId: string) => void;
@@ -33,6 +34,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   unreadMessages: [],
   isSubscribed: false,
   isLoading: false,
+  activeChannel: null,
 
   setMessages: (messages) => set({ messages }),
   
@@ -116,11 +118,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
       )
       .subscribe();
 
-    set({ isSubscribed: true });
+    set({ isSubscribed: true, activeChannel: channel });
   },
 
   unsubscribeFromMessages: () => {
-    supabase.removeAllChannels();
-    set({ isSubscribed: false });
+    const { activeChannel } = get();
+    if (activeChannel) {
+      supabase.removeChannel(activeChannel);
+    }
+    set({ isSubscribed: false, activeChannel: null });
   },
 }));
