@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Download, PlayCircle, Sparkles } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { PYTHON_API_URL } from '@/lib/api';
 import { sanitizeUrl } from '@/lib/security';
 
 export default function YoutubeConvertPage() {
+  const { user } = useAuthStore();
   const [url, setUrl] = useState('');
   const [jobId, setJobId] = useState('');
   const [progress, setProgress] = useState(0);
@@ -18,7 +21,7 @@ export default function YoutubeConvertPage() {
     if (jobId) {
       interval = setInterval(async () => {
         try {
-          const res = await fetch(`http://localhost:8001/youtube/status/${jobId}`);
+          const res = await fetch(`${PYTHON_API_URL}/youtube/status/${jobId}`);
           if (!res.ok) return;
           const data = await res.json();
           
@@ -62,6 +65,10 @@ export default function YoutubeConvertPage() {
 
   const handleStart = async () => {
     if (!url) return;
+    if (!user?.id) {
+      setError('Bạn cần đăng nhập để thực hiện tính năng này');
+      return;
+    }
     setLoading(true);
     setError('');
     setProgress(0);
@@ -69,12 +76,12 @@ export default function YoutubeConvertPage() {
     setStatusMsg('Đang gửi request...');
     
     try {
-      const response = await fetch('http://localhost:8001/youtube/convert', {
+      const response = await fetch(`${PYTHON_API_URL}/youtube/convert`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           url,
-          user_id: '00000000-0000-0000-0000-000000000000' // Dummy user
+          user_id: user.id
         }),
       });
       
