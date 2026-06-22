@@ -16,7 +16,7 @@ scrape_configs:
   #     - targets: ['caddy:2019']
 
   # If backend exposes a /metrics endpoint (e.g. via prom-client):
-  # - job_name: 'backend'
-  #   static_configs:
-  #     - targets: ['backend:3000']
-  #   metrics_path: /metrics
+  - job_name: 'backend'
+    static_configs:
+      - targets: ['backend:3000']
+    metrics_path: /metrics
