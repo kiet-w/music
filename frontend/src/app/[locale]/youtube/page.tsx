@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Download, PlayCircle, Sparkles } from 'lucide-react';
+import { sanitizeUrl } from '@/lib/security';
 
 export default function YoutubeConvertPage() {
   const [url, setUrl] = useState('');
@@ -26,13 +27,15 @@ export default function YoutubeConvertPage() {
             setProgress(100);
             setStatusMsg('Hoàn tất! Đã sẵn sàng tải xuống.');
             setLoading(false);
-            setDownloadUrl(data.download_url);
+            
+            const sanitizedUrl = sanitizeUrl(data.download_url);
+            setDownloadUrl(sanitizedUrl);
             setJobId('');
             
             // Auto trigger download
-            if (data.download_url) {
+            if (sanitizedUrl && sanitizedUrl !== 'about:blank') {
               const link = document.createElement('a');
-              link.href = data.download_url;
+              link.href = sanitizedUrl;
               link.download = `audio-${jobId}.mp3`;
               link.target = "_blank";
               document.body.appendChild(link);
