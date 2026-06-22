@@ -438,6 +438,14 @@ Khi bạn muốn ghi DB xong thì gửi email hoặc đẩy job vào queue, nế
 4. Commit Transaction (dữ liệu chính và event outbox được cam kết cùng lúc).
 5. Một worker riêng biệt đọc bảng OutboxEvent và xử lý (ví dụ: gửi mail). Làm xong xoá dòng đó đi.
 
+**Đánh đổi (Trade-offs)**: Đổi lấy tính nhất quán tuyệt đối, bạn phải trả giá bằng:
+- Cần tạo thêm 1 bảng (`OutboxEvent`).
+- Phải có 1 worker chạy ngầm liên tục (hoặc dùng CDC như Debezium), làm tăng độ phức tạp vận hành.
+- Có **độ trễ (latency)** giữa lúc user nhận kết quả thành công và lúc event thực sự chạy xong.
+
+**Khi nào KHÔNG nên dùng Outbox?** 
+Khi hệ thống có throughput không quá cao và bạn chấp nhận rủi ro nhỏ "tạo job ngay sau commit, lỡ crash thì cron dọn sau". Đây chính là cách Music App đang dùng với `CleanupService` (Self-healing cron). Outbox và Self-healing cron là 2 giải pháp cho cùng 1 vấn đề nhưng ở 2 mức độ nghiêm ngặt và chi phí vận hành khác nhau. Không phải lúc nào Outbox cũng là "nhất".
+
 ### 3. Cạm Bẫy: In-Memory Cache ở Đa Server (Multi-Instances)
 
 **Lỗi tiềm ẩn**: Nếu bạn dùng `CacheModule.register({ isGlobal: true })` ở NestJS mà không config Redis, nó sẽ dùng in-memory cache mặc định.
@@ -445,7 +453,23 @@ Khi project scale lên 2 instances chạy đằng sau Load Balancer:
 - Request 1 đập vào Instance A: Cache miss → Fetch DB → Cập nhật cache trên RAM máy A.
 - Request 2 của cùng user đập vào Instance B: RAM máy B vẫn trống không → Cache miss → Query DB tiếp.
 - Nếu dữ liệu bị xoá trên máy A, máy B vẫn có thể trả về cache cũ sai lệch.
-**Khắc phục**: Scale ngang (horizontal) luôn đi kèm với việc đưa state và cache ra thành hệ thống riêng rẽ trung tâm (external Redis).
+
+**Khắc phục**: Scale ngang (horizontal) luôn đi kèm với việc đưa state và cache ra thành hệ thống trung tâm (Redis).
+```typescript
+// ❌ Trước đây (In-memory, sập khi scale)
+CacheModule.register({ isGlobal: true, ttl: 60000 })
+
+// ✅ Chuyển sang Redis (Chia sẻ state toàn hệ thống)
+CacheModule.registerAsync({
+  isGlobal: true,
+  useFactory: () => ({
+    store: redisStore,
+    host: process.env.REDIS_HOST,
+    port: 6379,
+    ttl: 60000
+  })
+})
+```
 
 ### 4. Idempotency-Key Pattern cho API
 
@@ -453,3 +477,9 @@ Trong các hệ thống quan trọng (tạo mới tài nguyên tốn tiền, tha
 - Server xử lý và lưu kết quả cùng với key đó vào DB/Redis.
 - Khi network chập chờn, client tưởng timeout nên nã retry request y hệt.
 - Server phát hiện `Idempotency-Key` trùng → Trả về thẳng kết quả cũ đã tính toán thành công, bỏ qua mọi layer logic.
+
+**Các câu hỏi Interviewer sẽ xoáy vào:**
+- *Key này lưu bao lâu?* → Tùy nghiệp vụ, thường có TTL (ví dụ Stripe lưu key 24h). Quá thời hạn này, request với key cũ sẽ bị từ chối hoặc coi là request hoàn toàn mới.
+- *Nếu request 1 ĐANG CHẠY (chưa có kết quả) mà request 2 mang cùng key bay tới thì sao?* → Tuyệt đối không được chạy lại request 2. Cấu trúc chuẩn là: 
+  - Lưu key vào Redis kèm trạng thái `IN_PROGRESS` (dùng distributed lock).
+  - Khi request 2 tới, thấy `IN_PROGRESS` → Trả về HTTP 409 Conflict, hoặc giữ connection bắt request 2 đợi tới khi request 1 xong để lấy luôn kết quả.

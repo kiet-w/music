@@ -48,3 +48,28 @@ User nhập câu hỏi: *"Phân tích thị trường AI 2024"*.
 1. API nhận yêu cầu → Lưu dòng xuống DB trạng thái `PROCESSING` → Trả về `JobID` ngay cho client (Fast Path).
 2. Worker đọc Job → Gọi LLM.
 3. Nếu LLM trả mã lỗi 429 (Rate limit) hoặc 503 (Overloaded) → Worker tự đưa vào quá trình retry với *exponential backoff siêu lớn* (ví dụ: đợi 10s, 30s, 60s) thay vì liên tục cố gọi. Client lúc này polling/socket lắng nghe JobID đó để nhận status.
+
+---
+
+## 5. Cost-Aware Design (Chi Phí Biến Đổi Theo Input)
+
+**Ở Music App**: Tác vụ nặng (download 1 video YouTube) có chi phí tài nguyên tương đối cố định (vài chục giây CPU) dù video dài hay ngắn.
+**Ở AI Agent**: Chi phí **hoàn toàn phụ thuộc vào user**. Câu hỏi càng dài, context nạp vào càng nhiều, hoặc Agent tự động gọi tool quá nhiều lần (multi-step reasoning) thì số tiền (Token) bị trừ càng tăng phi mã.
+
+**Pattern mới bắt buộc phải có**: **Cost Estimation / Budget Cap** trước khi cho chạy.
+- Phải đếm token đầu vào (dùng thư viện như `tiktoken`) trước khi gửi qua API. Nếu vượt quá giới hạn tài khoản user (ví dụ tier Free chỉ được 2000 tokens/request), chặn ngay từ đầu thay vì gửi lên OpenAI rồi nhận lỗi.
+- Giới hạn số vòng lặp suy luận (`maxSteps`). Nếu agent bị kẹt trong vòng lặp (gọi tool lỗi → thử lại gọi tool lỗi) và loop quá `maxSteps` (ví dụ 5 vòng) mà chưa ra đáp án, phải ép nó dừng để chống tốn tiền vô ích (Infinite Loop Agent).
+
+---
+
+## 6. Observability: Tracing Cho AI (Langfuse)
+
+**Ở Music App (File 03)**: Bạn log đủ context (`userId`, `songId`, `duration`) để debug lỗi ở 2h sáng không cần SSH.
+**Ở AI Agent**: Log HTTP thông thường là vô nghĩa. Bạn cần biết chính xác LLM đã "nghĩ" gì. Thông tin cần log khác hẳn:
+- Prompt gốc đã nạp vào là gì?
+- Model nào được gọi (GPT-4o hay Claude 3.5 Sonnet)? Temperature bao nhiêu?
+- Tốn bao nhiêu Prompt Tokens, bao nhiêu Completion Tokens?
+- Trong chuỗi suy luận 5 bước (multi-step), bước số 3 gọi Tool bị fail nguyên nhân vì sao?
+
+**Công cụ giải quyết**: Đây là lúc các hệ thống LLM Tracing như **Langfuse** (đang dùng trong Project 1) toả sáng. Thay vì in log ra console, mọi tương tác với LLM được wrap lại và gửi về Langfuse để tạo thành một "Trace" hoàn chỉnh. 
+> *Câu chuyện phỏng vấn ghi điểm*: "Thay vì đọc console.log hỗn loạn, tôi tích hợp Langfuse để visualize toàn bộ quá trình tư duy (reasoning trace) của Agent. Nhờ đó tôi phát hiện ra bước gọi Tool bị ảo giác (hallucination) truyền sai tham số, và tối ưu lại system prompt."
