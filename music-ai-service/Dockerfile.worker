@@ -26,4 +26,7 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
 # Command to run Dramatiq worker
+HEALTHCHECK --interval=60s --timeout=10s --retries=3 \
+  CMD uv run dramatiq --help > /dev/null 2>&1 || exit 1
+
 CMD ["uv", "run", "dramatiq", "app.worker", "--processes", "2", "--threads", "4"]
