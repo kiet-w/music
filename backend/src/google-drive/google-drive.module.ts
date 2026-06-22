@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { GoogleDriveService } from './google-drive.service';
 import { GoogleDriveController } from './google-drive.controller';
 import { MusicController } from './music.controller';
@@ -8,7 +9,7 @@ import { AlbumsModule } from '../albums/albums.module';
 import { EncryptionService } from '../common/services/encryption.service';
 
 @Module({
-  imports: [SongsModule, StorageModule, AlbumsModule],
+  imports: [ConfigModule, SongsModule, StorageModule, AlbumsModule],
   providers: [GoogleDriveService, EncryptionService],
   controllers: [GoogleDriveController, MusicController],
   exports: [GoogleDriveService],
