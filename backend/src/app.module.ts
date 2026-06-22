@@ -21,7 +21,8 @@ import { MessagesModule } from './messages/messages.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 import { ThrottlerModule } from '@nestjs/throttler';
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { PrometheusModule, makeHistogramProvider } from '@willsoto/nestjs-prometheus';
+import { HttpMetricsInterceptor } from './common/interceptors/http-metrics.interceptor';
 
 @Module({
   imports: [
@@ -86,6 +87,16 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
   controllers: [AppController],
   providers: [
     AppService,
+    makeHistogramProvider({
+      name: 'http_request_duration_seconds',
+      help: 'Duration of HTTP requests in seconds',
+      labelNames: ['method', 'route', 'status_code'],
+      buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+    }),
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpMetricsInterceptor,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
