@@ -443,8 +443,11 @@ Khi bạn muốn ghi DB xong thì gửi email hoặc đẩy job vào queue, nế
 - Phải có 1 worker chạy ngầm liên tục (hoặc dùng CDC như Debezium), làm tăng độ phức tạp vận hành.
 - Có **độ trễ (latency)** giữa lúc user nhận kết quả thành công và lúc event thực sự chạy xong.
 
-**Khi nào KHÔNG nên dùng Outbox?** 
-Khi hệ thống có throughput không quá cao và bạn chấp nhận rủi ro nhỏ "tạo job ngay sau commit, lỡ crash thì cron dọn sau". Đây chính là cách Music App đang dùng với `CleanupService` (Self-healing cron). Outbox và Self-healing cron là 2 giải pháp cho cùng 1 vấn đề nhưng ở 2 mức độ nghiêm ngặt và chi phí vận hành khác nhau. Không phải lúc nào Outbox cũng là "nhất".
+**Outbox vs Self-healing cron — Hai vấn đề khác nhau, không phải hai mức độ của cùng một vấn đề:**
+- **Outbox** vá lỗ hổng: "DB commit xong nhưng enqueue chưa kịp gọi → server crash → job không bao giờ tồn tại trong queue" (lost write).
+- **CleanupService (Self-healing cron)** vá lỗ hổng khác: "Job đã vào queue, worker đã nhận, nhưng worker crash giữa lúc xử lý → job stuck ở trạng thái `PROCESSING` mãi" (stuck job).
+
+Cụ thể: nếu `SongService.createFromYoutube()` insert Track xong rồi crash **trước khi gọi `queue.add()`**, CleanupService **không cứu được** — vì record đó chưa bao giờ có job tương ứng để mà stuck. Đây đúng là kẽ hở Outbox được thiết kế để vá. Câu trả lời trung thực khi bị hỏi: code hiện tại có known limitation này, và Outbox là upgrade hợp lý khi throughput đủ cao để biện minh cho độ phức tạp thêm vào.
 
 ### 3. Cạm Bẫy: In-Memory Cache ở Đa Server (Multi-Instances)
 
@@ -460,6 +463,10 @@ Khi project scale lên 2 instances chạy đằng sau Load Balancer:
 CacheModule.register({ isGlobal: true, ttl: 60000 })
 
 // ✅ Chuyển sang Redis (Chia sẻ state toàn hệ thống)
+// Cú pháp dưới đây dùng cache-manager-redis-store (v4 style)
+// ⚠️ cache-manager v5+ chuyển sang @keyv/redis với API khác —
+// trước khi copy vào project thật, kiểm tra version đang dùng:
+// npm ls cache-manager
 CacheModule.registerAsync({
   isGlobal: true,
   useFactory: () => ({
@@ -479,7 +486,6 @@ Trong các hệ thống quan trọng (tạo mới tài nguyên tốn tiền, tha
 - Server phát hiện `Idempotency-Key` trùng → Trả về thẳng kết quả cũ đã tính toán thành công, bỏ qua mọi layer logic.
 
 **Các câu hỏi Interviewer sẽ xoáy vào:**
-- *Key này lưu bao lâu?* → Tùy nghiệp vụ, thường có TTL (ví dụ Stripe lưu key 24h). Quá thời hạn này, request với key cũ sẽ bị từ chối hoặc coi là request hoàn toàn mới.
-- *Nếu request 1 ĐANG CHẠY (chưa có kết quả) mà request 2 mang cùng key bay tới thì sao?* → Tuyệt đối không được chạy lại request 2. Cấu trúc chuẩn là: 
-  - Lưu key vào Redis kèm trạng thái `IN_PROGRESS` (dùng distributed lock).
-  - Khi request 2 tới, thấy `IN_PROGRESS` → Trả về HTTP 409 Conflict, hoặc giữ connection bắt request 2 đợi tới khi request 1 xong để lấy luôn kết quả.
+- *Key này lưu bao lâu?* → Tùy nghiệp vụ, thường có TTL (ví dụ Stripe lưu key 24h). Quá thời hạn, request với key cũ bị từ chối hoặc coi là request hoàn toàn mới.
+- *Nếu request 1 ĐANG CHẠY (chưa có kết quả) mà request 2 cùng key đến giữa lúc đó thì sao?* → Không chạy lại request 2. Cấu trúc chuẩn: lưu key vào Redis kèm trạng thái `IN_PROGRESS` (distributed lock). Request 2 thấy `IN_PROGRESS` → trả 409 Conflict, hoặc đợi request 1 xong rồi lấy kết quả cũ.
+- *Nếu client gửi lại cùng key nhưng request body khác (ví dụ lần đầu `amount: 100`, lần 2 cùng key nhưng `amount: 200`) thì sao?* → Server phải **so sánh hash của request body** với lần đầu. Nếu khác → trả 422 với message rõ `"Idempotency-Key reused with different parameters"`. Tuyệt đối không âm thầm chạy request mới (bỏ qua key) hoặc trả kết quả cũ sai ngữ cảnh. Điều này kiểm tra bạn hiểu *mục đích* của idempotency key: đảm bảo **cùng input → cùng output**, không phải "lưu key là xong".

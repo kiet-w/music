@@ -71,5 +71,18 @@ User nhập câu hỏi: *"Phân tích thị trường AI 2024"*.
 - Tốn bao nhiêu Prompt Tokens, bao nhiêu Completion Tokens?
 - Trong chuỗi suy luận 5 bước (multi-step), bước số 3 gọi Tool bị fail nguyên nhân vì sao?
 
-**Công cụ giải quyết**: Đây là lúc các hệ thống LLM Tracing như **Langfuse** (đang dùng trong Project 1) toả sáng. Thay vì in log ra console, mọi tương tác với LLM được wrap lại và gửi về Langfuse để tạo thành một "Trace" hoàn chỉnh. 
-> *Câu chuyện phỏng vấn ghi điểm*: "Thay vì đọc console.log hỗn loạn, tôi tích hợp Langfuse để visualize toàn bộ quá trình tư duy (reasoning trace) của Agent. Nhờ đó tôi phát hiện ra bước gọi Tool bị ảo giác (hallucination) truyền sai tham số, và tối ưu lại system prompt."
+**Công cụ giải quyết**: Đây là lúc các hệ thống LLM Tracing như **Langfuse** (đang dùng trong Project 1) toả sáng. Thay vì in log ra console, mọi tương tác với LLM được wrap lại và gửi về Langfuse để tạo thành một "Trace" hoàn chỉnh.
+
+**Nối với `requestId` từ File 03**: File 03 dạy "log cần `requestId` để trace xuyên suốt flow". Với AI Agent chạy qua **fast path → BullMQ queue → worker**, bạn phải truyền **cùng một `requestId`** xuyên suốt:
+```
+HTTP Request vào  →  tạo requestId (UUID)
+      ↓
+Lưu vào BullMQ job payload: { requestId, prompt, userId }
+      ↓
+Worker đọc job  →  khởi tạo Langfuse trace với id = requestId
+      ↓
+Mọi span/tool call trong Langfuse đều gắn với requestId này
+```
+Khi user báo "câu trả lời lúc 2h sáng bị sai", bạn tra `requestId` đó trong access log HTTP **và** trong Langfuse → thấy đúng cùng một trace, thấy được bước tool call nào trong reasoning chain trả output sai.
+
+> *Câu chuyện phỏng vấn ghi điểm*: "Tôi truyền `requestId` từ HTTP request xuyên qua job payload vào Langfuse trace ID. Nhờ đó khi user báo lỗi, tôi trace từ access log đến tận bước LLM nào trong reasoning chain gây ra hallucination — không cần đoán, không cần SSH."
