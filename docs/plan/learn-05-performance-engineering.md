@@ -239,6 +239,21 @@ const result = await this.redlock.acquire([`lock:${cacheKey}`], 5000, async () =
 
 Nguyên tắc: Cache khi **chi phí stale thấp hơn chi phí luôn query fresh**.
 
+### Database Caching (Redis cho Heavy Queries)
+
+Cache không chỉ dùng cho state đơn giản (như Drive status). Nó cực kỳ cần thiết cho các query DB dùng hàm Aggregate phức tạp, Report thống kê, hoặc những endpoint gọi external API tốn chi phí (như LLM trong AI Agent).
+
+**Thiết kế Cache Key đa tham số**:
+Khi query bị chi phối bởi nhiều điều kiện, key bắt buộc phải bao quát được tất cả để chống ghi đè sai lệch dữ liệu người này sang người kia.
+```typescript
+// ❌ Key thiếu tham số: cache bị ghi đè, user query sort ASC thấy kết quả của DESC
+const key = `search:${userId}`;
+
+// ✅ Key chuẩn: nối tất cả các tham số có thể làm đổi output
+const key = `search:${userId}:q_${query}:page_${page}:sort_${sortBy}`;
+// Hoặc băm hash toàn bộ object params để lấy chuỗi định danh.
+```
+
 ---
 
 ## IV. Queue & Worker Optimization

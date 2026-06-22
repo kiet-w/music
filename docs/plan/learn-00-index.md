@@ -10,16 +10,18 @@ Tài liệu này được tạo từ [`backend/docs/plan/learn.md`](../../backen
 
 ---
 
-## 6 File Tài Liệu Theo Chủ Đề
+## 8 File Tài Liệu Theo Chủ Đề
 
 | # | File | Nội Dung | Đọc Khi Nào |
 |---|------|----------|-------------|
 | 01 | [learn-01-codebase-reading-guide.md](./learn-01-codebase-reading-guide.md) | Cách đọc codebase theo luồng request, không theo folder | Khi bắt đầu đọc project mới |
-| 02 | [learn-02-interview-patterns.md](./learn-02-interview-patterns.md) | 4 câu chuyện STAR cho interview, patterns theo nhóm | Trước khi đi phỏng vấn |
+| 02 | [learn-02-interview-patterns.md](./learn-02-interview-patterns.md) | 4 câu chuyện STAR cho interview, phụ lục câu hỏi conceptual | Trước khi đi phỏng vấn |
 | 03 | [learn-03-production-checklist.md](./learn-03-production-checklist.md) | 5 câu hỏi production-grade, self-review template | Trước khi nói code "done" |
-| 04 | [learn-04-system-design-api-design.md](./learn-04-system-design-api-design.md) | Tư duy sync/async, database, REST conventions | Khi thiết kế feature mới |
-| 05 | [learn-05-performance-engineering.md](./learn-05-performance-engineering.md) | N+1, streaming, caching, queue tuning, logging | Khi optimize performance |
-| 06 | [learn-06-security-patterns.md](./learn-06-security-patterns.md) | Defense in depth, JWT, encryption, OAuth | Khi implement security feature |
+| 04 | [learn-04-system-design-api-design.md](./learn-04-system-design-api-design.md) | Tư duy sync/async, database, REST conventions, distributed system | Khi thiết kế feature mới |
+| 05 | [learn-05-performance-engineering.md](./learn-05-performance-engineering.md) | N+1 fix, stream vs buffer, cache patterns, redis, queue tuning | Khi optimize performance |
+| 06 | [learn-06-security-patterns.md](./learn-06-security-patterns.md) | Defense in depth, AES-256-GCM, lazy token migration, OAuth state | Khi implement security feature |
+| 07 | [learn-07-testing-patterns.md](./learn-07-testing-patterns.md) | Test pyramid, mock strategy, factory pattern, behavior testing | Khi setup automation tests |
+| 08 | [learn-08-ai-agent-patterns.md](./learn-08-ai-agent-patterns.md) | Áp dụng pattern sang Project 1 (AI Agent): streaming, idempotency | Khi phỏng vấn vai trò AI Engineer |
 
 ---
 

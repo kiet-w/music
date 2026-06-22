@@ -411,3 +411,45 @@ async ready() {
 ```
 
 Những thứ ở cuối dễ thêm sau. Những thứ ở đầu nếu thiết kế sai từ đầu — rất khó sửa khi đã có data thật và user thật.
+
+---
+
+## Phần III — Distributed Systems & Data Consistency
+
+### 1. Database Transactions vs Saga Pattern
+
+**Vấn đề trong code hiện tại**: Phương thức `GoogleDriveService.importFile()` (hoặc flow tương tự) thường giải quyết nhiều bước: Lấy thông tin user → Upload file lên Supabase → Ghi record Track vào Database. Quá trình này không bọc trong transaction. Nếu upload Supabase thành công nhưng ghi DB bị ném lỗi, file MP3 sẽ kẹt vĩnh viễn trên Supabase (zombie storage).
+
+**Khi nào dùng ACID Transaction (`prisma.$transaction`)**:
+- Khi MỌI thao tác cập nhật đều nằm CÙNG trong một Database.
+- Ví dụ kinh điển: Chuyển tiền trừ tài khoản A, cộng tài khoản B.
+
+**Khi nào dùng Saga / Compensating Action**:
+- Khi có một phần tác vụ tương tác với External Service (Supabase, S3, Stripe, OpenAI). Database của bạn KHÔNG THỂ rollback một file đã gửi lên server ngoài.
+- Giải pháp: Catch block khi update Database thất bại phải chủ động gọi API `deleteFile` lên Supabase để xoá file đi (đó gọi là Compensating action - hành động bù trừ).
+
+### 2. Outbox Pattern (Đảm bảo nhất quán với Queue)
+
+Khi bạn muốn ghi DB xong thì gửi email hoặc đẩy job vào queue, nếu DB commit thành công nhưng server sập trước khi enqueue, bạn bị mất tác vụ.
+**Giải pháp**:
+1. Bắt đầu DB Transaction.
+2. Tạo record dữ liệu chính.
+3. Ghi một record vào bảng `OutboxEvent` (chứa dữ liệu công việc cần làm).
+4. Commit Transaction (dữ liệu chính và event outbox được cam kết cùng lúc).
+5. Một worker riêng biệt đọc bảng OutboxEvent và xử lý (ví dụ: gửi mail). Làm xong xoá dòng đó đi.
+
+### 3. Cạm Bẫy: In-Memory Cache ở Đa Server (Multi-Instances)
+
+**Lỗi tiềm ẩn**: Nếu bạn dùng `CacheModule.register({ isGlobal: true })` ở NestJS mà không config Redis, nó sẽ dùng in-memory cache mặc định.
+Khi project scale lên 2 instances chạy đằng sau Load Balancer:
+- Request 1 đập vào Instance A: Cache miss → Fetch DB → Cập nhật cache trên RAM máy A.
+- Request 2 của cùng user đập vào Instance B: RAM máy B vẫn trống không → Cache miss → Query DB tiếp.
+- Nếu dữ liệu bị xoá trên máy A, máy B vẫn có thể trả về cache cũ sai lệch.
+**Khắc phục**: Scale ngang (horizontal) luôn đi kèm với việc đưa state và cache ra thành hệ thống riêng rẽ trung tâm (external Redis).
+
+### 4. Idempotency-Key Pattern cho API
+
+Trong các hệ thống quan trọng (tạo mới tài nguyên tốn tiền, thanh toán), API luôn yêu cầu client gửi lên một Header tên là `Idempotency-Key` (dạng UUID).
+- Server xử lý và lưu kết quả cùng với key đó vào DB/Redis.
+- Khi network chập chờn, client tưởng timeout nên nã retry request y hệt.
+- Server phát hiện `Idempotency-Key` trùng → Trả về thẳng kết quả cũ đã tính toán thành công, bỏ qua mọi layer logic.

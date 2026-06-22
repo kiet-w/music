@@ -178,3 +178,27 @@ Bạn có 28 điểm tốt trong codebase. Trong 45 phút interview, bạn chỉ
 4. Queue-based async + cleanup on failure (system design + reliability)
 
 Kể 4 câu này tốt hơn liệt kê 28 điểm qua loa.
+
+---
+
+## Phụ Lục: Các Câu Hỏi Conceptual Thường Gặp (Không phụ thuộc Code)
+
+Ngoài việc trình bày pattern thực tế từ code, trong các buổi phỏng vấn Backend / AI Engineer, bạn luôn bị hỏi về conceptual knowledge (kiến thức tổng quan). Dưới đây là các câu trả lời gọn nhẹ nhất:
+
+**1. Horizontal vs Vertical Scaling**
+- *Vertical Scaling (Scale up)*: Nâng cấp CPU, RAM cho 1 server hiện tại. (Ưu điểm: Dễ làm, code không đổi. Nhược điểm: Có trần vật lý, single point of failure).
+- *Horizontal Scaling (Scale out)*: Thêm nhiều server mới chạy song song qua Load Balancer. (Ưu điểm: Khả năng mở rộng vô hạn, chịu lỗi tốt. Nhược điểm: Phải giải quyết bài toán đồng bộ session, cache, race condition).
+
+**2. CAP Theorem (Định lý CAP)**
+Hệ thống phân tán không thể đạt được đồng thời cả 3: Consistency (Nhất quán), Availability (Sẵn sàng), Partition Tolerance (Chịu lỗi chia cắt mạng).
+- *Thực tế*: P (Mạng có thể đứt) luôn tồn tại. Ta bắt buộc phải chọn C hoặc A.
+- *Hệ thống tài chính (Banking)*: Chọn CP (Thà báo lỗi hệ thống không cho chuyển tiền còn hơn hiển thị sai số dư).
+- *Mạng xã hội (Like/Comment)*: Chọn AP (Chấp nhận đếm sai số like một chút để người dùng luôn xem được bài viết không bị lỗi).
+
+**3. Load Balancer Strategies**
+- *Round-robin*: Xoay vòng lần lượt chia đều request (A → B → C → A). Tốt nhất khi các request tốn resource ngang nhau.
+- *Least Connections*: Chia request cho server đang rảnh nhất. Tốt nhất khi có các request tốn thời gian chạy rất lâu (như AI processing), tránh việc 1 server phải gánh quá nhiều request nặng.
+
+**4. SQL vs NoSQL**
+- *SQL*: Dữ liệu có cấu trúc chặt chẽ, quan hệ rõ ràng (User có Album, Album có Track), bắt buộc phải có tính toàn vẹn ACID transaction.
+- *NoSQL*: Dữ liệu unstructured (log files, JSON payload thay đổi liên tục từ API LLM trả về), cần ghi với tốc độ cực cao, hoặc cấu trúc thay đổi liên tục không xác định trước.
