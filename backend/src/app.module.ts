@@ -21,16 +21,21 @@ import { MessagesModule } from './messages/messages.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 import { ThrottlerModule } from '@nestjs/throttler';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
 @Module({
   imports: [
     AppLoggerModule,
+    PrometheusModule.register({
+      path: '/metrics',
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
         limit: 10,
       },
     ]),
+    
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
