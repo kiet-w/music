@@ -98,6 +98,7 @@ describe('JwtAuthGuard', () => {
     expect(request['user']).toEqual({
       id: 'user-id',
       email: 'test@example.com',
+      role: 'USER',
     });
   });
 });
