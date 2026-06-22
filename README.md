@@ -120,11 +120,20 @@ Dự án đã được cấu hình `.gitignore` rất chặt chẽ tại thư m�
    - Các thư mục ẩn hỗ trợ AI/IDE: `.codegraph/`, `.gemini/`, `.serena/`, `.superpowers/`, `.vscode/`, `.idea/`.
 3. **File nhị phân nặng**: `backend/yt-dlp` được sử dụng local để tải nhạc và đã được ignore để không làm nặng Git repository.
 
+## 🚀 Cập Nhật Quan Trọng: Tái Cấu Trúc Kiến Trúc (Production Readiness - Phase 1)
+
+Dự án vừa trải qua đợt tái cấu trúc khẩn cấp nhằm đảm bảo tính ổn định và bảo mật trên môi trường Production:
+
+1. **Hợp nhất Kiến trúc (Architecture Harmonizer)**: Đã vô hiệu hóa hoàn toàn `music-ai-api` và `worker` (Python/FastAPI) trong `docker-compose.yml`. Mọi luồng tải và xử lý video từ YouTube hiện được gánh vác và xử lý tập trung tại **NestJS Backend** thông qua hàng đợi **BullMQ**.
+2. **Loại bỏ Hardcoded Host/Port**: Dọn dẹp hoàn toàn các địa chỉ cứng (`localhost:8001`) và mã người dùng tạm (`dummy user_id`) trên frontend. Chuyển sang sử dụng linh hoạt qua biến môi trường.
+3. **Bảo mật XSS Toàn diện**: Rà soát, quét mã frontend phòng chống HTML injection, đồng thời bổ sung `security.ts` để chặn triệt để các URL có chứa mã độc (`javascript:` protocol) trả về từ API.
+4. **Kiên cố hóa Google OAuth**: Xử lý triệt để lỗi crash (Internal Server Error) do điều hướng người dùng sớm khi dữ liệu xác thực chưa kịp hydrate, tự động xử lý token rỗng an toàn.
+
 ---
 
-## 🔒 Bản Cập Nhật Tối Ưu Hóa & Bảo Mật (Production Optimizations & Hardening)
+## 🔒 Bản Cập Nhật Tối Ưu Hóa & Bảo Mật Khác
 
-Hệ thống đã được tối ưu hóa toàn diện từ Phase 1 đến Phase 4 phục vụ môi trường Production:
+Hệ thống đã trải qua nhiều đợt tối ưu hóa toàn diện phục vụ môi trường Production:
 
 ### 1. Backend Hardening
 *   **Role-Based Access Control (RBAC)**: Thêm hệ thống vai trò `USER` và `ADMIN`. Bảo vệ các endpoint quản trị (`AdminController` và `/auth/users`) thông qua `JwtAuthGuard` kết hợp `RolesGuard`.
@@ -134,6 +143,9 @@ Hệ thống đã được tối ưu hóa toàn diện từ Phase 1 đến Phase
 *   **yt-dlp Supply Chain & Checksum Verification**: Tải bản release pinned `yt-dlp` kèm xác minh mã SHA-256 chặt chẽ trước khi thiết lập quyền chạy.
 *   **BullMQ Resilience**: Tối ưu luồng download nhạc với cơ chế retry exponential backoff và giới hạn xử lý tối đa 2 job song song bảo vệ tài nguyên CPU/RAM.
 *   **Repository Generics**: Nâng cao độ an toàn kiểu tĩnh (Type safety) cho `BaseRepository` thông qua Prisma type parameters.
+*   **Admin Audit Log**: Theo dõi mọi tác vụ quản trị như `deleteTrack` hay `cleanupStorage` bằng hệ thống log riêng biệt nhằm mục đích truy vết trong môi trường Production.
+*   **JWT Schema Migration**: Cơ chế graceful fallback về quyền `USER` đối với các JWT cũ không có trường `role`, ngăn chặn sự cố khóa người dùng cũ sau khi nâng cấp phiên bản.
+*   **Orphaned Job & Temp Cleanup**: Tích hợp CronJob tự động làm sạch các tiến trình kẹt (stuck jobs) và các file nháp lưu trữ dư thừa nhằm tránh thất thoát bộ nhớ ổ đĩa.
 
 ### 2. Frontend Hardening & UX Polish
 *   **Redact Sensitive Data**: Logging interceptor ở backend chủ động che (`[REDACTED]`) các trường token nhạy cảm trong body.
@@ -142,3 +154,8 @@ Hệ thống đã được tối ưu hóa toàn diện từ Phase 1 đến Phase
 *   **Global 401 Interception**: Bắt lỗi `401 Unauthorized` tập trung tại API client để tự động xóa session và redirect người dùng về trang login.
 *   **Toast Notifications & Custom Modals**: Thay thế toàn bộ popup `alert()`, `confirm()`, `prompt()` mặc định bằng hệ thống Toast (`sonner`) mượt mà và các custom modal kính mờ cao cấp hỗ trợ chọn trực quan Album.
 *   **Containerization**: Cung cấp cấu hình Dockerfile đa tầng tối ưu Next.js Standalone phục vụ Kubernetes/VPS.
+*   **Offline Storage Web Guard**: Hệ thống tự động nhận diện nền tảng nhằm vô hiệu hóa tính năng lưu file bộ nhớ đệm (của Mobile) khi chạy trên Web để ngăn chặn triệt để hiện tượng treo hay Out of Memory (OOM).
+
+### 3. AI Service Hardening
+*   **Structured Logging**: Nâng cấp từ câu lệnh print sang thư viện `structlog` nhằm chuẩn hóa định dạng logging JSON chuyên nghiệp phục vụ việc theo dõi ở Production.
+*   **Docker Healthchecks**: Các image của `api` và `worker` được thiết lập `HEALTHCHECK` giúp nền tảng quản trị tự động phục hồi khi container đóng băng.
