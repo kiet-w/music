@@ -19,7 +19,7 @@ export class HttpMetricsInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const req = context.switchToHttp().getRequest();
     const res = context.switchToHttp().getResponse();
-    
+
     // Ensure we only track HTTP requests
     if (!req || !res || !req.route) {
       return next.handle();

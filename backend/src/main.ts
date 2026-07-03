@@ -22,8 +22,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const corsOriginsEnv = process.env.CORS_ORIGINS;
   if (!corsOriginsEnv) {
-    console.error('CORS_ORIGINS environment variable is missing. Application must fail-closed.');
-    throw new Error('CORS_ORIGINS environment variable is missing. Application must fail-closed.');
+    console.error(
+      'CORS_ORIGINS environment variable is missing. Application must fail-closed.',
+    );
+    throw new Error(
+      'CORS_ORIGINS environment variable is missing. Application must fail-closed.',
+    );
   }
 
   const corsOrigins = corsOriginsEnv
@@ -32,16 +36,18 @@ async function bootstrap() {
     .filter((origin) => origin.length > 0);
 
   if (corsOrigins.length === 0) {
-    console.error('CORS_ORIGINS environment variable is empty. Application must fail-closed.');
-    throw new Error('CORS_ORIGINS environment variable is empty. Application must fail-closed.');
+    console.error(
+      'CORS_ORIGINS environment variable is empty. Application must fail-closed.',
+    );
+    throw new Error(
+      'CORS_ORIGINS environment variable is empty. Application must fail-closed.',
+    );
   }
 
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   const logger = new AppLogger();
   app.useLogger(logger);
-
-
 
   app.enableCors({
     origin: corsOrigins,
@@ -53,9 +59,7 @@ async function bootstrap() {
   });
 
   const httpAdapterHost = app.get(HttpAdapterHost);
-  app.useGlobalFilters(
-    new AllExceptionsFilter(httpAdapterHost, logger as any),
-  );
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost, logger as any));
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -72,13 +76,17 @@ async function bootstrap() {
       .setDescription('The music application API description')
       .setVersion('1.0')
       .build();
-    const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
+    const documentFactory = () =>
+      SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api', app, documentFactory);
     logger.log('📄 Swagger docs available at /api', 'Bootstrap');
   }
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  logger.log(`🚀 Backend Music App started on http://localhost:${port}`, 'Bootstrap');
+  logger.log(
+    `🚀 Backend Music App started on http://localhost:${port}`,
+    'Bootstrap',
+  );
 }
 void bootstrap();

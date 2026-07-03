@@ -81,7 +81,10 @@ export class AuthService {
     }
   }
 
-  async googleUnifiedLogin(code: string, redirectUri?: string): Promise<AuthResponseDto> {
+  async googleUnifiedLogin(
+    code: string,
+    redirectUri?: string,
+  ): Promise<AuthResponseDto> {
     try {
       const client = new OAuth2Client(
         this.configService.get<string>('GOOGLE_CLIENT_ID'),
@@ -127,8 +130,13 @@ export class AuthService {
 
       return this.buildAuthResponse(updatedUser);
     } catch (error: any) {
-      this.logger.error({ error: error.message }, 'Unified Google login failed');
-      throw new UnauthorizedException('Unified Google authentication failed: ' + error.message);
+      this.logger.error(
+        { error: error.message },
+        'Unified Google login failed',
+      );
+      throw new UnauthorizedException(
+        'Unified Google authentication failed: ' + error.message,
+      );
     }
   }
 

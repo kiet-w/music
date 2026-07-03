@@ -20,7 +20,9 @@ import {
 } from '@nestjs/swagger';
 import { SongService } from './song.service';
 import { CreateSongYoutubeDto } from './dto/create-song-youtube.dto';
+import { MoveSongDto } from './dto/move-song.dto';
 import { SongResponseDto } from './dto/song-response.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ThrottlerGuard } from '@nestjs/throttler';
@@ -43,15 +45,9 @@ export class SongController {
   @UseGuards(ThrottlerGuard)
   async createFromYoutube(
     @CurrentUser() user: any,
-    @Body() createSongDto: CreateSongYoutubeDto,
+    @Body() dto: CreateSongYoutubeDto,
   ): Promise<SongResponseDto> {
-    return this.songService.createFromYoutube(
-      user.id,
-      createSongDto.url,
-      createSongDto.title,
-      createSongDto.artist,
-      createSongDto.albumId,
-    );
+    return this.songService.createFromYoutube(user.id, dto);
   }
 
   @ApiOperation({ summary: 'Get all songs' })
@@ -62,13 +58,9 @@ export class SongController {
   @Get()
   async findAll(
     @CurrentUser() user: any,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query() paginationDto: PaginationDto,
   ) {
-    const skip =
-      page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
-    const take = Math.min(limit ? parseInt(limit, 10) : 50, 100); // cap at 100
-    return this.songService.findAll(user.id, skip, take);
+    return this.songService.findAll(user.id, paginationDto);
   }
 
   @ApiOperation({ summary: 'Get a song by ID' })
@@ -109,8 +101,8 @@ export class SongController {
   async moveToAlbum(
     @CurrentUser() user: any,
     @Param('id') id: string,
-    @Body('albumId') albumId: string,
+    @Body() dto: MoveSongDto,
   ): Promise<SongResponseDto> {
-    return this.songService.moveToAlbum(user.id, id, albumId);
+    return this.songService.moveToAlbum(user.id, id, dto);
   }
 }

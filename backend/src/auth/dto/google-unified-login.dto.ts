@@ -7,7 +7,10 @@ export class GoogleUnifiedLoginDto {
   @IsString()
   code: string;
 
-  @ApiProperty({ description: 'Google Redirect URI used in client request', required: false })
+  @ApiProperty({
+    description: 'Google Redirect URI used in client request',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   redirectUri?: string;

@@ -41,7 +41,7 @@ export class StorageService implements IStorageProvider {
         realtime: {
           transport: WebSocket as any,
         },
-      }
+      },
     );
   }
 

@@ -11,4 +11,40 @@ export class SongRepository extends BaseRepository<
   constructor(prisma: PrismaService) {
     super(prisma, prisma.track);
   }
+
+  async findByYoutubeId(youtubeId: string): Promise<Track | null> {
+    return this.findFirst({
+      where: {
+        sourceType: 'youtube',
+        sourceId: youtubeId,
+        url: { not: '' },
+      },
+    });
+  }
+
+  async findByUserAndId(userId: string, id: string): Promise<Track | null> {
+    return this.findFirst({
+      where: { id, userId },
+      include: { album: true },
+    });
+  }
+
+  async findAllByUser(
+    userId: string,
+    skip: number,
+    take: number,
+    orderBy: any,
+  ): Promise<Track[]> {
+    return this.findMany({
+      where: { userId },
+      skip,
+      take,
+      orderBy,
+      include: { album: true },
+    });
+  }
+
+  async countByUser(userId: string): Promise<number> {
+    return this.count({ where: { userId } });
+  }
 }

@@ -11,10 +11,14 @@ export class JobsMetricsService {
 
   constructor(
     @InjectQueue('conversion') private readonly conversionQueue: Queue,
-    @InjectMetric('bullmq_queue_jobs_waiting') private readonly waitingGauge: Gauge<string>,
-    @InjectMetric('bullmq_queue_jobs_active') private readonly activeGauge: Gauge<string>,
-    @InjectMetric('bullmq_queue_jobs_completed') private readonly completedGauge: Gauge<string>,
-    @InjectMetric('bullmq_queue_jobs_failed') private readonly failedGauge: Gauge<string>,
+    @InjectMetric('bullmq_queue_jobs_waiting')
+    private readonly waitingGauge: Gauge<string>,
+    @InjectMetric('bullmq_queue_jobs_active')
+    private readonly activeGauge: Gauge<string>,
+    @InjectMetric('bullmq_queue_jobs_completed')
+    private readonly completedGauge: Gauge<string>,
+    @InjectMetric('bullmq_queue_jobs_failed')
+    private readonly failedGauge: Gauge<string>,
   ) {}
 
   @Cron(CronExpression.EVERY_10_SECONDS)

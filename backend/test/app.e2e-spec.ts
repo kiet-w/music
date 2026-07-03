@@ -62,7 +62,9 @@ describe('AppController (e2e)', () => {
   });
 
   it('/health/ready (GET) - DB failure', () => {
-    mockPrismaService.$queryRaw.mockRejectedValue(new Error('Connection failed'));
+    mockPrismaService.$queryRaw.mockRejectedValue(
+      new Error('Connection failed'),
+    );
     return request(app.getHttpServer())
       .get('/health/ready')
       .expect(503)

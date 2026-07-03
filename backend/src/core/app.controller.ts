@@ -21,8 +21,13 @@ export class AppController {
 
   @Get('health/ready')
   @ApiTags('health')
-  @ApiOperation({ summary: 'Readiness check endpoint - verifies DB connectivity' })
-  @ApiResponse({ status: 200, description: 'Application is ready to serve traffic' })
+  @ApiOperation({
+    summary: 'Readiness check endpoint - verifies DB connectivity',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Application is ready to serve traffic',
+  })
   @ApiResponse({ status: 503, description: 'Application is not ready' })
   async readinessCheck() {
     return this.appService.getReadinessStatus();

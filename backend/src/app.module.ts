@@ -21,7 +21,10 @@ import { MessagesModule } from './messages/messages.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 import { ThrottlerModule } from '@nestjs/throttler';
-import { PrometheusModule, makeHistogramProvider } from '@willsoto/nestjs-prometheus';
+import {
+  PrometheusModule,
+  makeHistogramProvider,
+} from '@willsoto/nestjs-prometheus';
 import { HttpMetricsInterceptor } from './common/interceptors/http-metrics.interceptor';
 
 @Module({
@@ -36,7 +39,7 @@ import { HttpMetricsInterceptor } from './common/interceptors/http-metrics.inter
         limit: 10,
       },
     ]),
-    
+
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,

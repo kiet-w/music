@@ -31,7 +31,7 @@ import { JobsMetricsService } from './jobs.metrics.service';
     StorageModule,
   ],
   providers: [
-    ConversionProcessor, 
+    ConversionProcessor,
     CleanupService,
     makeGaugeProvider({
       name: 'bullmq_queue_jobs_waiting',

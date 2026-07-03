@@ -26,12 +26,13 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Delete('tracks/:id')
-  async deleteTrack(
-    @Param('id') id: string,
-    @CurrentUser() user: any,
-  ) {
+  async deleteTrack(@Param('id') id: string, @CurrentUser() user: any) {
     this.logger.warn(
-      { adminUserId: user.id, deletedTrackId: id, action: 'ADMIN_DELETE_TRACK' },
+      {
+        adminUserId: user.id,
+        deletedTrackId: id,
+        action: 'ADMIN_DELETE_TRACK',
+      },
       'Admin deleted track',
     );
     return this.adminService.deleteTrack(id);

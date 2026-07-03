@@ -53,11 +53,8 @@ export class CleanupService {
 
   private async cleanupTempFiles() {
     this.appLogger.step('Cleaning up temp files');
-    
-    const dirsToSweep = [
-      path.join(process.cwd(), 'temp'),
-      '/tmp'
-    ];
+
+    const dirsToSweep = [path.join(process.cwd(), 'temp'), '/tmp'];
 
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
     let deletedCount = 0;
@@ -82,7 +79,9 @@ export class CleanupService {
               deletedCount++;
             }
           } catch (fileErr) {
-            this.logger.warn(`Failed to process file ${filePath}: ${fileErr.message}`);
+            this.logger.warn(
+              `Failed to process file ${filePath}: ${fileErr.message}`,
+            );
           }
         }
       } catch (dirErr) {

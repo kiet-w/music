@@ -57,7 +57,9 @@ describe('AppController', () => {
     });
 
     it('should throw ServiceUnavailableException when DB check fails', async () => {
-      mockPrismaService.$queryRaw.mockRejectedValue(new Error('Connection failed'));
+      mockPrismaService.$queryRaw.mockRejectedValue(
+        new Error('Connection failed'),
+      );
 
       await expect(appController.readinessCheck()).rejects.toThrow(
         ServiceUnavailableException,

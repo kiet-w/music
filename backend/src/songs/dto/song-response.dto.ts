@@ -33,4 +33,20 @@ export class SongResponseDto {
   @ApiProperty({ description: 'The source type of the song (e.g., youtube)' })
   @Expose()
   sourceType: string;
+
+  @ApiProperty({
+    description: 'The source ID (e.g., YouTube video ID)',
+    required: false,
+    nullable: true,
+  })
+  @Expose()
+  sourceId: string | null;
+
+  @ApiProperty({
+    description: 'The duration of the song in seconds',
+    required: false,
+    nullable: true,
+  })
+  @Expose()
+  duration: number | null;
 }

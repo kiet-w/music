@@ -87,20 +87,20 @@ describe('DownloaderService', () => {
   });
 
   it('should throw BadRequestException if URL is not a YouTube URL', async () => {
-    await expect(service.download('https://evil.com/video', '/tmp/song.mp3')).rejects.toThrow(
-      BadRequestException,
-    );
-    await expect(service.download('https://evil.com/video', '/tmp/song.mp3')).rejects.toThrow(
-      'Only YouTube URLs are allowed',
-    );
+    await expect(
+      service.download('https://evil.com/video', '/tmp/song.mp3'),
+    ).rejects.toThrow(BadRequestException);
+    await expect(
+      service.download('https://evil.com/video', '/tmp/song.mp3'),
+    ).rejects.toThrow('Only YouTube URLs are allowed');
   });
 
   it('should throw BadRequestException if URL format is invalid', async () => {
-    await expect(service.download('not-a-url', '/tmp/song.mp3')).rejects.toThrow(
-      BadRequestException,
-    );
-    await expect(service.download('not-a-url', '/tmp/song.mp3')).rejects.toThrow(
-      'Invalid URL format',
-    );
+    await expect(
+      service.download('not-a-url', '/tmp/song.mp3'),
+    ).rejects.toThrow(BadRequestException);
+    await expect(
+      service.download('not-a-url', '/tmp/song.mp3'),
+    ).rejects.toThrow('Invalid URL format');
   });
 });

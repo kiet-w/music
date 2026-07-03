@@ -24,7 +24,19 @@ import { EncryptionService } from '../common/services/encryption.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserRepository, JwtAuthGuard, RolesGuard, EncryptionService],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, JwtModule, EncryptionService],
+  providers: [
+    AuthService,
+    UserRepository,
+    JwtAuthGuard,
+    RolesGuard,
+    EncryptionService,
+  ],
+  exports: [
+    AuthService,
+    JwtAuthGuard,
+    RolesGuard,
+    JwtModule,
+    EncryptionService,
+  ],
 })
 export class AuthModule {}

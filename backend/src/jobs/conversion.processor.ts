@@ -25,7 +25,10 @@ export class ConversionProcessor extends WorkerHost {
     const { url, songId, userId } = job.data;
     const processName = 'YouTube Conversion';
 
-    this.appLogger.startSection(processName, `jobId=${job.id} songId=${songId}`);
+    this.appLogger.startSection(
+      processName,
+      `jobId=${job.id} songId=${songId}`,
+    );
 
     const tempDir = path.join(process.cwd(), 'temp');
     if (!fs.existsSync(tempDir)) {
