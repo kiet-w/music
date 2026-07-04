@@ -13,7 +13,7 @@ export class YoutubeSongHelper {
   }
 
   mapToResponse(song: Track): SongResponseDto {
-    return {
+    return { 
       id: song.id,
       title: song.title,
       artist: song.artist,

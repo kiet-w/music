@@ -9,6 +9,19 @@ import { SongResponseDto } from '../../dto/song-response.dto';
 import { SongRepository } from '../../repositories/song.repository';
 import { YoutubeSongHelper } from '../../helper/youtube-song.helper';
 import { AlbumValidationHelper } from '../../helper/album-validation.helper';
+import {
+  CONVERSION_JOB,
+  SONG_SOURCE_TYPE,
+} from '../../constants/song.constants';
+
+// --- Types nội bộ cho Handler này ---
+interface ReuseTrackParams {
+  userId: string;
+  youtubeId: string;
+  title: string;
+  artist: string | undefined;
+  albumId: string;
+}
 
 @CommandHandler(CreateSongFromYoutubeCommand)
 export class CreateSongFromYoutubeHandler
@@ -40,13 +53,13 @@ export class CreateSongFromYoutubeHandler
     const youtubeId = this.youtubeHelper.extractYoutubeId(url);
 
     if (youtubeId) {
-      const reusedSong = await this.tryReuseExistingTrack(
+      const reusedSong = await this.tryReuseExistingTrack({
         userId,
         youtubeId,
         title,
         artist,
-        finalAlbumId,
-      );
+        albumId: finalAlbumId,
+      });
       if (reusedSong) {
         return this.youtubeHelper.mapToResponse(reusedSong);
       }
@@ -65,13 +78,13 @@ export class CreateSongFromYoutubeHandler
     return this.youtubeHelper.mapToResponse(song);
   }
 
+  // --- Private helpers ---
+
   private async tryReuseExistingTrack(
-    userId: string,
-    youtubeId: string,
-    title: string,
-    artist: string | undefined,
-    albumId: string,
+    params: ReuseTrackParams,
   ): Promise<Track | null> {
+    const { userId, youtubeId, title, artist, albumId } = params;
+
     const existingTrack = await this.songRepository.findByYoutubeId(youtubeId);
     if (!existingTrack) return null;
 
@@ -88,7 +101,7 @@ export class CreateSongFromYoutubeHandler
         duration: existingTrack.duration,
         albumId,
         userId,
-        sourceType: 'youtube',
+        sourceType: SONG_SOURCE_TYPE.YOUTUBE,
         sourceId: youtubeId,
       },
     });
@@ -108,7 +121,7 @@ export class CreateSongFromYoutubeHandler
         url: '',
         albumId,
         userId,
-        sourceType: 'youtube',
+        sourceType: SONG_SOURCE_TYPE.YOUTUBE,
         sourceId: youtubeId,
       },
     });
@@ -125,11 +138,14 @@ export class CreateSongFromYoutubeHandler
     );
 
     await this.conversionQueue.add(
-      'convert',
+      CONVERSION_JOB.NAME,
       { url, songId, userId },
       {
-        attempts: 3,
-        backoff: { type: 'exponential', delay: 5000 },
+        attempts: CONVERSION_JOB.MAX_ATTEMPTS,
+        backoff: {
+          type: 'exponential',
+          delay: CONVERSION_JOB.BACKOFF_DELAY_MS,
+        },
       },
     );
   }
