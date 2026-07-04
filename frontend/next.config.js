@@ -9,42 +9,23 @@ const isDev = process.env.NODE_ENV === 'development';
 const nextConfig = {
   reactStrictMode: true,
 
-  // Chỉ bật standalone trong production (build Docker), không cần trong dev
+  // Chỉ bật standalone trong production (build Docker)
   ...(isDev ? {} : { output: 'standalone' }),
 
   images: {
     unoptimized: true,
   },
 
-  // Bật Turbopack để compile nhanh hơn 5-10x trong dev
-  ...(isDev && {
-    experimental: {
-      turbo: {},
-    },
-  }),
-
-  // Tắt type-check và lint trong dev để không chờ lâu (đã có IDE check)
+  // Tắt type-check và lint khi dev để compile nhanh hơn (IDE đã check rồi)
   typescript: {
     ignoreBuildErrors: isDev,
   },
   eslint: {
     ignoreDuringBuilds: isDev,
   },
-
-  // Tăng giới hạn bộ nhớ webpack
-  webpack: (config, { dev, isServer }) => {
-    if (dev) {
-      // Disable poll, dùng native file watching
-      config.watchOptions = {
-        poll: false,
-        aggregateTimeout: 200,
-      };
-    }
-    return config;
-  },
 };
 
-// Chỉ wrap Sentry trong production để tránh nặng khi dev
+// Chỉ wrap Sentry trong production để tránh overhead khi dev
 const finalConfig = isDev
   ? withNextIntl(nextConfig)
   : withSentryConfig(
