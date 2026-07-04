@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import dynamic from 'next/dynamic';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 
@@ -7,14 +6,7 @@ import { AuthGate } from '@/components/templates/wrappers/AuthGate';
 import { NavWrapper } from '@/components/templates/wrappers/NavWrapper';
 import { GoogleAuthProvider } from '@/components/templates/wrappers/GoogleAuthProvider';
 import { ChatProvider } from '@/components/templates/wrappers/ChatProvider';
-
-const PlayerBar = dynamic(() => import('@/components/molecules/PlayerBar'), {
-  ssr: false,
-});
-const BottomTabBar = dynamic(
-  () => import('@/components/molecules/Navigation/BottomTabBar'),
-  { ssr: false },
-);
+import { ClientShell } from '@/components/templates/wrappers/ClientShell';
 
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'vi' }];
@@ -22,11 +14,12 @@ export function generateStaticParams() {
 
 export default async function LocaleLayout({
   children,
-  params: { locale },
+  params,
 }: {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const messages = await getMessages();
 
   return (
@@ -36,8 +29,7 @@ export default async function LocaleLayout({
           <AuthGate>
             {children}
             <NavWrapper>
-              <PlayerBar />
-              <BottomTabBar />
+              <ClientShell />
             </NavWrapper>
           </AuthGate>
         </ChatProvider>
