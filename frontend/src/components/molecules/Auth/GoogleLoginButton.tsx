@@ -9,6 +9,17 @@ import { googleUnifiedLogin } from '@/lib/api';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export function GoogleLoginButton() {
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform();
+
+  if (!clientId || isNative) {
+    return null;
+  }
+
+  return <GoogleLoginButtonInner />;
+}
+
+function GoogleLoginButtonInner() {
   const t = useTranslations('Auth');
   const setSession = useAuthStore((state) => state.setSession);
   const [error, setError] = useState<string | null>(null);
