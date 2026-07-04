@@ -9,6 +9,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
+    "dev:local": "bash ./dev.sh",
     "start:dev": "concurrently -c \"cyan.bold,green.bold\" -n \"nest,python\" \"npm run start:dev:nest\" \"npm run start:dev:python\"",
     "start:dev:nest": "NODE_OPTIONS=--max-old-space-size=4096 nest start --watch",
     "start:dev:python": "cd ../music-ai-service && uv run uvicorn main:app --reload --port 8001",
