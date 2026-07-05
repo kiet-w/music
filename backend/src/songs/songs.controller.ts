@@ -33,7 +33,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 @Controller('songs')
 @UseInterceptors(ClassSerializerInterceptor)
 export class SongsController {
-  constructor(private readonly songService: SongsService) {}
+  constructor(private readonly songsService: SongsService) {}
 
   @ApiOperation({ summary: 'Create a new song from YouTube URL' })
   @ApiResponse({
@@ -47,7 +47,7 @@ export class SongsController {
     @CurrentUser() user: any,
     @Body() dto: CreateSongYoutubeDto,
   ): Promise<SongResponseDto> {
-    return this.songService.createFromYoutube(user.id, dto);
+    return this.songsService.createFromYoutube(user.id, dto);
   }
 
   @ApiOperation({ summary: 'Get all songs' })
@@ -60,7 +60,7 @@ export class SongsController {
     @CurrentUser() user: any,
     @Query() paginationDto: PaginationDto,
   ) {
-    return this.songService.findAll(user.id, paginationDto);
+    return this.songsService.findAll(user.id, paginationDto);
   }
 
   @ApiOperation({ summary: 'Get a song by ID' })
@@ -75,7 +75,7 @@ export class SongsController {
     @CurrentUser() user: any,
     @Param('id') id: string,
   ): Promise<SongResponseDto> {
-    return this.songService.findOne(user.id, id);
+    return this.songsService.findOne(user.id, id);
   }
 
   @ApiOperation({ summary: 'Delete a song' })
@@ -87,7 +87,7 @@ export class SongsController {
     @CurrentUser() user: any,
     @Param('id') id: string,
   ): Promise<void> {
-    await this.songService.remove(user.id, id);
+    await this.songsService.remove(user.id, id);
   }
 
   @ApiOperation({ summary: 'Move a song to another album' })
@@ -103,6 +103,6 @@ export class SongsController {
     @Param('id') id: string,
     @Body() dto: MoveSongDto,
   ): Promise<SongResponseDto> {
-    return this.songService.moveToAlbum(user.id, id, dto);
+    return this.songsService.moveToAlbum(user.id, id, dto);
   }
 }

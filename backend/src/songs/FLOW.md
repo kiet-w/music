@@ -66,7 +66,7 @@ flowchart TD
   ```typescript
   @Post('youtube')
   async createFromYoutube(@CurrentUser() user, @Body() dto: CreateSongYoutubeDto) {
-    return this.songService.createFromYoutube(user.id, dto);
+    return this.songsService.createFromYoutube(user.id, dto);
   }
   ```
 

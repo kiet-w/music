@@ -23,7 +23,7 @@ Thay vì gộp toàn bộ logic vào trong Service (`song.service.ts`), kiến t
 - **Decorators**: `@Controller('songs')`, `@UseGuards(JwtAuthGuard)`, `@UseInterceptors(ClassSerializerInterceptor)`, các decorator Swagger (`@ApiTags`, v.v.).
 - **Vai trò**: Lớp ngoài cùng giao tiếp với Client.
 - **Methods**:
-  - `createFromYoutube`: `POST /youtube`. Có gắn thêm `@UseGuards(ThrottlerGuard)` để giới hạn rate-limit chống spam tạo quá nhiều video. Gọi sang `songService.createFromYoutube`.
+  - `createFromYoutube`: `POST /youtube`. Có gắn thêm `@UseGuards(ThrottlerGuard)` để giới hạn rate-limit chống spam tạo quá nhiều video. Gọi sang `songsService.createFromYoutube`.
   - `findAll`: `GET /`. Hỗ trợ phân trang và sort thông qua `PaginationDto`. Lấy `userId` qua decorator `@CurrentUser()`.
   - `findOne`: `GET /:id`. Lấy chi tiết bài hát.
   - `remove`: `DELETE /:id`. Xóa bài hát. Trả về status 204.
