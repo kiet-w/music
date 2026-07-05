@@ -51,7 +51,6 @@ describe('AlbumService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-
   describe('create', () => {
     it('should create an album for a specific user', async () => {
       const data = { title: 'New Album', artist: 'Artist' };

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { SongResponseDto } from './dto/song-response.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
@@ -30,7 +30,6 @@ export class SongService {
     );
     return this.commandBus.execute(command);
   }
-
   async findAll(userId: string, paginationDto: PaginationDto) {
     const query = new FindAllSongsQuery(userId, paginationDto);
     return this.queryBus.execute(query);
@@ -45,7 +44,6 @@ export class SongService {
     const command = new RemoveSongCommand(userId, id);
     return this.commandBus.execute(command);
   }
-
   async moveToAlbum(
     userId: string,
     id: string,

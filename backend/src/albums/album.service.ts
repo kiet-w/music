@@ -21,14 +21,12 @@ export class AlbumService {
     });
     return this.mapAlbumResponse(album);
   }
-
   async findOrCreateDefault(userId: string) {
     this.logger.debug({ userId }, 'Finding or creating default album');
     const existing = await this.albumRepository.findDefault(userId);
     if (existing) {
       return this.mapAlbumResponse(existing);
     }
-
     try {
       const album = await this.albumRepository.create({
         data: {
