@@ -20,9 +20,48 @@ Bất kỳ request nào từ Client gửi lên đều đi qua 4 tầng chính:
 
 **[Client] ➔ Controller ➔ Service ➔ Bus (CommandBus/QueryBus) ➔ Handler ➔ (Helpers / Repository)**
 
-### Bước 1: Controller (`song.controller.ts`)
+```mermaid
+flowchart TD
+    Client((Client))
+    
+    subgraph Controller Layer
+        Controller[SongsController]
+    end
+    
+    subgraph Service Layer
+        Service[SongsService]
+    end
+    
+    subgraph CQRS Bus
+        CmdBus[CommandBus]
+        QryBus[QueryBus]
+    end
+    
+    subgraph Handlers
+        CmdHandler[Command Handlers\ne.g., CreateSongFromYoutubeHandler]
+        QryHandler[Query Handlers\ne.g., FindAllSongsHandler]
+    end
+    
+    subgraph Data Access
+        Helpers[Helpers\ne.g., YoutubeSongHelper]
+        Repo[(SongRepository)]
+    end
+    
+    Client -->|HTTP Request| Controller
+    Controller -->|DTO| Service
+    Service -->|Command Object| CmdBus
+    Service -->|Query Object| QryBus
+    CmdBus -->|Route| CmdHandler
+    QryBus -->|Route| QryHandler
+    
+    CmdHandler -->|Validate| Helpers
+    CmdHandler -->|Read/Write| Repo
+    QryHandler -->|Read| Repo
+```
+
+### Bước 1: Controller (`songs.controller.ts`)
 - **Nhiệm vụ**: Nhận HTTP Request, xác thực (Guards), lấy data từ body/params/query thông qua DTO.
-- **Thực thi**: Gọi trực tiếp method tương ứng của `SongService` và truyền DTO vào.
+- **Thực thi**: Gọi trực tiếp method tương ứng của `SongsService` và truyền DTO vào.
 - **Ví dụ**:
   ```typescript
   @Post('youtube')
@@ -31,7 +70,7 @@ Bất kỳ request nào từ Client gửi lên đều đi qua 4 tầng chính:
   }
   ```
 
-### Bước 2: Service (`song.service.ts`)
+### Bước 2: Service (`songs.service.ts`)
 - **Nhiệm vụ**: Trở thành một người điều phối (Orchestrator) thuần túy. Nó không chứa logic nghiệp vụ, không gọi database.
 - **Thực thi**:
   - Nhận DTO từ Controller.
@@ -108,7 +147,7 @@ songs/
  ├── dto/                       # Data type cho Controller
  ├── helper/                    # Các hàm dùng chung (validate, map data)
  ├── repositories/              # Nơi giao tiếp Database (Prisma)
- ├── song.controller.ts         # Endpoint APIs
- ├── song.service.ts            # Bus Orchestrator
+ ├── songs.controller.ts        # Endpoint APIs
+ ├── songs.service.ts           # Bus Orchestrator
  └── songs.module.ts            # Đăng ký các phần tử (Providers, Handlers)
 ```

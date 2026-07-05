@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SongService } from './song.service';
+import { SongsService } from './songs.service';
 import { SongRepository } from './repositories/song.repository';
 import { AlbumRepository } from '../albums/repositories/album.repository';
 import { AlbumService } from '../albums/album.service';
@@ -7,8 +7,8 @@ import { getQueueToken } from '@nestjs/bullmq';
 import { NotFoundException } from '@nestjs/common';
 import { getLoggerToken } from 'nestjs-pino';
 
-describe('SongService', () => {
-  let service: SongService;
+describe('SongsService', () => {
+  let service: SongsService;
   let songRepository: SongRepository;
   let albumRepository: AlbumRepository;
   let albumService: AlbumService;
@@ -49,7 +49,7 @@ describe('SongService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        SongService,
+        SongsService,
         {
           provide: SongRepository,
           useValue: mockSongRepository,
@@ -67,13 +67,13 @@ describe('SongService', () => {
           useValue: mockQueue,
         },
         {
-          provide: getLoggerToken(SongService.name),
+          provide: getLoggerToken(SongsService.name),
           useValue: mockPinoLogger,
         },
       ],
     }).compile();
 
-    service = module.get<SongService>(SongService);
+    service = module.get<SongsService>(SongsService);
     songRepository = module.get<SongRepository>(SongRepository);
     albumRepository = module.get<AlbumRepository>(AlbumRepository);
     albumService = module.get<AlbumService>(AlbumService);

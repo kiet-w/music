@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { SongController } from './song.controller';
-import { SongService } from './song.service';
+import { SongsController } from './songs.controller';
+import { SongsService } from './songs.service';
 import { JobsModule } from '../jobs/jobs.module';
 import { SongRepository } from './repositories/song.repository';
 import { AlbumsModule } from '../albums/albums.module';
@@ -27,9 +27,9 @@ const QueryHandlers = [
 
 @Module({
   imports: [JobsModule, AlbumsModule, CqrsModule],
-  controllers: [SongController],
+  controllers: [SongsController],
   providers: [
-    SongService,
+    SongsService,
     SongRepository,
     YoutubeSongHelper,
     AlbumValidationHelper,

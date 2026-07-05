@@ -6,8 +6,8 @@ Tài liệu chi tiết đường đi của dữ liệu từ Client cho đến Da
 `Client` 
   ➔ `JwtAuthGuard` (Kiểm tra token) 
   ➔ `ThrottlerGuard` (Rate limiting) 
-  ➔ `SongController.createFromYoutube` (Nhận body `CreateSongYoutubeDto`) 
-  ➔ `SongService.createFromYoutube` (Khởi tạo `CreateSongFromYoutubeCommand`) 
+  ➔ `SongsController.createFromYoutube` (Nhận body `CreateSongYoutubeDto`) 
+  ➔ `SongsService.createFromYoutube` (Khởi tạo `CreateSongFromYoutubeCommand`) 
   ➔ `CommandBus.execute` 
   ➔ `CreateSongFromYoutubeHandler.execute`
       ➔ `AlbumValidationHelper.getValidatedAlbumId` ➔ `AlbumRepository` / `AlbumService` (DB check)
@@ -21,8 +21,8 @@ Tài liệu chi tiết đường đi của dữ liệu từ Client cho đến Da
 ## 2. GET `/songs` (Lấy danh sách phân trang)
 `Client` 
   ➔ `JwtAuthGuard` 
-  ➔ `SongController.findAll` (Nhận `PaginationDto` từ query) 
-  ➔ `SongService.findAll` (Khởi tạo `FindAllSongsQuery`) 
+  ➔ `SongsController.findAll` (Nhận `PaginationDto` từ query) 
+  ➔ `SongsService.findAll` (Khởi tạo `FindAllSongsQuery`) 
   ➔ `QueryBus.execute`
   ➔ `FindAllSongsHandler.execute`
       ➔ Tính toán offset (`skip`, `take`)
@@ -35,8 +35,8 @@ Tài liệu chi tiết đường đi của dữ liệu từ Client cho đến Da
 ## 3. GET `/songs/:id` (Lấy chi tiết)
 `Client` 
   ➔ `JwtAuthGuard` 
-  ➔ `SongController.findOne` (Nhận `id` từ param) 
-  ➔ `SongService.findOne` (Khởi tạo `FindOneSongQuery`) 
+  ➔ `SongsController.findOne` (Nhận `id` từ param) 
+  ➔ `SongsService.findOne` (Khởi tạo `FindOneSongQuery`) 
   ➔ `QueryBus.execute`
   ➔ `FindOneSongHandler.execute`
       ➔ `SongRepository.findByUserAndId`
@@ -47,8 +47,8 @@ Tài liệu chi tiết đường đi của dữ liệu từ Client cho đến Da
 ## 4. DELETE `/songs/:id` (Xóa bài hát)
 `Client` 
   ➔ `JwtAuthGuard` 
-  ➔ `SongController.remove`
-  ➔ `SongService.remove` (Khởi tạo `RemoveSongCommand`) 
+  ➔ `SongsController.remove`
+  ➔ `SongsService.remove` (Khởi tạo `RemoveSongCommand`) 
   ➔ `CommandBus.execute`
   ➔ `RemoveSongHandler.execute`
       ➔ `SongRepository.findByUserAndId`
@@ -59,8 +59,8 @@ Tài liệu chi tiết đường đi của dữ liệu từ Client cho đến Da
 ## 5. PATCH `/songs/:id/move` (Đổi Album)
 `Client` 
   ➔ `JwtAuthGuard` 
-  ➔ `SongController.moveToAlbum` (Nhận `MoveSongDto`)
-  ➔ `SongService.moveToAlbum` (Khởi tạo `MoveSongToAlbumCommand`) 
+  ➔ `SongsController.moveToAlbum` (Nhận `MoveSongDto`)
+  ➔ `SongsService.moveToAlbum` (Khởi tạo `MoveSongToAlbumCommand`) 
   ➔ `CommandBus.execute`
   ➔ `MoveSongToAlbumHandler.execute`
       ➔ `SongRepository.findByUserAndId`

@@ -11,7 +11,7 @@ import { FindAllSongsQuery } from './queries/find-all-songs/find-all-songs.query
 import { FindOneSongQuery } from './queries/find-one-song/find-one-song.query';
 
 @Injectable()
-export class SongService {
+export class SongsService {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,

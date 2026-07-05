@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectQueue } from '@nestjs/bullmq';
+import { BadRequestException } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { Track } from '@prisma/client';
@@ -52,17 +53,21 @@ export class CreateSongFromYoutubeHandler
     );
     const youtubeId = this.youtubeHelper.extractYoutubeId(url);
 
-    if (youtubeId) {
-      const reusedSong = await this.tryReuseExistingTrack({
-        userId,
-        youtubeId,
-        title,
-        artist,
-        albumId: finalAlbumId,
-      });
-      if (reusedSong) {
-        return this.youtubeHelper.mapToResponse(reusedSong);
-      }
+    if (!youtubeId) {
+      this.logger.warn({ url }, 'Invalid YouTube URL or missing Video ID');
+      throw new BadRequestException('Invalid YouTube URL');
+    }
+
+    const reusedSong = await this.tryReuseExistingTrack({
+      userId,
+      youtubeId,
+      title,
+      artist,
+      albumId: finalAlbumId,
+    });
+    
+    if (reusedSong) {
+      return this.youtubeHelper.mapToResponse(reusedSong);
     }
 
     const song = await this.createPendingSong(

@@ -18,7 +18,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { SongService } from './song.service';
+import { SongsService } from './songs.service';
 import { CreateSongYoutubeDto } from './dto/create-song-youtube.dto';
 import { MoveSongDto } from './dto/move-song.dto';
 import { SongResponseDto } from './dto/song-response.dto';
@@ -32,8 +32,8 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 @UseGuards(JwtAuthGuard)
 @Controller('songs')
 @UseInterceptors(ClassSerializerInterceptor)
-export class SongController {
-  constructor(private readonly songService: SongService) {}
+export class SongsController {
+  constructor(private readonly songService: SongsService) {}
 
   @ApiOperation({ summary: 'Create a new song from YouTube URL' })
   @ApiResponse({

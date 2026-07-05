@@ -10,13 +10,13 @@
 HTTP Request
     │
     ▼
-SongController          ← Chỉ nhận/trả HTTP, KHÔNG chứa logic
+SongsController          ← Chỉ nhận/trả HTTP, KHÔNG chứa logic
     │
     ▼
 [JwtAuthGuard / ThrottlerGuard] ← Chống spam và xác thực
     │
     ▼
-SongService             ← Orchestrator: Gom data đẩy sang Bus
+SongsService             ← Orchestrator: Gom data đẩy sang Bus
     │
     ▼
 CommandBus / QueryBus   ← Module phân phối (CQRS)
@@ -152,7 +152,7 @@ Log sẽ hiện: Xem log bằng cách grep "adding to conversion queue" trong te
 // → Loại bỏ fat-service, decouple logic.
 
 // Code ví dụ:
-export class SongService {
+export class SongsService {
   constructor(private commandBus: CommandBus) {}
   async remove(userId: string, id: string) {
     return this.commandBus.execute(new RemoveSongCommand(userId, id));
@@ -178,7 +178,7 @@ export function mapToResponse(song: any) {
 **Trước khi thêm feature mới:**
 - Mọi thao tác ghi (Create, Update, Delete) phải sinh ra `[Name]Command` và `[Name]Handler`.
 - Mọi thao tác đọc (Find) phức tạp nên sinh ra `[Name]Query`.
-- Không được viết trực tiếp Business Logic hay gọi Repository từ bên trong `SongService`.
+- Không được viết trực tiếp Business Logic hay gọi Repository từ bên trong `SongsService`.
 
 **Khi thêm endpoint mới:**
 - Bắt buộc gắn `@UseGuards(JwtAuthGuard)` để lấy user.
