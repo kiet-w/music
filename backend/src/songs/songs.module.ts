@@ -20,10 +20,7 @@ const CommandHandlers = [
   MoveSongToAlbumHandler,
 ];
 
-const QueryHandlers = [
-  FindAllSongsHandler,
-  FindOneSongHandler,
-];
+const QueryHandlers = [FindAllSongsHandler, FindOneSongHandler];
 
 @Module({
   imports: [JobsModule, AlbumsModule, CqrsModule],

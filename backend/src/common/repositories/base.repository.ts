@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-
 export abstract class BaseRepository<
   T,
   Delegate extends {
@@ -53,7 +52,6 @@ export abstract class BaseRepository<
       return this.handlePrismaError(error);
     }
   }
-
   async findUnique(
     args: Parameters<Delegate['findUnique']>[0],
   ): Promise<T | null> {

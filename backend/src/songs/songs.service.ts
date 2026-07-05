@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { SongResponseDto } from './dto/song-response.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
@@ -34,7 +34,6 @@ export class SongsService {
     const query = new FindAllSongsQuery(userId, paginationDto);
     return this.queryBus.execute(query);
   }
-
   async findOne(userId: string, id: string): Promise<SongResponseDto> {
     const query = new FindOneSongQuery(userId, id);
     return this.queryBus.execute(query);

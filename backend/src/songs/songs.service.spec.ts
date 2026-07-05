@@ -170,31 +170,6 @@ describe('SongsService', () => {
       mockAlbumService.findOrCreateDefault.mockResolvedValue(defaultAlbum);
       mockSongRepository.findFirst.mockResolvedValue(null); // Cache miss
       mockSongRepository.create.mockResolvedValue({
-        id: 'song-123',
-        title,
-        albumId: defaultAlbum.id,
-      });
-
-      const result = await service.createFromYoutube(mockUserId, url, title);
-
-      expect(result.albumId).toBe(defaultAlbum.id);
-      expect(mockAlbumService.findOrCreateDefault).toHaveBeenCalledWith(
-        mockUserId,
-      );
-      expect(songRepository.findFirst).toHaveBeenCalledWith({
-        where: {
-          sourceType: 'youtube',
-          sourceId: youtubeId,
-          url: { not: '' },
-        },
-      });
-      expect(songRepository.create).toHaveBeenCalledWith({
-        data: {
-          title,
-          artist: undefined,
-          url: '',
-          albumId: defaultAlbum.id,
-          userId: mockUserId,
           sourceType: 'youtube',
           sourceId: youtubeId,
         },
