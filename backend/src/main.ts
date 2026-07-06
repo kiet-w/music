@@ -18,6 +18,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppLogger } from './common/logger/app.logger';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Request, Response, NextFunction } from 'express';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const corsOriginsEnv = process.env.CORS_ORIGINS;
@@ -49,11 +51,34 @@ async function bootstrap() {
   const logger = new AppLogger();
   app.useLogger(logger);
 
+  app.use(helmet());
+
+  // Protect /metrics from external access (allow only internal/Prometheus scraping)
+  app.use('/metrics', (req: Request, res: Response, next: NextFunction) => {
+    const forwarded = req.headers['x-forwarded-for'];
+    const forwardedIp = Array.isArray(forwarded)
+      ? forwarded[0]
+      : forwarded?.split(',')[0]?.trim();
+    const ip = forwardedIp || req.socket.remoteAddress || '';
+    const isInternal =
+      ip === '127.0.0.1' ||
+      ip === '::1' ||
+      ip === '::ffff:127.0.0.1' ||
+      ip.startsWith('10.') ||
+      ip.startsWith('172.') ||
+      ip.startsWith('192.168.');
+    if (!isInternal) {
+      res.status(403).json({ message: 'Forbidden' });
+      return;
+    }
+    next();
+  });
+
   app.enableCors({
     origin: corsOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: '*',
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     preflightContinue: false,
     optionsSuccessStatus: 204,
   });
