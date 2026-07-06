@@ -1,357 +1,111 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { SongsService } from './songs.service';
-import { SongRepository } from './repositories/song.repository';
-import { AlbumRepository } from '../albums/repositories/album.repository';
-import { AlbumService } from '../albums/album.service';
-import { getQueueToken } from '@nestjs/bullmq';
-import { NotFoundException } from '@nestjs/common';
-import { getLoggerToken } from 'nestjs-pino';
+import { CreateSongFromYoutubeCommand } from './commands/create-youtube-song/create-youtube.song.command';
+import { RemoveSongCommand } from './commands/remove-song/remove-song.command';
+import { MoveSongToAlbumCommand } from './commands/move-song/move-song-to-album.command';
+import { FindAllSongsQuery } from './queries/find-all-songs/find-all-songs.query';
+import { FindOneSongQuery } from './queries/find-one-song/find-one-song.query';
+import { CreateSongYoutubeDto } from './dto/create-song-youtube.dto';
+import { MoveSongDto } from './dto/move-song.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 describe('SongsService', () => {
   let service: SongsService;
-  let songRepository: SongRepository;
-  let albumRepository: AlbumRepository;
-  let albumService: AlbumService;
-  let queue: any;
+  let dispatchedCommand: unknown;
+  let dispatchedQuery: unknown;
+  let commandBus: { execute: jest.Mock };
+  let queryBus: { execute: jest.Mock };
 
-  const mockUserId = 'user-123';
+  const userId = 'user-1';
 
-  const mockPinoLogger = {
-    info: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
-
-  const mockSongRepository = {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    findFirst: jest.fn(),
-    delete: jest.fn(),
-    update: jest.fn(),
-    count: jest.fn(),
-  };
-
-  const mockAlbumRepository = {
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    create: jest.fn(),
-  };
-
-  const mockAlbumService = {
-    findOrCreateDefault: jest.fn(),
-  };
-
-  const mockQueue = {
-    add: jest.fn(),
-  };
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SongsService,
-        {
-          provide: SongRepository,
-          useValue: mockSongRepository,
-        },
-        {
-          provide: AlbumRepository,
-          useValue: mockAlbumRepository,
-        },
-        {
-          provide: AlbumService,
-          useValue: mockAlbumService,
-        },
-        {
-          provide: getQueueToken('conversion'),
-          useValue: mockQueue,
-        },
-        {
-          provide: getLoggerToken(SongsService.name),
-          useValue: mockPinoLogger,
-        },
-      ],
-    }).compile();
-
-    service = module.get<SongsService>(SongsService);
-    songRepository = module.get<SongRepository>(SongRepository);
-    albumRepository = module.get<AlbumRepository>(AlbumRepository);
-    albumService = module.get<AlbumService>(AlbumService);
-    queue = module.get(getQueueToken('conversion'));
-
-    jest.clearAllMocks();
+  beforeEach(() => {
+    dispatchedCommand = undefined;
+    dispatchedQuery = undefined;
+    commandBus = {
+      execute: jest.fn((command: unknown) => {
+        dispatchedCommand = command;
+        return Promise.resolve('command-result');
+      }),
+    };
+    queryBus = {
+      execute: jest.fn((query: unknown) => {
+        dispatchedQuery = query;
+        return Promise.resolve('query-result');
+      }),
+    };
+    service = new SongsService(
+      commandBus as unknown as CommandBus,
+      queryBus as unknown as QueryBus,
+    );
   });
 
-  it('should be defined', () => {
+  it('is defined', () => {
     expect(service).toBeDefined();
   });
 
   describe('createFromYoutube', () => {
-    it('should create a song with a provided albumId if it belongs to the user', async () => {
-      const url = 'https://youtube.com/watch?v=12345678901';
-      const youtubeId = '12345678901';
-      const title = 'Test Song';
-      const artist = 'Test Artist';
-      const albumId = 'album-123';
-
-      mockAlbumRepository.findUnique.mockResolvedValue({
-        id: albumId,
-        userId: mockUserId,
-      });
-      mockSongRepository.findFirst.mockResolvedValue(null); // Cache miss
-      const mockSong = { id: 'song-123', title, artist, albumId };
-      mockSongRepository.create.mockResolvedValue(mockSong);
-
-      const result = await service.createFromYoutube(
-        mockUserId,
-        url,
-        title,
-        artist,
-        albumId,
-      );
-
-      expect(result).toEqual(mockSong);
-      expect(mockAlbumRepository.findUnique).toHaveBeenCalledWith({
-        where: { id: albumId },
-      });
-      expect(songRepository.findFirst).toHaveBeenCalledWith({
-        where: {
-          sourceType: 'youtube',
-          sourceId: youtubeId,
-          url: { not: '' },
-        },
-      });
-      expect(songRepository.create).toHaveBeenCalledWith({
-        data: {
-          title,
-          artist,
-          url: '',
-          albumId,
-          userId: mockUserId,
-          sourceType: 'youtube',
-          sourceId: youtubeId,
-        },
-      });
-      expect(queue.add).toHaveBeenCalledWith(
-        'convert',
-        { url, songId: 'song-123', userId: mockUserId },
-        { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
-      );
-    });
-
-    it('should throw NotFoundException if provided albumId does not belong to the user', async () => {
-      const albumId = 'other-user-album';
-      mockAlbumRepository.findUnique.mockResolvedValue({
-        id: albumId,
-        userId: 'other-user',
-      });
-
-      await expect(
-        service.createFromYoutube(
-          mockUserId,
-          'url',
-          'title',
-          'artist',
-          albumId,
-        ),
-      ).rejects.toThrow(NotFoundException);
-    });
-
-    it('should fallback to default album if no albumId is provided', async () => {
-      const url = 'https://youtube.com/watch?v=12345678901';
-      const youtubeId = '12345678901';
-      const title = 'Test Song';
-      const defaultAlbum = {
-        id: 'default-album',
-        title: 'Default',
-        userId: mockUserId,
+    it('dispatches a CreateSongFromYoutubeCommand built from the dto', async () => {
+      const dto: CreateSongYoutubeDto = {
+        url: 'https://youtu.be/dQw4w9WgXcQ',
+        title: 'Title',
+        artist: 'Artist',
+        albumId: 'album-1',
       };
 
-      mockAlbumService.findOrCreateDefault.mockResolvedValue(defaultAlbum);
-      mockSongRepository.findFirst.mockResolvedValue(null); // Cache miss
-      mockSongRepository.create.mockResolvedValue({
-          sourceType: 'youtube',
-          sourceId: youtubeId,
-        },
+      await service.createFromYoutube(userId, dto);
+
+      expect(dispatchedCommand).toBeInstanceOf(CreateSongFromYoutubeCommand);
+      expect(dispatchedCommand).toMatchObject({
+        userId,
+        url: dto.url,
+        title: dto.title,
+        artist: dto.artist,
+        albumId: dto.albumId,
       });
-    });
-
-    it('should reuse existing track URL if same YouTube ID has been converted', async () => {
-      const url = 'https://youtube.com/watch?v=12345678901';
-      const youtubeId = '12345678901';
-      const title = 'Test Song';
-      const artist = 'Test Artist';
-      const albumId = 'album-123';
-
-      mockAlbumRepository.findUnique.mockResolvedValue({
-        id: albumId,
-        userId: mockUserId,
-      });
-
-      const mockExistingTrack = {
-        id: 'existing-song-id',
-        title: 'Existing Track Title',
-        artist: 'Original Artist',
-        url: 'https://supabase.storage/some-mp3.mp3',
-        duration: 180,
-        sourceType: 'youtube',
-        sourceId: youtubeId,
-      };
-
-      mockSongRepository.findFirst.mockResolvedValue(mockExistingTrack);
-
-      const mockNewSong = {
-        id: 'new-song-id',
-        title,
-        artist: artist,
-        url: mockExistingTrack.url,
-        duration: mockExistingTrack.duration,
-        albumId,
-        sourceType: 'youtube',
-        sourceId: youtubeId,
-      };
-      mockSongRepository.create.mockResolvedValue(mockNewSong);
-
-      const result = await service.createFromYoutube(
-        mockUserId,
-        url,
-        title,
-        artist,
-        albumId,
-      );
-
-      const expectedResponse = {
-        id: 'new-song-id',
-        title,
-        artist,
-        url: mockExistingTrack.url,
-        albumId,
-        sourceType: 'youtube',
-      };
-
-      expect(result).toEqual(expectedResponse);
-      expect(songRepository.findFirst).toHaveBeenCalledWith({
-        where: {
-          sourceType: 'youtube',
-          sourceId: youtubeId,
-          url: { not: '' },
-        },
-      });
-      expect(songRepository.create).toHaveBeenCalledWith({
-        data: {
-          title,
-          artist,
-          url: mockExistingTrack.url,
-          duration: mockExistingTrack.duration,
-          albumId,
-          userId: mockUserId,
-          sourceType: 'youtube',
-          sourceId: youtubeId,
-        },
-      });
-      expect(queue.add).not.toHaveBeenCalled();
     });
   });
 
   describe('findAll', () => {
-    it('should return songs belonging to the user', async () => {
-      const mockSongs = [{ id: '1', title: 'Song 1' }];
-      mockSongRepository.count.mockResolvedValue(1);
-      mockSongRepository.findMany.mockResolvedValue(mockSongs);
+    it('dispatches a FindAllSongsQuery', async () => {
+      const paginationDto = new PaginationDto();
 
-      const result = await service.findAll(mockUserId);
+      await service.findAll(userId, paginationDto);
 
-      expect(result.data).toEqual(mockSongs);
-      expect(result.total).toBe(1);
-      expect(songRepository.findMany).toHaveBeenCalledWith({
-        where: { userId: mockUserId },
-        skip: 0,
-        take: 50,
-        orderBy: { createdAt: 'desc' },
-        include: { album: true },
-      });
+      expect(dispatchedQuery).toBeInstanceOf(FindAllSongsQuery);
+      expect(dispatchedQuery).toMatchObject({ userId, paginationDto });
     });
   });
 
   describe('findOne', () => {
-    it('should return a song if it belongs to the user', async () => {
-      const songId = 'song-123';
-      const mockSong = { id: songId, title: 'Test Song' };
-      mockSongRepository.findFirst.mockResolvedValue(mockSong);
+    it('dispatches a FindOneSongQuery', async () => {
+      await service.findOne(userId, 'song-1');
 
-      const result = await service.findOne(mockUserId, songId);
-
-      expect(result).toEqual(mockSong);
-      expect(songRepository.findFirst).toHaveBeenCalledWith({
-        where: { id: songId, userId: mockUserId },
-        include: { album: true },
-      });
-    });
-
-    it('should throw NotFoundException if song does not exist or belong to user', async () => {
-      mockSongRepository.findFirst.mockResolvedValue(null);
-      await expect(service.findOne(mockUserId, 'non-existent')).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(dispatchedQuery).toBeInstanceOf(FindOneSongQuery);
+      expect(dispatchedQuery).toMatchObject({ userId, id: 'song-1' });
     });
   });
 
   describe('remove', () => {
-    it('should delete a song if it belongs to the user', async () => {
-      const songId = 'song-123';
-      mockSongRepository.findFirst.mockResolvedValue({ id: songId });
-      mockSongRepository.delete.mockResolvedValue({ id: songId });
+    it('dispatches a RemoveSongCommand', async () => {
+      await service.remove(userId, 'song-1');
 
-      await service.remove(mockUserId, songId);
-
-      expect(songRepository.findFirst).toHaveBeenCalledWith({
-        where: { id: songId, userId: mockUserId },
-        include: { album: true },
-      });
-      expect(songRepository.delete).toHaveBeenCalledWith({
-        where: { id: songId },
-      });
-    });
-
-    it('should throw NotFoundException if song does not belong to user', async () => {
-      mockSongRepository.findFirst.mockResolvedValue(null);
-      await expect(service.remove(mockUserId, 'other-song')).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(dispatchedCommand).toBeInstanceOf(RemoveSongCommand);
+      expect(dispatchedCommand).toMatchObject({ userId, id: 'song-1' });
     });
   });
 
   describe('moveToAlbum', () => {
-    it('should update the albumId if both song and target album belong to the user', async () => {
-      const songId = 'song-123';
-      const albumId = 'new-album-123';
+    it('dispatches a MoveSongToAlbumCommand built from the dto', async () => {
+      const dto: MoveSongDto = { albumId: 'album-2' };
 
-      mockSongRepository.findFirst.mockResolvedValue({ id: songId });
-      mockAlbumRepository.findUnique.mockResolvedValue({
-        id: albumId,
-        userId: mockUserId,
+      await service.moveToAlbum(userId, 'song-1', dto);
+
+      expect(dispatchedCommand).toBeInstanceOf(MoveSongToAlbumCommand);
+      expect(dispatchedCommand).toMatchObject({
+        userId,
+        id: 'song-1',
+        albumId: 'album-2',
       });
-      mockSongRepository.update.mockResolvedValue({ id: songId, albumId });
-
-      const result = await service.moveToAlbum(mockUserId, songId, albumId);
-
-      expect(result.albumId).toBe(albumId);
-      expect(songRepository.update).toHaveBeenCalledWith({
-        where: { id: songId },
-        data: { albumId },
-      });
-    });
-
-    it('should throw NotFoundException if target album belongs to another user', async () => {
-      mockSongRepository.findFirst.mockResolvedValue({ id: 'song-1' });
-      mockAlbumRepository.findUnique.mockResolvedValue({
-        id: 'other-album',
-        userId: 'other-user',
-      });
-
-      await expect(
-        service.moveToAlbum(mockUserId, 'song-1', 'other-album'),
-      ).rejects.toThrow(NotFoundException);
     });
   });
 });
