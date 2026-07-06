@@ -63,3 +63,12 @@ _to_review_for_deletion/
 backend/cookies.txt
 backend/yt-dlp
 backend/temp/
+backend/test/
+
+# Python
+*.pyc
+__pycache__/
+
+# Misc
+*.sql
+*.sh
