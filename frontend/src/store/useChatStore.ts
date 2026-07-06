@@ -79,6 +79,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         set({ messages: history });
       } catch (error) {
         console.error('Failed to fetch chat history:', error);
+        throw error;
       } finally {
         set({ isLoading: false });
       }

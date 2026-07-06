@@ -173,52 +173,48 @@ export class GoogleDriveService implements OnModuleInit {
     await this.setCredentials(userId);
     const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
 
-    try {
-      const res = await drive.files.list({
-        pageSize: 100,
-        fields:
-          'nextPageToken, files(id, name, mimeType, size, shortcutDetails, capabilities, driveId)',
-        q: "trashed = false and (mimeType = 'audio/mpeg' or mimeType = 'application/vnd.google-apps.shortcut')",
-        supportsAllDrives: true,
-        includeItemsFromAllDrives: true,
-      });
+    const res = await drive.files.list({
+      pageSize: 100,
+      fields:
+        'nextPageToken, files(id, name, mimeType, size, shortcutDetails, capabilities, driveId)',
+      q: "trashed = false and (mimeType = 'audio/mpeg' or mimeType = 'application/vnd.google-apps.shortcut')",
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+    });
 
-      const files = res.data.files || [];
+    const files = res.data.files || [];
 
-      // Strictly filter for MP3 files or shortcuts to MP3 files
-      const musicFiles = files.filter((file) => {
-        const name = file.name?.toLowerCase() || '';
-        const mime = file.mimeType?.toLowerCase() || '';
-        const isMp3Mime = mime === 'audio/mpeg' || mime === 'audio/mp3';
-        const isMp3Ext = name.endsWith('.mp3');
+    // Strictly filter for MP3 files or shortcuts to MP3 files
+    const musicFiles = files.filter((file) => {
+      const name = file.name?.toLowerCase() || '';
+      const mime = file.mimeType?.toLowerCase() || '';
+      const isMp3Mime = mime === 'audio/mpeg' || mime === 'audio/mp3';
+      const isMp3Ext = name.endsWith('.mp3');
 
-        const isShortcutToMp3 =
-          mime === 'application/vnd.google-apps.shortcut' &&
-          (file.shortcutDetails?.targetMimeType === 'audio/mpeg' ||
-            file.shortcutDetails?.targetMimeType === 'audio/mp3' ||
-            name.endsWith('.mp3'));
+      const isShortcutToMp3 =
+        mime === 'application/vnd.google-apps.shortcut' &&
+        (file.shortcutDetails?.targetMimeType === 'audio/mpeg' ||
+          file.shortcutDetails?.targetMimeType === 'audio/mp3' ||
+          name.endsWith('.mp3'));
 
-        return isMp3Mime || isMp3Ext || isShortcutToMp3;
-      });
+      return isMp3Mime || isMp3Ext || isShortcutToMp3;
+    });
 
-      // Map shortcuts to their targets
-      return musicFiles.map((file) => {
-        if (
-          file.mimeType === 'application/vnd.google-apps.shortcut' &&
-          file.shortcutDetails?.targetId
-        ) {
-          return {
-            ...file,
-            id: file.shortcutDetails.targetId,
-            mimeType: file.shortcutDetails.targetMimeType || 'audio/mpeg',
-            isShortcut: true,
-          };
-        }
-        return file;
-      });
-    } catch (error: any) {
-      throw error;
-    }
+    // Map shortcuts to their targets
+    return musicFiles.map((file) => {
+      if (
+        file.mimeType === 'application/vnd.google-apps.shortcut' &&
+        file.shortcutDetails?.targetId
+      ) {
+        return {
+          ...file,
+          id: file.shortcutDetails.targetId,
+          mimeType: file.shortcutDetails.targetMimeType || 'audio/mpeg',
+          isShortcut: true,
+        };
+      }
+      return file;
+    });
   }
 
   async getFileMetadata(userId: string, fileId: string, accessToken?: string) {
@@ -284,29 +280,37 @@ export class GoogleDriveService implements OnModuleInit {
 
     // Handle token refresh automatically by the library
     this.oauth2Client.on('tokens', async (tokens) => {
-      if (tokens.refresh_token) {
-        // Rarely happens unless offline access is requested and first time
-        await this.prisma.user.update({
-          where: { id: userId },
-          data: {
-            googleRefreshToken: this.encryptionService.encrypt(
-              tokens.refresh_token,
-            ),
-          },
-        });
-      }
-      if (tokens.access_token) {
-        await this.prisma.user.update({
-          where: { id: userId },
-          data: {
-            googleAccessToken: this.encryptionService.encrypt(
-              tokens.access_token,
-            ),
-            googleTokenExpiry: tokens.expiry_date
-              ? new Date(tokens.expiry_date)
-              : null,
-          },
-        });
+      try {
+        if (tokens.refresh_token) {
+          await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+              googleRefreshToken: this.encryptionService.encrypt(
+                tokens.refresh_token,
+              ),
+            },
+          });
+        }
+        if (tokens.access_token) {
+          await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+              googleAccessToken: this.encryptionService.encrypt(
+                tokens.access_token,
+              ),
+              googleTokenExpiry: tokens.expiry_date
+                ? new Date(tokens.expiry_date)
+                : null,
+            },
+          });
+        }
+      } catch (error) {
+        // Log but don't throw — this runs in an event handler where
+        // unhandled rejections would crash the process.
+        console.error(
+          `Failed to persist refreshed Google tokens for user ${userId}:`,
+          error instanceof Error ? error.message : error,
+        );
       }
     });
   }
@@ -332,27 +336,34 @@ export class GoogleDriveService implements OnModuleInit {
     });
 
     for (const user of users) {
-      let updated = false;
-      const updateData: any = {};
+      try {
+        let updated = false;
+        const updateData: any = {};
 
-      if (user.googleRefreshToken && !user.googleRefreshToken.includes(':')) {
-        updateData.googleRefreshToken = this.encryptionService.encrypt(
-          user.googleRefreshToken,
-        );
-        updated = true;
-      }
-      if (user.googleAccessToken && !user.googleAccessToken.includes(':')) {
-        updateData.googleAccessToken = this.encryptionService.encrypt(
-          user.googleAccessToken,
-        );
-        updated = true;
-      }
+        if (user.googleRefreshToken && !user.googleRefreshToken.includes(':')) {
+          updateData.googleRefreshToken = this.encryptionService.encrypt(
+            user.googleRefreshToken,
+          );
+          updated = true;
+        }
+        if (user.googleAccessToken && !user.googleAccessToken.includes(':')) {
+          updateData.googleAccessToken = this.encryptionService.encrypt(
+            user.googleAccessToken,
+          );
+          updated = true;
+        }
 
-      if (updated) {
-        await this.prisma.user.update({
-          where: { id: user.id },
-          data: updateData,
-        });
+        if (updated) {
+          await this.prisma.user.update({
+            where: { id: user.id },
+            data: updateData,
+          });
+        }
+      } catch (error) {
+        console.error(
+          `Failed to migrate tokens for user ${user.id}:`,
+          error instanceof Error ? error.message : error,
+        );
       }
     }
   }

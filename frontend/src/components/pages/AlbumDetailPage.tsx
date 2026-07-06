@@ -9,6 +9,7 @@ import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
 import { useAlbumStore } from '@/store/useAlbumStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { AlbumDetailTemplate } from '@/components/templates/AlbumDetail/AlbumDetailTemplate';
+import { toast } from 'sonner';
 
 interface AlbumDetailPageProps {
   locale: string;
@@ -32,6 +33,7 @@ export function AlbumDetailPage({ locale }: AlbumDetailPageProps) {
       setAlbum(data);
     } catch (err: any) {
       console.error('Failed to reload album:', err);
+      toast.error(err.message || 'Failed to load album details');
     } finally {
       setLoading(false);
     }

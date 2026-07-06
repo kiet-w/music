@@ -46,6 +46,9 @@ export default function MessagesPage() {
         if (targetUserId && filteredUsers.some((u: User) => u.id === targetUserId)) {
           setActiveReceiverId(targetUserId, accessToken);
         }
+      }).catch((err) => {
+        console.error('Failed to fetch users:', err);
+        toast.error(t('error_loading_users') || 'Failed to load users');
       });
     }
   }, [accessToken, currentUser?.id, targetUserId, setActiveReceiverId]);
@@ -59,7 +62,10 @@ export default function MessagesPage() {
 
   const handleSelectUser = (userId: string | null) => {
     if (accessToken) {
-      setActiveReceiverId(userId, accessToken);
+      setActiveReceiverId(userId, accessToken).catch((err) => {
+        console.error('Failed to load chat:', err);
+        toast.error(t('error_loading_chat') || 'Failed to load chat history');
+      });
     }
   };
 
@@ -69,6 +75,7 @@ export default function MessagesPage() {
       await sendMessage(accessToken, content);
     } catch (error) {
       console.error('Failed to send message:', error);
+      toast.error(t('error_send_message') || 'Failed to send message');
     }
   };
 
@@ -83,6 +90,7 @@ export default function MessagesPage() {
       toast.success(t('invite_success_copied') || 'Link copied to clipboard!');
     } catch (error) {
       console.error('Failed to create invite:', error);
+      toast.error(t('error_create_invite') || 'Failed to create invite link');
     }
   };
 
