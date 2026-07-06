@@ -38,7 +38,6 @@ export class SongsService {
     const query = new FindOneSongQuery(userId, id);
     return this.queryBus.execute(query);
   }
-
   async remove(userId: string, id: string): Promise<void> {
     const command = new RemoveSongCommand(userId, id);
     return this.commandBus.execute(command);

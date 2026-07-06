@@ -54,7 +54,7 @@ export class CleanupService {
   private async cleanupTempFiles() {
     this.appLogger.step('Cleaning up temp files');
 
-    const dirsToSweep = [path.join(process.cwd(), 'temp'), '/tmp'];
+    const dirsToSweep = [path.join(process.cwd(), 'temp')];
 
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
     let deletedCount = 0;

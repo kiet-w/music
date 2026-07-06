@@ -25,6 +25,7 @@ import { SongResponseDto } from './dto/song-response.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
 @ApiTags('songs')
@@ -44,7 +45,7 @@ export class SongsController {
   @Post('youtube')
   @UseGuards(ThrottlerGuard)
   async createFromYoutube(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateSongYoutubeDto,
   ): Promise<SongResponseDto> {
     return this.songsService.createFromYoutube(user.id, dto);
@@ -57,7 +58,7 @@ export class SongsController {
   })
   @Get()
   async findAll(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Query() paginationDto: PaginationDto,
   ) {
     return this.songsService.findAll(user.id, paginationDto);
@@ -72,7 +73,7 @@ export class SongsController {
   @ApiResponse({ status: 404, description: 'Song not found.' })
   @Get(':id')
   async findOne(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ): Promise<SongResponseDto> {
     return this.songsService.findOne(user.id, id);
@@ -84,7 +85,7 @@ export class SongsController {
   @HttpCode(204)
   @Delete(':id')
   async remove(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ): Promise<void> {
     await this.songsService.remove(user.id, id);
@@ -99,7 +100,7 @@ export class SongsController {
   @ApiResponse({ status: 404, description: 'Song not found.' })
   @Patch(':id/move')
   async moveToAlbum(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() dto: MoveSongDto,
   ): Promise<SongResponseDto> {

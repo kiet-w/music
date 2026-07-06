@@ -20,6 +20,7 @@ import { MessageResponseDto } from '../dto/message-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
+import { AuthenticatedUser } from '../../auth/interfaces/authenticated-user.interface';
 
 @ApiTags('messages')
 @ApiBearerAuth()
@@ -37,7 +38,7 @@ export class MessagesController {
   })
   @Post()
   async create(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() createMessageDto: CreateMessageDto,
   ): Promise<MessageResponseDto> {
     const message = await this.messagesService.create(
@@ -55,7 +56,7 @@ export class MessagesController {
   })
   @Get(':userId')
   async findAllByConversation(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('userId') otherUserId: string,
   ): Promise<MessageResponseDto[]> {
     const messages = await this.messagesService.findAllByConversation(

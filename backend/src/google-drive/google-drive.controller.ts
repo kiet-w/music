@@ -15,7 +15,9 @@ import { GoogleDriveService } from './google-drive.service';
 import { ImportDto } from './dto/import.dto';
 import { ExchangeCodeDto } from './dto/exchange-code.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
 
 @ApiTags('google-drive')
 @ApiBearerAuth()
@@ -40,7 +42,7 @@ export class GoogleDriveController {
 
   @Get('status')
   @ApiOperation({ summary: 'Check if Google Drive is connected' })
-  async getStatus(@CurrentUser() user: any) {
+  async getStatus(@CurrentUser() user: AuthenticatedUser) {
     const cacheKey = `gdrive-status-${user.id}`;
     const cached = await this.cacheManager.get(cacheKey);
     if (cached !== undefined) {
@@ -54,14 +56,14 @@ export class GoogleDriveController {
 
   @Get('auth-url')
   @ApiOperation({ summary: 'Generate Google OAuth URL' })
-  async getAuthUrl(@CurrentUser() user: any) {
+  async getAuthUrl(@CurrentUser() user: AuthenticatedUser) {
     const url = await this.googleDriveService.generateAuthUrl(user.id);
     return { url };
   }
 
   @Post('exchange-code')
   @ApiOperation({ summary: 'Exchange Google OAuth code for tokens' })
-  async exchangeCode(@CurrentUser() user: any, @Body() dto: ExchangeCodeDto) {
+  async exchangeCode(@CurrentUser() user: AuthenticatedUser, @Body() dto: ExchangeCodeDto) {
     return await this.googleDriveService.exchangeCodeForTokens(
       user.id,
       dto.code,
@@ -71,13 +73,14 @@ export class GoogleDriveController {
 
   @Get('files')
   @ApiOperation({ summary: 'List music files from Google Drive' })
-  async listFiles(@CurrentUser() user: any) {
+  async listFiles(@CurrentUser() user: AuthenticatedUser) {
     return await this.googleDriveService.listFiles(user.id);
   }
 
   @Post('import')
+  @UseGuards(ThrottlerGuard)
   @ApiOperation({ summary: 'Import a file from Google Drive' })
-  async importFile(@CurrentUser() user: any, @Body() importDto: ImportDto) {
+  async importFile(@CurrentUser() user: AuthenticatedUser, @Body() importDto: ImportDto) {
     return await this.googleDriveService.importFile(user.id, importDto);
   }
 }

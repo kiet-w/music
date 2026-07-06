@@ -21,7 +21,7 @@ import { EncryptionService } from '../common/services/encryption.service';
 
 @Injectable()
 export class GoogleDriveService implements OnModuleInit {
-  private oauth2Client;
+  private oauth2Client: InstanceType<typeof google.auth.OAuth2>;
 
   constructor(
     private prisma: PrismaService,
@@ -173,52 +173,48 @@ export class GoogleDriveService implements OnModuleInit {
     await this.setCredentials(userId);
     const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
 
-    try {
-      const res = await drive.files.list({
-        pageSize: 100,
-        fields:
-          'nextPageToken, files(id, name, mimeType, size, shortcutDetails, capabilities, driveId)',
-        q: "trashed = false and (mimeType = 'audio/mpeg' or mimeType = 'application/vnd.google-apps.shortcut')",
-        supportsAllDrives: true,
-        includeItemsFromAllDrives: true,
-      });
+    const res = await drive.files.list({
+      pageSize: 100,
+      fields:
+        'nextPageToken, files(id, name, mimeType, size, shortcutDetails, capabilities, driveId)',
+      q: "trashed = false and (mimeType = 'audio/mpeg' or mimeType = 'application/vnd.google-apps.shortcut')",
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+    });
 
-      const files = res.data.files || [];
+    const files = res.data.files || [];
 
-      // Strictly filter for MP3 files or shortcuts to MP3 files
-      const musicFiles = files.filter((file) => {
-        const name = file.name?.toLowerCase() || '';
-        const mime = file.mimeType?.toLowerCase() || '';
-        const isMp3Mime = mime === 'audio/mpeg' || mime === 'audio/mp3';
-        const isMp3Ext = name.endsWith('.mp3');
+    // Strictly filter for MP3 files or shortcuts to MP3 files
+    const musicFiles = files.filter((file) => {
+      const name = file.name?.toLowerCase() || '';
+      const mime = file.mimeType?.toLowerCase() || '';
+      const isMp3Mime = mime === 'audio/mpeg' || mime === 'audio/mp3';
+      const isMp3Ext = name.endsWith('.mp3');
 
-        const isShortcutToMp3 =
-          mime === 'application/vnd.google-apps.shortcut' &&
-          (file.shortcutDetails?.targetMimeType === 'audio/mpeg' ||
-            file.shortcutDetails?.targetMimeType === 'audio/mp3' ||
-            name.endsWith('.mp3'));
+      const isShortcutToMp3 =
+        mime === 'application/vnd.google-apps.shortcut' &&
+        (file.shortcutDetails?.targetMimeType === 'audio/mpeg' ||
+          file.shortcutDetails?.targetMimeType === 'audio/mp3' ||
+          name.endsWith('.mp3'));
 
-        return isMp3Mime || isMp3Ext || isShortcutToMp3;
-      });
+      return isMp3Mime || isMp3Ext || isShortcutToMp3;
+    });
 
-      // Map shortcuts to their targets
-      return musicFiles.map((file) => {
-        if (
-          file.mimeType === 'application/vnd.google-apps.shortcut' &&
-          file.shortcutDetails?.targetId
-        ) {
-          return {
-            ...file,
-            id: file.shortcutDetails.targetId,
-            mimeType: file.shortcutDetails.targetMimeType || 'audio/mpeg',
-            isShortcut: true,
-          };
-        }
-        return file;
-      });
-    } catch (error: any) {
-      throw error;
-    }
+    // Map shortcuts to their targets
+    return musicFiles.map((file) => {
+      if (
+        file.mimeType === 'application/vnd.google-apps.shortcut' &&
+        file.shortcutDetails?.targetId
+      ) {
+        return {
+          ...file,
+          id: file.shortcutDetails.targetId,
+          mimeType: file.shortcutDetails.targetMimeType || 'audio/mpeg',
+          isShortcut: true,
+        };
+      }
+      return file;
+    });
   }
 
   async getFileMetadata(userId: string, fileId: string, accessToken?: string) {
@@ -283,6 +279,7 @@ export class GoogleDriveService implements OnModuleInit {
     });
 
     // Handle token refresh automatically by the library
+    this.oauth2Client.removeAllListeners('tokens');
     this.oauth2Client.on('tokens', async (tokens) => {
       if (tokens.refresh_token) {
         // Rarely happens unless offline access is requested and first time

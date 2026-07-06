@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Injectable,
   InternalServerErrorException,
@@ -6,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as fs from 'fs';
+import * as path from 'path';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { IDownloaderProvider } from '../../common/interfaces/downloader-provider.interface';
 import { execFile } from 'child_process';
@@ -64,17 +64,17 @@ export class DownloaderService implements IDownloaderProvider {
         ffmpegStatic as unknown as string,
       ];
 
-      if (fs.existsSync('./cookies.txt')) {
-        args.push('--cookies', './cookies.txt');
+      if (fs.existsSync(path.resolve('./cookies.txt'))) {
+        args.push('--cookies', path.resolve('./cookies.txt'));
       }
 
       args.push('-o', outputPath, url);
-      await execFileAsync('./yt-dlp', args);
+      await execFileAsync(path.resolve('./yt-dlp'), args);
 
       this.logger.info({ outputPath }, 'Download completed');
     } catch (error: any) {
-      const exitCode = error.code ?? 'unknown';
-      const stderr = (error.stderr as string) ?? '';
+      const exitCode = error.code ?? 'unknown'; // eslint-disable-line @typescript-eslint/no-unsafe-member-access
+      const stderr = (error.stderr as string) ?? ''; // eslint-disable-line @typescript-eslint/no-unsafe-member-access
 
       // Classify errors more specifically
       if (stderr.includes('Requested format is not available')) {
@@ -110,7 +110,7 @@ export class DownloaderService implements IDownloaderProvider {
       }
     } catch (error) {
       this.logger.error(
-        { filePath, error: error.message },
+        { filePath, error: error.message }, // eslint-disable-line @typescript-eslint/no-unsafe-member-access
         'Failed to cleanup file',
       );
     }

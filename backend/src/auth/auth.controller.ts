@@ -16,6 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
+import { AuthenticatedUser } from './interfaces/authenticated-user.interface';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -88,7 +89,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'Return current user profile' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async me(@CurrentUser() user: { id: string; email: string }) {
+  async me(@CurrentUser() user: AuthenticatedUser) {
     return this.authService.me(user.id);
   }
 
@@ -96,7 +97,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Check Google Drive link status' })
-  async googleStatus(@CurrentUser() user: any) {
+  async googleStatus(@CurrentUser() user: AuthenticatedUser) {
     return this.authService.getGoogleStatus(user.id);
   }
 

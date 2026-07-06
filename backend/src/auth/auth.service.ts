@@ -29,6 +29,8 @@ export class AuthService {
   ) {
     this.googleClient = new OAuth2Client(
       this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
+      this.configService.get<string>('GOOGLE_REDIRECT_URI'),
     );
   }
 
@@ -86,11 +88,13 @@ export class AuthService {
     redirectUri?: string,
   ): Promise<AuthResponseDto> {
     try {
-      const client = new OAuth2Client(
-        this.configService.get<string>('GOOGLE_CLIENT_ID'),
-        this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
-        redirectUri || this.configService.get<string>('GOOGLE_REDIRECT_URI'),
-      );
+      const client = redirectUri
+        ? new OAuth2Client(
+            this.configService.get<string>('GOOGLE_CLIENT_ID'),
+            this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
+            redirectUri,
+          )
+        : this.googleClient;
 
       const { tokens } = await client.getToken(code);
       if (!tokens.id_token) {
@@ -134,9 +138,7 @@ export class AuthService {
         { error: error.message },
         'Unified Google login failed',
       );
-      throw new UnauthorizedException(
-        'Unified Google authentication failed: ' + error.message,
-      );
+      throw new UnauthorizedException('Google authentication failed');
     }
   }
 

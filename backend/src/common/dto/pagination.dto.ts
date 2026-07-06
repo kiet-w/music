@@ -15,5 +15,6 @@ export class PaginationDto {
   limit: number = 10;
   @IsOptional()
   @IsString()
+  @IsIn(['title', 'artist', 'createdAt'])
   sort?: string;
 }

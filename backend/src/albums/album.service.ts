@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { AlbumRepository } from './repositories/album.repository';
 import { CreateAlbumDto } from './dto/create-album.dto';
@@ -84,6 +84,10 @@ export class AlbumService {
         },
       },
     });
+
+    if (!album) {
+      throw new NotFoundException(`Album with ID ${id} not found`);
+    }
 
     return this.mapAlbumResponse(album);
   }

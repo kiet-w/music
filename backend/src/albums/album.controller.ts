@@ -7,7 +7,6 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   UseGuards,
-  NotFoundException,
   Query,
 } from '@nestjs/common';
 import {
@@ -21,6 +20,7 @@ import { AlbumResponseDto } from './dto/album-response.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
 
 @ApiTags('albums')
 @ApiBearerAuth()
@@ -38,7 +38,7 @@ export class AlbumController {
   })
   @Post()
   async create(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() createAlbumDto: CreateAlbumDto,
   ): Promise<AlbumResponseDto> {
     return this.albumService.create(user.id, createAlbumDto);
@@ -51,7 +51,7 @@ export class AlbumController {
   })
   @Get()
   async findAll(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
@@ -70,13 +70,9 @@ export class AlbumController {
   @ApiResponse({ status: 404, description: 'Album not found.' })
   @Get(':id')
   async findOne(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ): Promise<AlbumResponseDto> {
-    const album = await this.albumService.findOne(user.id, id);
-    if (!album) {
-      throw new NotFoundException(`Album with ID ${id} not found`);
-    }
-    return album;
+    return this.albumService.findOne(user.id, id);
   }
 }

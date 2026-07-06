@@ -4,6 +4,7 @@ import { GoogleDriveService } from './google-drive.service';
 import { ImportDto } from './dto/import.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
 
 @ApiTags('music')
 @ApiBearerAuth()
@@ -14,7 +15,7 @@ export class MusicController {
 
   @Post('import')
   @ApiOperation({ summary: 'Import a file from Google Drive' })
-  async importFile(@CurrentUser() user: any, @Body() importDto: ImportDto) {
+  async importFile(@CurrentUser() user: AuthenticatedUser, @Body() importDto: ImportDto) {
     return await this.googleDriveService.importFile(user.id, importDto);
   }
 }
