@@ -17,4 +17,12 @@ export class PaginationDto {
   @IsString()
   @IsIn(['title', 'artist', 'createdAt'])
   sort?: string;
+
+  get skip(): number {
+    return (this.page - 1) * this.limit;
+  }
+
+  get take(): number {
+    return this.limit;
+  }
 }

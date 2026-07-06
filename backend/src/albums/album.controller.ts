@@ -18,6 +18,7 @@ import {
 import { AlbumService } from './album.service';
 import { AlbumResponseDto } from './dto/album-response.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
@@ -52,13 +53,13 @@ export class AlbumController {
   @Get()
   async findAll(
     @CurrentUser() user: AuthenticatedUser,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query() paginationDto: PaginationDto,
   ) {
-    const skip =
-      page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
-    const take = Math.min(limit ? parseInt(limit, 10) : 50, 100); // cap at 100
-    return this.albumService.findAll(user.id, skip, take);
+    return this.albumService.findAll(
+      user.id,
+      paginationDto.skip,
+      paginationDto.take,
+    );
   }
 
   @ApiOperation({ summary: 'Get an album by ID' })

@@ -7,11 +7,7 @@ import { YoutubeSection } from '@/components/molecules/Music/YoutubeSection';
 import { DriveSection } from '@/components/molecules/Music/DriveSection';
 import { DownloadHistoryList } from '@/components/molecules/Music/DownloadHistoryList';
 import { AnimatePresence } from 'framer-motion';
-
-interface Album {
-  id: string;
-  title: string;
-}
+import type { AlbumBasic } from '@/types/album';
 
 interface HistoryItem {
   id: string;
@@ -28,7 +24,7 @@ interface MusicTemplateProps {
   isDriveLoading: boolean;
   selectedAlbumId: string;
   setSelectedAlbumId: (id: string) => void;
-  albums: Album[];
+  albums: AlbumBasic[];
   history: HistoryItem[];
   t: (key: string, values?: any) => string;
 }
