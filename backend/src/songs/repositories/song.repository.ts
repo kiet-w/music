@@ -22,6 +22,16 @@ export class SongRepository extends BaseRepository<
     });
   }
 
+  async findPendingByYoutubeId(youtubeId: string): Promise<Track | null> {
+    return this.findFirst({
+      where: {
+        sourceType: 'youtube',
+        sourceId: youtubeId,
+        url: '',
+      },
+    });
+  }
+
   async findByUserAndId(userId: string, id: string): Promise<Track | null> {
     return this.findFirst({
       where: { id, userId },

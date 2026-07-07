@@ -5,7 +5,7 @@ import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { MoveSongToAlbumCommand } from './move-song-to-album.command';
 import { SongResponseDto } from '../../dto/song-response.dto';
 import { SongRepository } from '../../repositories/song.repository';
-import { YoutubeSongHelper } from '../../helper/youtube-song.helper';
+import { SongMapper } from '../../helper/song-mapper';
 import { AlbumValidationHelper } from '../../helper/album-validation.helper';
 
 @CommandHandler(MoveSongToAlbumCommand)
@@ -14,7 +14,7 @@ export class MoveSongToAlbumHandler
 {
   constructor(
     private readonly songRepository: SongRepository,
-    private readonly youtubeHelper: YoutubeSongHelper,
+    private readonly songMapper: SongMapper,
     private readonly albumHelper: AlbumValidationHelper,
     @InjectPinoLogger(MoveSongToAlbumHandler.name)
     private readonly logger: PinoLogger,
@@ -41,6 +41,6 @@ export class MoveSongToAlbumHandler
       data: { albumId: validatedAlbumId },
     });
 
-    return this.youtubeHelper.mapToResponse(updatedSong);
+    return this.songMapper.mapToResponse(updatedSong);
   }
 }

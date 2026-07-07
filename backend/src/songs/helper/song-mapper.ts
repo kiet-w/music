@@ -3,7 +3,7 @@ import { SongResponseDto } from '../dto/song-response.dto';
 import { Track } from '@prisma/client';
 
 @Injectable()
-export class YoutubeSongHelper {
+export class SongMapper {
   private readonly YOUTUBE_ID_REGEX =
     /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/;
 
@@ -13,7 +13,7 @@ export class YoutubeSongHelper {
   }
 
   mapToResponse(song: Track): SongResponseDto {
-    return { 
+    return {
       id: song.id,
       title: song.title,
       artist: song.artist,
@@ -22,6 +22,7 @@ export class YoutubeSongHelper {
       albumId: song.albumId,
       sourceType: song.sourceType,
       sourceId: song.sourceId,
+      createdAt: song.createdAt,
     };
   }
 
@@ -29,4 +30,3 @@ export class YoutubeSongHelper {
     return songs.map((song) => this.mapToResponse(song));
   }
 }
-

@@ -8,21 +8,12 @@ import { Track } from '@prisma/client';
 import { CreateSongFromYoutubeCommand } from './create-youtube.song.command';
 import { SongResponseDto } from '../../dto/song-response.dto';
 import { SongRepository } from '../../repositories/song.repository';
-import { YoutubeSongHelper } from '../../helper/youtube-song.helper';
+import { SongMapper } from '../../helper/song-mapper';
 import { AlbumValidationHelper } from '../../helper/album-validation.helper';
 import {
   CONVERSION_JOB,
   SONG_SOURCE_TYPE,
 } from '../../constants/song.constants';
-
-// --- Types nội bộ cho Handler này ---
-interface ReuseTrackParams {
-  userId: string;
-  youtubeId: string;
-  title: string;
-  artist: string | undefined;
-  albumId: string;
-}
 
 @CommandHandler(CreateSongFromYoutubeCommand)
 export class CreateSongFromYoutubeHandler
@@ -30,7 +21,7 @@ export class CreateSongFromYoutubeHandler
 {
   constructor(
     private readonly songRepository: SongRepository,
-    private readonly youtubeHelper: YoutubeSongHelper,
+    private readonly songMapper: SongMapper,
     private readonly albumHelper: AlbumValidationHelper,
     @InjectQueue('conversion') private readonly conversionQueue: Queue,
     @InjectPinoLogger(CreateSongFromYoutubeHandler.name)
@@ -51,25 +42,60 @@ export class CreateSongFromYoutubeHandler
       userId,
       albumId,
     );
-    const youtubeId = this.youtubeHelper.extractYoutubeId(url);
+    const youtubeId = this.songMapper.extractYoutubeId(url);
 
     if (!youtubeId) {
       this.logger.warn({ url }, 'Invalid YouTube URL or missing Video ID');
       throw new BadRequestException('Invalid YouTube URL');
     }
 
-    const reusedSong = await this.tryReuseExistingTrack({
-      userId,
-      youtubeId,
-      title,
-      artist,
-      albumId: finalAlbumId,
-    });
-    
-    if (reusedSong) {
-      return this.youtubeHelper.mapToResponse(reusedSong);
+    // 1. Reuse completed track if available
+    const existingTrack = await this.songRepository.findByYoutubeId(youtubeId);
+    if (existingTrack) {
+      this.logger.info(
+        { youtubeId, existingTrackId: existingTrack.id },
+        'Found completed track, reusing storage URL',
+      );
+      const reusedSong = await this.songRepository.create({
+        data: {
+          title,
+          artist: artist || existingTrack.artist,
+          url: existingTrack.url,
+          duration: existingTrack.duration,
+          albumId: finalAlbumId,
+          userId,
+          sourceType: SONG_SOURCE_TYPE.YOUTUBE,
+          sourceId: youtubeId,
+        },
+      });
+      return this.songMapper.mapToResponse(reusedSong);
     }
 
+    // 2. Check if another request already claimed this youtubeId (race guard)
+    const pendingTrack = await this.songRepository.findPendingByYoutubeId(
+      youtubeId,
+    );
+    if (pendingTrack) {
+      this.logger.info(
+        { youtubeId, pendingTrackId: pendingTrack.id },
+        'Another request already converting this YouTube ID, reusing pending record',
+      );
+      const reusedSong = await this.songRepository.create({
+        data: {
+          title,
+          artist: artist || pendingTrack.artist,
+          url: pendingTrack.url,
+          duration: pendingTrack.duration,
+          albumId: finalAlbumId,
+          userId,
+          sourceType: SONG_SOURCE_TYPE.YOUTUBE,
+          sourceId: youtubeId,
+        },
+      });
+      return this.songMapper.mapToResponse(reusedSong);
+    }
+
+    // 3. No existing track — create pending and enqueue with dedup jobId
     const song = await this.createPendingSong(
       userId,
       title,
@@ -78,39 +104,38 @@ export class CreateSongFromYoutubeHandler
       youtubeId,
     );
 
-    await this.enqueueConversionJob(userId, url, song.id);
+    // Double-check: another request may have slipped in between
+    // findByYoutubeId and createPendingSong. If so, clean up our duplicate.
+    const raceCheck = await this.songRepository.findPendingByYoutubeId(
+      youtubeId,
+    );
+    if (raceCheck && raceCheck.id !== song.id) {
+      this.logger.warn(
+        { youtubeId, ourId: song.id, winnerId: raceCheck.id },
+        'Lost race condition, removing duplicate pending record',
+      );
+      await this.songRepository.delete({ where: { id: song.id } });
+      const reusedSong = await this.songRepository.create({
+        data: {
+          title,
+          artist: artist || raceCheck.artist,
+          url: raceCheck.url,
+          duration: raceCheck.duration,
+          albumId: finalAlbumId,
+          userId,
+          sourceType: SONG_SOURCE_TYPE.YOUTUBE,
+          sourceId: youtubeId,
+        },
+      });
+      return this.songMapper.mapToResponse(reusedSong);
+    }
 
-    return this.youtubeHelper.mapToResponse(song);
+    await this.enqueueConversionJob(userId, url, song.id, youtubeId);
+
+    return this.songMapper.mapToResponse(song);
   }
 
   // --- Private helpers ---
-
-  private async tryReuseExistingTrack(
-    params: ReuseTrackParams,
-  ): Promise<Track | null> {
-    const { userId, youtubeId, title, artist, albumId } = params;
-
-    const existingTrack = await this.songRepository.findByYoutubeId(youtubeId);
-    if (!existingTrack) return null;
-
-    this.logger.info(
-      { youtubeId, existingTrackId: existingTrack.id },
-      'Found existing track for YouTube ID, reusing storage URL',
-    );
-
-    return this.songRepository.create({
-      data: {
-        title,
-        artist: artist || existingTrack.artist,
-        url: existingTrack.url,
-        duration: existingTrack.duration,
-        albumId,
-        userId,
-        sourceType: SONG_SOURCE_TYPE.YOUTUBE,
-        sourceId: youtubeId,
-      },
-    });
-  }
 
   private createPendingSong(
     userId: string,
@@ -136,9 +161,10 @@ export class CreateSongFromYoutubeHandler
     userId: string,
     url: string,
     songId: string,
+    youtubeId: string,
   ): Promise<void> {
     this.logger.info(
-      { songId },
+      { songId, youtubeId },
       'Song record created, adding to conversion queue',
     );
 
@@ -146,6 +172,7 @@ export class CreateSongFromYoutubeHandler
       CONVERSION_JOB.NAME,
       { url, songId, userId },
       {
+        jobId: `convert:${youtubeId}`,
         attempts: CONVERSION_JOB.MAX_ATTEMPTS,
         backoff: {
           type: 'exponential',

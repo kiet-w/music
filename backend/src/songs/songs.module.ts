@@ -5,7 +5,7 @@ import { SongsService } from './songs.service';
 import { JobsModule } from '../jobs/jobs.module';
 import { SongRepository } from './repositories/song.repository';
 import { AlbumsModule } from '../albums/albums.module';
-import { YoutubeSongHelper } from './helper/youtube-song.helper';
+import { SongMapper } from './helper/song-mapper';
 import { AlbumValidationHelper } from './helper/album-validation.helper';
 import { CreateSongFromYoutubeHandler } from './commands/create-youtube-song/create-youtube.song.handler';
 import { RemoveSongHandler } from './commands/remove-song/remove-song.handler';
@@ -28,7 +28,7 @@ const QueryHandlers = [FindAllSongsHandler, FindOneSongHandler];
   providers: [
     SongsService,
     SongRepository,
-    YoutubeSongHelper,
+    SongMapper,
     AlbumValidationHelper,
     ...CommandHandlers,
     ...QueryHandlers,

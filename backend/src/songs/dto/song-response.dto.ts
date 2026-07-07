@@ -49,4 +49,8 @@ export class SongResponseDto {
   })
   @Expose()
   duration: number | null;
+
+  @ApiProperty({ description: 'When the song was created' })
+  @Expose()
+  createdAt: Date;
 }

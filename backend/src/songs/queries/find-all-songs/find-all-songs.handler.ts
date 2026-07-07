@@ -4,13 +4,13 @@ import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { FindAllSongsQuery } from './find-all-songs.query';
 import { SongResponseDto } from '../../dto/song-response.dto';
 import { SongRepository } from '../../repositories/song.repository';
-import { YoutubeSongHelper } from '../../helper/youtube-song.helper';
+import { SongMapper } from '../../helper/song-mapper';
 
 @QueryHandler(FindAllSongsQuery)
 export class FindAllSongsHandler implements IQueryHandler<FindAllSongsQuery> {
   constructor(
     private readonly songRepository: SongRepository,
-    private readonly youtubeHelper: YoutubeSongHelper,
+    private readonly songMapper: SongMapper,
     @InjectPinoLogger(FindAllSongsHandler.name)
     private readonly logger: PinoLogger,
   ) {}
@@ -44,7 +44,7 @@ export class FindAllSongsHandler implements IQueryHandler<FindAllSongsQuery> {
     ]);
 
     return {
-      data: this.youtubeHelper.mapToResponseArray(songs),
+      data: this.songMapper.mapToResponseArray(songs),
       total,
       page,
       limit: take,

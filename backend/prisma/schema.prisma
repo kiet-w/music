@@ -80,6 +80,7 @@ model Track {
 
   @@index([albumId])
   @@index([userId])
+  @@index([sourceType, sourceId])
 }
 
 enum RequestStatus {
