@@ -3,11 +3,7 @@
 import React from 'react';
 import { HardDrive, Search, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-interface Album {
-  id: string;
-  title: string;
-}
+import type { AlbumBasic } from '@/types/album';
 
 interface DriveSectionProps {
   onBrowseClick: () => void;
@@ -15,7 +11,7 @@ interface DriveSectionProps {
   isDriveLoading: boolean;
   selectedAlbumId: string;
   setSelectedAlbumId: (id: string) => void;
-  albums: Album[];
+  albums: AlbumBasic[];
   t: (key: string) => string;
 }
 

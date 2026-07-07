@@ -8,17 +8,7 @@ import { AlbumGridItem } from '@/components/molecules/Albums/AlbumGridItem';
 import { AlbumListItem } from '@/components/molecules/Albums/AlbumListItem';
 import { CreateAlbumDialog } from '@/components/molecules/Albums/CreateAlbumDialog';
 import { AlbumsEmptyState } from '@/components/molecules/Albums/AlbumsEmptyState';
-
-interface Album {
-  id: string;
-  title: string;
-  artist: string | null;
-  coverUrl: string | null;
-  createdAt: string;
-  _count?: {
-    songs: number;
-  };
-}
+import type { Album } from '@/types/album';
 
 interface AlbumsTemplateProps {
   albums: Album[];

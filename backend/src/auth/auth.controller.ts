@@ -22,6 +22,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
 import { GoogleUnifiedLoginDto } from './dto/google-unified-login.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
@@ -107,10 +108,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Return all users' })
-  async findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
-    const skip =
-      page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
-    const take = Math.min(limit ? parseInt(limit, 10) : 50, 100); // cap at 100
-    return this.authService.findAll(skip, take);
+  async findAll(@Query() paginationDto: PaginationDto) {
+    return this.authService.findAll(paginationDto.skip, paginationDto.take);
   }
 }

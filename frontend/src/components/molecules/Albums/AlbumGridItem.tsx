@@ -3,17 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { DiscAlbum } from 'lucide-react';
-
-interface Album {
-  id: string;
-  title: string;
-  artist: string | null;
-  coverUrl: string | null;
-  createdAt: string;
-  _count?: {
-    songs: number;
-  };
-}
+import type { Album } from '@/types/album';
 
 interface AlbumGridItemProps {
   album: Album;

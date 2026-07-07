@@ -3,7 +3,7 @@
 import React from 'react';
 import { Mail, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/atoms/ui/button';
-import { Input } from '@/components/atoms/ui/input';
+import { FormField } from '@/components/atoms/FormField';
 
 interface LoginFormProps {
   email: string;
@@ -28,41 +28,27 @@ export function LoginForm({
 }: LoginFormProps) {
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-white/80" htmlFor="login-email">
-          {t('email')}
-        </label>
-        <div className="relative">
-          <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/60" strokeWidth={1.5} />
-          <Input
-            id="login-email"
-            type="email"
-            placeholder={t('email')}
-            className="h-14 rounded-2xl border-white/10 bg-white/5 pl-12 text-base placeholder:text-muted-foreground/40 backdrop-blur-xl focus-visible:ring-1 focus-visible:ring-primary/40"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-      </div>
+      <FormField
+        id="login-email"
+        label={t('email')}
+        type="email"
+        placeholder={t('email')}
+        value={email}
+        onChange={setEmail}
+        icon={Mail}
+        required
+      />
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-white/80" htmlFor="login-password">
-          {t('password')}
-        </label>
-        <div className="relative">
-          <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/60" strokeWidth={1.5} />
-          <Input
-            id="login-password"
-            type="password"
-            placeholder={t('password')}
-            className="h-14 rounded-2xl border-white/10 bg-white/5 pl-12 text-base placeholder:text-muted-foreground/40 backdrop-blur-xl focus-visible:ring-1 focus-visible:ring-primary/40"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-      </div>
+      <FormField
+        id="login-password"
+        label={t('password')}
+        type="password"
+        placeholder={t('password')}
+        value={password}
+        onChange={setPassword}
+        icon={Lock}
+        required
+      />
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
