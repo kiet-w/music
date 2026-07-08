@@ -30,7 +30,6 @@ export class JobsMetricsService {
         'completed',
         'failed',
       );
-      qweqwe;
       const queueName = this.conversionQueue.name;
 
       this.waitingGauge.set({ queue: queueName }, counts.waiting);

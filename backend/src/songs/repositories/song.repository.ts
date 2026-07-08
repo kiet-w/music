@@ -19,6 +19,7 @@ export class SongRepository extends BaseRepository<
         sourceId: youtubeId,
         url: { not: '' },
       },
+      include: { album: true },
     });
   }
 
@@ -29,6 +30,7 @@ export class SongRepository extends BaseRepository<
         sourceId: youtubeId,
         url: '',
       },
+      include: { album: true },
     });
   }
 

@@ -31,6 +31,7 @@ export class RemoveSongHandler
 
     // Cancel pending conversion job if one exists
     if (!song.url) {
+      // ponytail: O(n) scan, BullMQ has no filter by job.data — accept until queue grows
       const pendingJobs = await this.conversionQueue.getJobs(['waiting', 'delayed']);
       const relatedJob = pendingJobs.find((job) => job.data.songId === id);
       if (relatedJob) {

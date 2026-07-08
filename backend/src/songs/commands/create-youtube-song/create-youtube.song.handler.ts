@@ -115,19 +115,8 @@ export class CreateSongFromYoutubeHandler
         'Lost race condition, removing duplicate pending record',
       );
       await this.songRepository.delete({ where: { id: song.id } });
-      const reusedSong = await this.songRepository.create({
-        data: {
-          title,
-          artist: artist || raceCheck.artist,
-          url: raceCheck.url,
-          duration: raceCheck.duration,
-          albumId: finalAlbumId,
-          userId,
-          sourceType: SONG_SOURCE_TYPE.YOUTUBE,
-          sourceId: youtubeId,
-        },
-      });
-      return this.songMapper.mapToResponse(reusedSong);
+      // ponytail: return winner's data, no new DB write needed
+      return this.songMapper.mapToResponse(raceCheck);
     }
 
     await this.enqueueConversionJob(userId, url, song.id, youtubeId);
