@@ -23,6 +23,14 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: isDev,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api-proxy/:path*',
+        destination: 'http://localhost:4000/:path*',
+      },
+    ];
+  },
 };
 
 // Chỉ wrap Sentry trong production để tránh overhead khi dev

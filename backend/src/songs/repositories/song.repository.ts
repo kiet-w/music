@@ -46,9 +46,10 @@ export class SongRepository extends BaseRepository<
     skip: number,
     take: number,
     orderBy: any,
+    where: any = { userId },
   ): Promise<Track[]> {
     return this.findMany({
-      where: { userId },
+      where,
       skip,
       take,
       orderBy,

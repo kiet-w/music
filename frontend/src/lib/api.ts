@@ -1,4 +1,6 @@
-const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const isServer = typeof window === 'undefined';
+const defaultApiUrl = isServer ? 'http://localhost:4000' : '/api-proxy';
+const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL ?? defaultApiUrl;
 // Remove trailing slash if exists to prevent double slashes in paths
 const API_URL = RAW_API_URL.replace(/\/$/, '');
 
@@ -143,8 +145,10 @@ export async function createAlbum(appToken: string, data: { title: string; artis
   return result?.data ?? result;
 }
 
-export async function fetchTracks(appToken: string) {
-  const result = await customFetch(`${API_URL}/songs`, { 
+export async function fetchTracks(appToken: string, albumId?: string) {
+  const params = new URLSearchParams({ limit: '100' });
+  if (albumId) params.set('albumId', albumId);
+  const result = await customFetch(`${API_URL}/songs?${params}`, { 
     cache: 'no-store',
     headers: getAuthHeaders(appToken)
   });

@@ -38,9 +38,12 @@ export class FindAllSongsHandler implements IQueryHandler<FindAllSongsQuery> {
       orderBy = { [paginationDto.sort]: 'asc' };
     }
 
+    const where: any = { userId };
+    if (paginationDto.albumId) where.albumId = paginationDto.albumId;
+
     const [total, songs] = await Promise.all([
-      this.songRepository.countByUser(userId),
-      this.songRepository.findAllByUser(userId, skip, take, orderBy),
+      this.songRepository.count({ where }),
+      this.songRepository.findAllByUser(userId, skip, take, orderBy, where),
     ]);
 
     return {

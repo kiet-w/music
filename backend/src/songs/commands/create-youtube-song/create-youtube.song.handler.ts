@@ -161,7 +161,7 @@ export class CreateSongFromYoutubeHandler
       CONVERSION_JOB.NAME,
       { url, songId, userId },
       {
-        jobId: `convert:${youtubeId}`,
+        jobId: `convert-${youtubeId}`,
         attempts: CONVERSION_JOB.MAX_ATTEMPTS,
         backoff: {
           type: 'exponential',

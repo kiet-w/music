@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, Min, IsIn, IsString } from 'class-validator';
+import { IsInt, IsOptional, Min, IsIn, IsString, IsUUID } from 'class-validator';
 
 export class PaginationDto {
   @IsOptional()
@@ -17,4 +17,8 @@ export class PaginationDto {
   @IsString()
   @IsIn(['title', 'artist', 'createdAt'])
   sort?: string;
+
+  @IsOptional()
+  @IsUUID()
+  albumId?: string;
 }

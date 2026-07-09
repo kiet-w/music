@@ -151,13 +151,9 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
       return;
     }
 
-    fetchTracks(accessToken)
+    fetchTracks(accessToken, albumId)
       .then((data: Track[]) => {
-        if (albumId) {
-          setTracks(data.filter(t => t.albumId === albumId));
-        } else {
-          setTracks(data);
-        }
+        setTracks(data);
       })
       .catch((err) => {
         console.error('Error fetching tracks:', err);

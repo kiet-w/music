@@ -183,7 +183,7 @@ export function useGoogleDrive() {
     } catch (err: any) {
       console.error('Error fetching auth URL:', err);
       setError(err.message || 'Failed to get auth URL');
-      toast.error('Lỗi khởi tạo Google Drive: ' + err.message);
+      toast.error('Lỗi khởi tạo Google Drive: ' + err.message, { id: 'drive-auth-error' });
     } finally {
       setIsLoading(false);
     }
