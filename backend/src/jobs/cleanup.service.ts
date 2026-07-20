@@ -21,6 +21,7 @@ export class CleanupService {
     try {
       await this.cleanupOrphanedJobs();
       await this.cleanupTempFiles();
+      await this.cleanupExpiredTokens();
     } catch (error) {
       this.appLogger.processError('Cleanup Cron', error, 'Cleanup Processing');
     } finally {
@@ -90,5 +91,24 @@ export class CleanupService {
     }
 
     this.logger.log(`Cleaned up ${deletedCount} temporary files`);
+  }
+
+  private async cleanupExpiredTokens() {
+    this.appLogger.step('Cleaning up expired refresh tokens');
+    const thresholdDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
+    
+    const result = await this.prisma.refreshToken.deleteMany({
+      where: {
+        OR: [
+          { expiresAt: { lt: new Date() } },
+          { 
+            isRevoked: true, 
+            updatedAt: { lt: thresholdDate }
+          }
+        ]
+      }
+    });
+
+    this.logger.log(`Cleaned up ${result.count} expired/revoked refresh tokens`);
   }
 }

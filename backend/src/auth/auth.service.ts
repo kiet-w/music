@@ -112,6 +112,21 @@ export class AuthService {
     return this.issueToken(storedToken.user, ip, userAgent, storedToken.family);
   }
 
+  async revokeRefreshToken(refreshToken: string): Promise<void> {
+    if (!refreshToken) return;
+    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
+    const storedToken = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash },
+    });
+    if (storedToken) {
+      await this.prisma.refreshToken.updateMany({
+        where: { family: storedToken.family },
+        data: { isRevoked: true },
+      });
+      this.logger.info({ userId: storedToken.userId, family: storedToken.family }, 'Refresh token family revoked via logout');
+    }
+  }
+
   async googleLogin(idToken: string): Promise<AuthResponseDto> {
     try {
       const { googleId, email, name } = await this.verifyGoogleToken(idToken);
