@@ -54,7 +54,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/auth/refresh',
+      path: '/auth',
     });
     return { accessToken: result.accessToken, user: result.user };
   }
@@ -72,7 +72,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/auth/refresh',
+      path: '/auth',
     });
     return { accessToken: result.accessToken, user: result.user };
   }
@@ -99,7 +99,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/auth/refresh',
+      path: '/auth',
     });
     return { accessToken: result.accessToken, user: result.user };
   }
@@ -112,7 +112,7 @@ export class AuthController {
     if (refreshToken) {
       await this.authService.revokeRefreshToken(refreshToken);
     }
-    res.clearCookie('refreshToken', { path: '/auth/refresh' });
+    res.clearCookie('refreshToken', { path: '/auth' });
     return { message: 'Logged out' };
   }
 
@@ -126,8 +126,19 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid Google token' })
   async googleLogin(
     @Body() googleLoginDto: GoogleLoginDto,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent: string,
+    @Res({ passthrough: true }) res: Response
   ): Promise<AuthResponseDto> {
-    return this.authService.googleLogin(googleLoginDto.idToken);
+    const result = await this.authService.googleLogin(googleLoginDto.idToken, ip, userAgent);
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/auth',
+    });
+    return { accessToken: result.accessToken, user: result.user };
   }
 
   @Post('google-unified')
@@ -140,11 +151,24 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Google authentication failed' })
   async googleUnifiedLogin(
     @Body() googleUnifiedLoginDto: GoogleUnifiedLoginDto,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent: string,
+    @Res({ passthrough: true }) res: Response
   ): Promise<AuthResponseDto> {
-    return this.authService.googleUnifiedLogin(
+    const result = await this.authService.googleUnifiedLogin(
       googleUnifiedLoginDto.code,
+      ip,
+      userAgent,
       googleUnifiedLoginDto.redirectUri,
     );
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/auth',
+    });
+    return { accessToken: result.accessToken, user: result.user };
   }
 
   @Get('me')

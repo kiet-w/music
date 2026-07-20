@@ -127,11 +127,12 @@ export class AuthService {
     }
   }
 
-  async googleLogin(idToken: string): Promise<AuthResponseDto> {
+  async googleLogin(idToken: string, ip: string, userAgent: string): Promise<AuthResponseDto> {
     try {
       const { googleId, email, name } = await this.verifyGoogleToken(idToken);
       const user = await this.findOrCreateGoogleUser(googleId, email, name);
-      return this.buildAuthResponse(user);
+      const family = randomUUID();
+      return this.issueToken(user, ip, userAgent, family);
     } catch (error: any) {
       this.logger.error({ error: error.message }, 'Google login failed');
       throw new UnauthorizedException('Google authentication failed');
@@ -140,6 +141,8 @@ export class AuthService {
 
   async googleUnifiedLogin(
     code: string,
+    ip: string,
+    userAgent: string,
     redirectUri?: string,
   ): Promise<AuthResponseDto> {
     try {
@@ -187,7 +190,8 @@ export class AuthService {
         },
       });
 
-      return this.buildAuthResponse(updatedUser);
+      const family = randomUUID();
+      return this.issueToken(updatedUser, ip, userAgent, family);
     } catch (error: any) {
       this.logger.error(
         { error: error.message },
@@ -301,7 +305,7 @@ export class AuthService {
   
   private async issueToken( user: User, ip: string, userAgent: string, family: string ): Promise<AuthResponseDto>{
     const accessToken = await this.jwtService.signAsync(
-      {sub: user.id, role:user.role},
+      { sub: user.id, email: user.email, role: user.role },
       {expiresIn: '15m'}
     )
     const refreshToken =  randomBytes(64).toString('hex')
