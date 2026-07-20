@@ -27,6 +27,7 @@ model User {
   sentRequests       FriendRequest[] @relation("SentRequests")
   receivedRequests   FriendRequest[] @relation("ReceivedRequests")
   downloadJobs       DownloadJob[]
+  refreshTokens      RefreshToken[]
 }
 
 enum UserRole {
@@ -129,4 +130,22 @@ model DownloadJob {
 
   @@index([userId])
   @@index([status])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isRevoked Boolean  @default(false)
+  family    String
+  expiresAt DateTime
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([family])
 }

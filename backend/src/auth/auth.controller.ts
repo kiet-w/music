@@ -7,6 +7,11 @@ import {
   Post,
   UseGuards,
   Query,
+  Req,
+  Res,
+  Ip,
+  Headers,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -27,6 +32,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { Request,Response } from 'express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -35,21 +41,65 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User successfully registered' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
-  async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
-    return this.authService.register(registerDto);
+  async register(@Body() registerDto: RegisterDto, @Ip() ip: string, @Headers('user-agent') userAgent: string, @Res({ passthrough: true }) res: Response): Promise<AuthResponseDto> {
+    const result = await this.authService.register(registerDto, ip, userAgent);
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+    return { accessToken: result.accessToken, user: result.user };
   }
-
+ 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'User login' })
   @ApiResponse({ status: 200, description: 'User successfully logged in' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Ip() ip: string, @Headers('user-agent') userAgent: string, @Res({ passthrough: true }) res: Response): Promise<AuthResponseDto> {
+    const result = await this.authService.login(loginDto, ip, userAgent);
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+    return { accessToken: result.accessToken, user: result.user };
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'Token successfully refreshed' })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent: string
+  ): Promise<AuthResponseDto> {
+    const refreshToken = req.cookies?.['refreshToken'];
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token provided');
+    }
+    const result = await this.authService.refresh(refreshToken, ip, userAgent);
+    
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+    return { accessToken: result.accessToken, user: result.user };
   }
 
   @Post('google')
@@ -113,4 +163,8 @@ export class AuthController {
     const take = Math.min(limit ? parseInt(limit, 10) : 50, 100); // cap at 100
     return this.authService.findAll(skip, take);
   }
+  
+
+  
+
 }

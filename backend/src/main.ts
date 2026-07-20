@@ -1,8 +1,11 @@
 import { config } from 'dotenv';
+import cookieParser from 'cookie-parser';
+
 config({ override: true });
 
 // ── Sentry: must be initialized before anything else ──────────────────────
 import * as Sentry from '@sentry/node';
+
 if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
@@ -52,6 +55,7 @@ async function bootstrap() {
   app.useLogger(logger);
 
   app.use(helmet());
+  app.use(cookieParser());
 
   // Protect /metrics from external access (allow only internal/Prometheus scraping)
   app.use('/metrics', (req: Request, res: Response, next: NextFunction) => {

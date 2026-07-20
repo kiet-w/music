@@ -14,6 +14,10 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { EncryptionService } from '../common/services/encryption.service';
+import { randomBytes, randomUUID, createHash } from 'crypto';
+import * as argon2 from 'argon2';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { RefreshToken } from '@prisma/client'
 
 @Injectable()
 export class AuthService {
@@ -26,6 +30,7 @@ export class AuthService {
     private readonly encryptionService: EncryptionService,
     @InjectPinoLogger(AuthService.name)
     private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService
   ) {
     this.googleClient = new OAuth2Client(
       this.configService.get<string>('GOOGLE_CLIENT_ID'),
@@ -36,7 +41,7 @@ export class AuthService {
 
   // ─── Public Methods ───────────────────────────────────────────
 
-  async register(dto: RegisterDto): Promise<AuthResponseDto> {
+  async register(dto: RegisterDto, ip: string, userAgent: string): Promise<AuthResponseDto> {
     const email = dto.email.toLowerCase();
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
@@ -44,32 +49,67 @@ export class AuthService {
       throw new ConflictException('Email already exists');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 12);
+    const passwordHash = await argon2.hash(dto.password);
     const user = await this.userRepository.create({
       data: { email, passwordHash, name: dto.name },
     });
-
+    const family = randomUUID()
     this.logger.info({ userId: user.id }, 'User registered successfully');
-    return this.buildAuthResponse(user);
+    return this.issueToken(user, ip, userAgent, family);
   }
 
-  async login(dto: LoginDto): Promise<AuthResponseDto> {
+  async login(dto: LoginDto,ip: string, userAgent: string): Promise<AuthResponseDto> {
     const email = dto.email.trim().toLowerCase();
     const user = await this.userRepository.findByEmail(email);
 
     if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Invalid credentials');
     }
-
-    const isPasswordValid = await bcrypt.compare(
-      dto.password,
-      user.passwordHash,
-    );
+    const isPasswordValid = await argon2.verify(user.passwordHash, dto.password)
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
+    const family = randomUUID()
 
-    return this.buildAuthResponse(user);
+    return this.issueToken(user,ip,userAgent,family);
+  }
+
+  async refresh(refreshToken: string, ip: string, userAgent: string): Promise<AuthResponseDto> {
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token provided');
+    }
+
+    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
+    const storedToken = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash },
+      include: { user: true },
+    });
+
+    if (!storedToken) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (storedToken.isRevoked) {
+      // Refresh Token reuse detected
+      await this.prisma.refreshToken.updateMany({
+        where: { family: storedToken.family },
+        data: { isRevoked: true },
+      });
+      this.logger.warn({ userId: storedToken.userId, family: storedToken.family }, 'Attempted use of revoked refresh token, family revoked');
+      throw new UnauthorizedException('Token revoked');
+    }
+
+    if (new Date() > storedToken.expiresAt) {
+      throw new UnauthorizedException('Refresh token expired');
+    }
+
+    // Revoke old token
+    await this.prisma.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { isRevoked: true },
+    });
+
+    return this.issueToken(storedToken.user, ip, userAgent, storedToken.family);
   }
 
   async googleLogin(idToken: string): Promise<AuthResponseDto> {
@@ -184,7 +224,6 @@ export class AuthService {
   }
 
   // ─── Private Helpers ──────────────────────────────────────────
-
   private buildAuthResponse(user: User): AuthResponseDto {
     return {
       accessToken: this.jwtService.sign({
@@ -192,6 +231,7 @@ export class AuthService {
         email: user.email,
         role: user.role,
       }),
+      refreshToken: '', // TODO: Replace this with issueToken later
       user: {
         id: user.id,
         email: user.email,
@@ -242,5 +282,37 @@ export class AuthService {
     });
     this.logger.info({ userId: user.id }, 'Created new user via Google login');
     return user;
+  }
+  
+  private async issueToken( user: User, ip: string, userAgent: string, family: string ): Promise<AuthResponseDto>{
+    const accessToken = await this.jwtService.signAsync(
+      {sub: user.id, role:user.role},
+      {expiresIn: '15m'}
+    )
+    const refreshToken =  randomBytes(64).toString('hex')
+    const tokenHash =  createHash('sha256').update(refreshToken).digest('hex')
+    const expiresAt= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    const saveToken = await this.prisma.refreshToken.create({
+      data:{
+        tokenHash,
+        family, 
+        ip,
+        userAgent,
+        expiresAt,
+        userId: user.id
+
+      }
+    })
+    return {
+      accessToken,
+      refreshToken,
+      refreshTokenId: saveToken.id,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      }
+    }
   }
 }
