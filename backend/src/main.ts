@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-import cookieParser from 'cookie-parser';
+import * as cookieParser from 'cookie-parser';
 
 config({ override: true });
 
