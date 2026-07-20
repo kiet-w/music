@@ -60,6 +60,7 @@
     "login_button": "Đăng nhập",
     "register_button": "Tạo tài khoản",
     "google_login": "Tiếp tục với Google",
+    "signin_with": "Đăng nhập bằng Google",
     "no_account": "Chưa có tài khoản?",
     "have_account": "Đã có tài khoản?",
     "invalid_credentials": "Email hoặc mật khẩu không đúng",

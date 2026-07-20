@@ -50,8 +50,6 @@ backend/yt-dlp.tsbuildinfo
 # Documentations & Draft folders (as requested)
 front/
 **/front/
-docs/
-**/docs/
 frontend-docs/
 **/frontend-docs/
 backend-docs/

@@ -1,0 +1,8 @@
+flowchart LR
+    CRON["@Cron EVERY_10_SECONDS"] --> UPDATE[updateMetrics]
+    UPDATE --> COUNTS["queue.getJobCounts()\n'waiting', 'active', 'completed', 'failed'"]
+    COUNTS --> G1["waitingGauge.set\nbullmq_queue_jobs_waiting"]
+    COUNTS --> G2["activeGauge.set\nbullmq_queue_jobs_active"]
+    COUNTS --> G3["completedGauge.set\nbullmq_queue_jobs_completed"]
+    COUNTS --> G4["failedGauge.set\nbullmq_queue_jobs_failed"]
+    G1 & G2 & G3 & G4 --> PROM["Prometheus /metrics"]

@@ -171,6 +171,13 @@ export async function fetchTrack(appToken: string, id: string) {
   return result?.data ?? result;
 }
 
+export async function fetchYoutubeInfo(appToken: string, url: string) {
+  const result = await customFetch(`${API_URL}/songs/youtube/info?url=${encodeURIComponent(url)}`, {
+    headers: getAuthHeaders(appToken),
+  });
+  return result?.data ?? result;
+}
+
 export async function downloadFromYoutube(appToken: string, url: string, title: string, artist?: string, albumId?: string) {
   const result = await customFetch(`${API_URL}/songs/youtube`, {
     method: 'POST',

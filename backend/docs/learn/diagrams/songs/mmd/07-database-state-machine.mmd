@@ -1,0 +1,12 @@
+stateDiagram-v2
+    [*] --> PENDING: SongsService.createFromYoutube create url empty
+
+    PENDING --> PROCESSING: ConversionProcessor picks up job
+    PROCESSING --> COMPLETED: prisma.track.update url publicUrl
+    PROCESSING --> FAILED_RETRY: Error thrown BullMQ retry
+    FAILED_RETRY --> PROCESSING: Retry attempt max 3
+    FAILED_RETRY --> FAILED: Max attempts reached
+    FAILED --> CLEANED: CleanupService cleanupOrphanedJobs 2h stuck
+
+    note right of PENDING: url empty convention
+    note right of COMPLETED: url has publicUrl

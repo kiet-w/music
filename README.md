@@ -21,7 +21,6 @@ Full-stack music streaming application with YouTube download, Google Drive integ
 - **Cache:** Redis (BullMQ)
 - **Storage:** Supabase Storage
 - **Auth:** JWT + Google OAuth 2.0
-- **Pattern:** CQRS (Command Query Responsibility Segregation)
 - **Monitoring:** Prometheus + Sentry
 
 ### Infrastructure
@@ -102,7 +101,7 @@ music/
 ### Music Management
 - YouTube URL download via yt-dlp
 - Album organization with default album per user
-- Song CRUD operations (CQRS pattern)
+- Song CRUD operations
 - Move songs between albums
 
 ### Google Drive Integration

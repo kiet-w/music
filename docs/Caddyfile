@@ -1,0 +1,16 @@
+# Caddyfile
+# Set DOMAIN env var to your actual domain, e.g. example.com
+# Caddy will automatically obtain and renew Let's Encrypt TLS certificates.
+
+{$DOMAIN:localhost} {
+    # Route API traffic to backend (strip /api prefix)
+    route /api/* {
+        uri strip_prefix /api
+        reverse_proxy backend:3000
+    }
+
+    # Route all other traffic to the Next.js frontend
+    route /* {
+        reverse_proxy frontend:3000
+    }
+}

@@ -1,0 +1,34 @@
+graph LR
+    subgraph APP["AppModule"]
+        AM[AppModule]
+    end
+
+    subgraph SM["SongsModule"]
+        SC[SongsController]
+        SS[SongsService]
+        SR[SongRepository]
+        AVH[AlbumValidationHelper]
+    end
+
+    subgraph JM["JobsModule"]
+        JMod[JobsModule]
+        CP[ConversionProcessor]
+        CS[CleanupService]
+        JMS[JobsMetricsService]
+        Bull[BullModule\n'conversion' queue]
+    end
+
+    subgraph AlbM["AlbumsModule"]
+        AlbRepo[AlbumRepository]
+        AlbSvc[AlbumService]
+    end
+
+    SM -->|"imports"| JM
+    SM -->|"imports"| AlbM
+    JM -->|"exports BullModule"| SM
+    AlbM -->|"exports AlbumRepository + AlbumService"| SM
+
+    SS -->|"@InjectQueue('conversion')"| Bull
+    CP -->|uses| DownloaderModule
+    CP -->|uses| StorageModule
+    SM -->|"exports SongRepository"| AdminModule["AdminModule (cross-module query)"]

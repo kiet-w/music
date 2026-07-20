@@ -60,6 +60,7 @@
     "login_button": "Log In",
     "register_button": "Create Account",
     "google_login": "Continue with Google",
+    "signin_with": "Sign in with Google",
     "no_account": "Don't have an account?",
     "have_account": "Already have an account?",
     "invalid_credentials": "Invalid email or password",

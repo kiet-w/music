@@ -1,0 +1,46 @@
+sequenceDiagram
+    participant C as 🌐 Client
+    participant LI as LoggingInterceptor
+    participant CTRL as SongsController
+    participant SVC as SongsService
+    participant REPO as SongRepository
+    participant Q as BullMQ Queue
+
+    C->>LI: POST /songs/youtube {url, albumId}
+    Note over LI: Ghi lại method, url, userId (8 ký tự đầu)
+    LI->>CTRL: forward request
+    Note over CTRL: JwtAuthGuard → xác thực JWT<br/>ThrottlerGuard → max 10 req/60s<br/>@CurrentUser() → lấy userId
+    CTRL->>SVC: createFromYoutube(userId, dto)
+
+    SVC->>SVC: validateAlbum(albumId)
+    SVC->>SVC: extractYoutubeId(url)
+
+    rect rgb(255, 240, 200)
+        Note over SVC,REPO: Deduplication 3 tầng
+        SVC->>REPO: findByYoutubeId(youtubeId)
+        alt Tầng 1: Đã có bài convert xong (url != '')
+            REPO-->>SVC: existingTrack
+            SVC->>REPO: create({url: existingTrack.url, ...})
+            SVC-->>CTRL: SongResponseDto (reuse URL)
+        else Tầng 2: Có bài đang pending (url == '')
+            SVC->>REPO: findPendingByYoutubeId(youtubeId)
+            REPO-->>SVC: pendingTrack
+            SVC->>REPO: create({url: '', sourceId: youtubeId})
+            SVC-->>CTRL: SongResponseDto (chờ job của track kia)
+        else Tầng 3: Chưa có gì
+            SVC->>REPO: create({url: '', ...})
+            REPO-->>SVC: newSong
+            SVC->>REPO: findPendingByYoutubeId (race check)
+            alt Thua race: có người khác tạo trước
+                SVC->>REPO: delete(newSong.id)
+                SVC-->>CTRL: SongResponseDto (từ người thắng)
+            else Thắng race
+                SVC->>Q: add('convert', {url, songId, userId}, {jobId: 'convert-'+youtubeId})
+                SVC-->>CTRL: SongResponseDto (pending)
+            end
+        end
+    end
+
+    CTRL-->>LI: response
+    LI->>LI: log ✅/❌ + duration
+    LI-->>C: HTTP 201 {song object}

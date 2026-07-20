@@ -1,0 +1,19 @@
+flowchart LR
+    CRON["@Cron EVERY_HOUR\n0 * * * *"] --> HANDLER[handleCron]
+    
+    HANDLER --> OJ[cleanupOrphanedJobs]
+    HANDLER --> TF[cleanupTempFiles]
+
+    OJ --> OJ_Q{"downloadJob\nstatus IN PROCESSING, PENDING\nAND updatedAt < 2h ago"}
+    OJ_Q --> |"found"| OJ_U["updateMany → status: FAILED\nerrorMessage: 'Job timed out'"]
+    OJ_Q --> |"none"| OJ_SKIP[skip]
+
+    TF --> TF_SCAN["scan temp/ directory\nfilter: .mp3 and .part"]
+    TF_SCAN --> TF_Q{"mtimeMs < 1h ago?"}
+    TF_Q --> |"yes"| TF_DEL[fs.unlinkSync\nxóa file]
+    TF_Q --> |"no"| TF_SKIP[skip]
+
+    subgraph WHY["Tại sao cần 2 loại?"]
+        W1["Loại 1: Job treo\n→ Server crash giữa chừng\n→ finally không chạy"]
+        W2["Loại 2: File tạm\n→ kill -9 hoặc power cut\n→ cleanup() không chạy"]
+    end

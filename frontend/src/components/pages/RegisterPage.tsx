@@ -43,11 +43,11 @@ export function RegisterPage({ locale }: RegisterPageProps) {
   };
 
   const footer = (
-    <p className="text-muted-foreground/70">
+    <p className="text-muted-foreground">
       {t('have_account')}
       <Link
         href={`/${locale}/login`}
-        className="ml-1 font-semibold text-primary transition-colors hover:text-primary/80"
+        className="ml-1 font-semibold text-foreground transition-colors hover:text-foreground/80 underline underline-offset-4"
       >
         {t('login')}
       </Link>

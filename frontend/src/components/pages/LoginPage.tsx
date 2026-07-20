@@ -47,11 +47,11 @@ export function LoginPage({ locale }: LoginPageProps) {
   };
 
   const footer = (
-    <p className="text-muted-foreground/70">
+    <p className="text-muted-foreground">
       {t('no_account')}
       <Link
         href={`/${locale}/register`}
-        className="ml-1 font-semibold text-primary transition-colors hover:text-primary/80"
+        className="ml-1 font-semibold text-foreground transition-colors hover:text-foreground/80 underline underline-offset-4"
       >
         {t('register')}
       </Link>
@@ -78,10 +78,10 @@ export function LoginPage({ locale }: LoginPageProps) {
       
       <div className="relative py-6">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-white/10" />
+          <span className="w-full border-t border-white/5" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-transparent px-4 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground/40">
+          <span className="bg-background px-4 text-[10px] font-mono font-semibold uppercase tracking-widest text-muted-foreground/60">
             OR
           </span>
         </div>

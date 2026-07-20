@@ -115,4 +115,48 @@ export class DownloaderService implements IDownloaderProvider {
       );
     }
   }
+
+  async getVideoInfo(url: string): Promise<{ title: string; artist?: string }> {
+    const ALLOWED_HOSTS = [
+      'youtube.com',
+      'www.youtube.com',
+      'm.youtube.com',
+      'music.youtube.com',
+      'youtu.be',
+      'www.youtu.be',
+    ];
+    try {
+      const parsedUrl = new URL(url);
+      if (!ALLOWED_HOSTS.includes(parsedUrl.hostname.toLowerCase())) {
+        throw new BadRequestException('Only YouTube URLs are allowed');
+      }
+    } catch (e) {
+      if (e instanceof BadRequestException) throw e;
+      throw new BadRequestException('Invalid URL format');
+    }
+
+    try {
+      const args = [
+        '--dump-json',
+        '--no-playlist',
+      ];
+
+      if (fs.existsSync(path.resolve('./cookies.txt'))) {
+        args.push('--cookies', path.resolve('./cookies.txt'));
+      }
+
+      args.push(url);
+
+      const { stdout } = await execFileAsync(path.resolve('./yt-dlp'), args);
+      const info = JSON.parse(stdout);
+      
+      return {
+        title: info.title,
+        artist: info.uploader || info.channel || info.artist,
+      };
+    } catch (error: any) {
+      this.logger.error({ error: error.message }, '[Downloader] Failed to fetch video info');
+      throw new InternalServerErrorException('Failed to fetch video info');
+    }
+  }
 }

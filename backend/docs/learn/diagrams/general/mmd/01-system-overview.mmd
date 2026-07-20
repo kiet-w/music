@@ -1,0 +1,47 @@
+graph TB
+    subgraph CLIENT["🌐 Client / Browser"]
+        REQ["HTTP Request\nPOST /songs/youtube"]
+    end
+
+    subgraph SONGS_MODULE["📦 SongsModule"]
+        CTRL["SongsController\n@JwtAuthGuard + @ThrottlerGuard\n@UseInterceptors(ClassSerializerInterceptor)"]
+        SVC["SongsService\n(Business Logic)"]
+        REPO["SongRepository\nextends BaseRepository<Track>"]
+        BASE["BaseRepository<T, Delegate>\nhandlePrismaError(P2002/P2025/P2003)"]
+        ALBUM_HELPER["AlbumValidationHelper"]
+        INTERCEPTOR["LoggingInterceptor\n✅ log thành công / ❌ log lỗi\nredact() sensitive fields"]
+    end
+
+    subgraph JOBS_MODULE["⚙️ JobsModule"]
+        BULL_CONFIG["BullModule.forRoot\nRedis connection + TLS auto-detect"]
+        QUEUE["Queue: 'conversion'\nattempts:3, backoff: exponential 5s"]
+        PROCESSOR["ConversionProcessor\n@Processor concurrency:2"]
+        DOWNLOADER["DownloaderService\nyt-dlp binary"]
+        STORAGE["StorageService\nSupabase Storage"]
+        CLEANUP["CleanupService\n@Cron EVERY_HOUR"]
+        METRICS["JobsMetricsService\n@Cron EVERY_10_SECONDS"]
+    end
+
+    subgraph INFRA["🏗️ Infrastructure"]
+        REDIS[("Redis\nJob Queue Storage")]
+        DB[("PostgreSQL / Prisma\ntrack table")]
+        SUPABASE[("Supabase Storage\nbucket: music")]
+        PROMETHEUS["Prometheus\nGauge Metrics"]
+    end
+
+    REQ --> INTERCEPTOR --> CTRL
+    CTRL --> SVC
+    SVC --> REPO --> BASE --> DB
+    SVC --> ALBUM_HELPER
+    SVC -->|"Queue.add('convert',...)"| QUEUE
+    QUEUE <--> REDIS
+    REDIS --> PROCESSOR
+    PROCESSOR --> DOWNLOADER
+    PROCESSOR --> STORAGE
+    PROCESSOR -->|"prisma.track.update(url)"| DB
+    DOWNLOADER -->|"yt-dlp download"| SUPABASE
+    STORAGE --> SUPABASE
+    CLEANUP --> DB
+    CLEANUP -->|"delete .mp3/.part"| DISK["💾 temp/ disk"]
+    METRICS --> PROMETHEUS
+    METRICS <-->|"getJobCounts()"| QUEUE

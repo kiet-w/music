@@ -36,6 +36,16 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 export class SongsController {
   constructor(private readonly songsService: SongsService) {}
 
+  @ApiOperation({ summary: 'Get info from YouTube URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns video title and artist',
+  })
+  @Get('youtube/info')
+  async getYoutubeInfo(@Query('url') url: string) {
+    return this.songsService.getYoutubeInfo(url);
+  }
+
   @ApiOperation({ summary: 'Create a new song from YouTube URL' })
   @ApiResponse({
     status: 201,

@@ -21,24 +21,19 @@ export function AuthTemplate({
   gradientStyle
 }: AuthTemplateProps) {
   return (
-    <div className={`min-h-[100dvh] text-white ${gradientStyle}`}>
-      <MainContainer className="flex flex-col justify-center py-12">
-        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/30 backdrop-blur-2xl">
-          <div className="mb-8 flex flex-col items-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 text-primary">
-              <Music className="h-8 w-8" />
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-            <p className="mt-2 text-sm text-muted-foreground/80">{subtitle}</p>
-          </div>
-
-          {children}
-
-          <footer className="pt-6 text-center text-sm">
-            {footer}
-          </footer>
+    <MainContainer className="flex flex-col justify-center py-12 text-foreground">
+      <div className="w-full max-w-[360px] mx-auto">
+        <div className="mb-12 flex flex-col gap-2 items-start text-left">
+          <h1 className="font-instrument text-5xl md:text-6xl tracking-tighter leading-none">{title}</h1>
+          <p className="text-sm text-muted-foreground font-sans">{subtitle}</p>
         </div>
-      </MainContainer>
-    </div>
+
+        {children}
+
+        <footer className="pt-8 text-left text-sm">
+          {footer}
+        </footer>
+      </div>
+    </MainContainer>
   );
 }

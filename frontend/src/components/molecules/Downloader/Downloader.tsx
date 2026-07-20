@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/atoms/ui/button';
 import { Input } from '@/components/atoms/ui/input';
 import { Download, Loader2, CheckCircle2 } from 'lucide-react';
-import { downloadFromYoutube, fetchTrack } from '@/lib/api';
+import { downloadFromYoutube, fetchTrack, fetchYoutubeInfo } from '@/lib/api';
 import { supabase, isConfigured } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -30,6 +30,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
   const { addHistory } = useDownloadHistoryStore();
   const [selectedAlbumId, setSelectedAlbumId] = useState<string>('');
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isFetchingInfo, setIsFetchingInfo] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
   const loadAlbums = useCallback(() => {
@@ -41,6 +42,29 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
   useEffect(() => {
     loadAlbums();
   }, [loadAlbums]);
+
+  useEffect(() => {
+    const fetchInfo = async () => {
+      if (!url || !accessToken || title) return; // don't override if title is already typed
+      
+      const isYoutubeUrl = /^(https?\:\/\/)?(www\.youtube\.com|youtu\.be)\/.+$/i.test(url);
+      if (!isYoutubeUrl) return;
+
+      setIsFetchingInfo(true);
+      try {
+        const info = await fetchYoutubeInfo(accessToken, url);
+        if (info.title && !title) setTitle(info.title);
+        if (info.artist && !artist) setArtist(info.artist);
+      } catch (error) {
+        console.error('Failed to fetch YouTube info:', error);
+      } finally {
+        setIsFetchingInfo(false);
+      }
+    };
+
+    const timer = setTimeout(fetchInfo, 500);
+    return () => clearTimeout(timer);
+  }, [url, accessToken]); // Intentionally omitting title and artist to avoid infinite loops, we only want to fetch when url changes
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +91,10 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
         
         // Add to history
         const album = (Array.isArray(albums) ? albums : []).find(a => a.id === selectedAlbumId);
-        addHistory(updatedTrack || song, album?.title || 'Single');
+        const { user } = useAuthStore.getState();
+        if (user) {
+          addHistory(user.id, updatedTrack || song, album?.title || 'Single');
+        }
 
         setUrl('');
         setTitle('');
@@ -177,19 +204,19 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
         <div className="grid grid-cols-2 gap-3">
           <Input 
             type="text" 
-            placeholder="Song Title"
+            placeholder={isFetchingInfo ? "Fetching Title..." : "Song Title"}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            disabled={isDownloading}
+            disabled={isDownloading || isFetchingInfo}
             required
             className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl"
           />
           <Input 
             type="text" 
-            placeholder="Artist (Optional)"
+            placeholder={isFetchingInfo ? "Fetching Artist..." : "Artist (Optional)"}
             value={artist}
             onChange={(e) => setArtist(e.target.value)}
-            disabled={isDownloading}
+            disabled={isDownloading || isFetchingInfo}
             className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl"
           />
         </div>
@@ -197,7 +224,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
           value={selectedAlbumId}
           onFocus={loadAlbums}
           onChange={(e) => setSelectedAlbumId(e.target.value)}
-          disabled={isDownloading}
+          disabled={isDownloading || isFetchingInfo}
           className="w-full h-11 rounded-xl bg-background/50 border-white/5 focus-visible:ring-primary/20 text-white/70 px-3 outline-none appearance-none"
         >
           <option value="">No Album (Single)</option>
@@ -209,7 +236,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
         </select>
         <Button 
           type="submit" 
-          disabled={isDownloading || !url || !title}
+          disabled={isDownloading || isFetchingInfo || !url || !title}
           className="w-full h-11 rounded-xl bg-white text-black hover:bg-white/90 shadow-glow font-bold transition-all active:scale-95"
         >
           {isDownloading ? (

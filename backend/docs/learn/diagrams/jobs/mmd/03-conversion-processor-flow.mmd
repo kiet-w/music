@@ -1,0 +1,24 @@
+flowchart TD
+    START([Job picked up from Redis]) --> LOG1[appLogger.startSection]
+    LOG1 --> MKTEMP[Tạo temp dir nếu chưa có\noutputPath = temp/songId.mp3]
+    MKTEMP --> DL["DownloaderService.download(url, outputPath)\n⏳ yt-dlp → 30-120 giây"]
+
+    DL --> |"Success"| STREAM["fs.createReadStream(outputPath)\n→ StorageService.uploadStream(stream, 'music', 'songs/songId.mp3')\n✅ Constant memory ~64KB"]
+
+    DL --> |"Fail"| ERR1[cleanup temp file]
+    ERR1 --> RETHROW1[throw error → BullMQ retry]
+
+    STREAM --> |"Success"| GETURL["StorageService.getPublicUrl('music', storagePath)\n→ publicUrl = https://supabase..."]
+    STREAM --> |"Fail"| ERR2[cleanup temp file]
+    ERR2 --> RETHROW2[throw error → BullMQ retry]
+
+    GETURL --> UPDATEDB["prisma.track.update\nurl: '' → url: publicUrl\n⚠️ Bước này CUỐI CÙNG: chỉ update khi chắc file đã lên cloud"]
+    UPDATEDB --> CLEANUP[downloaderService.cleanup\nxóa temp/songId.mp3]
+    CLEANUP --> LOG2[appLogger.endSection]
+    LOG2 --> DONE([Job: completed ✅])
+
+    subgraph RETRY["🔄 Retry Logic"]
+        RETHROW1 & RETHROW2 --> WAIT["BullMQ exponential backoff\nAttempt 1: immediate\nAttempt 2: +5s\nAttempt 3: +10s"]
+        WAIT --> |"< 3 attempts"| START
+        WAIT --> |">= 3 attempts"| FAILED([Job: failed ❌])
+    end

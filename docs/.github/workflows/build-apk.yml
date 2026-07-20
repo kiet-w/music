@@ -1,0 +1,49 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build Web App
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        run: |
+          cd frontend
+          npm run build
+          # Copy a default index.html to the root of out/ for Capacitor
+          cp out/vi.html out/index.html || cp out/en.html out/index.html || cp out/vi/index.html out/index.html || cp out/en/index.html out/index.html
+
+      - name: Build Android APK
+        run: |
+          cd frontend
+          npx cap copy
+          npx cap sync
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug.apk
+          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk

@@ -12,16 +12,16 @@ export interface DownloadHistoryItem {
 }
 
 interface DownloadHistoryState {
-  history: DownloadHistoryItem[];
-  addHistory: (track: any, albumTitle: string) => void;
-  clearHistory: () => void;
+  historyByUserId: Record<string, DownloadHistoryItem[]>;
+  addHistory: (userId: string, track: any, albumTitle: string) => void;
+  clearHistory: (userId: string) => void;
 }
 
 export const useDownloadHistoryStore = create<DownloadHistoryState>()(
   persist(
     (set) => ({
-      history: [],
-      addHistory: (track, albumTitle) => {
+      historyByUserId: {},
+      addHistory: (userId, track, albumTitle) => {
         const newItem: DownloadHistoryItem = {
           id: track.id,
           title: track.title,
@@ -31,14 +31,26 @@ export const useDownloadHistoryStore = create<DownloadHistoryState>()(
         };
 
         set((state) => {
+          const userHistory = state.historyByUserId[userId] || [];
           // Remove if already exists (to move it to top)
-          const filtered = state.history.filter((item) => item.id !== track.id);
+          const filtered = userHistory.filter((item) => item.id !== track.id);
           // Keep only the most recent 2, then add the new one to make it 3
           const newHistory = [newItem, ...filtered].slice(0, 3);
-          return { history: newHistory };
+          
+          return { 
+            historyByUserId: {
+              ...state.historyByUserId,
+              [userId]: newHistory
+            }
+          };
         });
       },
-      clearHistory: () => set({ history: [] }),
+      clearHistory: (userId) => set((state) => ({ 
+        historyByUserId: {
+          ...state.historyByUserId,
+          [userId]: []
+        }
+      })),
     }),
     {
       name: 'download-history-storage',

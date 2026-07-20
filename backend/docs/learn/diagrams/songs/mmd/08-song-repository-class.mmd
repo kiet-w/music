@@ -1,0 +1,28 @@
+classDiagram
+    class BaseRepository~T, Delegate~ {
+        +handlePrismaError(error) never
+        +findMany(args) T[]
+        +findFirst(args) T|null
+        +findUnique(args) T|null
+        +create(args) T
+        +update(args) T
+        +delete(args) T
+        +count(args) number
+        -P2002 to 409 ConflictException
+        -P2025 to 404 NotFoundException
+        -P2003 to 400 BadRequestException
+    }
+
+    class SongRepository {
+        +findByYoutubeId(youtubeId) Track|null
+        +findPendingByYoutubeId(youtubeId) Track|null
+        +findByUserAndId(userId, id) Track|null
+        +findAllByUser(userId, skip, take, orderBy, where) Track[]
+        +countByUser(userId) number
+        -All queries include album true
+    }
+
+    BaseRepository <|-- SongRepository
+    SongRepository --> PrismaService
+
+    note for SongRepository "findByYoutubeId url not empty done\nfindPendingByYoutubeId url empty pending\nfindByUserAndId filter userId security 404"

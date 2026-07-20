@@ -53,7 +53,7 @@ function GoogleLoginButtonInner() {
         onClick={() => login()}
         disabled={isLoading}
         type="button"
-        className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-medium py-3.5 px-4 border border-gray-300 rounded-full shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-3 bg-transparent hover:bg-white/5 text-foreground font-medium py-3 px-4 border border-white/10 rounded-full transition-all focus:outline-none focus:ring-1 focus:ring-white/20 active:scale-[0.98] text-sm"
       >
         {isLoading ? (
           <Loader2 className="w-5 h-5 animate-spin text-gray-500" />

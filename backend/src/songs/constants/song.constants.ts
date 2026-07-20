@@ -1,7 +1,4 @@
-export const SONG_SOURCE_TYPE = {
-  YOUTUBE: 'youtube',
-} as const;
-
+// ponytail: SONG_SOURCE_TYPE removed — only one value, use string 'youtube' directly at call sites
 export const CONVERSION_JOB = {
   NAME: 'convert',
   MAX_ATTEMPTS: 3,

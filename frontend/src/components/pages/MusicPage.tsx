@@ -15,10 +15,12 @@ export function MusicPage() {
   const initialTab = searchParams.get('tab') === 'drive' ? 'drive' : 'youtube';
   const shouldOpenPicker = searchParams.get('openPicker') === 'true';
   
-  const { history } = useDownloadHistoryStore();
+  const { historyByUserId } = useDownloadHistoryStore();
   const { login, checkConnection, openPicker, isConnected, isLoading: isDriveLoading } = useGoogleDrive();
   const { albums, loadAlbums } = useAlbumStore();
-  const { accessToken: appToken } = useAuthStore();
+  const { accessToken: appToken, user } = useAuthStore();
+  
+  const history = user ? (historyByUserId[user.id] || []) : [];
   
   const [activeTab, setActiveTab] = useState<'youtube' | 'drive'>(initialTab);
   const [selectedAlbumId, setSelectedAlbumId] = useState<string>("");
