@@ -7,6 +7,7 @@ import { fetchAlbums, createAlbum } from '@/lib/api';
 import { useAlbumStore } from '@/store/useAlbumStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { AlbumsTemplate } from '@/components/templates/Albums/AlbumsTemplate';
+import { toast } from 'sonner';
 
 interface AlbumsPageProps {
   locale: string;
@@ -30,6 +31,7 @@ export function AlbumsPage({ locale }: AlbumsPageProps) {
       setAlbums(Array.isArray(result) ? result : []);
     } catch (err: any) {
       console.error('Failed to load albums:', err);
+      toast.error(err.message || t('error_loading') || 'Failed to load albums');
     }
   }, [appToken, setAlbums]);
 
@@ -50,6 +52,7 @@ export function AlbumsPage({ locale }: AlbumsPageProps) {
       setNewArtist('');
     } catch (err: any) {
       console.error('Failed to create album', err);
+      toast.error(err.message || t('error_creating') || 'Failed to create album');
     }
   };
 

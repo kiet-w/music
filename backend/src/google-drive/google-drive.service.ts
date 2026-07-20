@@ -281,29 +281,37 @@ export class GoogleDriveService implements OnModuleInit {
     // Handle token refresh automatically by the library
     this.oauth2Client.removeAllListeners('tokens');
     this.oauth2Client.on('tokens', async (tokens) => {
-      if (tokens.refresh_token) {
-        // Rarely happens unless offline access is requested and first time
-        await this.prisma.user.update({
-          where: { id: userId },
-          data: {
-            googleRefreshToken: this.encryptionService.encrypt(
-              tokens.refresh_token,
-            ),
-          },
-        });
-      }
-      if (tokens.access_token) {
-        await this.prisma.user.update({
-          where: { id: userId },
-          data: {
-            googleAccessToken: this.encryptionService.encrypt(
-              tokens.access_token,
-            ),
-            googleTokenExpiry: tokens.expiry_date
-              ? new Date(tokens.expiry_date)
-              : null,
-          },
-        });
+      try {
+        if (tokens.refresh_token) {
+          await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+              googleRefreshToken: this.encryptionService.encrypt(
+                tokens.refresh_token,
+              ),
+            },
+          });
+        }
+        if (tokens.access_token) {
+          await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+              googleAccessToken: this.encryptionService.encrypt(
+                tokens.access_token,
+              ),
+              googleTokenExpiry: tokens.expiry_date
+                ? new Date(tokens.expiry_date)
+                : null,
+            },
+          });
+        }
+      } catch (error) {
+        // Log but don't throw — this runs in an event handler where
+        // unhandled rejections would crash the process.
+        console.error(
+          `Failed to persist refreshed Google tokens for user ${userId}:`,
+          error instanceof Error ? error.message : error,
+        );
       }
     });
   }
@@ -329,27 +337,34 @@ export class GoogleDriveService implements OnModuleInit {
     });
 
     for (const user of users) {
-      let updated = false;
-      const updateData: any = {};
+      try {
+        let updated = false;
+        const updateData: any = {};
 
-      if (user.googleRefreshToken && !user.googleRefreshToken.includes(':')) {
-        updateData.googleRefreshToken = this.encryptionService.encrypt(
-          user.googleRefreshToken,
-        );
-        updated = true;
-      }
-      if (user.googleAccessToken && !user.googleAccessToken.includes(':')) {
-        updateData.googleAccessToken = this.encryptionService.encrypt(
-          user.googleAccessToken,
-        );
-        updated = true;
-      }
+        if (user.googleRefreshToken && !user.googleRefreshToken.includes(':')) {
+          updateData.googleRefreshToken = this.encryptionService.encrypt(
+            user.googleRefreshToken,
+          );
+          updated = true;
+        }
+        if (user.googleAccessToken && !user.googleAccessToken.includes(':')) {
+          updateData.googleAccessToken = this.encryptionService.encrypt(
+            user.googleAccessToken,
+          );
+          updated = true;
+        }
 
-      if (updated) {
-        await this.prisma.user.update({
-          where: { id: user.id },
-          data: updateData,
-        });
+        if (updated) {
+          await this.prisma.user.update({
+            where: { id: user.id },
+            data: updateData,
+          });
+        }
+      } catch (error) {
+        console.error(
+          `Failed to migrate tokens for user ${user.id}:`,
+          error instanceof Error ? error.message : error,
+        );
       }
     }
   }

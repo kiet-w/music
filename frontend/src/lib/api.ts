@@ -271,14 +271,10 @@ export async function fetchChatHistory(appToken: string, userId: string) {
 }
 
 export async function fetchUsers(appToken: string) {
-  try {
-    const result = await customFetch(`${API_URL}/auth/users`, {
-      headers: getAuthHeaders(appToken),
-    });
-    return result?.data ?? result ?? [];
-  } catch {
-    return [];
-  }
+  const result = await customFetch(`${API_URL}/auth/users`, {
+    headers: getAuthHeaders(appToken),
+  });
+  return result?.data ?? result ?? [];
 }
 
 export async function createInvite(appToken: string, receiverId?: string) {
