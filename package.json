@@ -1,0 +1,16 @@
+{
+  "name": "music-app-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "npm --prefix backend run start:dev:nest",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "concurrently -c \"cyan.bold,magenta.bold\" -n \"backend,frontend\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "deploy": "git add . && git commit -m \"deploy: production update\" && git push origin main"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
