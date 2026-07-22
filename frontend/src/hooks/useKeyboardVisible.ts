@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { Keyboard } from '@capacitor/keyboard';
 
 export function useKeyboardVisible() {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -8,35 +10,29 @@ export function useKeyboardVisible() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const updateViewport = () => {
-      const vv = window.visualViewport;
-      const currentHeight = vv ? vv.height : window.innerHeight;
-      const isKeyboardOpen = vv ? vv.height < window.innerHeight - 150 : false;
-      setIsKeyboardVisible(isKeyboardOpen);
+    let showListener: any;
+    let hideListener: any;
 
-      document.documentElement.style.setProperty('--vh', `${currentHeight}px`);
-
-      if (window.scrollY !== 0) {
-        window.scrollTo(0, 0);
-      }
-    };
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateViewport);
-      window.visualViewport.addEventListener('scroll', updateViewport);
+    if (Capacitor.isNativePlatform()) {
+      showListener = Keyboard.addListener('keyboardWillShow', () => {
+        setIsKeyboardVisible(true);
+      });
+      hideListener = Keyboard.addListener('keyboardWillHide', () => {
+        setIsKeyboardVisible(false);
+      });
     }
 
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
-        setTimeout(updateViewport, 150);
+        setIsKeyboardVisible(true);
       }
     };
 
     const handleFocusOut = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
-        setTimeout(updateViewport, 150);
+        setIsKeyboardVisible(false);
       }
     };
 
@@ -44,10 +40,8 @@ export function useKeyboardVisible() {
     window.addEventListener('focusout', handleFocusOut);
 
     return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', updateViewport);
-        window.visualViewport.removeEventListener('scroll', updateViewport);
-      }
+      if (showListener) showListener.remove();
+      if (hideListener) hideListener.remove();
       window.removeEventListener('focusin', handleFocusIn);
       window.removeEventListener('focusout', handleFocusOut);
     };
