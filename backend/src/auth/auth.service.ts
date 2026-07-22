@@ -193,6 +193,10 @@ export class AuthService {
     const email = dto.email.trim().toLowerCase();
     const user = await this.userRepository.findByEmail(email);
 
+    if (!user || !user.passwordHash) {
+      throw new UnauthorizedException('Thông tin đăng nhập không chính xác');
+    }
+
     let isPasswordValid = false;
     try {
       if (user.passwordHash.startsWith('$2a$') || user.passwordHash.startsWith('$2b$')) {
