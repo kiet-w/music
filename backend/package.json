@@ -15,7 +15,7 @@
     "start:dev:python": "cd ../music-ai-service && uv run uvicorn main:app --reload --port 8001",
     "start:debug": "NODE_OPTIONS=--max-old-space-size=4096 nest start --debug --watch",
     "start:prod": "node dist/main",
-    "postinstall": "./scripts/install-ytdlp.sh",
+    "postinstall": "prisma generate",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --maxWorkers=2",
