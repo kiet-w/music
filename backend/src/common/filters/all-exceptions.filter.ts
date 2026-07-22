@@ -60,16 +60,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
           code = 'ERR_NOT_FOUND';
           message = 'Resource not found';
         } else {
-          // Don't leak internal error details for 5xx errors
-          message = process.env.NODE_ENV === 'production'
-            ? 'Internal server error'
-            : exception.message;
+          message = exception.message || 'Database error occurred';
         }
       } else {
-        // Don't leak internal error details for 5xx errors
-        message = process.env.NODE_ENV === 'production'
-          ? 'Internal server error'
-          : exception.message;
+        message = exception.message || 'Internal server error';
       }
     }
 
