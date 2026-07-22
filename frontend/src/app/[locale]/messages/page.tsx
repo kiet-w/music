@@ -166,88 +166,117 @@ export default function MessagesPage() {
       </header>
 
       <div className="flex-1 min-h-0 glass-dark rounded-3xl border border-white/10 overflow-hidden flex flex-col md:flex-row">
-        {/* Sidebar - User List */}
-        <aside className={cn(
-          "w-full md:w-80 md:border-r border-white/10 p-4 overflow-y-auto flex-col shrink-0 h-full",
-          activeReceiverId ? "hidden md:flex" : "flex flex-1"
-        )}>
-          <UserList 
-            users={users} 
-            activeUserId={activeReceiverId} 
-            unreadUserIds={unreadMessages}
-            onSelectUser={handleSelectUser} 
-          />
-          {users.length === 0 && (
-            <div className="text-white/40 text-sm text-center py-8">
-              {t('no_conversations')}
+        {users.length === 0 ? (
+          <div className="flex-1 p-6 sm:p-10 flex flex-col items-center justify-center text-center my-auto">
+            <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5 text-emerald-400 shadow-xl shadow-emerald-500/10">
+              <MessageSquare className="w-10 h-10" />
             </div>
-          )}
-        </aside>
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
+              Chưa có cuộc trò chuyện nào
+            </h2>
+            <p className="text-sm text-white/50 max-w-sm mb-8 leading-relaxed">
+              Nhận lời mời kết bạn hoặc sao chép liên kết mời để kết nối và bắt đầu nhắn tin ngay!
+            </p>
 
-        {/* Main Chat Area */}
-        <section className={cn(
-          "flex-1 flex flex-col h-full overflow-hidden min-w-0 min-h-0",
-          activeReceiverId ? "flex" : "hidden md:flex"
-        )}>
-          {activeReceiverId ? (
-            <>
-              {/* Chat Header */}
-              <div className="px-4 sm:px-6 py-3 border-b border-white/10 flex items-center justify-between bg-white/5 shrink-0">
-                <div className="flex items-center gap-2 min-w-0">
-                  <button 
-                    onClick={() => handleSelectUser(null)}
-                    className="p-1 -ml-1 hover:bg-white/10 rounded-full transition-colors text-white md:hidden shrink-0"
-                    title="Back to list"
-                  >
-                    <ChevronLeft className="w-6 h-6" />
-                  </button>
-                  <div className="min-w-0">
-                    <h2 className="text-white font-bold truncate text-sm sm:text-base">
-                      {activeChatPartner?.name || activeChatPartner?.email}
-                    </h2>
-                    <div className="flex items-center gap-1.5 text-[11px] min-w-0 mt-0.5">
-                      <span className={cn("w-2 h-2 rounded-full shrink-0", partnerStatus.isOnline ? "bg-emerald-400 animate-pulse" : "bg-white/30")} />
-                      <span className={cn("font-medium", partnerStatus.isOnline ? "text-emerald-400" : "text-white/50")}>
-                        {partnerStatus.text}
-                      </span>
-                      <span className="text-white/20">•</span>
-                      <span className="text-white/40 truncate">{activeChatPartner?.email}</span>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Button
+                onClick={handleAcceptInvite}
+                variant="outline"
+                className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 font-bold rounded-2xl text-sm px-5 py-3 h-12 flex items-center gap-2.5 transition-all active:scale-95"
+              >
+                <UserPlus className="w-5 h-5" />
+                Nhận lời mời
+              </Button>
+              <Button
+                onClick={handleCreateInvite}
+                className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-2xl text-sm px-5 py-3 h-12 flex items-center gap-2.5 shadow-lg shadow-emerald-500/25 transition-all active:scale-95"
+              >
+                <Link2 className="w-5 h-5" />
+                {t('invite_button')}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Sidebar - User List */}
+            <aside className={cn(
+              "w-full md:w-80 md:border-r border-white/10 p-4 overflow-y-auto flex-col shrink-0 h-full",
+              activeReceiverId ? "hidden md:flex" : "flex flex-1"
+            )}>
+              <UserList 
+                users={users} 
+                activeUserId={activeReceiverId} 
+                unreadUserIds={unreadMessages}
+                onSelectUser={handleSelectUser} 
+              />
+            </aside>
+
+            {/* Main Chat Area */}
+            <section className={cn(
+              "flex-1 flex flex-col h-full overflow-hidden min-w-0 min-h-0",
+              activeReceiverId ? "flex" : "hidden md:flex"
+            )}>
+              {activeReceiverId ? (
+                <>
+                  {/* Chat Header */}
+                  <div className="px-4 sm:px-6 py-3 border-b border-white/10 flex items-center justify-between bg-white/5 shrink-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <button 
+                        onClick={() => handleSelectUser(null)}
+                        className="p-1 -ml-1 hover:bg-white/10 rounded-full transition-colors text-white md:hidden shrink-0"
+                        title="Back to list"
+                      >
+                        <ChevronLeft className="w-6 h-6" />
+                      </button>
+                      <div className="min-w-0">
+                        <h2 className="text-white font-bold truncate text-sm sm:text-base">
+                          {activeChatPartner?.name || activeChatPartner?.email}
+                        </h2>
+                        <div className="flex items-center gap-1.5 text-[11px] min-w-0 mt-0.5">
+                          <span className={cn("w-2 h-2 rounded-full shrink-0", partnerStatus.isOnline ? "bg-emerald-400 animate-pulse" : "bg-white/30")} />
+                          <span className={cn("font-medium", partnerStatus.isOnline ? "text-emerald-400" : "text-white/50")}>
+                            {partnerStatus.text}
+                          </span>
+                          <span className="text-white/20">•</span>
+                          <span className="text-white/40 truncate">{activeChatPartner?.email}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              
-              {isLoading ? (
-                <div className="flex-1 flex items-center justify-center text-white/40">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                </div>
+                  
+                  {isLoading ? (
+                    <div className="flex-1 flex items-center justify-center text-white/40">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                    </div>
+                  ) : (
+                    <ChatWindow 
+                      messages={messages} 
+                      currentUserId={currentUser?.id || ''} 
+                      onLoadMore={() => accessToken && loadMoreMessages(accessToken)}
+                      hasMore={hasMoreMessages}
+                      isLoadingMore={isLoadingMore}
+                      onAcceptInvite={handleAcceptInvite}
+                      onCreateInvite={handleCreateInvite}
+                    />
+                  )}
+                  <ChatInput onSend={handleSend} />
+                </>
               ) : (
-                <ChatWindow 
-                  messages={messages} 
-                  currentUserId={currentUser?.id || ''} 
-                  onLoadMore={() => accessToken && loadMoreMessages(accessToken)}
-                  hasMore={hasMoreMessages}
-                  isLoadingMore={isLoadingMore}
-                  onAcceptInvite={handleAcceptInvite}
-                  onCreateInvite={handleCreateInvite}
-                />
+                <div className="flex-1 p-6 flex flex-col items-center justify-center text-center my-auto">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400 shadow-lg shadow-emerald-500/10">
+                    <MessageSquare className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-1">
+                    Chưa chọn cuộc trò chuyện
+                  </h3>
+                  <p className="text-xs text-white/50 max-w-xs mb-6">
+                    Chọn một người bạn từ danh sách ở bên trái để bắt đầu nhắn tin!
+                  </p>
+                </div>
               )}
-              <ChatInput onSend={handleSend} />
-            </>
-          ) : (
-            <div className="flex-1 p-6 flex flex-col items-center justify-center text-center my-auto">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400 shadow-lg shadow-emerald-500/10">
-                <MessageSquare className="w-8 h-8" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1">
-                Chưa chọn cuộc trò chuyện
-              </h3>
-              <p className="text-xs text-white/50 max-w-xs">
-                Chọn một người bạn từ danh sách bên trái để bắt đầu nhắn tin!
-              </p>
-            </div>
-          )}
-        </section>
+            </section>
+          </>
+        )}
       </div>
     </MainContainer>
   );
