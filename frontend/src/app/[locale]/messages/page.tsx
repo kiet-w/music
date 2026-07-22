@@ -242,26 +242,9 @@ export default function MessagesPage() {
               <h3 className="text-lg font-bold text-white mb-1">
                 Chưa chọn cuộc trò chuyện
               </h3>
-              <p className="text-xs text-white/50 max-w-xs mb-6">
-                Chọn một người bạn từ danh sách hoặc nhận/gửi lời mời để bắt đầu nhắn tin!
+              <p className="text-xs text-white/50 max-w-xs">
+                Chọn một người bạn từ danh sách bên trái để bắt đầu nhắn tin!
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <Button
-                  onClick={handleAcceptInvite}
-                  variant="outline"
-                  className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 font-bold rounded-2xl text-xs px-4 py-2.5 h-10 flex items-center gap-2"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Nhận lời mời
-                </Button>
-                <Button
-                  onClick={handleCreateInvite}
-                  className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-2xl text-xs px-4 py-2.5 h-10 flex items-center gap-2 shadow-lg shadow-emerald-500/20"
-                >
-                  <Link2 className="w-4 h-4" />
-                  {t('invite_button')}
-                </Button>
-              </div>
             </div>
           )}
         </section>
