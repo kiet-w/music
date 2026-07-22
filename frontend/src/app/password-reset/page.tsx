@@ -1,8 +1,10 @@
 'use client';
 import { useState } from 'react';
 import { LoadingPopup } from '@/components/atoms/ui/loading-popup';
+import { useKeyboardMode } from '@/hooks/useKeyboardMode';
 
 export default function PasswordReset() {
+  useKeyboardMode('none');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {

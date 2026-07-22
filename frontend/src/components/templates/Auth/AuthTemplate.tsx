@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Music } from 'lucide-react';
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
+import { useKeyboardMode } from '@/hooks/useKeyboardMode';
 
 interface AuthTemplateProps {
   title: string;
@@ -20,6 +21,7 @@ export function AuthTemplate({
   footer,
   gradientStyle
 }: AuthTemplateProps) {
+  useKeyboardMode('none');
   return (
     <MainContainer className="flex flex-col justify-center py-12 text-foreground !pb-[calc(2rem+env(safe-area-inset-bottom))]">
       <div className="w-full max-w-[360px] mx-auto">
