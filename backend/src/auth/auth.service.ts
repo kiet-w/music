@@ -193,10 +193,18 @@ export class AuthService {
     const email = dto.email.trim().toLowerCase();
     const user = await this.userRepository.findByEmail(email);
 
-    if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Thông tin đăng nhập không chính xác');
+    let isPasswordValid = false;
+    try {
+      if (user.passwordHash.startsWith('$2a$') || user.passwordHash.startsWith('$2b$')) {
+        const bcrypt = require('bcryptjs');
+        isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+      } else {
+        isPasswordValid = await argon2.verify(user.passwordHash, dto.password);
+      }
+    } catch {
+      isPasswordValid = false;
     }
-    const isPasswordValid = await argon2.verify(user.passwordHash, dto.password);
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Thông tin đăng nhập không chính xác');
     }
