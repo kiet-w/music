@@ -14,6 +14,7 @@ const isDev = process.env.NODE_ENV === 'development';
 const nextConfig = {
   outputFileTracingRoot: path.resolve(__dirname, '../'),
   reactStrictMode: true,
+  trailingSlash: true,
 
   // Bật export khi build Capacitor APK, standalone khi build Docker production
   ...(process.env.NEXT_STATIC_EXPORT === 'true'

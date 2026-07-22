@@ -1,11 +1,13 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
+const serverUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.CAPACITOR_SERVER_URL;
+
 const config: CapacitorConfig = {
   appId: 'com.kietw.music',
   appName: 'music',
   webDir: 'out',
   server: {
-    ...(process.env.CAPACITOR_SERVER_URL ? { url: process.env.CAPACITOR_SERVER_URL } : {}),
+    ...(serverUrl ? { url: serverUrl } : {}),
     cleartext: true
   }
 };
