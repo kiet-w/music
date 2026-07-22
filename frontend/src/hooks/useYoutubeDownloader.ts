@@ -81,6 +81,11 @@ export function useYoutubeDownloader(onDownloadStarted?: (url: string) => void) 
           setStatus(t('import_success'));
           setIsDownloading(false);
 
+          // Instantly refresh albums list so dropdown updates across the app
+          if (accessToken) {
+            useAlbumStore.getState().loadAlbums(accessToken);
+          }
+
           const album = (Array.isArray(albums) ? albums : []).find((a) => a.id === selectedAlbumId);
           const { user } = useAuthStore.getState();
           if (user) {

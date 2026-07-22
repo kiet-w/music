@@ -21,6 +21,12 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   };
 
+  const handleFocus = () => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="p-3 sm:p-4 border-t border-white/10 shrink-0 bg-black/20">
       <div className="flex gap-2">
@@ -28,6 +34,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           type="text"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          onFocus={handleFocus}
           placeholder={t('type_placeholder') || 'Nhập tin nhắn...'}
           disabled={disabled}
           className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition-colors text-sm"

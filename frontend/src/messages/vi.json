@@ -54,7 +54,10 @@
     "youtube_upgrade_desc1": "Trang chuyển đổi YouTube cũ sử dụng API dịch vụ Python (cổng 8001) đã được thay thế hoàn toàn bằng trình tải nhạc hợp nhất sử dụng NestJS backend kết hợp hàng đợi BullMQ hiệu năng cao.",
     "youtube_upgrade_desc2": "Giờ đây, bạn có thể tải nhạc YouTube trực tiếp ngay trong giao diện trang Music của bạn với độ ổn định vượt trội và tốc độ tải aria2c cực nhanh.",
     "go_to_music": "Đi tới trang Music",
-    "pipeline_enabled": "Unified NestJS Downloader Pipeline Enabled"
+    "pipeline_enabled": "Unified NestJS Downloader Pipeline Enabled",
+    "fetching_title": "Đang tải tên bài hát...",
+    "fetching_artist": "Đang tải nghệ sĩ...",
+    "no_album_single": "Không chọn album (Single)"
   },
   "Auth": {
     "login": "Đăng nhập",

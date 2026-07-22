@@ -12,9 +12,20 @@ const instrumentSerif = Instrument_Serif({
   adjustFontFallback: false,
 });
 
+import type { Viewport } from 'next';
+
 export const metadata = {
   title: 'Music App',
   description: 'Personal music player and downloader',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
 };
 
 export default function RootLayout({

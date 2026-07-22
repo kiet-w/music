@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/ui/button';
 import { Input } from '@/components/atoms/ui/input';
-import { Download, Loader2, CheckCircle2 } from 'lucide-react';
+import { Download, Loader2, CheckCircle2, ChevronDown, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useYoutubeDownloader } from '@/hooks/useYoutubeDownloader';
 
@@ -34,48 +34,95 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
   return (
     <div className="w-full space-y-4 p-5 rounded-2xl bg-secondary/5 border-none shadow-inner">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Input 
-          type="text" 
-          placeholder={t('paste_url')}
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          disabled={isDownloading}
-          required
-          className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl"
-        />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="relative w-full">
           <Input 
             type="text" 
-            placeholder={isFetchingInfo ? "Fetching Title..." : "Song Title"}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            disabled={isDownloading || isFetchingInfo}
+            placeholder={t('paste_url')}
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            disabled={isDownloading}
             required
-            className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl"
+            className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl pr-10"
           />
-          <Input 
-            type="text" 
-            placeholder={isFetchingInfo ? "Fetching Artist..." : "Artist (Optional)"}
-            value={artist}
-            onChange={(e) => setArtist(e.target.value)}
-            disabled={isDownloading || isFetchingInfo}
-            className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl"
-          />
+          {isFetchingInfo && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-emerald-400">
+              <Loader2 className="w-4 h-4 animate-spin" />
+            </div>
+          )}
         </div>
-        <select
-          value={selectedAlbumId}
-          onFocus={loadAlbums}
-          onChange={(e) => setSelectedAlbumId(e.target.value)}
-          disabled={isDownloading || isFetchingInfo}
-          className="w-full h-11 rounded-xl bg-background/50 border-white/5 focus-visible:ring-primary/20 text-white/70 px-3 outline-none appearance-none"
-        >
-          <option value="">No Album (Single)</option>
-          {(Array.isArray(albums) ? albums : []).map((album) => (
-            <option key={album.id} value={album.id}>
-              {album.title}
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="relative flex-1">
+            <Input 
+              type="text" 
+              placeholder={isFetchingInfo ? (t('fetching_title') || 'Fetching Title...') : 'Song Title'}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              disabled={isDownloading || isFetchingInfo}
+              required
+              className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl pr-9"
+            />
+            {isFetchingInfo && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-emerald-400">
+                <Loader2 className="w-4 h-4 animate-spin" />
+              </div>
+            )}
+          </div>
+
+          <div className="relative flex-1">
+            <Input 
+              type="text" 
+              placeholder={isFetchingInfo ? (t('fetching_artist') || 'Fetching Artist...') : 'Artist (Optional)'}
+              value={artist}
+              onChange={(e) => setArtist(e.target.value)}
+              disabled={isDownloading || isFetchingInfo}
+              className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl pr-9"
+            />
+            {isFetchingInfo && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-emerald-400">
+                <Loader2 className="w-4 h-4 animate-spin" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Metadata Auto-Fetch Lazy Loading Banner */}
+        <AnimatePresence>
+          {isFetchingInfo && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/20"
+            >
+              <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+              <span>Đang tự động tải thông tin bài hát & nghệ sĩ từ YouTube...</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Custom Styled Album Selection Dropdown */}
+        <div className="relative w-full">
+          <select
+            value={selectedAlbumId}
+            onFocus={loadAlbums}
+            onChange={(e) => setSelectedAlbumId(e.target.value)}
+            disabled={isDownloading || isFetchingInfo}
+            className="w-full h-11 rounded-xl bg-background/50 border border-white/10 focus:border-emerald-500/50 text-white/90 px-4 pr-10 outline-none appearance-none cursor-pointer transition-all text-sm font-medium disabled:opacity-50"
+          >
+            <option value="" className="bg-[#121212] text-white">
+              {t('no_album_single') || 'Không chọn album (Single)'}
             </option>
-          ))}
-        </select>
+            {(Array.isArray(albums) ? albums : []).map((album) => (
+              <option key={album.id} value={album.id} className="bg-[#121212] text-white">
+                🎵 Album: {album.title}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
+            <ChevronDown className="w-4 h-4" />
+          </div>
+        </div>
         <Button 
           type="submit" 
           disabled={isDownloading || isFetchingInfo || !url || !title}

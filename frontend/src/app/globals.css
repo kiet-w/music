@@ -63,6 +63,16 @@
     background: transparent;
   }
 
+  html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+  }
+
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground;
   }

@@ -54,7 +54,10 @@
     "youtube_upgrade_desc1": "The legacy YouTube converter page using Python API has been completely replaced with a unified NestJS backend downloader powered by high-performance BullMQ queues.",
     "youtube_upgrade_desc2": "You can now download YouTube music directly inside your Music library page with superior stability and lightning-fast aria2c speeds.",
     "go_to_music": "Go to Music Page",
-    "pipeline_enabled": "Unified NestJS Downloader Pipeline Enabled"
+    "pipeline_enabled": "Unified NestJS Downloader Pipeline Enabled",
+    "fetching_title": "Fetching song title...",
+    "fetching_artist": "Fetching artist...",
+    "no_album_single": "No Album (Single)"
   },
   "Auth": {
     "login": "Login",

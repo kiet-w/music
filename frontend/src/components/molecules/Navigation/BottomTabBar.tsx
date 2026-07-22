@@ -8,14 +8,20 @@ import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useChatStore } from '@/store/useChatStore';
+import { useKeyboardVisible } from '@/hooks/useKeyboardVisible';
 
 export default function BottomTabBar() {
+  const isKeyboardVisible = useKeyboardVisible();
   const pathname = usePathname();
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations();
   const { clearSession, user } = useAuthStore();
   const { unreadMessages } = useChatStore();
+
+  if (isKeyboardVisible) {
+    return null;
+  }
 
   const handleLogout = () => {
     clearSession();

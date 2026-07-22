@@ -3,14 +3,16 @@
 import React from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume1, Volume2, VolumeX } from 'lucide-react';
 import { usePlayerStore } from '@/store/usePlayerStore';
+import { useKeyboardVisible } from '@/hooks/useKeyboardVisible';
 import { cn } from '@/lib/utils';
 
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PlayerBar() {
+  const isKeyboardVisible = useKeyboardVisible();
   const { currentTrack, isPlaying, togglePlay, currentTime, duration, seek, volume, setVolume } = usePlayerStore();
 
-  if (!currentTrack) return null;
+  if (!currentTrack || isKeyboardVisible) return null;
 
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return '0:00';
