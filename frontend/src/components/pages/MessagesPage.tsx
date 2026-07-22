@@ -132,13 +132,25 @@ export function MessagesPage() {
   const partnerStatus = getUserStatusText(activeChatPartner?.isOnline, activeChatPartner?.lastSeen);
 
   return (
-    <MainContainer>
-      <MessagesHeader
-        title={t('title')}
-        onOpenTokenModal={() => setIsTokenModalOpen(true)}
-      />
+    <MainContainer
+      className={cn(
+        "transition-all duration-200",
+        activeReceiverId && "!pb-0 !pt-[calc(0.5rem+env(safe-area-inset-top))] h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden"
+      )}
+    >
+      {!activeReceiverId && (
+        <MessagesHeader
+          title={t('title')}
+          onOpenTokenModal={() => setIsTokenModalOpen(true)}
+        />
+      )}
 
-      <div className="w-full flex-1 min-h-0 h-full glass-dark border border-white/10 rounded-3xl overflow-hidden flex flex-col lg:flex-row">
+      <div
+        className={cn(
+          "w-full flex-1 min-h-0 glass-dark border border-white/10 rounded-3xl overflow-hidden flex flex-col lg:flex-row",
+          activeReceiverId && "h-full rounded-2xl sm:rounded-3xl"
+        )}
+      >
         {isLoadingFriends ? (
           <EmptyFriendListState
             onOpenTokenModal={() => setIsTokenModalOpen(true)}

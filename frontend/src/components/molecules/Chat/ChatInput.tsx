@@ -33,7 +33,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-3 sm:p-4 border-t border-white/10 shrink-0 bg-black/90 backdrop-blur-md"
+      className="p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] border-t border-white/10 shrink-0 bg-black/90 backdrop-blur-md"
     >
       <div className="flex gap-2">
         <input
