@@ -18,8 +18,11 @@ export class MailService {
         port,
         secure: port === 465,
         auth: { user, pass },
+        tls: {
+          rejectUnauthorized: false,
+        },
       });
-      this.logger.log('Nodemailer SMTP transporter initialized');
+      this.logger.log(`Nodemailer SMTP transporter initialized (${host}:${port})`);
     } else {
       this.logger.warn(
         'SMTP_USER and SMTP_PASS not set. Emails will be logged to console in dev mode.',
