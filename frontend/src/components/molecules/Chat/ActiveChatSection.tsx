@@ -52,7 +52,7 @@ export function ActiveChatSection({
       )}
     >
       {/* Chat Header */}
-      <div className="px-4 sm:px-6 py-3 border-b border-white/10 flex items-center justify-between bg-white/5 shrink-0">
+      <div className="px-4 sm:px-6 py-3 border-b border-white/10 flex items-center justify-between bg-black/60 backdrop-blur-md shrink-0 w-full">
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onBack}

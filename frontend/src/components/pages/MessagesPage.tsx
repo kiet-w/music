@@ -135,7 +135,7 @@ export function MessagesPage() {
     <MainContainer
       className={cn(
         "transition-all duration-200",
-        activeReceiverId && "!pb-0 !pt-[calc(0.5rem+env(safe-area-inset-top))] h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden"
+        activeReceiverId && "!max-w-full !w-full !px-0 !mx-0 !pt-[env(safe-area-inset-top)] !pb-0 h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden"
       )}
     >
       {!activeReceiverId && (
@@ -148,7 +148,7 @@ export function MessagesPage() {
       <div
         className={cn(
           "w-full flex-1 min-h-0 glass-dark border border-white/10 rounded-3xl overflow-hidden flex flex-col lg:flex-row",
-          activeReceiverId && "h-full rounded-2xl sm:rounded-3xl"
+          activeReceiverId && "!rounded-none !border-none !bg-background h-full"
         )}
       >
         {isLoadingFriends ? (
