@@ -157,7 +157,7 @@ nextjs-portal {
   left: 0 !important;
   right: 0 !important;
   width: 100vw !important;
-  top: calc(2.25rem + env(safe-area-inset-top, 0px)) !important;
+  top: calc(1.25rem + env(safe-area-inset-top, 0px)) !important;
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
