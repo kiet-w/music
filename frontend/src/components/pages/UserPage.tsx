@@ -152,7 +152,7 @@ export function UserPage({ locale }: UserPageProps) {
   const displayAvatarUrl = localPreview || avatarMediaUrl;
 
   return (
-    <MainContainer className="h-[var(--vh,100dvh)] max-h-[var(--vh,100dvh)] overflow-hidden flex flex-col pt-4 pb-0">
+    <MainContainer>
       {/* Centered Loading Popups */}
       <LoadingPopup isOpen={isUploadingAvatar} text="Đang tải ảnh đại diện lên..." />
       <LoadingPopup isOpen={isUpdatingName} text="Đang cập nhật tên hiển thị..." />

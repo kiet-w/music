@@ -132,14 +132,7 @@ export function MessagesPage() {
   const partnerStatus = getUserStatusText(activeChatPartner?.isOnline, activeChatPartner?.lastSeen);
 
   return (
-    <MainContainer
-      className={cn(
-        "h-[var(--vh,100dvh)] max-h-[var(--vh,100dvh)] overflow-hidden flex flex-col w-full max-w-[360px] lg:max-w-7xl gap-2.5 transition-all duration-200",
-        activeReceiverId
-          ? "pt-2 sm:pt-4 pb-3 sm:pb-6"
-          : "pt-3 sm:pt-6 pb-[88px] sm:pb-24"
-      )}
-    >
+    <MainContainer>
       <MessagesHeader
         title={t('title')}
         onOpenTokenModal={() => setIsTokenModalOpen(true)}
