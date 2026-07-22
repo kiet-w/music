@@ -28,7 +28,6 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
-          NEXT_STATIC_EXPORT: 'true'
         run: |
           cd frontend
           mkdir -p out
@@ -43,7 +42,6 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
-          NEXT_STATIC_EXPORT: 'true'
         run: |
           cd frontend
           mkdir -p out

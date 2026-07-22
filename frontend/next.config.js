@@ -16,12 +16,8 @@ const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
 
-  // Bật export khi build Capacitor APK, standalone khi build Docker production
-  ...(process.env.NEXT_STATIC_EXPORT === 'true'
-    ? { output: 'export' }
-    : isDev
-    ? {}
-    : { output: 'standalone' }),
+  // Bật standalone trong production (build Docker)
+  ...(isDev ? {} : { output: 'standalone' }),
 
   images: {
     unoptimized: true,
