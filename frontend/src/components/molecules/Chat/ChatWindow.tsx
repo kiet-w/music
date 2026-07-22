@@ -49,15 +49,10 @@ export function ChatWindow({
     el.scrollTop = el.scrollHeight;
   }, []);
 
-  // Re-scroll to bottom when keyboard opens/closes or viewport resizes
+  // Re-scroll to bottom instantly when keyboard opens/closes or viewport resizes
   useEffect(() => {
     scrollToBottom();
-    const t1 = setTimeout(scrollToBottom, 100);
-    const t2 = setTimeout(scrollToBottom, 300);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
+    requestAnimationFrame(scrollToBottom);
   }, [isKeyboardVisible, keyboardHeight, scrollToBottom]);
 
   useEffect(() => {
@@ -107,7 +102,7 @@ export function ChatWindow({
       ref={scrollRef}
       onScroll={handleScroll}
       className={cn(
-        "flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col gap-4 scrollbar-hide transition-all duration-200",
+        "flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col gap-4 scrollbar-hide",
         messages.length === 0 && "justify-center items-center"
       )}
     >
