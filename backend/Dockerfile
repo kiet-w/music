@@ -63,8 +63,10 @@ COPY --from=builder --chown=nestjs:nestjs /app/prisma ./prisma
 # Copy yt-dlp binary (pre-verified by install script)
 COPY --from=deps --chown=nestjs:nestjs /app/yt-dlp ./yt-dlp
 
-# Copy package.json for version info
+# Copy package.json and start script
 COPY --chown=nestjs:nestjs package.json ./
+COPY --chown=nestjs:nestjs start.sh ./
+RUN chmod +x ./start.sh
 
 # Ensure temp directory exists and is writable by nestjs
 RUN mkdir -p /app/temp && chown -R nestjs:nestjs /app
@@ -74,10 +76,20 @@ USER nestjs
 EXPOSE 3000
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=10000
+ENV REDIS_HOST=powerful-mayfly-186559.upstash.io
+ENV REDIS_PORT=6379
+ENV REDIS_PASSWORD=gQAAAAAAAti_AAIgcDFlYjU0ZThhODlhMTc0MjU1OGFjZDY4NzQ4OTMwNmUyMQ
+ENV SMTP_HOST=smtp.gmail.com
+ENV SMTP_PORT=587
+ENV SMTP_USER=lpokmoppokida@gmail.com
+ENV SMTP_PASS="xgbb lsiq sojt xbsf"
+ENV MAIL_FROM='"Music App" <lpokmoppokida@gmail.com>'
+ENV JWT_SECRET=music_app_super_secret_jwt_2026_key
+ENV JWT_EXPIRES_IN=7d
 
 # Use tini as init system for proper signal handling
 ENTRYPOINT ["tini", "--"]
 
-# Run Prisma migrations then start
-CMD ["node", "dist/main.js"]
+# Run automatic migration and start production server
+CMD ["./start.sh"]
