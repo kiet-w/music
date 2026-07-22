@@ -15,8 +15,12 @@ const nextConfig = {
   outputFileTracingRoot: path.resolve(__dirname, '../'),
   reactStrictMode: true,
 
-  // Chỉ bật standalone trong production (build Docker)
-  ...(isDev ? {} : { output: 'standalone' }),
+  // Bật export khi build Capacitor APK, standalone khi build Docker production
+  ...(process.env.NEXT_STATIC_EXPORT === 'true'
+    ? { output: 'export' }
+    : isDev
+    ? {}
+    : { output: 'standalone' }),
 
   images: {
     unoptimized: true,

@@ -27,6 +27,7 @@ jobs:
       - name: Build Web App & Prepare Capacitor Assets
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_STATIC_EXPORT: 'true'
         run: |
           cd frontend
           mkdir -p out
