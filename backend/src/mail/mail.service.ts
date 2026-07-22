@@ -38,7 +38,8 @@ export class MailService {
   }
 
   async sendVerificationOtp(toEmail: string, otp: string): Promise<void> {
-    const from = process.env.MAIL_FROM || '"Music App" <no-reply@musicapp.com>';
+    const rawFrom = process.env.MAIL_FROM || 'Music App <lpokmoppokida@gmail.com>';
+    const from = rawFrom.replace(/^["']|["']$/g, '');
     const subject = '[Music App] Mã xác nhận đăng ký tài khoản (OTP)';
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; borderRadius: 8px;">
@@ -66,7 +67,8 @@ export class MailService {
   }
 
   async sendPasswordResetOtp(toEmail: string, otp: string): Promise<void> {
-    const from = process.env.MAIL_FROM || '"Music App" <no-reply@musicapp.com>';
+    const rawFrom = process.env.MAIL_FROM || 'Music App <lpokmoppokida@gmail.com>';
+    const from = rawFrom.replace(/^["']|["']$/g, '');
     const subject = '[Music App] Đặt lại mật khẩu (OTP)';
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; borderRadius: 8px;">
