@@ -12,13 +12,12 @@ if (isProd) {
 
 const DEFAULT_API_FALLBACK = 'https://section-affair-convertible-beds.trycloudflare.com';
 
-const RAW_API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !window.location.hostname.includes('trycloudflare')
-    ? `${window.location.protocol}//${window.location.hostname}:4000`
-    : DEFAULT_API_FALLBACK);
-
-export const API_URL = RAW_API_URL.replace(/\/$/, '');
+const rawApi = process.env.NEXT_PUBLIC_API_URL;
+export const API_URL = (
+  rawApi && !rawApi.includes('localhost') && !rawApi.includes('127.0.0.1')
+    ? rawApi
+    : DEFAULT_API_FALLBACK
+).replace(/\/$/, '');
 
 const RAW_PYTHON_API_URL = process.env.NEXT_PUBLIC_PYTHON_API_URL || 'http://localhost:8001';
 export const PYTHON_API_URL = RAW_PYTHON_API_URL.replace(/\/$/, '');
