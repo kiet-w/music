@@ -22,29 +22,13 @@ import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 
 async function bootstrap() {
-  const corsOriginsEnv = process.env.CORS_ORIGINS;
-  if (!corsOriginsEnv) {
-    console.error(
-      'CORS_ORIGINS environment variable is missing. Application must fail-closed.',
-    );
-    throw new Error(
-      'CORS_ORIGINS environment variable is missing. Application must fail-closed.',
-    );
-  }
-
-  const corsOrigins = corsOriginsEnv
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter((origin) => origin.length > 0);
-
-  if (corsOrigins.length === 0) {
-    console.error(
-      'CORS_ORIGINS environment variable is empty. Application must fail-closed.',
-    );
-    throw new Error(
-      'CORS_ORIGINS environment variable is empty. Application must fail-closed.',
-    );
-  }
+  const corsOriginsEnv = process.env.CORS_ORIGINS || '*';
+  const corsOrigins = corsOriginsEnv === '*'
+    ? '*'
+    : corsOriginsEnv
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter((origin) => origin.length > 0);
 
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
