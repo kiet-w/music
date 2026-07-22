@@ -30,6 +30,10 @@ jobs:
         run: |
           cd frontend
           npm run build || true
+          mkdir -p out
+          if [ ! -f out/index.html ]; then
+            cp out/vi.html out/index.html 2>/dev/null || cp out/en.html out/index.html 2>/dev/null || cp out/vi/index.html out/index.html 2>/dev/null || cp out/en/index.html out/index.html 2>/dev/null || echo '<!DOCTYPE html><html><head><script>window.location.href="/vi/albums";</script></head><body></body></html>' > out/index.html
+          fi
 
       - name: Build Android APK
         run: |
