@@ -13,16 +13,23 @@ export class MailService {
     const pass = process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/^["']|["']$/g, '').replace(/\s+/g, '') : undefined;
 
     if (user && pass) {
-      this.transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465,
-        auth: { user, pass },
-        tls: {
-          rejectUnauthorized: false,
-        },
-      });
-      this.logger.log(`Nodemailer SMTP transporter initialized (${host}:${port})`);
+      const isGmail = host.includes('gmail');
+      this.transporter = nodemailer.createTransport(
+        isGmail
+          ? {
+              service: 'gmail',
+              auth: { user, pass },
+              tls: { rejectUnauthorized: false },
+            }
+          : {
+              host,
+              port,
+              secure: port === 465,
+              auth: { user, pass },
+              tls: { rejectUnauthorized: false },
+            }
+      );
+      this.logger.log(`Nodemailer SMTP transporter initialized (${isGmail ? 'Gmail Service' : host})`);
     } else {
       this.logger.warn(
         'SMTP_USER and SMTP_PASS not set. Emails will be logged to console in dev mode.',
@@ -45,15 +52,16 @@ export class MailService {
       </div>
     `;
 
+    // Always log OTP to server console for easy fallback debugging
+    this.logger.log(`🔑 [Verification OTP] Email: ${toEmail} | Code: ${otp}`);
+
     if (this.transporter) {
       try {
         await this.transporter.sendMail({ from, to: toEmail, subject, html });
         this.logger.log(`Verification OTP email sent to ${toEmail}`);
-      } catch (error) {
-        this.logger.error(`Failed to send email to ${toEmail}: ${error.message}`);
+      } catch (error: any) {
+        this.logger.error(`Failed to send email to ${toEmail}: ${error?.message || error}`);
       }
-    } else {
-      this.logger.log(`[DEV MODE] Verification OTP for ${toEmail}: ${otp}`);
     }
   }
 
@@ -72,15 +80,16 @@ export class MailService {
       </div>
     `;
 
+    // Always log OTP to server console for easy fallback debugging
+    this.logger.log(`🔑 [Password Reset OTP] Email: ${toEmail} | Code: ${otp}`);
+
     if (this.transporter) {
       try {
         await this.transporter.sendMail({ from, to: toEmail, subject, html });
         this.logger.log(`Password reset OTP email sent to ${toEmail}`);
-      } catch (error) {
-        this.logger.error(`Failed to send reset email to ${toEmail}: ${error.message}`);
+      } catch (error: any) {
+        this.logger.error(`Failed to send reset email to ${toEmail}: ${error?.message || error}`);
       }
-    } else {
-      this.logger.log(`[DEV MODE] Password Reset OTP for ${toEmail}: ${otp}`);
     }
   }
 }
