@@ -151,3 +151,25 @@
 nextjs-portal {
   display: none !important;
 }
+
+[data-sonner-toaster][data-position="top-center"] {
+  top: calc(2.25rem + env(safe-area-inset-top, 0px)) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: max-content !important;
+  max-width: 88vw !important;
+}
+
+[data-sonner-toast] {
+  border-radius: 1.25rem !important;
+  padding: 12px 20px !important;
+  background: rgba(10, 10, 10, 0.9) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 auto !important;
+}
