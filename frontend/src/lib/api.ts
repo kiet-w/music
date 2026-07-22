@@ -11,7 +11,7 @@ if (isProd) {
 }
 
 const defaultApiUrl = isProd
-  ? 'https://music-backend-cb0i.onrender.com'
+  ? 'https://inquiry-santa-archive-minute.trycloudflare.com'
   : (isServer ? (process.env.BACKEND_INTERNAL_URL || 'http://localhost:4000') : '/api-proxy');
 const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || defaultApiUrl;
 export const API_URL = RAW_API_URL.replace(/\/$/, '');
