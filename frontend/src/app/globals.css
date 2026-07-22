@@ -147,3 +147,7 @@
     @apply w-full h-1.5 bg-secondary rounded-full;
   }
 }
+
+nextjs-portal {
+  display: none !important;
+}
