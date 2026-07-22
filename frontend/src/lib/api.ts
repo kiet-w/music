@@ -8,6 +8,8 @@ if (isProd) {
   if (!process.env.NEXT_PUBLIC_PYTHON_API_URL) {
     console.warn('[API Warning] NEXT_PUBLIC_PYTHON_API_URL is missing in production environment. Using default fallback.');
   }
+}
+
 const DEFAULT_API_FALLBACK = 'https://section-affair-convertible-beds.trycloudflare.com';
 
 const RAW_API_URL =
