@@ -16,6 +16,8 @@ export function useAuthGate() {
   }, [hydrate]);
 
   const isPublicRoute =
+    pathname === '/' ||
+    pathname === '/index.html' ||
     pathname === `/${locale}/login` ||
     pathname === `/${locale}/register` ||
     pathname === `/${locale}/forgot-password` ||
@@ -32,10 +34,10 @@ export function useAuthGate() {
       return;
     }
 
-    if (accessToken && isPublicRoute) {
-      router.push(`/${locale}`);
+    if (accessToken && (pathname === `/${locale}/login` || pathname === `/${locale}/register`)) {
+      router.push(`/${locale}/albums`);
     }
-  }, [accessToken, isHydrated, isPublicRoute, locale, router]);
+  }, [accessToken, isHydrated, isPublicRoute, locale, pathname, router]);
 
   return {
     isHydrated,
