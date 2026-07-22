@@ -117,7 +117,7 @@ export class SongsService {
       CONVERSION_JOB.NAME,
       { url, songId: song.id, userId },
       {
-        jobId: `convert-${youtubeId}`,
+        jobId: `convert-${youtubeId}-${song.id}`,
         attempts: CONVERSION_JOB.MAX_ATTEMPTS,
         backoff: { type: 'exponential', delay: CONVERSION_JOB.BACKOFF_DELAY_MS },
       },
