@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { getUserStatusText } from '@/lib/userStatus';
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
 import { cn } from '@/lib/utils';
+import { useKeyboardMode } from '@/hooks/useKeyboardMode';
 
 import { getEffectiveAccessToken } from '@/store/useAuthStore';
 
@@ -25,7 +26,12 @@ const FriendCodeModal = dynamic(
   { ssr: false }
 );
 
-export function MessagesPage() {
+interface MessagesPageProps {
+  locale: string;
+}
+
+export function MessagesPage({ locale }: MessagesPageProps) {
+  useKeyboardMode('body');
   const t = useTranslations('Chat');
   const { users, loadUsers, currentUser, accessToken, isLoading: isLoadingFriends } = useFriends();
   const searchParams = useSearchParams();

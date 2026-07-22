@@ -11,11 +11,14 @@ import { LoadingPopup } from '@/components/atoms/ui/loading-popup';
 import { getMediaUrl } from '@/lib/utils';
 import { toast } from 'sonner';
 
+import { useKeyboardMode } from '@/hooks/useKeyboardMode';
+
 interface UserPageProps {
   locale: string;
 }
 
 export function UserPage({ locale }: UserPageProps) {
+  useKeyboardMode('none');
   const t = useTranslations('Music');
   const router = useRouter();
   const { user, accessToken, updateUser, clearSession } = useAuthStore();

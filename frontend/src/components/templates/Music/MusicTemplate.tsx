@@ -33,6 +33,8 @@ interface MusicTemplateProps {
   t: (key: string, values?: any) => string;
 }
 
+import { useKeyboardMode } from '@/hooks/useKeyboardMode';
+
 export function MusicTemplate({
   activeTab,
   setActiveTab,
@@ -45,6 +47,7 @@ export function MusicTemplate({
   history,
   t
 }: MusicTemplateProps) {
+  useKeyboardMode('none');
   return (
     <MainContainer>
       <div className="flex flex-col gap-2 mb-6 mt-2">

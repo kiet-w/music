@@ -20,6 +20,8 @@ interface Album {
   };
 }
 
+import { useKeyboardMode } from '@/hooks/useKeyboardMode';
+
 interface AlbumsTemplateProps {
   albums: Album[];
   isLoading: boolean;
@@ -59,6 +61,7 @@ export function AlbumsTemplate({
   locale,
   t
 }: AlbumsTemplateProps) {
+  useKeyboardMode('none');
   return (
     <MainContainer className="h-[100dvh] max-h-[100dvh] overflow-hidden !pb-[100px] flex flex-col gap-4">
       <div className="shrink-0">
