@@ -42,7 +42,7 @@ export default function BottomTabBar() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
-      <div className="mx-auto max-w-[360px] flex items-center justify-around glass-dark border-white/10 rounded-full h-[64px] px-2 shadow-soft shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] pointer-events-auto">
+      <div className="mx-auto max-w-md w-[calc(100%-2.5rem)] flex items-center justify-around glass-dark border-white/10 rounded-full h-[64px] px-2 shadow-soft shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] pointer-events-auto">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
           const Icon = tab.icon;

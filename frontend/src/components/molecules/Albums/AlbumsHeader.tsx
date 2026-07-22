@@ -21,9 +21,9 @@ export function AlbumsHeader({
   t 
 }: AlbumsHeaderProps) {
   return (
-    <div className="flex flex-col gap-6 mb-12 mt-4">
+    <div className="flex flex-col gap-6 mb-6 mt-2">
       <div className="flex flex-col gap-1.5">
-        <h1 className="font-instrument text-4xl md:text-5xl tracking-tighter leading-none">{t('albums')}</h1>
+        <h1 className="font-instrument text-4xl sm:text-5xl tracking-tighter leading-none">{t('albums')}</h1>
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground font-sans">
             {albumsCount > 0 ? t('collection_count', { count: albumsCount }) : 'Your music library'}

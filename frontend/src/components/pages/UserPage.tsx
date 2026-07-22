@@ -167,9 +167,9 @@ export function UserPage({ locale }: UserPageProps) {
         className="hidden"
       />
 
-      {/* Top Header Matching MusicPage Layout */}
-      <div className="flex flex-col gap-2 mb-6 shrink-0">
-        <h1 className="font-instrument text-4xl md:text-5xl tracking-tighter leading-none text-foreground">
+      {/* Top Header Matching All Pages Layout */}
+      <div className="flex flex-col gap-2 mb-6 mt-2 shrink-0">
+        <h1 className="font-instrument text-4xl sm:text-5xl tracking-tighter leading-none text-foreground">
           Tài Khoản
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed font-sans">

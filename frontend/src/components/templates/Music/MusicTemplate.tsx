@@ -47,8 +47,8 @@ export function MusicTemplate({
 }: MusicTemplateProps) {
   return (
     <MainContainer>
-      <div className="flex flex-col gap-2 mb-8 mt-4">
-        <h1 className="font-instrument text-4xl md:text-5xl tracking-tighter leading-none">{t('add_music')}</h1>
+      <div className="flex flex-col gap-2 mb-6 mt-2">
+        <h1 className="font-instrument text-4xl sm:text-5xl tracking-tighter leading-none">{t('add_music')}</h1>
         <p className="text-base text-muted-foreground leading-relaxed font-sans">
           {activeTab === 'youtube' ? 'Convert YouTube to MP3.' : 'Import MP3s from your Drive.'}
         </p>

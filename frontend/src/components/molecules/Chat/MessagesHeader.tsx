@@ -24,8 +24,8 @@ export function MessagesHeader({
   const displayButtonText = buttonText || t('friend_code');
 
   return (
-    <header className={cn("flex items-center justify-between gap-2 shrink-0", className)}>
-      <h1 className="text-2xl font-bold text-white shadow-text">{displayTitle}</h1>
+    <header className={cn("flex items-center justify-between gap-2 shrink-0 mb-6 mt-2", className)}>
+      <h1 className="font-instrument text-4xl sm:text-5xl tracking-tighter leading-none text-white shadow-text">{displayTitle}</h1>
       <Button
         onClick={onOpenTokenModal}
         className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 font-bold rounded-2xl text-xs sm:text-sm px-4 py-2 h-10 flex items-center gap-2 transition-all active:scale-95 shadow-md shadow-emerald-500/10"
