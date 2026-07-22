@@ -37,7 +37,7 @@ export function DriveSection({
       className="space-y-6"
     >
       <div className="bg-card border-[0.5px] border-border p-12 rounded-[2.5rem] flex flex-col items-center text-center gap-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full -mr-16 -mt-16" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16" />
         <div className="w-16 h-16 rounded-3xl bg-blue-500/10 flex items-center justify-center text-blue-500 relative z-10">
           <HardDrive size={32} />
         </div>

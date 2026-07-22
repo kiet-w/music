@@ -178,7 +178,7 @@ export function UserPage({ locale }: UserPageProps) {
       </div>
 
       {/* Scrollable Content Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto pb-[120px] scrollbar-hide">
+      <div className="w-full pb-32">
         <div className="flex flex-col gap-5 max-w-2xl">
           {/* User Info Overview Card */}
           <div className="bg-card border-[0.5px] border-border p-5 sm:p-6 rounded-3xl shadow-sm relative flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
