@@ -5,6 +5,7 @@ const config: CapacitorConfig = {
   appName: 'music',
   webDir: 'out',
   server: {
+    url: 'http://192.168.240.1:3003',
     cleartext: true
   }
 };

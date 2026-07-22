@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Mail, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/ui/button';
 import { Input } from '@/components/atoms/ui/input';
@@ -28,12 +28,11 @@ export function ForgotPasswordForm({
           {t('email')}
         </label>
         <div className="relative">
-          <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/60" strokeWidth={1.5} />
           <Input
             id="reset-email"
             type="email"
             placeholder="email@example.com"
-            className="h-12 rounded-2xl bg-muted/30 border border-white/5 pl-12 text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-white/20 transition-all"
+            className="h-12 rounded-2xl bg-muted/30 border border-white/5 px-4 text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-white/20 transition-all"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

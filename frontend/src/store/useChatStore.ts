@@ -2,7 +2,13 @@
 
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
-import { fetchChatHistory, sendMessage as apiSendMessage, API_URL } from '@/lib/api';
+import { fetchChatHistory, sendMessage as apiSendMessage, reactToMessage as apiReactToMessage, API_URL } from '@/lib/api';
+
+export type MessageReaction = {
+  id?: string;
+  userId: string;
+  emoji: string;
+};
 
 export type Message = {
   id: string;
@@ -10,6 +16,7 @@ export type Message = {
   senderId: string;
   receiverId: string;
   createdAt: string;
+  reactions?: MessageReaction[];
 };
 
 type ChatState = {
@@ -23,10 +30,12 @@ type ChatState = {
   socket: Socket | null;
   setMessages: (messages: Message[]) => void;
   addMessage: (message: Message) => void;
+  updateMessageReaction: (updatedMessage: Message) => void;
   clearUnread: (senderId: string) => void;
   setActiveReceiverId: (id: string | null, token?: string) => Promise<void>;
   loadMoreMessages: (token: string) => Promise<boolean>;
   sendMessage: (token: string, content: string) => Promise<void>;
+  reactToMessage: (token: string, messageId: string, emoji: string) => Promise<void>;
   subscribeToMessages: (userId: string) => void;
   unsubscribeFromMessages: () => void;
 };
@@ -61,6 +70,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
       return newState;
     });
+  },
+
+  updateMessageReaction: (updatedMessage) => {
+    set((state) => ({
+      messages: state.messages.map((m) =>
+        m.id === updatedMessage.id ? { ...m, reactions: updatedMessage.reactions } : m
+      ),
+    }));
   },
 
   clearUnread: (senderId) => set((state) => ({
@@ -128,6 +145,17 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
+  reactToMessage: async (token, messageId, emoji) => {
+    try {
+      const updatedMessage = await apiReactToMessage(token, messageId, emoji);
+      if (updatedMessage) {
+        get().updateMessageReaction(updatedMessage);
+      }
+    } catch (error) {
+      console.error('Failed to react to message:', error);
+    }
+  },
+
   subscribeToMessages: (userId: string) => {
     // ponytail: allow re-subscribe after disconnect by checking socket state, not just flag
     const existing = get().socket;
@@ -160,6 +188,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     socket.on('newMessage', (message: Message) => {
       get().addMessage(message);
+    });
+
+    socket.on('messageReactionUpdated', (updatedMessage: Message) => {
+      get().updateMessageReaction(updatedMessage);
     });
 
     set({ isSubscribed: true, socket });

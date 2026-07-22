@@ -27,15 +27,6 @@ const nextConfig = {
     optimizePackageImports: [
       'lucide-react',
       'framer-motion',
-      '@base-ui/react',
-      'sonner',
-      'howler',
-      'zustand',
-      'next-intl',
-      '@react-oauth/google',
-      '@sentry/nextjs',
-      'clsx',
-      'tailwind-merge',
     ],
   },
 
@@ -43,15 +34,18 @@ const nextConfig = {
     removeConsole: isDev ? false : { exclude: ['error', 'warn'] },
   },
 
-  // Tắt type-check và lint khi dev để compile nhanh hơn (IDE đã check rồi)
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   async rewrites() {
-    const backendUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_INTERNAL_URL || 'https://memphis-lace-plastic-policies.trycloudflare.com').replace(/\/$/, '');
+    const backendUrl = (
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.BACKEND_INTERNAL_URL ||
+      'http://localhost:4000'
+    ).replace(/\/$/, '');
     return [
       {
         source: '/api-proxy/:path*',

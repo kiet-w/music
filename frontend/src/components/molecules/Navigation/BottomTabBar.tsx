@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Disc, Music, LogOut, MessageCircle } from 'lucide-react';
+import { Disc, Music, LogOut, MessageCircle, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -17,11 +17,9 @@ export default function BottomTabBar() {
   const locale = useLocale();
   const t = useTranslations();
   const { clearSession, user } = useAuthStore();
-  const { unreadMessages } = useChatStore();
+  const { unreadMessages, activeReceiverId } = useChatStore();
 
-  const isMessagesPage = pathname?.includes('/messages');
-
-  if (isKeyboardVisible || isMessagesPage) {
+  if (isKeyboardVisible || activeReceiverId) {
     return null;
   }
 
@@ -36,9 +34,10 @@ export default function BottomTabBar() {
   };
 
   const tabs = [
-    { name: t('Navbar.albums'), path: '/albums', icon: Disc },
-    { name: t('Navbar.music'), path: '/music', icon: Music },
-    { name: t('Navbar.messages'), path: '/messages', icon: MessageCircle, badge: unreadMessages.length },
+    { name: t('Navbar.albums') || 'Album', path: '/albums', icon: Disc },
+    { name: t('Navbar.music') || 'Nhạc', path: '/music', icon: Music },
+    { name: t('Navbar.messages') || 'Chat', path: '/messages', icon: MessageCircle, badge: unreadMessages.length },
+    { name: t('Navbar.user') || 'Tài khoản', path: '/user', icon: User },
   ];
 
   return (

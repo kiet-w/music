@@ -1,10 +1,17 @@
 # Local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*.local
+
+# Build & dependency outputs
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+.codegraph/
+symphony_locks.sqlite
+b64.txt
 
 # Mobile builds (Capacitor/Android/iOS)
 /android/
 /ios/
-/dist/
+

@@ -64,6 +64,7 @@ backend/cookies.txt
 backend/yt-dlp
 backend/temp/
 backend/test/
+backend/uploads/
 
 # Python
 *.pyc

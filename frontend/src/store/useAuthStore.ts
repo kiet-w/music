@@ -14,6 +14,7 @@ type AuthState = {
   isHydrated: boolean;
   hydrate: () => Promise<void>;
   setSession: (accessToken: string, user: AuthUser) => Promise<void>;
+  updateUser: (partialUser: Partial<AuthUser>) => Promise<void>;
   clearSession: () => Promise<void>;
 };
 
@@ -28,6 +29,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   accessToken: null,
   isHydrated: false,
+
+  updateUser: async (partialUser) => {
+    const current = get().user;
+    if (!current) return;
+    const updated = { ...current, ...partialUser };
+    const accessToken = get().accessToken;
+    set({ user: updated });
+    if (typeof window !== 'undefined') {
+      if (Capacitor.isNativePlatform()) {
+        await Preferences.set({
+          key: AUTH_STORAGE_KEY,
+          value: JSON.stringify({ accessToken, user: updated }),
+        });
+      } else {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, user: updated }));
+      }
+    }
+  },
 
   setSession: async (accessToken, user) => {
     const previousUserId = get().user?.id;
@@ -95,19 +114,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      // ponytail: 5s timeout — if backend is down, don't block the entire app
+      // 5s timeout using AbortController — if backend is down/hanging, abort request and unblock UI cleanly without timer memory leaks
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       try {
-        const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Hydration timeout')), 5000)
-        );
-        const user = await Promise.race([fetchMe(accessToken), timeoutPromise]);
+        const user = await fetchMe(accessToken, { signal: controller.signal });
         set({ accessToken, user, isHydrated: true });
       } catch (error: any) {
-        console.error('Failed to hydrate auth session:', error);
         if (error?.status === 401) {
           await get().clearSession();
+        } else {
+          console.warn('Auth session hydration skipped:', error?.message || error);
         }
         set({ isHydrated: true });
+      } finally {
+        clearTimeout(timeoutId);
       }
     } catch (e) {
       console.error('Failed to parse auth storage:', e);
@@ -115,3 +137,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 }));
+
+export function getEffectiveAccessToken(): string | null {
+  const storeToken = useAuthStore.getState().accessToken;
+  if (storeToken) return storeToken;
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed?.accessToken || parsed?.state?.accessToken || null;
+      }
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+

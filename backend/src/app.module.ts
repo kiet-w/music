@@ -18,6 +18,9 @@ import { GoogleDriveModule } from './google-drive/google-drive.module';
 import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { MessagesModule } from './messages/messages.module';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { UploadModule } from './upload/upload.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
@@ -87,6 +90,11 @@ import { HttpMetricsInterceptor } from './common/interceptors/http-metrics.inter
     AdminModule,
     AuthModule,
     MessagesModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+    }),
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [

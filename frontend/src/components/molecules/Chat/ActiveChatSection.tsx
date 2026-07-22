@@ -23,6 +23,7 @@ interface ActiveChatSectionProps {
   onAcceptInvite: () => void;
   onCreateInvite: () => void;
   onSend: (content: string) => Promise<void>;
+  onReactToMessage?: (messageId: string, emoji: string) => void;
 }
 
 export function ActiveChatSection({
@@ -39,6 +40,7 @@ export function ActiveChatSection({
   onAcceptInvite,
   onCreateInvite,
   onSend,
+  onReactToMessage,
 }: ActiveChatSectionProps) {
   const t = useTranslations('Chat');
 
@@ -93,6 +95,7 @@ export function ActiveChatSection({
           isLoadingMore={isLoadingMore}
           onAcceptInvite={onAcceptInvite}
           onCreateInvite={onCreateInvite}
+          onReactToMessage={onReactToMessage}
         />
       )}
 

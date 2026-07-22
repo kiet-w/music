@@ -17,6 +17,7 @@ model User {
   googleRefreshToken String?
   googleTokenExpiry  DateTime?
   name               String?
+  avatarUrl          String?
   role               UserRole        @default(USER)
   isEmailVerified    Boolean         @default(false)
   verificationOtp    String?
@@ -31,6 +32,7 @@ model User {
   sentRequests       FriendRequest[] @relation("SentRequests")
   receivedMessages   Message[]       @relation("ReceivedMessages")
   sentMessages       Message[]       @relation("SentMessages")
+  reactions          MessageReaction[]
   refreshTokens      RefreshToken[]
   tracks             Track[]
 }
@@ -43,10 +45,26 @@ model Message {
   createdAt  DateTime @default(now())
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
   sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  reactions  MessageReaction[]
 
   @@index([senderId])
   @@index([receiverId])
   @@index([senderId, receiverId])
+}
+
+model MessageReaction {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
 }
 
 model Album {

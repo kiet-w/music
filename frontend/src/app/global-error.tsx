@@ -47,7 +47,9 @@ export default function GlobalError({
           </h1>
 
           <p className="text-xs sm:text-sm text-white/50 mb-8 leading-relaxed">
-            {error?.message || 'An unexpected error occurred. Please try refreshing.'}
+            {process.env.NODE_ENV === 'development'
+              ? error?.message || 'An unexpected error occurred. Please try refreshing.'
+              : 'An unexpected system error occurred. Please try refreshing.'}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full">

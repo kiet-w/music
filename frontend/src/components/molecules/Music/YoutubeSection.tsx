@@ -18,8 +18,8 @@ export function YoutubeSection() {
       exit={{ opacity: 0, y: -10 }}
       className="space-y-6"
     >
-      <div className="bg-card border-[0.5px] border-border p-6 rounded-[2.5rem] shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full -mr-16 -mt-16" />
+      <div className="bg-card border-[0.5px] border-border p-6 rounded-[2.5rem] shadow-sm relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full -mr-16 -mt-16 overflow-hidden pointer-events-none rounded-full" />
         <Downloader />
       </div>
     </motion.section>

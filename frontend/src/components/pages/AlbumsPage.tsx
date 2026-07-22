@@ -20,6 +20,9 @@ export function AlbumsPage({ locale }: AlbumsPageProps) {
     setNewTitle,
     newArtist,
     setNewArtist,
+    coverUrl,
+    setCoverUrl,
+    setCoverFile,
     handleCreate,
     onImportClick,
     t,
@@ -37,6 +40,9 @@ export function AlbumsPage({ locale }: AlbumsPageProps) {
       setNewTitle={setNewTitle}
       newArtist={newArtist}
       setNewArtist={setNewArtist}
+      coverUrl={coverUrl}
+      setCoverUrl={setCoverUrl}
+      setCoverFile={setCoverFile}
       handleCreate={handleCreate}
       onImportClick={onImportClick}
       locale={locale}

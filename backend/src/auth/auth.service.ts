@@ -352,7 +352,47 @@ export class AuthService {
       where: { id: userId },
     });
     if (!user) throw new UnauthorizedException();
-    return { id: user.id, email: user.email, name: user.name };
+    return { id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl, role: user.role };
+  }
+
+  async updateProfile(userId: string, data: { name?: string; avatarUrl?: string }) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.avatarUrl !== undefined ? { avatarUrl: data.avatarUrl } : {}),
+      },
+    });
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+      role: user.role,
+    };
+  }
+
+  async changePassword(userId: string, data: { currentPassword?: string; newPassword: string }) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Người dùng không tồn tại');
+    }
+
+    if (user.passwordHash && data.currentPassword) {
+      const isValid = await argon2.verify(user.passwordHash, data.currentPassword);
+      if (!isValid) {
+        throw new BadRequestException('Mật khẩu hiện tại không chính xác');
+      }
+    }
+
+    const newPasswordHash = await argon2.hash(data.newPassword);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newPasswordHash },
+    });
+
+    return { message: 'Đổi mật khẩu thành công' };
   }
 
   async getGoogleStatus(
@@ -468,6 +508,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        avatarUrl: user.avatarUrl,
         role: user.role,
       },
     };

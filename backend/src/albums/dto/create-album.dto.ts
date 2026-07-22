@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateAlbumDto {
   @ApiProperty({ description: 'The title of the album' })
@@ -13,9 +13,9 @@ export class CreateAlbumDto {
   artist?: string;
 
   @ApiPropertyOptional({
-    description: 'The URL to the cover image of the album',
+    description: 'The URL or path to the cover image of the album',
   })
-  @IsUrl()
+  @IsString()
   @IsOptional()
   coverUrl?: string;
 }

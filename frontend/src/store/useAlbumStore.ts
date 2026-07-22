@@ -8,7 +8,7 @@ interface AlbumStore {
   isLoading: boolean;
   isLoaded: boolean;
   error: string | null;
-  loadAlbums: (accessToken?: string) => Promise<void>;
+  loadAlbums: (accessToken?: string, force?: boolean) => Promise<void>;
   setAlbums: (albums: any[]) => void;
   reset: () => void;
 }
@@ -18,13 +18,13 @@ export const useAlbumStore = create<AlbumStore>((set, get) => ({
   isLoading: false,
   isLoaded: false,
   error: null,
-  loadAlbums: async (accessToken) => {
-    // Avoid redundant fetches if already loaded
-    if (get().isLoaded) return;
+  loadAlbums: async (accessToken, force = false) => {
+    // Avoid redundant fetches unless forced
+    if (get().isLoaded && !force) return;
     
     set({ isLoading: true, error: null });
     try {
-      const result = await fetchAlbums(accessToken as string);
+      const result = await fetchAlbums(accessToken as string, { cache: 'no-store' });
       set({ albums: Array.isArray(result) ? result : [], isLoaded: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load albums';

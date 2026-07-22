@@ -29,8 +29,11 @@ interface AlbumsTemplateProps {
   setIsCreating: (value: boolean) => void;
   newTitle: string;
   setNewTitle: (value: string) => void;
-  newArtist: string;
-  setNewArtist: (value: string) => void;
+  newArtist?: string;
+  setNewArtist?: (value: string) => void;
+  coverUrl?: string | null;
+  setCoverUrl?: (value: string | null) => void;
+  setCoverFile?: (file: File | null) => void;
   handleCreate: (e: React.FormEvent) => void;
   onImportClick: () => void;
   locale: string;
@@ -48,6 +51,9 @@ export function AlbumsTemplate({
   setNewTitle,
   newArtist,
   setNewArtist,
+  coverUrl,
+  setCoverUrl,
+  setCoverFile,
   handleCreate,
   onImportClick,
   locale,
@@ -112,6 +118,9 @@ export function AlbumsTemplate({
         setNewTitle={setNewTitle}
         newArtist={newArtist}
         setNewArtist={setNewArtist}
+        coverUrl={coverUrl}
+        setCoverUrl={setCoverUrl}
+        onCoverFileSelect={setCoverFile}
         t={t}
       />
     </MainContainer>

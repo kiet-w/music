@@ -96,7 +96,8 @@
     "home": "Home",
     "albums": "Albums",
     "music": "Add Music",
-    "messages": "Messages"
+    "messages": "Messages",
+    "user": "Account"
   },
   "Chat": {
     "title": "Messages",

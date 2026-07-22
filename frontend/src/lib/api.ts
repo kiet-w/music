@@ -10,10 +10,7 @@ if (isProd) {
   }
 }
 
-const isRenderUrl = process.env.NEXT_PUBLIC_API_URL?.includes('render.com');
-const RAW_API_URL = (!process.env.NEXT_PUBLIC_API_URL || isRenderUrl)
-  ? 'https://memphis-lace-plastic-policies.trycloudflare.com'
-  : process.env.NEXT_PUBLIC_API_URL;
+const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:4000` : 'http://localhost:4000');
 export const API_URL = RAW_API_URL.replace(/\/$/, '');
 
 const RAW_PYTHON_API_URL = process.env.NEXT_PUBLIC_PYTHON_API_URL || 'http://localhost:8001';
@@ -23,6 +20,7 @@ export type AuthUser = {
   id: string;
   email: string;
   name?: string | null;
+  avatarUrl?: string | null;
 };
 
 export type AuthResponse = {
@@ -47,7 +45,23 @@ export function getAuthHeaders(appToken?: string) {
  * Custom fetch wrapper to handle standardized backend error responses
  */
 async function customFetch(url: string, options: RequestInit = {}) {
-  const res = await fetch(url, options);
+  let res: Response;
+  try {
+    res = await fetch(url, options);
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      const error = new Error('Hydration timeout');
+      (error as any).code = 'ERR_TIMEOUT';
+      (error as any).status = 408;
+      (error as any).originalError = err;
+      throw error;
+    }
+    const error = new Error('Lỗi kết nối mạng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường truyền.');
+    (error as any).code = 'ERR_NETWORK';
+    (error as any).status = 0;
+    (error as any).originalError = err;
+    throw error;
+  }
 
   if (!res.ok) {
     let errorBody;
@@ -161,7 +175,7 @@ export async function resendOtp(email: string): Promise<{ message: string }> {
   return result?.data ?? result;
 }
 
-export async function forgotPassword(email: string): Promise<{ message: string }> {
+export async function forgotPassword(email: string): Promise<{ message: string; otp?: string }> {
   const result = await customFetch(`${API_URL}/auth/forgot-password`, {
     method: 'POST',
     headers,
@@ -183,9 +197,59 @@ export async function resetPassword(data: {
   return result?.data ?? result;
 }
 
-export async function fetchMe(appToken: string): Promise<AuthUser> {
+export async function fetchMe(appToken: string, options?: RequestInit): Promise<AuthUser> {
   const result = await customFetch(`${API_URL}/auth/me`, {
+    ...options,
+    headers: {
+      ...getAuthHeaders(appToken),
+      ...options?.headers,
+    },
+  });
+  return result?.data ?? result;
+}
+
+export async function updateProfile(appToken: string, data: { name?: string; avatarUrl?: string }): Promise<AuthUser> {
+  const result = await customFetch(`${API_URL}/auth/profile`, {
+    method: 'PATCH',
     headers: getAuthHeaders(appToken),
+    body: JSON.stringify(data),
+  });
+  return result?.data ?? result;
+}
+
+export async function uploadImage(appToken: string, file: File, folder = 'general'): Promise<{ url: string; filename: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch(`${API_URL}/uploads/image?folder=${encodeURIComponent(folder)}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${appToken}`,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    let errorBody;
+    try {
+      errorBody = await res.json();
+    } catch {
+      errorBody = { message: 'Failed to upload image' };
+    }
+    throw new Error(errorBody.message || 'Lỗi khi tải ảnh lên máy chủ');
+  }
+
+  const result = await res.json();
+  const data = result?.data ?? result;
+  const fullUrl = data.url?.startsWith('http') ? data.url : `${API_URL}${data.url}`;
+  return { url: fullUrl, filename: data.filename };
+}
+
+export async function changePassword(appToken: string, data: { currentPassword?: string; newPassword: string }): Promise<{ message: string }> {
+  const result = await customFetch(`${API_URL}/auth/change-password`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(appToken),
+    body: JSON.stringify(data),
   });
   return result?.data ?? result;
 }
@@ -209,6 +273,15 @@ export async function fetchAlbums(appToken: string, options?: RequestInit) {
 export async function createAlbum(appToken: string, data: { title: string; artist?: string; coverUrl?: string }) {
   const result = await customFetch(`${API_URL}/albums`, {
     method: 'POST',
+    headers: getAuthHeaders(appToken),
+    body: JSON.stringify(data),
+  });
+  return result?.data ?? result;
+}
+
+export async function updateAlbum(appToken: string, id: string, data: { title?: string; artist?: string; coverUrl?: string }) {
+  const result = await customFetch(`${API_URL}/albums/${id}`, {
+    method: 'PATCH',
     headers: getAuthHeaders(appToken),
     body: JSON.stringify(data),
   });
@@ -378,6 +451,15 @@ export async function acceptInvite(appToken: string, token: string) {
   const result = await customFetch(`${API_URL}/messages/invite/accept/${token}`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
+  });
+  return result?.data ?? result;
+}
+
+export async function reactToMessage(appToken: string, messageId: string, emoji: string) {
+  const result = await customFetch(`${API_URL}/messages/react`, {
+    method: 'POST',
+    headers: getAuthHeaders(appToken),
+    body: JSON.stringify({ messageId, emoji }),
   });
   return result?.data ?? result;
 }

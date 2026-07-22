@@ -17,7 +17,7 @@ export class MessageRepository extends BaseRepository<
     userId2: string,
     before?: string,
     limit: number = 30,
-  ): Promise<Message[]> {
+  ): Promise<any[]> {
     const where: Prisma.MessageWhereInput = {
       OR: [
         { senderId: userId1, receiverId: userId2 },
@@ -34,6 +34,15 @@ export class MessageRepository extends BaseRepository<
 
     const messages = await this.prisma.message.findMany({
       where,
+      include: {
+        reactions: {
+          select: {
+            id: true,
+            userId: true,
+            emoji: true,
+          },
+        },
+      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -41,6 +50,58 @@ export class MessageRepository extends BaseRepository<
     });
 
     return messages.reverse();
+  }
+
+  async findMessageById(messageId: string) {
+    return this.prisma.message.findUnique({
+      where: { id: messageId },
+      include: {
+        reactions: {
+          select: {
+            id: true,
+            userId: true,
+            emoji: true,
+          },
+        },
+      },
+    });
+  }
+
+  async toggleReaction(userId: string, messageId: string, emoji: string) {
+    const existing = await this.prisma.messageReaction.findUnique({
+      where: {
+        messageId_userId: {
+          messageId,
+          userId,
+        },
+      },
+    });
+
+    if (existing) {
+      if (existing.emoji === emoji) {
+        // Same emoji -> remove reaction
+        await this.prisma.messageReaction.delete({
+          where: { id: existing.id },
+        });
+      } else {
+        // Different emoji -> update reaction
+        await this.prisma.messageReaction.update({
+          where: { id: existing.id },
+          data: { emoji },
+        });
+      }
+    } else {
+      // New reaction
+      await this.prisma.messageReaction.create({
+        data: {
+          messageId,
+          userId,
+          emoji,
+        },
+      });
+    }
+
+    return this.findMessageById(messageId);
   }
 
   async checkConnection(userId1: string, userId2: string): Promise<boolean> {

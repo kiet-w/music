@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Disc, LogOut, MessageCircle, Music } from 'lucide-react';
+import { Disc, LogOut, MessageCircle, Music, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -23,14 +23,15 @@ export function Navbar() {
   };
   
   const navItems = [
-    { href: '/albums', icon: Disc, label: t('albums') },
-    { href: '/music', icon: Music, label: t('music') },
+    { href: '/albums', icon: Disc, label: t('albums') || 'Album' },
+    { href: '/music', icon: Music, label: t('music') || 'Nhạc' },
     { 
       href: '/messages', 
       icon: MessageCircle, 
-      label: t('messages'),
+      label: t('messages') || 'Chat',
       badge: unreadMessages.length > 0
     },
+    { href: '/user', icon: User, label: t('user') || 'Tài khoản' },
   ];
 
   // Helper to handle locale prefix in pathname

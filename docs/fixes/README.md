@@ -17,6 +17,8 @@ docs/fixes/
 |------|------|---------|---------|
 | [2026-07-04-backend-setup.md](./2026-07-04-backend-setup.md) | 04/07/2026 | Backend | Prisma URL, TypeScript types, ENCRYPTION_KEY, Redis, ffmpeg, yt-dlp |
 | [2026-07-04-frontend-performance.md](./2026-07-04-frontend-performance.md) | 04/07/2026 | Frontend | Turbopack, Sentry dev overhead, compile optimization |
+| [2026-07-22-messages-pagination-production.md](./2026-07-22-messages-pagination-production.md) | 22/07/2026 | Frontend | Fixed chat pagination, keyboard layout shift & message reactivity |
+| [2026-07-23-production-readiness-security-fixes.md](./2026-07-23-production-readiness-security-fixes.md) | 23/07/2026 | Frontend | Remediation of critical security, build errors, testing & hardcoded URLs |
 
 ## Quy ước đặt tên file
 

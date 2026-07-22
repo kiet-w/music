@@ -6,6 +6,7 @@ import { X, Search, File, Music, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GoogleDriveFile, useGoogleDrive } from "@/hooks/useGoogleDrive";
 import { importFromDrive } from "@/lib/api";
+import { CustomSelect, SelectOption } from "@/components/atoms/ui/custom-select";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -135,17 +136,16 @@ export const DrivePicker = ({
               {/* Album Selection UI */}
               <div className="mb-6 space-y-2">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-white/40 px-1">{t('import_to_album')}</label>
-                <select 
-                  value={selectedAlbumId}
-                  onChange={(e) => setSelectedAlbumId(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all appearance-none cursor-pointer"
-                >
-                  {albums.map((album) => (
-                    <option key={album.id} value={album.id} className="bg-[#1A1A1A]">
-                      {album.title} {album.artist ? ` - ${album.artist}` : ''}
-                    </option>
-                  ))}
-                </select>
+                <CustomSelect 
+                  value={selectedAlbumId || ''}
+                  onChange={(val) => setSelectedAlbumId(val)}
+                  options={albums.map((album) => ({
+                    value: album.id,
+                    label: album.title,
+                    description: album.artist ? `Nghệ sĩ: ${album.artist}` : undefined,
+                  }))}
+                  placeholder={t('import_to_album')}
+                />
               </div>
 
               <div className="relative mb-6">

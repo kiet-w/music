@@ -56,6 +56,17 @@ export class MessagesController {
     return plainToInstance(MessageResponseDto, message);
   }
 
+  @ApiOperation({ summary: 'React to a message with an emoji' })
+  @Post('react')
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Cập nhật cảm xúc tin nhắn thành công')
+  async reactToMessage(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: { messageId: string; emoji: string },
+  ) {
+    return this.messagesService.reactToMessage(user.id, dto.messageId, dto.emoji);
+  }
+
   @ApiOperation({ summary: 'Get list of friends' })
   @Get('friends')
   @HttpCode(HttpStatus.OK)

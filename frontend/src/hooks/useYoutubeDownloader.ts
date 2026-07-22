@@ -107,8 +107,18 @@ export function useYoutubeDownloader(onDownloadStarted?: (url: string) => void) 
 
         setStatus(t('converting'));
 
+        let pollAttempts = 0;
+        const maxPollAttempts = 60; // 60 attempts * 3s = 3 minutes max limit
+
         const poll = async () => {
           if (isCompleted) return;
+
+          pollAttempts += 1;
+          if (pollAttempts > maxPollAttempts) {
+            setIsDownloading(false);
+            setStatus('Chuyển đổi bài hát mất quá nhiều thời gian. Vui lòng thử lại sau.');
+            return;
+          }
 
           try {
             const updatedSong = await fetchTrack(accessToken, songId);
@@ -119,7 +129,14 @@ export function useYoutubeDownloader(onDownloadStarted?: (url: string) => void) 
             }
           } catch (err) {
             console.error('Polling error:', err);
-            if (!isCompleted) setTimeout(poll, 5000);
+            if (!isCompleted) {
+              if (pollAttempts > maxPollAttempts) {
+                setIsDownloading(false);
+                setStatus('Lỗi kết nối khi tải bài hát. Vui lòng thử lại.');
+              } else {
+                setTimeout(poll, 5000);
+              }
+            }
           }
         };
 

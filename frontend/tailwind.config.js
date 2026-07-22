@@ -55,6 +55,15 @@ export default {
           '5': 'hsl(var(--chart-5))'
         },
         surface: '#1A1A1A',
+        // Colors for Stitch Generated Screens
+        'void-surface': '#09090B',
+        'void-black': '#09090B',
+        'pure-white': '#FFFFFF',
+        'whisper-border': 'rgba(255,255,255,0.1)',
+        'active-tab-surface': '#27272A',
+        'refined-emerald': '#059669',
+        'surface-container': '#1b211d',
+        'muted-steel': '#71717A',
       },
       borderRadius: {
         lg: 'var(--radius)',

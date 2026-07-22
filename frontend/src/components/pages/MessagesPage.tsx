@@ -16,13 +16,14 @@ import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { getUserStatusText } from '@/lib/userStatus';
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
+import { cn } from '@/lib/utils';
+
+import { getEffectiveAccessToken } from '@/store/useAuthStore';
 
 const FriendCodeModal = dynamic(
   () => import('@/components/molecules/Chat/FriendCodeModal').then((mod) => mod.FriendCodeModal),
   { ssr: false }
 );
-
-import { cn } from '@/lib/utils';
 
 export function MessagesPage() {
   const t = useTranslations('Chat');
@@ -36,6 +37,7 @@ export function MessagesPage() {
     unreadMessages,
     setActiveReceiverId, 
     sendMessage, 
+    reactToMessage,
     isLoading,
     isLoadingMore,
     hasMoreMessages,
@@ -50,29 +52,38 @@ export function MessagesPage() {
       loadUsers(accessToken).then((filteredUsers) => {
         if (targetUserId && filteredUsers.some((u: User) => u.id === targetUserId)) {
           setActiveReceiverId(targetUserId, accessToken);
-        } else if (filteredUsers && filteredUsers.length > 0) {
-          setActiveReceiverId(filteredUsers[0].id, accessToken);
         }
       });
     }
   }, [accessToken, targetUserId, loadUsers, setActiveReceiverId]);
 
   const handleSelectUser = useCallback((userId: string | null) => {
-    const token = accessToken || (typeof window !== 'undefined' ? localStorage.getItem('music.auth') ? JSON.parse(localStorage.getItem('music.auth') || '{}').accessToken : null : null);
+    const token = getEffectiveAccessToken();
     setActiveReceiverId(userId, token || undefined).catch((err) => {
       console.error('Failed to load chat:', err);
     });
-  }, [accessToken, setActiveReceiverId]);
+  }, [setActiveReceiverId]);
 
   const handleSend = useCallback(async (content: string) => {
-    if (!accessToken) return;
+    const token = getEffectiveAccessToken();
+    if (!token) return;
     try {
-      await sendMessage(accessToken, content);
+      await sendMessage(token, content);
     } catch (error: any) {
       console.error('Failed to send message:', error);
       toast.error(error?.message || t('error_send_message') || 'Failed to send message');
     }
-  }, [accessToken, sendMessage, t]);
+  }, [sendMessage, t]);
+
+  const handleReactToMessage = useCallback(async (messageId: string, emoji: string) => {
+    const token = getEffectiveAccessToken();
+    if (!token) return;
+    try {
+      await reactToMessage(token, messageId, emoji);
+    } catch (error) {
+      console.error('Failed to react to message:', error);
+    }
+  }, [reactToMessage]);
 
   const handleCreateInvite = useCallback(async () => {
     if (!accessToken) return;
@@ -123,7 +134,10 @@ export function MessagesPage() {
   return (
     <MainContainer
       className={cn(
-        "h-[var(--vh,100dvh)] max-h-[var(--vh,100dvh)] overflow-hidden flex flex-col gap-3 transition-all duration-200 pb-0 sm:pb-2"
+        "h-[var(--vh,100dvh)] max-h-[var(--vh,100dvh)] overflow-hidden flex flex-col w-full max-w-[360px] lg:max-w-7xl gap-2.5 transition-all duration-200",
+        activeReceiverId
+          ? "pt-2 sm:pt-4 pb-3 sm:pb-6"
+          : "pt-3 sm:pt-6 pb-[88px] sm:pb-24"
       )}
     >
       <MessagesHeader
@@ -131,7 +145,7 @@ export function MessagesPage() {
         onOpenTokenModal={() => setIsTokenModalOpen(true)}
       />
 
-      <div className="flex-1 min-h-0 glass-dark rounded-3xl border border-white/10 overflow-hidden flex flex-col lg:flex-row">
+      <div className="flex-1 min-h-0 glass-dark border border-white/10 rounded-3xl overflow-hidden flex flex-col lg:flex-row">
         {isLoadingFriends ? (
           <EmptyFriendListState
             onOpenTokenModal={() => setIsTokenModalOpen(true)}
@@ -171,6 +185,7 @@ export function MessagesPage() {
                 onAcceptInvite={handleAcceptInvite}
                 onCreateInvite={handleCreateInvite}
                 onSend={handleSend}
+                onReactToMessage={handleReactToMessage}
               />
             ) : (
               <section className="hidden lg:flex flex-1 flex-col h-full overflow-hidden">

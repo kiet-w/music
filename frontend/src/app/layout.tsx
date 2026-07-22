@@ -1,7 +1,6 @@
 import './globals.css';
 import { Instrument_Serif } from 'next/font/google';
 import { GeistSans } from 'geist/font/sans';
-import Script from 'next/script';
 import { Toaster } from 'sonner';
 
 const instrumentSerif = Instrument_Serif({ 
@@ -22,8 +21,8 @@ export const metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: 'cover',
   interactiveWidget: 'resizes-content',
 };
@@ -36,10 +35,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-background dark">
       <body className={`${GeistSans.variable} ${instrumentSerif.variable} font-sans bg-background text-foreground antialiased selection:bg-foreground selection:text-background`}>
-        <Script src="https://apis.google.com/js/api.js" strategy="beforeInteractive" />
-        <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
         {children}
-        <Toaster richColors position="top-right" theme="dark" closeButton />
+        <Toaster richColors position="top-center" theme="dark" closeButton />
       </body>
     </html>
   );

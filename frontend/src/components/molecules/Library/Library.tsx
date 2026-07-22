@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { Play, Plus, Trash2, FolderInput, Download, CheckCircle2, Loader2, X } from 'lucide-react';
+import { Play, Plus, Trash2, FolderInput, Download, CheckCircle2, Loader2, X, MoreVertical } from 'lucide-react';
 import { useOfflineStorage } from '@/hooks/useOfflineStorage';
 import { Button } from '@/components/atoms/ui/button';
 import { cn } from '@/lib/utils';
@@ -39,33 +39,44 @@ interface LibraryProps {
   albumId?: string;
 }
 
-const TrackDuration = ({ trackUrl, initialDuration, formatDuration }: { trackUrl: string; initialDuration: number | null; formatDuration: (seconds: number | null) => string }) => {
-  const [duration, setDuration] = useState<number | null>(initialDuration);
-
-  useEffect(() => {
-    if ((initialDuration === null || isNaN(initialDuration)) && trackUrl) {
-      const audio = new Audio(trackUrl);
-      audio.preload = 'metadata';
-      const onLoadedMetadata = () => {
-        setDuration(audio.duration);
-      };
-      audio.addEventListener('loadedmetadata', onLoadedMetadata);
-      return () => {
-        audio.removeEventListener('loadedmetadata', onLoadedMetadata);
-        audio.src = '';
-      };
-    } else {
-      setDuration(initialDuration);
-    }
-  }, [initialDuration, trackUrl]);
-
-  return <>{formatDuration(duration)}</>;
-};
+const TrackDuration = React.memo(({ trackUrl, initialDuration, formatDuration }: { trackUrl: string; initialDuration: number | null; formatDuration: (seconds: number | null) => string }) => {
+  return <>{formatDuration(initialDuration)}</>;
+});
 
 export default function Library({ onTrackSelect, currentTrackId, albumId }: LibraryProps) {
   const t = useTranslations('Music');
   const { accessToken, user, isHydrated } = useAuthStore();
   const { albums } = useAlbumStore();
+
+  // Action Popup Modal State for Long-Press / 3-dots Menu
+  const [actionModalState, setActionModalState] = useState<{
+    isOpen: boolean;
+    track: Track | null;
+  }>({
+    isOpen: false,
+    track: null,
+  });
+
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isLongPressRef = useRef<boolean>(false);
+
+  const handleTouchStart = (track: Track) => {
+    isLongPressRef.current = false;
+    longPressTimerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50);
+      }
+      setActionModalState({ isOpen: true, track });
+    }, 450);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+    }
+  };
+
   const [deleteModalState, setDeleteModalState] = useState<{
     isOpen: boolean;
     track: Track | null;
@@ -73,6 +84,7 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
     isOpen: false,
     track: null,
   });
+
   const [moveModalState, setMoveModalState] = useState<{
     isOpen: boolean;
     track: Track | null;
@@ -81,16 +93,37 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
     track: null,
   });
 
+  const getEffectiveToken = useCallback(() => {
+    if (accessToken) return accessToken;
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('music.auth');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          return parsed.accessToken || parsed.state?.accessToken || null;
+        } catch (e) {
+          return null;
+        }
+      }
+    }
+    return null;
+  }, [accessToken]);
+
   const confirmDelete = async () => {
     const { track } = deleteModalState;
-    if (!track || !accessToken) return;
+    const token = getEffectiveToken();
+    if (!track || !token) {
+      toast.error('Vui lòng kiểm tra đăng nhập');
+      setDeleteModalState({ isOpen: false, track: null });
+      return;
+    }
     try {
-      await deleteTrack(accessToken, track.id);
+      await deleteTrack(token, track.id);
       toast.success(t('delete_success') || 'Đã xóa bài hát khỏi thư viện.');
-      loadTracks();
+      setTracks((prev) => prev.filter((t) => t.id !== track.id));
     } catch (error: any) {
       console.error('Error deleting track:', error);
-      toast.error(error.message || 'Lỗi khi xóa bài hát.');
+      toast.error(error?.message || 'Lỗi khi xóa bài hát.');
     } finally {
       setDeleteModalState({ isOpen: false, track: null });
     }
@@ -98,23 +131,30 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
 
   const confirmMove = async (targetAlbumId: string) => {
     const { track } = moveModalState;
-    if (!track || !accessToken) return;
+    const token = getEffectiveToken();
+    if (!track || !token) {
+      toast.error('Vui lòng kiểm tra đăng nhập');
+      setMoveModalState({ isOpen: false, track: null });
+      return;
+    }
     try {
-      await moveTrackToAlbum(accessToken, track.id, targetAlbumId);
+      await moveTrackToAlbum(token, track.id, targetAlbumId);
       toast.success(t('move_success') || 'Đã di chuyển bài hát sang album mới.');
       loadTracks();
     } catch (error: any) {
       console.error('Error moving track:', error);
-      toast.error(error.message || 'Lỗi khi di chuyển bài hát.');
+      toast.error(error?.message || 'Lỗi khi di chuyển bài hát.');
     } finally {
       setMoveModalState({ isOpen: false, track: null });
     }
   };
+
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dialogState, setDialogState] = useState<{ isOpen: boolean; songTitle: string }>({
+  const [dialogState, setDialogState] = useState<{ isOpen: boolean; songTitle: string; songId?: string }>({
     isOpen: false,
     songTitle: '',
+    songId: undefined,
   });
 
   const { offlineTracks, downloadTrack, removeTrack, getLocalUri, isSupported } = useOfflineStorage();
@@ -145,12 +185,13 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
 
   const loadTracks = useCallback(() => {
     if (!isHydrated) return;
-    if (!accessToken) {
+    const token = getEffectiveToken();
+    if (!token) {
       setLoading(false);
       return;
     }
 
-    fetchTracks(accessToken, albumId)
+    fetchTracks(token, albumId)
       .then((data: Track[]) => {
         setTracks(Array.isArray(data) ? data : []);
       })
@@ -159,29 +200,26 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
         setTracks([]);
       })
       .finally(() => setLoading(false));
-  }, [albumId, accessToken, isHydrated]);
+  }, [albumId, getEffectiveToken, isHydrated]);
 
   useEffect(() => {
     loadTracks();
   }, [loadTracks]);
 
-
-  const handleAddToPlaylist = useCallback((e: React.MouseEvent, title: string) => {
+  const handleAddToPlaylist = useCallback((e: React.MouseEvent, title: string, songId?: string) => {
     e.stopPropagation();
-    setDialogState({ isOpen: true, songTitle: title });
+    setDialogState({ isOpen: true, songTitle: title, songId });
   }, []);
 
   const handleDeleteClick = useCallback((e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
-    if (!accessToken) return;
     setDeleteModalState({ isOpen: true, track });
-  }, [accessToken]);
+  }, []);
 
   const handleMoveClick = useCallback((e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
-    if (!accessToken) return;
     setMoveModalState({ isOpen: true, track });
-  }, [accessToken]);
+  }, []);
 
   const formatDuration = useCallback((seconds: number | null) => {
     if (seconds === null || isNaN(seconds)) return '--:--';
@@ -220,109 +258,81 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
           </span>
         </div>
       )}
+
       <div className="flex flex-col gap-2">
         {memoizedTracks.map((track) => {
           const isActive = currentTrackId === track.id;
           const isFailed = !track.url;
           const isDownloaded = offlineTracks.has(track.id);
-          const isDownloading = downloadingIds.has(track.id);
-          
+
           return (
             <div 
               key={track.id} 
               className={cn(
-                "group flex justify-between items-center p-3 px-4 rounded-xl transition-all duration-300 gap-3",
-                isFailed ? "opacity-50 grayscale cursor-not-allowed bg-red-500/5" : "bg-secondary/5 hover:bg-secondary/10 active:scale-[0.98] cursor-pointer",
-                isActive && "bg-primary/10 shadow-glow"
+                "group flex justify-between items-center p-3.5 px-4 rounded-2xl transition-all duration-200 gap-3 relative select-none",
+                isFailed ? "opacity-50 grayscale cursor-not-allowed bg-red-500/5" : "bg-secondary/5 hover:bg-secondary/10 active:scale-[0.99] cursor-pointer",
+                isActive && "bg-primary/10 border border-emerald-500/20"
               )}
-              onClick={() => !isFailed && handleTrackSelect(track)}
+              onTouchStart={() => handleTouchStart(track)}
+              onTouchEnd={handleTouchEnd}
+              onMouseDown={() => handleTouchStart(track)}
+              onMouseUp={handleTouchEnd}
+              onMouseLeave={handleTouchEnd}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setActionModalState({ isOpen: true, track });
+              }}
+              onClick={(e) => {
+                if (isLongPressRef.current) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  isLongPressRef.current = false;
+                  return;
+                }
+                if (!isFailed) handleTrackSelect(track);
+              }}
             >
-              <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+              <div className="flex flex-col gap-0.5 flex-1 min-w-0 pr-2">
                 <span className={cn(
-                  "block font-medium leading-tight truncate transition-colors",
-                  isActive ? "text-primary" : isFailed ? "text-red-400" : "text-foreground/90 group-hover:text-primary"
+                  "block font-semibold leading-tight truncate transition-colors text-sm sm:text-base",
+                  isActive ? "text-primary font-bold" : isFailed ? "text-red-400" : "text-foreground/90 group-hover:text-primary"
                 )}>
                   {track.title} {isFailed && '(Processing Failed)'}
                 </span>
-                <span className="block text-xs text-muted-foreground truncate">
+                <span className="block text-xs text-muted-foreground/80 truncate">
                   {track.artist || track.album?.title || 'Unknown Artist'}
                 </span>
               </div>
+
               <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-                <span className="text-[10px] text-muted-foreground/60 font-medium tracking-wider mr-1">
+                {isActive && (
+                  <div className="mr-1">
+                    <PlayingVisualizer />
+                  </div>
+                )}
+
+                {isDownloaded && (
+                  <span title="Downloaded">
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+                  </span>
+                )}
+
+                <span className="text-xs text-muted-foreground/70 font-mono tracking-wider">
                   {isFailed ? 'Error' : <TrackDuration trackUrl={track.url} initialDuration={track.duration} formatDuration={formatDuration} />}
                 </span>
+
                 {!isFailed && (
-                  <div className="flex items-center gap-1">
-                    {isSupported !== false && (isDownloading ? (
-                      <Loader2 size={14} className="text-primary animate-spin mr-1" />
-                    ) : isDownloaded ? (
-                      <div className="flex items-center gap-1" title="Downloaded for offline">
-                        <CheckCircle2 size={14} className="text-green-500" />
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          className="h-8 w-8 p-0 rounded-full opacity-0 group-hover:opacity-100 bg-secondary/20 transition-all hover:bg-orange-500/20 hover:text-orange-500"
-                          onClick={(e) => handleRemoveOffline(e, track.id)}
-                          title="Remove Download"
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button 
-                        size="sm" 
-                        variant="ghost"
-                        className="h-8 w-8 p-0 rounded-full opacity-0 group-hover:opacity-100 bg-secondary/20 transition-all hover:bg-primary/20 hover:text-primary"
-                        onClick={(e) => handleDownload(e, track)}
-                        title="Download for Offline"
-                      >
-                        <Download size={14} />
-                      </Button>
-                    ))}
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      className="h-8 w-8 p-0 rounded-full opacity-0 group-hover:opacity-100 bg-secondary/20 transition-all hover:bg-primary/20 hover:text-primary"
-                      onClick={(e) => handleMoveClick(e, track)}
-                      title="Move to Folder"
-                    >
-                      <FolderInput size={14} />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      className="h-8 w-8 p-0 rounded-full opacity-0 group-hover:opacity-100 bg-secondary/20 transition-all hover:bg-red-500/20 hover:text-red-500"
-                      onClick={(e) => handleDeleteClick(e, track)}
-                      title="Delete Track"
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      className="h-8 w-8 p-0 rounded-full opacity-0 group-hover:opacity-100 bg-secondary/20 transition-all hover:bg-primary/20 hover:text-primary"
-                      onClick={(e) => handleAddToPlaylist(e, track.title)}
-                    >
-                      <Plus size={14} />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant={isActive ? "default" : "ghost"}
-                      className={cn(
-                        "h-8 w-8 p-0 rounded-full transition-all",
-                        !isActive && "opacity-0 group-hover:opacity-100 bg-secondary/20"
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTrackSelect(track);
-                      }}
-                    >
-                      {isActive ? (
-                        <PlayingVisualizer />
-                      ) : <Play size={14} className="ml-0.5" />}
-                    </Button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActionModalState({ isOpen: true, track });
+                    }}
+                    className="p-1.5 hover:bg-white/10 text-white/40 hover:text-white rounded-full transition-colors shrink-0 ml-1"
+                    title="Menu tùy chọn"
+                  >
+                    <MoreVertical size={16} />
+                  </button>
                 )}
               </div>
             </div>
@@ -335,9 +345,89 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
         )}
       </div>
 
+      {/* Track Options Action Popup Modal (Features Only) */}
+      {actionModalState.isOpen && actionModalState.track && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+          <div
+            onClick={() => setActionModalState({ isOpen: false, track: null })}
+            className="absolute inset-0"
+          />
+          <div className="relative w-full max-w-xs glass-dark rounded-3xl p-4 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 z-10 flex flex-col gap-2">
+            {/* Download / Remove Offline */}
+            {isSupported !== false && (
+              offlineTracks.has(actionModalState.track.id) ? (
+                <button
+                  onClick={(e) => {
+                    const target = actionModalState.track;
+                    setActionModalState({ isOpen: false, track: null });
+                    if (target) handleRemoveOffline(e, target.id);
+                  }}
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-orange-400 font-medium text-sm transition-all cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4 text-orange-400 shrink-0" />
+                  <span>Xóa bản Offline</span>
+                </button>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    const target = actionModalState.track;
+                    setActionModalState({ isOpen: false, track: null });
+                    if (target) handleDownload(e, target);
+                  }}
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all cursor-pointer"
+                >
+                  <Download className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Tải về nghe Offline</span>
+                </button>
+              )
+            )}
+
+            {/* Move to Album */}
+            <button
+              onClick={(e) => {
+                const target = actionModalState.track;
+                setActionModalState({ isOpen: false, track: null });
+                if (target) handleMoveClick(e, target);
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all cursor-pointer"
+            >
+              <FolderInput className="w-4 h-4 text-blue-400 shrink-0" />
+              <span>Di chuyển sang Album</span>
+            </button>
+
+            {/* Add to Playlist */}
+            <button
+              onClick={(e) => {
+                const target = actionModalState.track;
+                setActionModalState({ isOpen: false, track: null });
+                if (target) handleAddToPlaylist(e, target.title, target.id);
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4 text-teal-400 shrink-0" />
+              <span>Thêm vào Playlist / Album</span>
+            </button>
+
+            {/* Delete Track */}
+            <button
+              onClick={(e) => {
+                const target = actionModalState.track;
+                setActionModalState({ isOpen: false, track: null });
+                if (target) handleDeleteClick(e, target);
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium text-sm transition-all cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4 text-red-400 shrink-0" />
+              <span>Xóa bài hát</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       <AddToPlaylistDialog 
         isOpen={dialogState.isOpen}
         songTitle={dialogState.songTitle}
+        songId={dialogState.songId}
         onClose={() => setDialogState({ ...dialogState, isOpen: false })}
       />
 

@@ -53,8 +53,34 @@ export class MessagesService {
     userId2: string,
     before?: string,
     limit: number = 30,
-  ): Promise<Message[]> {
+  ): Promise<any[]> {
     return this.messageRepository.findConversation(userId1, userId2, before, limit);
+  }
+
+  async reactToMessage(userId: string, messageId: string, emoji: string): Promise<any> {
+    const message = await this.messageRepository.findMessageById(messageId);
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+
+    if (message.senderId !== userId && message.receiverId !== userId) {
+      throw new ForbiddenException('You are not part of this conversation');
+    }
+
+    const updatedMessage = await this.messageRepository.toggleReaction(
+      userId,
+      messageId,
+      emoji,
+    );
+
+    // Broadcast reaction update via Socket.io
+    this.messagesGateway.emitMessageReactionUpdated(
+      updatedMessage.senderId,
+      updatedMessage.receiverId,
+      updatedMessage,
+    );
+
+    return updatedMessage;
   }
 
   async createInvite(

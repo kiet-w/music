@@ -121,4 +121,16 @@ export class MessagesGateway
       `Emitted friendRequestAccepted to user_${senderId} and user_${receiverId}`,
     );
   }
+
+  emitMessageReactionUpdated(
+    senderId: string,
+    receiverId: string,
+    message: any,
+  ) {
+    this.server.to(`user_${senderId}`).emit('messageReactionUpdated', message);
+    this.server.to(`user_${receiverId}`).emit('messageReactionUpdated', message);
+    this.logger.log(
+      `Emitted messageReactionUpdated to user_${senderId} and user_${receiverId}`,
+    );
+  }
 }

@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   UseGuards,
   Query,
@@ -234,6 +235,32 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async me(@CurrentUser() user: AuthenticatedUser) {
     return this.authService.me(user.id);
+  }
+
+  @Patch('profile')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Cập nhật thông tin người dùng thành công')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update user profile' })
+  async updateProfile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: { name?: string; avatarUrl?: string },
+  ) {
+    return this.authService.updateProfile(user.id, dto);
+  }
+
+  @Patch('change-password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Đổi mật khẩu thành công')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change user password' })
+  async changePassword(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: { currentPassword?: string; newPassword: string },
+  ) {
+    return this.authService.changePassword(user.id, dto);
   }
 
   @Get('google/status')

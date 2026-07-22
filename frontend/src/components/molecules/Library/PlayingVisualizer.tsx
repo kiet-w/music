@@ -1,19 +1,13 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 
 export default function PlayingVisualizer() {
   return (
     <div className="flex gap-0.5 items-end h-3 flex-shrink-0">
-      {[0.4, 0.7, 0.5].map((h, i) => (
-        <motion.div 
-          key={i}
-          animate={{ height: ["20%", "100%", "20%"] }}
-          transition={{ duration: h + 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }}
-          className="w-0.5 bg-primary-foreground rounded-full"
-        />
-      ))}
+      <span className="w-0.5 h-full bg-emerald-400 rounded-full animate-music-bar-1 origin-bottom will-change-transform" />
+      <span className="w-0.5 h-full bg-emerald-400 rounded-full animate-music-bar-2 origin-bottom will-change-transform" />
+      <span className="w-0.5 h-full bg-emerald-400 rounded-full animate-music-bar-3 origin-bottom will-change-transform" />
     </div>
   );
-};
+}

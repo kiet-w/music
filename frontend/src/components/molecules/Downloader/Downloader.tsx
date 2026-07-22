@@ -4,7 +4,8 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/ui/button';
 import { Input } from '@/components/atoms/ui/input';
-import { Download, Loader2, CheckCircle2, ChevronDown, Sparkles } from 'lucide-react';
+import { CustomSelect, SelectOption } from '@/components/atoms/ui/custom-select';
+import { Download, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useYoutubeDownloader } from '@/hooks/useYoutubeDownloader';
 
@@ -31,6 +32,19 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
     handleSubmit,
   } = useYoutubeDownloader(onDownloadStarted);
 
+  const albumOptions: SelectOption[] = [
+    {
+      value: '',
+      label: t('no_album_single') || 'Không chọn album (Single)',
+      description: 'Lưu bài hát dưới dạng Single độc lập',
+    },
+    ...(Array.isArray(albums) ? albums : []).map((album) => ({
+      value: album.id,
+      label: album.title,
+      description: album.artist ? `Nghệ sĩ: ${album.artist}` : 'Album nhạc',
+    })),
+  ];
+
   return (
     <div className="w-full space-y-4 p-5 rounded-2xl bg-secondary/5 border-none shadow-inner">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -42,13 +56,8 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
             onChange={(e) => setUrl(e.target.value)}
             disabled={isDownloading}
             required
-            className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl pr-10"
+            className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl"
           />
-          {isFetchingInfo && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-emerald-400">
-              <Loader2 className="w-4 h-4 animate-spin" />
-            </div>
-          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -60,13 +69,8 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
               onChange={(e) => setTitle(e.target.value)}
               disabled={isDownloading || isFetchingInfo}
               required
-              className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl pr-9"
+              className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl"
             />
-            {isFetchingInfo && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-emerald-400">
-                <Loader2 className="w-4 h-4 animate-spin" />
-              </div>
-            )}
           </div>
 
           <div className="relative flex-1">
@@ -76,53 +80,36 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
               value={artist}
               onChange={(e) => setArtist(e.target.value)}
               disabled={isDownloading || isFetchingInfo}
-              className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl pr-9"
+              className="bg-background/50 border-white/5 focus-visible:ring-primary/20 h-11 rounded-xl"
             />
-            {isFetchingInfo && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-emerald-400">
-                <Loader2 className="w-4 h-4 animate-spin" />
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Metadata Auto-Fetch Lazy Loading Banner */}
+        {/* Metadata Auto-Fetch Lazy Loading Banner (Single Centered Loading Indicator) */}
         <AnimatePresence>
           {isFetchingInfo && (
             <motion.div
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
-              className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/20"
+              className="flex flex-col items-center justify-center p-4 gap-2 text-xs text-emerald-400 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-center"
             >
-              <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-              <span>Đang tự động tải thông tin bài hát & nghệ sĩ từ YouTube...</span>
+              <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
+              <span className="font-medium">Đang tự động tải thông tin bài hát & nghệ sĩ từ YouTube...</span>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Custom Styled Album Selection Dropdown */}
-        <div className="relative w-full">
-          <select
-            value={selectedAlbumId}
-            onFocus={loadAlbums}
-            onChange={(e) => setSelectedAlbumId(e.target.value)}
-            disabled={isDownloading || isFetchingInfo}
-            className="w-full h-11 rounded-xl bg-background/50 border border-white/10 focus:border-emerald-500/50 text-white/90 px-4 pr-10 outline-none appearance-none cursor-pointer transition-all text-sm font-medium disabled:opacity-50"
-          >
-            <option value="" className="bg-[#121212] text-white">
-              {t('no_album_single') || 'Không chọn album (Single)'}
-            </option>
-            {(Array.isArray(albums) ? albums : []).map((album) => (
-              <option key={album.id} value={album.id} className="bg-[#121212] text-white">
-                🎵 Album: {album.title}
-              </option>
-            ))}
-          </select>
-          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
-            <ChevronDown className="w-4 h-4" />
-          </div>
-        </div>
+        <CustomSelect
+          value={selectedAlbumId}
+          onChange={(val) => setSelectedAlbumId(val)}
+          options={albumOptions}
+          disabled={isDownloading || isFetchingInfo}
+          onOpen={loadAlbums}
+          placeholder={t('no_album_single') || 'Không chọn album (Single)'}
+        />
+
         <Button 
           type="submit" 
           disabled={isDownloading || isFetchingInfo || !url || !title}

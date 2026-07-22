@@ -35,7 +35,9 @@ async function bootstrap() {
   const logger = new AppLogger();
   app.useLogger(logger);
 
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }));
   app.use(cookieParser());
 
   // Protect /metrics from external access (allow only internal/Prometheus scraping)
