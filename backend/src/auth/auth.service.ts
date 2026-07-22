@@ -81,6 +81,7 @@ export class AuthService {
       message: 'Đăng ký thành công. Vui lòng kiểm tra email để lấy mã xác thực OTP.',
       email: user.email,
       requiresVerification: true,
+      otp,
     };
   }
 
@@ -114,7 +115,7 @@ export class AuthService {
     return this.issueToken(updatedUser, ip, userAgent, family);
   }
 
-  async resendOtp(dto: ResendOtpDto): Promise<{ message: string }> {
+  async resendOtp(dto: ResendOtpDto): Promise<{ message: string; otp?: string }> {
     const email = dto.email.toLowerCase();
     const user = await this.userRepository.findByEmail(email);
 
@@ -134,10 +135,10 @@ export class AuthService {
     });
 
     await this.mailService.sendVerificationOtp(email, otp);
-    return { message: 'Đã gửi lại mã OTP xác nhận tới email của bạn.' };
+    return { message: 'Đã gửi lại mã OTP xác nhận tới email của bạn.', otp };
   }
 
-  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; otp?: string }> {
     const email = dto.email.trim().toLowerCase();
     const user = await this.userRepository.findByEmail(email);
 
@@ -158,7 +159,7 @@ export class AuthService {
     });
 
     await this.mailService.sendPasswordResetOtp(email, otp);
-    return { message: 'Mã OTP đặt lại mật khẩu đã được gửi tới email của bạn.' };
+    return { message: 'Mã OTP đặt lại mật khẩu đã được gửi tới email của bạn.', otp };
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
