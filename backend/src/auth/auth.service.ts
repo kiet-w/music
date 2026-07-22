@@ -463,7 +463,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      refreshTokenId: saveToken.id,
+      refreshTokenId: tokenHash,
       user: {
         id: user.id,
         email: user.email,
