@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Howl } from 'howler';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/ui/button';
@@ -10,17 +10,55 @@ interface PlayerProps {
   url: string;
 }
 
+const formatTime = (seconds: number) => {
+  if (!seconds || isNaN(seconds)) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
 export const Player: React.FC<PlayerProps> = ({ url }) => {
   const t = useTranslations('Music');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
   const [loading, setLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  
+  // ponytail: progress tracked via DOM refs, not React state — avoids 60-120 re-renders/sec
+  const [sliderValue, setSliderValue] = useState(0);
+
   const howlRef = useRef<Howl | null>(null);
   const rafRef = useRef<number | null>(null);
+  const currentTimeRef = useRef<HTMLSpanElement>(null);
+  const progressBarRef = useRef<HTMLInputElement>(null);
+
+  const stopUpdate = useCallback(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  }, []);
+
+  const startUpdate = useCallback(() => {
+    const update = () => {
+      if (howlRef.current && howlRef.current.playing() && !isDragging) {
+        const seek = howlRef.current.seek();
+        const dur = howlRef.current.duration();
+        if (dur > 0) {
+          const pct = (seek / dur) * 100;
+          // ponytail: direct DOM mutation, no setState
+          if (currentTimeRef.current) {
+            currentTimeRef.current.textContent = formatTime(seek);
+          }
+          if (progressBarRef.current) {
+            progressBarRef.current.value = String(pct);
+          }
+        }
+      }
+      rafRef.current = requestAnimationFrame(update);
+    };
+    rafRef.current = requestAnimationFrame(update);
+  }, [isDragging]);
 
   useEffect(() => {
     if (!url) return;
@@ -59,12 +97,10 @@ export const Player: React.FC<PlayerProps> = ({ url }) => {
       onstop: () => {
         setIsPlaying(false);
         stopUpdate();
-        setProgress(0);
       },
       onend: () => {
         setIsPlaying(false);
         stopUpdate();
-        setProgress(100);
       },
     });
 
@@ -82,26 +118,6 @@ export const Player: React.FC<PlayerProps> = ({ url }) => {
     }
   }, [volume]);
 
-  const startUpdate = () => {
-    const update = () => {
-      if (howlRef.current && howlRef.current.playing() && !isDragging) {
-        const seek = howlRef.current.seek();
-        const duration = howlRef.current.duration();
-        if (duration > 0) {
-          setProgress((seek / duration) * 100);
-        }
-      }
-      rafRef.current = requestAnimationFrame(update);
-    };
-    rafRef.current = requestAnimationFrame(update);
-  };
-
-  const stopUpdate = () => {
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-    }
-  };
-
   const togglePlay = () => {
     if (!howlRef.current) return;
     if (isPlaying) {
@@ -112,8 +128,7 @@ export const Player: React.FC<PlayerProps> = ({ url }) => {
   };
 
   const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    setProgress(value);
+    setSliderValue(parseFloat(e.target.value));
   };
 
   const handleSeekEnd = (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent | React.TouchEvent) => {
@@ -122,22 +137,16 @@ export const Player: React.FC<PlayerProps> = ({ url }) => {
     const value = parseFloat(input.value);
     const seekTime = (value / 100) * duration;
     howlRef.current.seek(seekTime);
-    setProgress(value);
+    setSliderValue(value);
     setIsDragging(false);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
     <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
       <div className="flex items-center justify-center">
-        <Button 
-          onClick={togglePlay} 
-          disabled={loading || !url} 
+        <Button
+          onClick={togglePlay}
+          disabled={loading || !url}
           size="icon"
           variant="secondary"
           className="w-16 h-16 rounded-full"
@@ -151,18 +160,19 @@ export const Player: React.FC<PlayerProps> = ({ url }) => {
           )}
         </Button>
       </div>
-      
+
       <div className="space-y-2">
         <div className="flex justify-between text-xs text-muted-foreground font-mono">
-          <span>{formatTime((progress / 100) * duration)}</span>
+          <span ref={currentTimeRef}>0:00</span>
           <span>{formatTime(duration)}</span>
         </div>
-        <input 
-          type="range" 
-          min="0" 
-          max="100" 
+        <input
+          ref={progressBarRef}
+          type="range"
+          min="0"
+          max="100"
           step="0.1"
-          value={progress} 
+          defaultValue={0}
           onChange={handleSeekChange}
           onMouseDown={() => setIsDragging(true)}
           onMouseUp={handleSeekEnd}
@@ -175,12 +185,12 @@ export const Player: React.FC<PlayerProps> = ({ url }) => {
 
       <div className="flex items-center gap-4 max-w-[200px] mx-auto">
         <Volume2 className="w-4 h-4 text-muted-foreground shrink-0" />
-        <input 
-          type="range" 
-          min="0" 
-          max="1" 
+        <input
+          type="range"
+          min="0"
+          max="1"
           step="0.01"
-          value={volume} 
+          value={volume}
           onChange={(e) => setVolume(parseFloat(e.target.value))}
           className="w-full h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-muted-foreground"
         />

@@ -16,7 +16,6 @@ export interface Track {
 interface PlayerState {
   currentTrack: Track | null;
   isPlaying: boolean;
-  howl: Howl | null;
   duration: number;
   currentTime: number;
   play: (track: Track, localUrl?: string) => void;
@@ -29,15 +28,20 @@ interface PlayerState {
   reset: () => void;
 }
 
+// ponytail: howl instance stored outside Zustand — non-serializable objects don't belong in state
+let _howl: Howl | null = null;
+
+export const getHowl = () => _howl;
+
 export const usePlayerStore = create<PlayerState>((set, get) => {
   let timer: ReturnType<typeof setInterval> | null = null;
 
   const startTimer = () => {
     if (timer) clearInterval(timer);
     timer = setInterval(() => {
-      const { howl, isPlaying } = get();
-      if (howl && isPlaying) {
-        set({ currentTime: howl.seek() as number });
+      const { isPlaying } = get();
+      if (_howl && isPlaying) {
+        set({ currentTime: _howl.seek() as number });
       }
     }, 1000);
   };
@@ -52,15 +56,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
   return {
     currentTrack: null,
     isPlaying: false,
-    howl: null,
     duration: 0,
     currentTime: 0,
     volume: 1,
 
     play: (track: Track, localUrl?: string) => {
       const state = get();
-      if (state.howl) {
-        state.howl.unload();
+      if (_howl) {
+        _howl.unload();
       }
 
       const playUrl = localUrl || track.url;
@@ -104,61 +107,57 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         },
       });
 
+      _howl = newHowl;
       newHowl.play();
-      set({ currentTrack: track, howl: newHowl, isPlaying: true, currentTime: 0 });
+      set({ currentTrack: track, isPlaying: true, currentTime: 0 });
     },
 
     pause: () => {
-      const { howl } = get();
-      if (howl) {
-        howl.pause();
+      if (_howl) {
+        _howl.pause();
       }
     },
 
     resume: () => {
-      const { howl } = get();
-      if (howl) {
-        howl.play();
+      if (_howl) {
+        _howl.play();
       }
     },
 
     togglePlay: () => {
-      const { isPlaying, howl, currentTrack } = get();
+      const { isPlaying, currentTrack } = get();
       if (!currentTrack) return;
 
       if (isPlaying) {
-        howl?.pause();
+        _howl?.pause();
       } else {
-        howl?.play();
+        _howl?.play();
       }
     },
 
     seek: (time: number) => {
-      const { howl } = get();
-      if (howl) {
-        howl.seek(time);
+      if (_howl) {
+        _howl.seek(time);
         set({ currentTime: time });
       }
     },
 
     setVolume: (volume: number) => {
       set({ volume });
-      const { howl } = get();
-      if (howl) {
-        howl.volume(volume);
+      if (_howl) {
+        _howl.volume(volume);
       }
     },
 
     reset: () => {
-      const { howl } = get();
       stopTimer();
-      if (howl) {
-        howl.unload();
+      if (_howl) {
+        _howl.unload();
+        _howl = null;
       }
       set({
         currentTrack: null,
         isPlaying: false,
-        howl: null,
         duration: 0,
         currentTime: 0,
       });

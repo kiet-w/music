@@ -51,7 +51,6 @@
 
 @layer base {
   * {
-    @apply border-border;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;     /* Firefox */
   }
@@ -92,7 +91,8 @@
     @apply bg-white/5 backdrop-blur-xl border border-white/10;
   }
   .glass-dark {
-    @apply bg-black/40 backdrop-blur-2xl border border-white/5;
+    /* ponytail: reduced from backdrop-blur-2xl (40px) — GPU killer on mobile */
+    @apply bg-black/60 backdrop-blur-md border border-white/5;
   }
   .shadow-soft {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);

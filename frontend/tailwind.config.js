@@ -4,7 +4,7 @@ import tailwindcssAnimate from 'tailwindcss-animate';
 export default {
   darkMode: ["class"],
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    // ponytail: removed "./app/**/*" — doesn't exist, was wasting compile-time glob scanning
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {

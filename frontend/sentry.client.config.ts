@@ -5,9 +5,10 @@ import * as Sentry from '@sentry/nextjs';
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // Capture 100% of transactions in development, lower in production
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
+  // ponytail: was 1.0 in dev — traced 100% of transactions, massive overhead
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 0,
 
   // Disable Sentry debug logging in production
   debug: false,
 });
+

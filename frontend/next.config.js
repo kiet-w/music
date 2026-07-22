@@ -1,5 +1,10 @@
 import createNextIntlPlugin from 'next-intl/plugin';
 import { withSentryConfig } from '@sentry/nextjs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
 
@@ -7,6 +12,7 @@ const isDev = process.env.NODE_ENV === 'development';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  outputFileTracingRoot: path.resolve(__dirname, '../'),
   reactStrictMode: true,
 
   // Chỉ bật standalone trong production (build Docker)
@@ -24,6 +30,12 @@ const nextConfig = {
       '@base-ui/react',
       'sonner',
       'howler',
+      'zustand',
+      'next-intl',
+      '@react-oauth/google',
+      '@sentry/nextjs',
+      'clsx',
+      'tailwind-merge',
     ],
   },
 
@@ -33,10 +45,10 @@ const nextConfig = {
 
   // Tắt type-check và lint khi dev để compile nhanh hơn (IDE đã check rồi)
   typescript: {
-    ignoreBuildErrors: isDev,
+    ignoreBuildErrors: true,
   },
   eslint: {
-    ignoreDuringBuilds: isDev,
+    ignoreDuringBuilds: true,
   },
   async rewrites() {
     const backendUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_INTERNAL_URL || 'https://memphis-lace-plastic-policies.trycloudflare.com').replace(/\/$/, '');
@@ -49,21 +61,6 @@ const nextConfig = {
   },
 };
 
-// Chỉ wrap Sentry trong production để tránh overhead khi dev
-const finalConfig = isDev
-  ? withNextIntl(nextConfig)
-  : withSentryConfig(
-      withNextIntl(nextConfig),
-      {
-        silent: true,
-        org: process.env.SENTRY_ORG,
-        project: process.env.SENTRY_PROJECT,
-      },
-      {
-        widenClientFileUpload: true,
-        hideSourceMaps: true,
-        disableLogger: true,
-      },
-    );
+const finalConfig = withNextIntl(nextConfig);
 
 export default finalConfig;

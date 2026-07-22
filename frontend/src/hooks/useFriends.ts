@@ -10,19 +10,18 @@ import { useChatStore } from '@/store/useChatStore';
 
 export function useFriends() {
   const t = useTranslations('Chat');
-  const { user: currentUser, accessToken } = useAuthStore();
+  const { user: currentUser, accessToken, isHydrated } = useAuthStore();
   const { socket } = useChatStore();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [, setTicker] = useState<number>(0);
 
-  // Periodic ticker to refresh relative time strings (e.g. 5 phút -> 1 giờ)
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTicker((prev) => prev + 1);
-    }, 30000);
-    return () => clearInterval(timer);
-  }, []);
+    if (isHydrated && !accessToken) {
+      setIsLoading(false);
+    }
+  }, [isHydrated, accessToken]);
+
+  // ponytail: removed 30s setInterval ticker — was re-rendering entire friends list every 30s just for relative time strings
 
   const loadUsers = useCallback(
     async (token: string) => {
