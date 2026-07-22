@@ -12,6 +12,11 @@ const config: CapacitorConfig = {
   server: {
     url: serverUrl,
     cleartext: true
+  },
+  plugins: {
+    Keyboard: {
+      resize: 'none'
+    }
   }
 };
 
