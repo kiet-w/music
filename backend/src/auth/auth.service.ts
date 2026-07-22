@@ -442,16 +442,20 @@ export class AuthService {
     const refreshToken = randomBytes(64).toString('hex');
     const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const saveToken = await this.prisma.refreshToken.create({
-      data: {
-        tokenHash,
-        family,
-        ip,
-        userAgent,
-        expiresAt,
-        userId: user.id,
-      },
-    });
+    try {
+      await this.prisma.refreshToken.create({
+        data: {
+          tokenHash,
+          family,
+          ip,
+          userAgent,
+          expiresAt,
+          userId: user.id,
+        },
+      });
+    } catch (e: any) {
+      this.logger.warn({ error: e?.message }, 'Failed to persist refresh token, returning access token safely');
+    }
     return {
       accessToken,
       refreshToken,
