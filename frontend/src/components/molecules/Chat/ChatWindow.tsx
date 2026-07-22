@@ -106,7 +106,6 @@ export function ChatWindow({
     <div
       ref={scrollRef}
       onScroll={handleScroll}
-      style={keyboardHeight > 0 ? { paddingBottom: `${keyboardHeight}px` } : undefined}
       className={cn(
         "flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col gap-4 scrollbar-hide transition-all duration-200",
         messages.length === 0 && "justify-center items-center"

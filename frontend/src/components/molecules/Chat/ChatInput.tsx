@@ -33,11 +33,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      style={keyboardHeight > 0 ? { transform: `translateY(-${keyboardHeight}px)` } : undefined}
-      className={cn(
-        "p-3 sm:p-4 border-t border-white/10 shrink-0 bg-black/80 backdrop-blur-md transition-transform duration-200 z-40 relative",
-        keyboardHeight > 0 && "shadow-2xl border-emerald-500/30"
-      )}
+      className="p-3 sm:p-4 border-t border-white/10 shrink-0 bg-black/90 backdrop-blur-md z-40 relative sticky bottom-0"
     >
       <div className="flex gap-2">
         <input
