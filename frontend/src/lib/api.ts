@@ -10,11 +10,11 @@ if (isProd) {
   }
 }
 
-const DEFAULT_API_FALLBACK = 'https://section-affair-convertible-beds.trycloudflare.com';
+const DEFAULT_API_FALLBACK = 'http://192.168.1.16:4000';
 
 const rawApi = process.env.NEXT_PUBLIC_API_URL;
 export const API_URL = (
-  rawApi && !rawApi.includes('localhost') && !rawApi.includes('127.0.0.1')
+  rawApi
     ? rawApi
     : DEFAULT_API_FALLBACK
 ).replace(/\/$/, '');

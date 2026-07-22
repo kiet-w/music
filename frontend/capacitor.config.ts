@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const serverUrl =
   process.env.NEXT_PUBLIC_APP_URL ||
   process.env.CAPACITOR_SERVER_URL ||
-  'https://viruses-pest-sauce-scratch.trycloudflare.com';
+  'http://192.168.1.16:3003';
 
 const config: CapacitorConfig = {
   appId: 'com.kietw.music',
