@@ -12,14 +12,18 @@ export function NavWrapper({ children }: NavWrapperProps) {
   const params = useParams();
   const locale = typeof params?.locale === 'string' ? params.locale : 'en';
 
+  const cleanPath = pathname ? pathname.replace(/^\/(en|vi)/, '') : '';
   const isPublicRoute =
-    pathname === `/${locale}/login` ||
-    pathname === `/${locale}/register` ||
-    pathname === `/${locale}/forgot-password` ||
-    pathname.startsWith(`/${locale}/invite`) ||
-    pathname === `/${locale}/auth/callback/google` ||
-    pathname === '/auth/callback/google' ||
-    pathname.includes('/auth/callback');
+    cleanPath === '/login' ||
+    cleanPath === '/register' ||
+    cleanPath === '/forgot-password' ||
+    cleanPath === '/password-reset' ||
+    cleanPath.startsWith('/invite') ||
+    cleanPath.startsWith('/auth/callback') ||
+    Boolean(pathname?.includes('/login')) ||
+    Boolean(pathname?.includes('/register')) ||
+    Boolean(pathname?.includes('/password-reset')) ||
+    Boolean(pathname?.includes('/forgot-password'));
 
   if (isPublicRoute) {
     return null;

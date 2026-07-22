@@ -21,7 +21,7 @@ export function AuthTemplate({
   gradientStyle
 }: AuthTemplateProps) {
   return (
-    <MainContainer className="flex flex-col justify-center py-12 text-foreground">
+    <MainContainer className="flex flex-col justify-center py-12 text-foreground !pb-[calc(2rem+env(safe-area-inset-bottom))]">
       <div className="w-full max-w-[360px] mx-auto">
         <div className="mb-12 flex flex-col gap-2 items-start text-left">
           <h1 className="font-instrument text-5xl md:text-6xl tracking-tighter leading-none">{title}</h1>
