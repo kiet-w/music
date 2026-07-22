@@ -17,16 +17,25 @@ export function useAuthGate() {
     }
   }, [isHydrated, hydrate]);
 
+  const cleanPath = pathname ? pathname.replace(/^\/(en|vi)/, '') : '';
+
   const isPublicRoute =
     pathname === '/' ||
     pathname === '/index.html' ||
-    pathname === `/${locale}/login` ||
-    pathname === `/${locale}/register` ||
-    pathname === `/${locale}/forgot-password` ||
-    pathname.startsWith(`/${locale}/invite`) ||
-    pathname === `/${locale}/auth/callback/google` ||
-    pathname === '/auth/callback/google' ||
-    pathname.includes('/auth/callback');
+    cleanPath === '' ||
+    cleanPath === '/' ||
+    cleanPath === '/login' ||
+    cleanPath === '/register' ||
+    cleanPath === '/forgot-password' ||
+    cleanPath === '/password-reset' ||
+    cleanPath.startsWith('/invite') ||
+    cleanPath.startsWith('/auth/callback') ||
+    Boolean(pathname?.includes('/login')) ||
+    Boolean(pathname?.includes('/register')) ||
+    Boolean(pathname?.includes('/forgot-password')) ||
+    Boolean(pathname?.includes('/password-reset')) ||
+    Boolean(pathname?.includes('/invite')) ||
+    Boolean(pathname?.includes('/auth/callback'));
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -36,10 +45,10 @@ export function useAuthGate() {
       return;
     }
 
-    if (accessToken && (pathname === `/${locale}/login` || pathname === `/${locale}/register`)) {
+    if (accessToken && (cleanPath === '/login' || cleanPath === '/register' || cleanPath === '/forgot-password' || cleanPath === '/password-reset')) {
       router.push(`/${locale}/albums`);
     }
-  }, [accessToken, isHydrated, isPublicRoute, locale, pathname, router]);
+  }, [accessToken, isHydrated, isPublicRoute, locale, pathname, cleanPath, router]);
 
   return {
     isHydrated,
