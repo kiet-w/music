@@ -95,13 +95,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      const user = await fetchMe(accessToken);
-      set({ accessToken, user, isHydrated: true });
-    } catch (error: any) {
-      console.error('Failed to hydrate auth session:', error);
-      if (error?.status === 401) {
-        await get().clearSession();
+      // ponytail: 5s timeout — if backend is down, don't block the entire app
+      try {
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Hydration timeout')), 5000)
+        );
+        const user = await Promise.race([fetchMe(accessToken), timeoutPromise]);
+        set({ accessToken, user, isHydrated: true });
+      } catch (error: any) {
+        console.error('Failed to hydrate auth session:', error);
+        if (error?.status === 401) {
+          await get().clearSession();
+        }
+        set({ isHydrated: true });
       }
+    } catch (e) {
+      console.error('Failed to parse auth storage:', e);
       set({ isHydrated: true });
     }
   },
