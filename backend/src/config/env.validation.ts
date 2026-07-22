@@ -6,14 +6,14 @@ export const envValidationSchema = Joi.object({
     .default('development'),
   PORT: Joi.number().default(10000),
 
-  // Database connection string
+  // Database connection string (Supabase Postgres)
   DATABASE_URL: Joi.string()
     .optional()
-    .default('postgresql://music_user:music_secure_password@localhost:5432/music_db?schema=public'),
+    .default('postgresql://postgres.ukpsubptfzmuszcnnjoy:lpokmoppokid1234@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true'),
 
   DIRECT_URL: Joi.string()
     .optional()
-    .default('postgresql://music_user:music_secure_password@localhost:5432/music_db?schema=public'),
+    .default('postgresql://postgres.ukpsubptfzmuszcnnjoy:lpokmoppokid1234@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres'),
 
   // Authentication configurations
   JWT_SECRET: Joi.string()
