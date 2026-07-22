@@ -140,8 +140,7 @@ export function MessagesPage({ locale }: MessagesPageProps) {
   return (
     <MainContainer
       className={cn(
-        "transition-all duration-200",
-        activeReceiverId && "!max-w-full !w-full !px-0 !mx-0 !pt-[env(safe-area-inset-top)] !pb-0 h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden"
+        activeReceiverId && "!max-w-full !w-full !px-3 sm:!px-4 !pt-[calc(0.5rem+env(safe-area-inset-top))] !pb-[calc(0.5rem+env(safe-area-inset-bottom))] h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden"
       )}
     >
       {!activeReceiverId && (
@@ -153,8 +152,8 @@ export function MessagesPage({ locale }: MessagesPageProps) {
 
       <div
         className={cn(
-          "w-full flex-1 min-h-0 glass-dark border border-white/10 rounded-3xl overflow-hidden flex flex-col lg:flex-row",
-          activeReceiverId && "!rounded-none !border-none !bg-background h-full"
+          "w-full flex-1 min-h-0 glass-dark border border-white/10 rounded-3xl overflow-hidden flex flex-col lg:flex-row shadow-2xl relative",
+          activeReceiverId && "h-full rounded-3xl border border-white/10 bg-black/80 backdrop-blur-xl shadow-2xl"
         )}
       >
         {isLoadingFriends ? (
