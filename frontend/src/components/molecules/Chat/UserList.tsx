@@ -2,11 +2,14 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { getUserStatusText } from '@/lib/userStatus';
 
 export type User = {
   id: string;
   name: string;
   email: string;
+  isOnline?: boolean;
+  lastSeen?: string | null;
 };
 
 interface UserListProps {
@@ -21,6 +24,7 @@ export function UserList({ users, activeUserId, unreadUserIds = [], onSelectUser
     <div className="flex flex-col gap-2">
       {users.map((user) => {
         const isUnread = unreadUserIds.includes(user.id);
+        const status = getUserStatusText(user.isOnline, user.lastSeen);
         
         return (
           <button
@@ -33,17 +37,26 @@ export function UserList({ users, activeUserId, unreadUserIds = [], onSelectUser
                 : "text-white/60 hover:text-white hover:bg-white/5"
             )}
           >
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center font-bold text-white border border-white/10 relative">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center font-bold text-white border border-white/10 relative shrink-0">
               {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
-              {isUnread && (
+              {isUnread ? (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#121212] shadow-sm animate-pulse" />
+              ) : (
+                <span 
+                  className={cn(
+                    "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#121212]",
+                    status.isOnline ? "bg-emerald-400" : "bg-white/20"
+                  )} 
+                />
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className={cn("font-semibold truncate", isUnread && "text-white")}>
+              <p className={cn("font-semibold truncate text-sm", isUnread && "text-white")}>
                 {user.name || user.email}
               </p>
-              <p className="text-[10px] opacity-40 truncate">{user.email}</p>
+              <p className={cn("text-[11px] truncate", status.isOnline ? "text-emerald-400 font-medium" : "text-white/40")}>
+                {status.text}
+              </p>
             </div>
             {isUnread && (
               <div className="bg-red-500/20 text-red-500 text-[10px] px-2 py-0.5 rounded-full font-bold">

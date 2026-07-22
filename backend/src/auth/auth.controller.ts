@@ -20,19 +20,25 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { CurrentUser } from './current-user.decorator';
+import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthenticatedUser } from './interfaces/authenticated-user.interface';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
 import { GoogleUnifiedLoginDto } from './dto/google-unified-login.dto';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { Request,Response } from 'express';
+
+import { ResponseMessage } from '../common/decorators/response-message.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -41,14 +47,29 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @ResponseMessage('Đăng ký thành công. Vui lòng kiểm tra email để lấy mã OTP.')
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'User successfully registered' })
+  @ApiResponse({ status: 201, description: 'User registered, verification OTP sent' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
-  async register(@Body() registerDto: RegisterDto, @Ip() ip: string, @Headers('user-agent') userAgent: string, @Res({ passthrough: true }) res: Response): Promise<AuthResponseDto> {
-    const result = await this.authService.register(registerDto, ip, userAgent);
+  async register(@Body() registerDto: RegisterDto, @Ip() ip: string, @Headers('user-agent') userAgent: string) {
+    return this.authService.register(registerDto, ip, userAgent);
+  }
+
+  @Post('verify-otp')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Xác thực email thành công')
+  @ApiOperation({ summary: 'Verify email OTP' })
+  async verifyOtp(
+    @Body() dto: VerifyOtpDto,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    const result = await this.authService.verifyOtp(dto, ip, userAgent);
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -58,10 +79,38 @@ export class AuthController {
     });
     return { accessToken: result.accessToken, user: result.user };
   }
+
+  @Post('resend-otp')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Đã gửi lại mã OTP')
+  @ApiOperation({ summary: 'Resend verification OTP' })
+  async resendOtp(@Body() dto: ResendOtpDto) {
+    return this.authService.resendOtp(dto);
+  }
+
+  @Post('forgot-password')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Đã gửi yêu cầu đặt lại mật khẩu')
+  @ApiOperation({ summary: 'Request password reset OTP' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @Post('reset-password')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Đặt lại mật khẩu thành công')
+  @ApiOperation({ summary: 'Reset password using OTP' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
+  }
  
   @Post('login')
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Đăng nhập thành công')
   @ApiOperation({ summary: 'User login' })
   @ApiResponse({ status: 200, description: 'User successfully logged in' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
@@ -79,6 +128,7 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Làm mới token thành công')
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, description: 'Token successfully refreshed' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
@@ -106,6 +156,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Đăng xuất thành công')
   @ApiOperation({ summary: 'Logout user' })
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.['refreshToken'];
@@ -118,6 +169,7 @@ export class AuthController {
 
   @Post('google')
   @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Đăng nhập Google thành công')
   @ApiOperation({ summary: 'Login with Google' })
   @ApiResponse({
     status: 200,
@@ -143,6 +195,7 @@ export class AuthController {
 
   @Post('google-unified')
   @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Đăng nhập Google Unified thành công')
   @ApiOperation({ summary: 'Login and Sync Google Drive with Unified SSO' })
   @ApiResponse({
     status: 200,
@@ -173,6 +226,8 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Lấy thông tin người dùng thành công')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'Return current user profile' })
@@ -183,6 +238,8 @@ export class AuthController {
 
   @Get('google/status')
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Lấy trạng thái Google Drive thành công')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Check Google Drive link status' })
   async googleStatus(@CurrentUser() user: AuthenticatedUser) {
@@ -191,18 +248,16 @@ export class AuthController {
 
   @Get('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.USER)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Lấy danh sách người dùng thành công')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Return all users' })
   async findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
-    const skip =
-      page && limit ? (parseInt(page, 10) - 1) * parseInt(limit, 10) : 0;
-    const take = Math.min(limit ? parseInt(limit, 10) : 50, 100); // cap at 100
-    return this.authService.findAll(skip, take);
+    const pageNum = Math.max(1, parseInt(page || '1', 10) || 1);
+    const limitNum = Math.min(Math.max(1, parseInt(limit || '50', 10) || 50), 100);
+    const skip = (pageNum - 1) * limitNum;
+    return this.authService.findAll(skip, limitNum);
   }
-  
-
-  
-
 }

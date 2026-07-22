@@ -19,6 +19,8 @@ dist/
 # Logs & temp build infos
 *.log
 **/*.log
+*.sqlite
+**/*.sqlite
 **/*.tsbuildinfo
 backend/yt-dlp.tsbuildinfo
 

@@ -1,0 +1,134 @@
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { MessageRepository } from './repositories/message.repository';
+import { MessagesGateway } from './messages.gateway';
+import { CreateMessageDto } from './dto/create-message.dto';
+import { CreateFriendRequestDto } from './dto/create-friend-request.dto';
+import { Message, FriendRequest, RequestStatus } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
+
+@Injectable()
+export class MessagesService {
+  constructor(
+    private readonly messageRepository: MessageRepository,
+    private readonly messagesGateway: MessagesGateway,
+  ) {}
+
+  async create(
+    senderId: string,
+    createMessageDto: CreateMessageDto,
+  ): Promise<Message> {
+    const isConnected = await this.messageRepository.checkConnection(
+      senderId,
+      createMessageDto.receiverId,
+    );
+
+    if (!isConnected) {
+      throw new ForbiddenException(
+        'Hai người chưa là bạn bè. Không thể gửi tin nhắn.',
+      );
+    }
+
+    const newMessage = await this.messageRepository.create({
+      data: {
+        content: createMessageDto.content,
+        sender: { connect: { id: senderId } },
+        receiver: { connect: { id: createMessageDto.receiverId } },
+      },
+    });
+
+    // Emit real-time WebSocket event to the receiver
+    this.messagesGateway.emitNewMessage(createMessageDto.receiverId, newMessage);
+
+    return newMessage;
+  }
+
+  async findAllByConversation(
+    userId1: string,
+    userId2: string,
+    before?: string,
+    limit: number = 30,
+  ): Promise<Message[]> {
+    return this.messageRepository.findConversation(userId1, userId2, before, limit);
+  }
+
+  async createInvite(
+    senderId: string,
+    dto: CreateFriendRequestDto,
+  ): Promise<FriendRequest> {
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24);
+
+    return this.messageRepository.createFriendRequest({
+      token: uuidv4(),
+      sender: { connect: { id: senderId } },
+      ...(dto.receiverId
+        ? { receiver: { connect: { id: dto.receiverId } } }
+        : {}),
+      expiresAt,
+    });
+  }
+
+  async getInviteInfo(token: string): Promise<any> {
+    const invite = await this.messageRepository.findFriendRequestByToken(token);
+
+    if (!invite) {
+      throw new NotFoundException('Invite link not found');
+    }
+
+    if (invite.status !== RequestStatus.PENDING) {
+      throw new BadRequestException(
+        `Invite link is already ${invite.status.toLowerCase()}`,
+      );
+    }
+
+    if (new Date() > invite.expiresAt) {
+      await this.messageRepository.updateFriendRequest(
+        { id: invite.id },
+        { status: RequestStatus.EXPIRED },
+      );
+      throw new BadRequestException('Invite link has expired');
+    }
+
+    return invite;
+  }
+
+  async acceptInvite(
+    token: string,
+    receiverId: string,
+  ): Promise<FriendRequest> {
+    const invite = await this.getInviteInfo(token);
+
+    if (invite.senderId === receiverId) {
+      throw new BadRequestException('You cannot accept your own invite');
+    }
+
+    return this.messageRepository.updateFriendRequest(
+      { id: invite.id },
+      {
+        status: RequestStatus.ACCEPTED,
+        receiver: { connect: { id: receiverId } },
+      },
+    );
+  }
+
+  async getFriends(userId: string): Promise<any[]> {
+    const connections = await this.messageRepository.findAcceptedFriends(userId);
+
+    return connections.map((conn) => {
+      const friend = conn.senderId === userId ? conn.receiver : conn.sender;
+      const presence = this.messagesGateway.getUserPresence(friend.id);
+      return {
+        id: friend.id,
+        name: friend.name,
+        email: friend.email,
+        isOnline: presence.isOnline,
+        lastSeen: presence.lastSeen,
+      };
+    });
+  }
+}

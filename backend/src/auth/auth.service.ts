@@ -2,10 +2,10 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcryptjs';
 import { OAuth2Client } from 'google-auth-library';
 import { User } from '@prisma/client';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
@@ -13,11 +13,16 @@ import { UserRepository } from './repositories/user.repository';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { MailService } from '../mail/mail.service';
 import { EncryptionService } from '../common/services/encryption.service';
 import { randomBytes, randomUUID, createHash } from 'crypto';
 import * as argon2 from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { RefreshToken } from '@prisma/client'
+import { RefreshToken } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +33,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly encryptionService: EncryptionService,
+    private readonly mailService: MailService,
     @InjectPinoLogger(AuthService.name)
     private readonly logger: PinoLogger,
     private readonly prisma: PrismaService
@@ -39,9 +45,13 @@ export class AuthService {
     );
   }
 
+  private generateOtp(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
   // ─── Public Methods ───────────────────────────────────────────
 
-  async register(dto: RegisterDto, ip: string, userAgent: string): Promise<AuthResponseDto> {
+  async register(dto: RegisterDto, ip: string, userAgent: string): Promise<any> {
     const email = dto.email.toLowerCase();
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
@@ -50,28 +60,151 @@ export class AuthService {
     }
 
     const passwordHash = await argon2.hash(dto.password);
-    const user = await this.userRepository.create({
-      data: { email, passwordHash, name: dto.name },
+    const otp = this.generateOtp();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        name: dto.name,
+        isEmailVerified: false,
+        verificationOtp: otp,
+        otpExpiresAt,
+      },
     });
-    const family = randomUUID()
-    this.logger.info({ userId: user.id }, 'User registered successfully');
-    return this.issueToken(user, ip, userAgent, family);
+
+    this.logger.info({ userId: user.id }, 'User registered successfully, sending verification OTP');
+    await this.mailService.sendVerificationOtp(email, otp);
+
+    return {
+      message: 'Đăng ký thành công. Vui lòng kiểm tra email để lấy mã xác thực OTP.',
+      email: user.email,
+      requiresVerification: true,
+    };
   }
 
-  async login(dto: LoginDto,ip: string, userAgent: string): Promise<AuthResponseDto> {
+  async verifyOtp(dto: VerifyOtpDto, ip: string, userAgent: string): Promise<AuthResponseDto> {
+    const email = dto.email.toLowerCase();
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('Email không tồn tại');
+    }
+    if (user.isEmailVerified) {
+      throw new BadRequestException('Tài khoản đã được xác thực trước đó');
+    }
+    if (!user.verificationOtp || user.verificationOtp !== dto.otp) {
+      throw new BadRequestException('Mã OTP không chính xác');
+    }
+    if (user.otpExpiresAt && new Date() > user.otpExpiresAt) {
+      throw new BadRequestException('Mã OTP đã hết hạn. Vui lòng yêu cầu gửi lại mã.');
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isEmailVerified: true,
+        verificationOtp: null,
+        otpExpiresAt: null,
+      },
+    });
+
+    const family = randomUUID();
+    return this.issueToken(updatedUser, ip, userAgent, family);
+  }
+
+  async resendOtp(dto: ResendOtpDto): Promise<{ message: string }> {
+    const email = dto.email.toLowerCase();
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('Email không tồn tại');
+    }
+    if (user.isEmailVerified) {
+      throw new BadRequestException('Email này đã được xác thực');
+    }
+
+    const otp = this.generateOtp();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { verificationOtp: otp, otpExpiresAt },
+    });
+
+    await this.mailService.sendVerificationOtp(email, otp);
+    return { message: 'Đã gửi lại mã OTP xác nhận tới email của bạn.' };
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
+    const email = dto.email.trim().toLowerCase();
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      // Return success to avoid email enumeration
+      return { message: 'Nếu email tồn tại trong hệ thống, bạn sẽ nhận được mã OTP đặt lại mật khẩu.' };
+    }
+
+    const otp = this.generateOtp();
+    const resetPasswordOtpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordOtp: otp,
+        resetPasswordOtpExpiresAt,
+      },
+    });
+
+    await this.mailService.sendPasswordResetOtp(email, otp);
+    return { message: 'Mã OTP đặt lại mật khẩu đã được gửi tới email của bạn.' };
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+    const email = dto.email.trim().toLowerCase();
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('Yêu cầu không hợp lệ');
+    }
+    if (!user.resetPasswordOtp || user.resetPasswordOtp !== dto.otp) {
+      throw new BadRequestException('Mã OTP không chính xác');
+    }
+    if (user.resetPasswordOtpExpiresAt && new Date() > user.resetPasswordOtpExpiresAt) {
+      throw new BadRequestException('Mã OTP đã hết hạn. Vui lòng yêu cầu lại.');
+    }
+
+    const newPasswordHash = await argon2.hash(dto.newPassword);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: newPasswordHash,
+        resetPasswordOtp: null,
+        resetPasswordOtpExpiresAt: null,
+      },
+    });
+
+    return { message: 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập ngay bây giờ.' };
+  }
+
+  async login(dto: LoginDto, ip: string, userAgent: string): Promise<AuthResponseDto> {
     const email = dto.email.trim().toLowerCase();
     const user = await this.userRepository.findByEmail(email);
 
     if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không chính xác');
     }
-    const isPasswordValid = await argon2.verify(user.passwordHash, dto.password)
+    const isPasswordValid = await argon2.verify(user.passwordHash, dto.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không chính xác');
     }
-    const family = randomUUID()
+    if (!user.isEmailVerified && !user.googleId) {
+      throw new UnauthorizedException('Tài khoản chưa được xác thực email. Vui lòng xác thực mã OTP trước.');
+    }
+    const family = randomUUID();
 
-    return this.issueToken(user,ip,userAgent,family);
+    return this.issueToken(user, ip, userAgent, family);
   }
 
   async refresh(refreshToken: string, ip: string, userAgent: string): Promise<AuthResponseDto> {
@@ -243,23 +376,6 @@ export class AuthService {
   }
 
   // ─── Private Helpers ──────────────────────────────────────────
-  private buildAuthResponse(user: User): AuthResponseDto {
-    return {
-      accessToken: this.jwtService.sign({
-        sub: user.id,
-        email: user.email,
-        role: user.role,
-      }),
-      refreshToken: '', // TODO: Replace this with issueToken later
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
-    };
-  }
-
   private async verifyGoogleToken(idToken: string) {
     const ticket = await this.googleClient.verifyIdToken({
       idToken,
@@ -302,26 +418,30 @@ export class AuthService {
     this.logger.info({ userId: user.id }, 'Created new user via Google login');
     return user;
   }
-  
-  private async issueToken( user: User, ip: string, userAgent: string, family: string ): Promise<AuthResponseDto>{
+
+  private async issueToken(
+    user: User,
+    ip: string,
+    userAgent: string,
+    family: string,
+  ): Promise<AuthResponseDto> {
     const accessToken = await this.jwtService.signAsync(
       { sub: user.id, email: user.email, role: user.role },
-      {expiresIn: '15m'}
-    )
-    const refreshToken =  randomBytes(64).toString('hex')
-    const tokenHash =  createHash('sha256').update(refreshToken).digest('hex')
-    const expiresAt= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      { expiresIn: '15m' },
+    );
+    const refreshToken = randomBytes(64).toString('hex');
+    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const saveToken = await this.prisma.refreshToken.create({
-      data:{
+      data: {
         tokenHash,
-        family, 
+        family,
         ip,
         userAgent,
         expiresAt,
-        userId: user.id
-
-      }
-    })
+        userId: user.id,
+      },
+    });
     return {
       accessToken,
       refreshToken,
@@ -331,7 +451,7 @@ export class AuthService {
         email: user.email,
         name: user.name,
         role: user.role,
-      }
-    }
+      },
+    };
   }
 }

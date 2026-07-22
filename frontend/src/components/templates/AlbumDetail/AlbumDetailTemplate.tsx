@@ -60,8 +60,8 @@ export function AlbumDetailTemplate({
   }
 
   return (
-    <MainContainer className="space-y-8">
-      <div className="flex items-center justify-between">
+    <MainContainer className="h-[100dvh] max-h-[100dvh] overflow-hidden !pb-[100px] flex flex-col gap-4">
+      <div className="flex items-center justify-between shrink-0">
         <Link href={`/${locale}/albums`}>
           <Button variant="ghost" size="sm" shape="full" className="-ml-2 bg-muted/50 hover:bg-muted">
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -70,20 +70,22 @@ export function AlbumDetailTemplate({
         </Link>
       </div>
 
-      <AlbumDetailHeader album={album} isAlbumActive={isAlbumActive} />
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-6 pr-1 scrollbar-hide pb-4">
+        <AlbumDetailHeader album={album} isAlbumActive={isAlbumActive} />
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold tracking-tight">{t('tracks')}</h2>
-          <span className="text-sm text-muted-foreground font-sans">
-            {album._count?.songs || 0} tracks
-          </span>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold tracking-tight">{t('tracks')}</h2>
+            <span className="text-sm text-muted-foreground font-sans">
+              {album._count?.songs || 0} tracks
+            </span>
+          </div>
+          <Library 
+            onTrackSelect={play} 
+            currentTrackId={currentTrackId} 
+            albumId={id}
+          />
         </div>
-        <Library 
-          onTrackSelect={play} 
-          currentTrackId={currentTrackId} 
-          albumId={id}
-        />
       </div>
     </MainContainer>
   );

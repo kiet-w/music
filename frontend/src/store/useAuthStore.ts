@@ -31,11 +31,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setSession: async (accessToken, user) => {
     const previousUserId = get().user?.id;
-    if (previousUserId !== user.id) {
+    if (user?.id && previousUserId !== user.id) {
       resetUserScopedState();
     }
 
-    set({ accessToken, user });
+    set({ accessToken, user: user || null });
 
     if (typeof window !== 'undefined') {
       if (Capacitor.isNativePlatform()) {

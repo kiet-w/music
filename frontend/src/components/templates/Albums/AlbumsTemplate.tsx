@@ -54,51 +54,55 @@ export function AlbumsTemplate({
   t
 }: AlbumsTemplateProps) {
   return (
-    <MainContainer>
-      <AlbumsHeader 
-        albumsCount={albums.length}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        onImportClick={onImportClick}
-        onCreateClick={() => setIsCreating(true)}
-        t={t}
-      />
-
-      {isLoading && albums.length === 0 ? (
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i}>
-              <AlbumSkeleton />
-            </div>
-          ))}
-        </div>
-      ) : albums.length > 0 ? (
-        <div className={viewMode === 'grid' ? "grid grid-cols-2 gap-x-6 gap-y-10" : "flex flex-col gap-4"}>
-          {albums.map((album, index) => (
-            viewMode === 'grid' ? (
-              <AlbumGridItem 
-                key={album.id} 
-                album={album} 
-                index={index} 
-                locale={locale} 
-                t={t} 
-              />
-            ) : (
-              <AlbumListItem 
-                key={album.id} 
-                album={album} 
-                locale={locale} 
-                t={t} 
-              />
-            )
-          ))}
-        </div>
-      ) : (
-        <AlbumsEmptyState 
-          onCreateClick={() => setIsCreating(true)} 
-          t={t} 
+    <MainContainer className="h-[100dvh] max-h-[100dvh] overflow-hidden !pb-[100px] flex flex-col gap-4">
+      <div className="shrink-0">
+        <AlbumsHeader 
+          albumsCount={albums.length}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          onImportClick={onImportClick}
+          onCreateClick={() => setIsCreating(true)}
+          t={t}
         />
-      )}
+      </div>
+
+      <div className="flex-1 min-h-0 overflow-y-auto pb-4 scrollbar-hide">
+        {isLoading && albums.length === 0 ? (
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i}>
+                <AlbumSkeleton />
+              </div>
+            ))}
+          </div>
+        ) : albums.length > 0 ? (
+          <div className={viewMode === 'grid' ? "grid grid-cols-2 gap-x-6 gap-y-10" : "flex flex-col gap-4"}>
+            {albums.map((album, index) => (
+              viewMode === 'grid' ? (
+                <AlbumGridItem 
+                  key={album.id} 
+                  album={album} 
+                  index={index} 
+                  locale={locale} 
+                  t={t} 
+                />
+              ) : (
+                <AlbumListItem 
+                  key={album.id} 
+                  album={album} 
+                  locale={locale} 
+                  t={t} 
+                />
+              )
+            ))}
+          </div>
+        ) : (
+          <AlbumsEmptyState 
+            onCreateClick={() => setIsCreating(true)} 
+            t={t} 
+          />
+        )}
+      </div>
 
       <CreateAlbumDialog 
         isOpen={isCreating}

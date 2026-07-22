@@ -9,6 +9,7 @@ import { login } from '@/lib/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { AuthTemplate } from '@/components/templates/Auth/AuthTemplate';
 import { LoginForm } from '@/components/molecules/Auth/LoginForm';
+import { OtpForm } from '@/components/molecules/Auth/OtpForm';
 
 interface LoginPageProps {
   locale: string;
@@ -21,6 +22,7 @@ export function LoginPage({ locale }: LoginPageProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showOtp, setShowOtp] = useState(false);
   const setSession = useAuthStore((state) => state.setSession);
   const user = useAuthStore((state) => state.user);
 
@@ -37,10 +39,16 @@ export function LoginPage({ locale }: LoginPageProps) {
 
     try {
       const response = await login({ email, password });
-      setSession(response.accessToken, response.user);
-      router.push(`/${locale}`);
+      if (response.accessToken && response.user) {
+        setSession(response.accessToken, response.user);
+        router.push(`/${locale}`);
+      }
     } catch (err: any) {
-      setError(err.message === 'Invalid email or password' ? t('invalid_credentials') : t('error_generic'));
+      if (err.message && err.message.includes('xác thực email')) {
+        setShowOtp(true);
+      } else {
+        setError(err.message === 'Invalid email or password' ? t('invalid_credentials') : (err.message || t('error_generic')));
+      }
     } finally {
       setLoading(false);
     }
@@ -60,34 +68,45 @@ export function LoginPage({ locale }: LoginPageProps) {
 
   return (
     <AuthTemplate 
-      title={t('login')}
-      subtitle="Sign in to continue listening."
+      title={showOtp ? 'Xác thực Email' : t('login')}
+      subtitle={showOtp ? 'Tài khoản chưa được xác thực. Nhập mã OTP đã gửi đến email của bạn.' : 'Sign in to continue listening.'}
       footer={footer}
       gradientStyle="bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.16),_transparent_36%),linear-gradient(180deg,_#070b14_0%,_#0f172a_100%)]"
     >
-      <LoginForm 
-        email={email}
-        setEmail={setEmail}
-        password={password}
-        setPassword={setPassword}
-        loading={loading}
-        error={error}
-        onSubmit={handleSubmit}
-        t={t}
-      />
-      
-      <div className="relative py-6">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-white/5" />
-        </div>
-        <div className="relative flex justify-center">
-          <span className="bg-background px-4 text-[10px] font-mono font-semibold uppercase tracking-widest text-muted-foreground/60">
-            OR
-          </span>
-        </div>
-      </div>
+      {showOtp ? (
+        <OtpForm 
+          email={email} 
+          onSuccess={() => router.push(`/${locale}`)}
+          t={t}
+        />
+      ) : (
+        <>
+          <LoginForm 
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            loading={loading}
+            error={error}
+            onSubmit={handleSubmit}
+            t={t}
+            locale={locale}
+          />
+          
+          <div className="relative py-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-white/5" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-background px-4 text-[10px] font-mono font-semibold uppercase tracking-widest text-muted-foreground/60">
+                OR
+              </span>
+            </div>
+          </div>
 
-      <GoogleLoginButton />
+          <GoogleLoginButton />
+        </>
+      )}
     </AuthTemplate>
   );
 }

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { AlbumRepository } from './repositories/album.repository';
 import { CreateAlbumDto } from './dto/create-album.dto';
+import { UpdateAlbumDto } from './dto/update-album.dto';
 
 @Injectable()
 export class AlbumService {
@@ -12,7 +13,7 @@ export class AlbumService {
   ) {}
 
   async create(userId: string, data: CreateAlbumDto) {
-    this.logger.info({ userId, data }, 'Creating new album');
+    this.logger.info({ userId, data }, 'Creating new album for user');
     const album = await this.albumRepository.create({
       data: {
         ...data,
@@ -21,8 +22,9 @@ export class AlbumService {
     });
     return this.mapAlbumResponse(album);
   }
+
   async findOrCreateDefault(userId: string) {
-    this.logger.debug({ userId }, 'Finding or creating default album');
+    this.logger.debug({ userId }, 'Finding or creating default album for user');
     const existing = await this.albumRepository.findDefault(userId);
     if (existing) {
       return this.mapAlbumResponse(existing);
@@ -50,20 +52,11 @@ export class AlbumService {
   async findAll(userId: string, skip: number = 0, take: number = 50) {
     this.logger.debug({ userId, skip, take }, 'Finding all albums for user');
 
-    const [total, albums] = await Promise.all([
-      this.albumRepository.count({ where: { userId } }),
-      this.albumRepository.findMany({
-        where: { userId },
-        skip,
-        take,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          _count: {
-            select: { tracks: true },
-          },
-        },
-      }),
-    ]);
+    const { total, albums } = await this.albumRepository.findAllForUser(
+      userId,
+      skip,
+      take,
+    );
 
     return {
       data: albums.map((album) => this.mapAlbumResponse(album)),
@@ -76,20 +69,35 @@ export class AlbumService {
 
   async findOne(userId: string, id: string) {
     this.logger.debug({ userId, id }, 'Finding album by ID for user');
-    const album = await this.albumRepository.findFirst({
-      where: { id, userId },
-      include: {
-        _count: {
-          select: { tracks: true },
-        },
-      },
-    });
+    const album = await this.albumRepository.findOneForUser(id, userId);
 
     if (!album) {
       throw new NotFoundException(`Album with ID ${id} not found`);
     }
 
     return this.mapAlbumResponse(album);
+  }
+
+  async update(userId: string, id: string, data: UpdateAlbumDto) {
+    this.logger.info({ userId, id, data }, 'Updating album for user');
+    const album = await this.albumRepository.updateOneForUser(id, userId, data);
+
+    if (!album) {
+      throw new NotFoundException(`Album with ID ${id} not found`);
+    }
+
+    return this.mapAlbumResponse(album);
+  }
+
+  async remove(userId: string, id: string) {
+    this.logger.info({ userId, id }, 'Deleting album for user');
+    const album = await this.albumRepository.deleteOneForUser(id, userId);
+
+    if (!album) {
+      throw new NotFoundException(`Album with ID ${id} not found`);
+    }
+
+    return { message: 'Album deleted successfully', id: album.id };
   }
 
   private mapAlbumResponse(album: any) {

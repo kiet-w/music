@@ -9,9 +9,10 @@ import { ChatInput } from '@/components/molecules/Chat/ChatInput';
 import { Button } from '@/components/atoms/ui/button';
 import { useChatStore } from '@/store/useChatStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { fetchUsers, createInvite } from '@/lib/api';
+import { fetchFriends, createInvite, acceptInvite } from '@/lib/api';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { getUserStatusText } from '@/lib/userStatus';
 
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
 
@@ -30,25 +31,43 @@ export default function MessagesPage() {
     sendMessage, 
     subscribeToMessages, 
     unsubscribeFromMessages,
-    isLoading 
+    isLoading,
+    isLoadingMore,
+    hasMoreMessages,
+    loadMoreMessages,
+    socket
   } = useChatStore();
 
   const [users, setUsers] = useState<User[]>([]);
+  const [, setTicker] = useState<number>(0);
+
+  // Periodic ticker to refresh relative time strings (e.g. 5 phút -> 1 giờ -> 2 giờ)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTicker(prev => prev + 1);
+    }, 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const loadUsers = async (token: string) => {
+    try {
+      const data = await fetchFriends(token);
+      const filteredUsers = data.filter((u: User) => u.id !== currentUser?.id);
+      setUsers(filteredUsers);
+      return filteredUsers;
+    } catch (err) {
+      console.error('Failed to fetch friends:', err);
+      toast.error(t('error_loading_users') || 'Failed to load friends');
+      return [];
+    }
+  };
 
   useEffect(() => {
     if (accessToken) {
-      fetchUsers(accessToken).then(data => {
-        // Filter out the current user from the list
-        const filteredUsers = data.filter((u: User) => u.id !== currentUser?.id);
-        setUsers(filteredUsers);
-
-        // If targetUserId is provided in URL, set it as active
+      loadUsers(accessToken).then((filteredUsers) => {
         if (targetUserId && filteredUsers.some((u: User) => u.id === targetUserId)) {
           setActiveReceiverId(targetUserId, accessToken);
         }
-      }).catch((err) => {
-        console.error('Failed to fetch users:', err);
-        toast.error(t('error_loading_users') || 'Failed to load users');
       });
     }
   }, [accessToken, currentUser?.id, targetUserId, setActiveReceiverId]);
@@ -59,6 +78,26 @@ export default function MessagesPage() {
     }
     return () => unsubscribeFromMessages();
   }, [currentUser?.id, subscribeToMessages, unsubscribeFromMessages]);
+
+  // Listen for realtime presence updates from socket
+  useEffect(() => {
+    if (!socket) return;
+
+    const handlePresence = (data: { userId: string; isOnline: boolean; lastSeen: string | null }) => {
+      setUsers(prevUsers =>
+        prevUsers.map(user =>
+          user.id === data.userId
+            ? { ...user, isOnline: data.isOnline, lastSeen: data.lastSeen }
+            : user
+        )
+      );
+    };
+
+    socket.on('userPresenceChanged', handlePresence);
+    return () => {
+      socket.off('userPresenceChanged', handlePresence);
+    };
+  }, [socket]);
 
   const handleSelectUser = (userId: string | null) => {
     if (accessToken) {
@@ -73,9 +112,9 @@ export default function MessagesPage() {
     if (!accessToken) return;
     try {
       await sendMessage(accessToken, content);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send message:', error);
-      toast.error(t('error_send_message') || 'Failed to send message');
+      toast.error(error?.message || t('error_send_message') || 'Failed to send message');
     }
   };
 
@@ -83,7 +122,7 @@ export default function MessagesPage() {
     if (!accessToken) return;
     try {
       const { token } = await createInvite(accessToken);
-      const inviteUrl = `${window.location.origin}/${searchParams.get('locale')}/invite?token=${token}`;
+      const inviteUrl = `${window.location.origin}/${searchParams.get('locale') || 'vi'}/invite?token=${token}`;
       
       // Copy to clipboard
       await navigator.clipboard.writeText(inviteUrl);
@@ -94,25 +133,60 @@ export default function MessagesPage() {
     }
   };
 
+  const handleAcceptInvite = async () => {
+    if (!accessToken) return;
+    const input = prompt('Nhập link lời mời hoặc Token kết bạn:');
+    if (!input) return;
+
+    let token = input.trim();
+    if (token.includes('token=')) {
+      token = token.split('token=')[1].split('&')[0];
+    }
+
+    try {
+      const res = await acceptInvite(accessToken, token);
+      toast.success('Đã chấp nhận lời mời kết bạn thành công!');
+      const updatedUsers = await loadUsers(accessToken);
+      if (res?.senderId) {
+        setActiveReceiverId(res.senderId, accessToken);
+      }
+    } catch (error: any) {
+      console.error('Failed to accept invite:', error);
+      toast.error(error?.message || 'Không thể chấp nhận lời mời kết bạn');
+    }
+  };
+
   const activeChatPartner = users.find(u => u.id === activeReceiverId);
+  const partnerStatus = getUserStatusText(activeChatPartner?.isOnline, activeChatPartner?.lastSeen);
 
   return (
-    <MainContainer className="flex flex-col gap-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white shadow-text">{t('title')}</h1>
-        <Button 
-          onClick={handleCreateInvite}
-          className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl"
-        >
-          {t('invite_button')}
-        </Button>
+    <MainContainer className="h-[100dvh] max-h-[100dvh] overflow-hidden !pb-[100px] flex flex-col gap-3">
+      <header className="flex flex-wrap items-center justify-between gap-2 shrink-0">
+        <h1 className="text-2xl font-bold text-white shadow-text">{t('title')}</h1>
+        <div className={cn("flex items-center gap-1.5 shrink-0", activeReceiverId && "hidden md:flex")}>
+          <Button 
+            onClick={handleAcceptInvite}
+            variant="outline"
+            size="sm"
+            className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 font-bold rounded-xl text-xs px-2.5 py-1.5 h-8"
+          >
+            Nhận lời mời
+          </Button>
+          <Button 
+            onClick={handleCreateInvite}
+            size="sm"
+            className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl text-xs px-2.5 py-1.5 h-8"
+          >
+            {t('invite_button')}
+          </Button>
+        </div>
       </header>
 
-      <div className="flex-1 glass-dark rounded-3xl border border-white/10 overflow-hidden flex flex-col h-[70vh] min-h-[500px]">
+      <div className="flex-1 min-h-0 glass-dark rounded-3xl border border-white/10 overflow-hidden flex flex-col md:flex-row">
         {/* Sidebar - User List */}
         <aside className={cn(
-          "w-full border-b border-white/10 p-4 overflow-y-auto",
-          activeReceiverId ? "hidden" : "block"
+          "w-full md:w-80 md:border-r border-white/10 p-4 overflow-y-auto flex-col shrink-0 h-full",
+          activeReceiverId ? "hidden md:flex" : "flex flex-1"
         )}>
           <UserList 
             users={users} 
@@ -129,23 +203,33 @@ export default function MessagesPage() {
 
         {/* Main Chat Area */}
         <section className={cn(
-          "flex-1 flex flex-col h-full overflow-hidden",
-          activeReceiverId ? "block" : "hidden"
+          "flex-1 flex flex-col h-full overflow-hidden min-w-0 min-h-0",
+          activeReceiverId ? "flex" : "hidden md:flex"
         )}>
           {activeReceiverId ? (
             <>
               {/* Chat Header */}
-              <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-white/5">
-                <div className="flex items-center gap-3">
+              <div className="px-4 sm:px-6 py-3 border-b border-white/10 flex items-center justify-between bg-white/5 shrink-0">
+                <div className="flex items-center gap-2 min-w-0">
                   <button 
                     onClick={() => handleSelectUser(null)}
-                    className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors text-white"
+                    className="p-1 -ml-1 hover:bg-white/10 rounded-full transition-colors text-white md:hidden shrink-0"
+                    title="Back to list"
                   >
                     <ChevronLeft className="w-6 h-6" />
                   </button>
-                  <div>
-                    <h2 className="text-white font-bold">{activeChatPartner?.name || activeChatPartner?.email}</h2>
-                    <p className="text-[10px] text-white/40">{activeChatPartner?.email}</p>
+                  <div className="min-w-0">
+                    <h2 className="text-white font-bold truncate text-sm sm:text-base">
+                      {activeChatPartner?.name || activeChatPartner?.email}
+                    </h2>
+                    <div className="flex items-center gap-1.5 text-[11px] min-w-0 mt-0.5">
+                      <span className={cn("w-2 h-2 rounded-full shrink-0", partnerStatus.isOnline ? "bg-emerald-400 animate-pulse" : "bg-white/30")} />
+                      <span className={cn("font-medium", partnerStatus.isOnline ? "text-emerald-400" : "text-white/50")}>
+                        {partnerStatus.text}
+                      </span>
+                      <span className="text-white/20">•</span>
+                      <span className="text-white/40 truncate">{activeChatPartner?.email}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -158,12 +242,15 @@ export default function MessagesPage() {
                 <ChatWindow 
                   messages={messages} 
                   currentUserId={currentUser?.id || ''} 
+                  onLoadMore={() => accessToken && loadMoreMessages(accessToken)}
+                  hasMore={hasMoreMessages}
+                  isLoadingMore={isLoadingMore}
                 />
               )}
               <ChatInput onSend={handleSend} />
             </>
           ) : (
-            <div className="flex-1 p-6 flex items-center justify-center text-white/40 italic">
+            <div className="flex-1 p-6 flex items-center justify-center text-white/40 italic text-sm">
               {t('select_user')}
             </div>
           )}

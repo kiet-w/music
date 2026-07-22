@@ -168,3 +168,23 @@ npm run dev:local
 | 5a | ffmpeg binary chưa tồn tại | ✅ Đã khắc phục |
 | 5b | yt-dlp phiên bản cũ | ✅ Đã khắc phục |
 | 6 | Redis không tắt cùng backend | ✅ Đã khắc phục |
+
+---
+
+## 📅 22/07/2026 — Messages, Pagination & Production Bugs
+
+> Chi tiết đầy đủ: [fixes/2026-07-22-messages-pagination-production.md](./fixes/2026-07-22-messages-pagination-production.md)
+
+| # | Lỗi | Severity | Trạng thái |
+|---|-----|----------|------------|
+| 7 | `tracks.filter is not a function` — double-nested API response | 🔴 Runtime | ✅ Fixed |
+| 8 | Album list không hiển thị sau khi tạo | 🔴 Runtime | ✅ Fixed |
+| 9 | Nút Invite hiển thị sai khi đang chat | 🟡 UI | ✅ Fixed |
+| 10 | Gateway `static` Maps memory leak | 🔴 Production | ✅ Fixed |
+| 11 | Presence broadcast lộ userId toàn bộ client | 🔴 Security | ✅ Fixed |
+| 12 | Socket không re-join room sau reconnect | 🔴 Production | ✅ Fixed |
+| 13 | `isSubscribed` flag chặn re-subscribe | 🟡 Logic | ✅ Fixed |
+| 14 | ChatWindow `isPrepending` race condition | 🟡 UI | ✅ Fixed |
+| 15 | Message pagination (infinite scroll up) | — Feature | ✅ Added |
+| 16 | User online/offline presence indicator | — Feature | ✅ Added |
+| 17 | Ẩn scrollbar toàn bộ frontend | 🟢 Polish | ✅ Fixed |

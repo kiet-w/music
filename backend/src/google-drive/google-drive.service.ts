@@ -138,10 +138,8 @@ export class GoogleDriveService implements OnModuleInit {
     albumId?: string,
   ): Promise<string> {
     if (albumId) {
-      const album = await this.albumRepository.findUnique({
-        where: { id: albumId },
-      });
-      if (!album || album.userId !== userId) {
+      const album = await this.albumRepository.findOneForUser(albumId, userId);
+      if (!album) {
         throw new NotFoundException('Album not found');
       }
       return album.id;

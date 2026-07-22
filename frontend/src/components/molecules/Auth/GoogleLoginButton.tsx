@@ -31,7 +31,9 @@ function GoogleLoginButtonInner() {
       setError(null);
       try {
         const response = await googleUnifiedLogin(codeResponse.code, 'postmessage');
-        setSession(response.accessToken, response.user);
+        if (response.accessToken && response.user) {
+          setSession(response.accessToken, response.user);
+        }
       } catch (err: any) {
         console.error('Google login error:', err);
         setError(err.message || 'Google login failed');

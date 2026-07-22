@@ -14,6 +14,7 @@ interface LoginFormProps {
   error: string | null;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   t: (key: string) => string;
+  locale?: string;
 }
 
 export function LoginForm({
@@ -24,7 +25,8 @@ export function LoginForm({
   loading,
   error,
   onSubmit,
-  t
+  t,
+  locale
 }: LoginFormProps) {
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
@@ -62,6 +64,15 @@ export function LoginForm({
             required
           />
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <a
+          href={`/${locale || 'vi'}/forgot-password`}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+        >
+          Quên mật khẩu?
+        </a>
       </div>
 
       {error && <p className="text-sm text-red-400">{error}</p>}

@@ -14,8 +14,10 @@ export type AuthUser = {
 };
 
 export type AuthResponse = {
-  accessToken: string;
-  user: AuthUser;
+  accessToken?: string;
+  user?: AuthUser;
+  message?: string;
+  requiresVerification?: boolean;
 };
 
 const headers = {
@@ -88,44 +90,105 @@ export async function register(data: {
   password: string;
   name?: string;
 }): Promise<AuthResponse> {
-  return customFetch(`${API_URL}/auth/register`, {
+  const result = await customFetch(`${API_URL}/auth/register`, {
     method: 'POST',
     headers,
     body: JSON.stringify(data),
   });
+  return result?.data ?? result;
 }
 
 export async function googleLogin(idToken: string): Promise<AuthResponse> {
-  return customFetch(`${API_URL}/auth/google`, {
+  const result = await customFetch(`${API_URL}/auth/google`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ idToken }),
   });
+  return result?.data ?? result;
 }
 
 export async function googleUnifiedLogin(code: string, redirectUri?: string): Promise<AuthResponse> {
-  return customFetch(`${API_URL}/auth/google-unified`, {
+  const result = await customFetch(`${API_URL}/auth/google-unified`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ code, redirectUri }),
   });
+  return result?.data ?? result;
 }
 
 export async function login(data: {
   email: string;
   password: string;
 }): Promise<AuthResponse> {
-  return customFetch(`${API_URL}/auth/login`, {
+  const result = await customFetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers,
     body: JSON.stringify(data),
   });
+  return result?.data ?? result;
+}
+
+export async function verifyOtp(data: {
+  email: string;
+  otp: string;
+}): Promise<AuthResponse> {
+  const result = await customFetch(`${API_URL}/auth/verify-otp`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(data),
+  });
+  return result?.data ?? result;
+}
+
+export async function resendOtp(email: string): Promise<{ message: string }> {
+  const result = await customFetch(`${API_URL}/auth/resend-otp`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email }),
+  });
+  return result?.data ?? result;
+}
+
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  const result = await customFetch(`${API_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email }),
+  });
+  return result?.data ?? result;
+}
+
+export async function resetPassword(data: {
+  email: string;
+  otp: string;
+  newPassword: string;
+}): Promise<{ message: string }> {
+  const result = await customFetch(`${API_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(data),
+  });
+  return result?.data ?? result;
 }
 
 export async function fetchMe(appToken: string): Promise<AuthUser> {
-  return customFetch(`${API_URL}/auth/me`, {
+  const result = await customFetch(`${API_URL}/auth/me`, {
     headers: getAuthHeaders(appToken),
   });
+  return result?.data ?? result;
+}
+
+function extractArrayData<T = any>(result: any): T[] {
+  if (Array.isArray(result?.data?.data)) return result.data.data;
+  if (Array.isArray(result?.data)) return result.data;
+  if (Array.isArray(result)) return result;
+  if (Array.isArray(result?.data?.songs)) return result.data.songs;
+  if (Array.isArray(result?.data?.tracks)) return result.data.tracks;
+  if (Array.isArray(result?.data?.items)) return result.data.items;
+  if (Array.isArray(result?.songs)) return result.songs;
+  if (Array.isArray(result?.tracks)) return result.tracks;
+  if (Array.isArray(result?.items)) return result.items;
+  return [];
 }
 
 export async function fetchAlbums(appToken: string, options?: RequestInit) {
@@ -133,7 +196,7 @@ export async function fetchAlbums(appToken: string, options?: RequestInit) {
     ...options,
     headers: getAuthHeaders(appToken)
   });
-  return result?.data ?? result ?? [];
+  return extractArrayData(result);
 }
 
 export async function createAlbum(appToken: string, data: { title: string; artist?: string; coverUrl?: string }) {
@@ -152,7 +215,7 @@ export async function fetchTracks(appToken: string, albumId?: string) {
     cache: 'no-store',
     headers: getAuthHeaders(appToken)
   });
-  return result?.data ?? result ?? [];
+  return extractArrayData(result);
 }
 
 export async function fetchAlbum(appToken: string, id: string) {
@@ -241,7 +304,7 @@ export async function fetchGoogleDriveFiles(appToken: string) {
     cache: 'no-store',
     headers: getAuthHeaders(appToken)
   });
-  return result?.data ?? result ?? [];
+  return extractArrayData(result);
 }
 
 export async function importFromDrive(appToken: string, fileId: string, albumId?: string) {
@@ -262,23 +325,34 @@ export async function sendMessage(appToken: string, receiverId: string, content:
   return result?.data ?? result;
 }
 
-export async function fetchChatHistory(appToken: string, userId: string) {
-  const result = await customFetch(`${API_URL}/messages/${userId}`, {
+export async function fetchChatHistory(appToken: string, userId: string, before?: string, limit: number = 30) {
+  const params = new URLSearchParams({ limit: limit.toString() });
+  if (before) params.set('before', before);
+
+  const result = await customFetch(`${API_URL}/messages/${userId}?${params}`, {
     cache: 'no-store',
     headers: getAuthHeaders(appToken),
   });
-  return result?.data ?? result ?? [];
+  return extractArrayData(result);
 }
 
 export async function fetchUsers(appToken: string) {
   const result = await customFetch(`${API_URL}/auth/users`, {
     headers: getAuthHeaders(appToken),
   });
-  return result?.data ?? result ?? [];
+  return extractArrayData(result);
+}
+
+export async function fetchFriends(appToken: string) {
+  const result = await customFetch(`${API_URL}/messages/friends`, {
+    cache: 'no-store',
+    headers: getAuthHeaders(appToken),
+  });
+  return extractArrayData(result);
 }
 
 export async function createInvite(appToken: string, receiverId?: string) {
-  const result = await customFetch(`${API_URL}/friend-requests/invite`, {
+  const result = await customFetch(`${API_URL}/messages/invite`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
     body: JSON.stringify({ receiverId }),
@@ -287,14 +361,14 @@ export async function createInvite(appToken: string, receiverId?: string) {
 }
 
 export async function getInviteInfo(token: string) {
-  const result = await customFetch(`${API_URL}/friend-requests/info/${token}`, {
+  const result = await customFetch(`${API_URL}/messages/invite/info/${token}`, {
     cache: 'no-store',
   });
   return result?.data ?? result;
 }
 
 export async function acceptInvite(appToken: string, token: string) {
-  const result = await customFetch(`${API_URL}/friend-requests/accept/${token}`, {
+  const result = await customFetch(`${API_URL}/messages/invite/accept/${token}`, {
     method: 'POST',
     headers: getAuthHeaders(appToken),
   });

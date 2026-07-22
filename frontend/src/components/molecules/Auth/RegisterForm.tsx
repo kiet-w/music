@@ -12,6 +12,8 @@ interface RegisterFormProps {
   setEmail: (value: string) => void;
   password: string;
   setPassword: (value: string) => void;
+  confirmPassword?: string;
+  setConfirmPassword?: (value: string) => void;
   loading: boolean;
   error: string | null;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -25,6 +27,8 @@ export function RegisterForm({
   setEmail,
   password,
   setPassword,
+  confirmPassword = '',
+  setConfirmPassword,
   loading,
   error,
   onSubmit,
@@ -82,6 +86,26 @@ export function RegisterForm({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            minLength={8}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[11px] uppercase tracking-widest font-mono text-muted-foreground" htmlFor="register-confirm-password">
+          Xác nhận lại mật khẩu
+        </label>
+        <div className="relative">
+          <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/60" strokeWidth={1.5} />
+          <Input
+            id="register-confirm-password"
+            type="password"
+            placeholder="Nhập lại mật khẩu"
+            className="h-12 rounded-2xl bg-muted/30 border border-white/5 pl-12 text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-white/20 transition-all"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword && setConfirmPassword(e.target.value)}
+            required
+            minLength={8}
           />
         </div>
       </div>

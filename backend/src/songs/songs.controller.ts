@@ -23,10 +23,12 @@ import { CreateSongYoutubeDto } from './dto/create-song-youtube.dto';
 import { MoveSongDto } from './dto/move-song.dto';
 import { SongResponseDto } from './dto/song-response.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CurrentUser } from '../auth/current-user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
 import { ThrottlerGuard } from '@nestjs/throttler';
+
+import { ResponseMessage } from '../common/decorators/response-message.decorator';
 
 @ApiTags('songs')
 @ApiBearerAuth()
@@ -42,6 +44,8 @@ export class SongsController {
     description: 'Returns video title and artist',
   })
   @Get('youtube/info')
+  @HttpCode(200)
+  @ResponseMessage('Lấy thông tin YouTube thành công')
   async getYoutubeInfo(@Query('url') url: string) {
     return this.songsService.getYoutubeInfo(url);
   }
@@ -53,6 +57,8 @@ export class SongsController {
     type: SongResponseDto,
   })
   @Post('youtube')
+  @HttpCode(201)
+  @ResponseMessage('Tải nhạc từ YouTube thành công')
   @UseGuards(ThrottlerGuard)
   async createFromYoutube(
     @CurrentUser() user: AuthenticatedUser,
@@ -67,6 +73,8 @@ export class SongsController {
     description: 'Return all songs with pagination.',
   })
   @Get()
+  @HttpCode(200)
+  @ResponseMessage('Lấy danh sách bài hát thành công')
   async findAll(
     @CurrentUser() user: AuthenticatedUser,
     @Query() paginationDto: PaginationDto,
@@ -82,6 +90,8 @@ export class SongsController {
   })
   @ApiResponse({ status: 404, description: 'Song not found.' })
   @Get(':id')
+  @HttpCode(200)
+  @ResponseMessage('Lấy chi tiết bài hát thành công')
   async findOne(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -109,6 +119,8 @@ export class SongsController {
   })
   @ApiResponse({ status: 404, description: 'Song not found.' })
   @Patch(':id/move')
+  @HttpCode(200)
+  @ResponseMessage('Di chuyển bài hát thành công')
   async moveToAlbum(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,

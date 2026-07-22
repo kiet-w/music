@@ -14,9 +14,9 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { GoogleDriveService } from './google-drive.service';
 import { ImportDto } from './dto/import.dto';
 import { ExchangeCodeDto } from './dto/exchange-code.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { CurrentUser } from '../auth/current-user.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
 
 @ApiTags('google-drive')

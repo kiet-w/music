@@ -5,14 +5,16 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserRepository } from './repositories/user.repository';
 import { PrismaModule } from '../prisma/prisma.module';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { MailModule } from '../mail/mail.module';
 import { EncryptionService } from '../common/services/encryption.service';
 
 @Global()
 @Module({
   imports: [
     PrismaModule,
+    MailModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

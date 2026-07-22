@@ -153,10 +153,11 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
 
     fetchTracks(accessToken, albumId)
       .then((data: Track[]) => {
-        setTracks(data);
+        setTracks(Array.isArray(data) ? data : []);
       })
       .catch((err) => {
         console.error('Error fetching tracks:', err);
+        setTracks([]);
       })
       .finally(() => setLoading(false));
   }, [albumId, accessToken, isHydrated]);
@@ -174,19 +175,20 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
     }
 
     setTracks((prevTracks) => {
+      const currentTracks = Array.isArray(prevTracks) ? prevTracks : [];
       switch (eventType) {
         case 'INSERT': {
-          if (prevTracks.some(t => t.id === newRecord.id)) return prevTracks;
-          return [newRecord as Track, ...prevTracks];
+          if (currentTracks.some(t => t.id === newRecord.id)) return currentTracks;
+          return [newRecord as Track, ...currentTracks];
         }
         case 'UPDATE':
-          return prevTracks.map((track) =>
+          return currentTracks.map((track) =>
             track.id === newRecord.id ? { ...track, ...newRecord } : track
           );
         case 'DELETE':
-          return prevTracks.filter((track) => track.id !== oldRecord.id);
+          return currentTracks.filter((track) => track.id !== oldRecord.id);
         default:
-          return prevTracks;
+          return currentTracks;
       }
     });
   }, [albumId]);
@@ -222,22 +224,24 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }, []);
 
+  const safeTracks = React.useMemo(() => (Array.isArray(tracks) ? tracks : []), [tracks]);
+
   const { memoizedTracks, totalDuration } = React.useMemo(() => {
-    const validTracks = tracks.filter(t => t.url);
-    const duration = validTracks.reduce((acc, track) => acc + (track.duration || 0), 0);
+    const validTracks = safeTracks.filter(t => t?.url);
+    const duration = validTracks.reduce((acc, track) => acc + (track?.duration || 0), 0);
     return { memoizedTracks: validTracks, totalDuration: duration };
-  }, [tracks]);
+  }, [safeTracks]);
 
   const stats = React.useMemo(() => ({
-    count: tracks.length,
+    count: safeTracks.length,
     formattedTotal: formatDuration(totalDuration)
-  }), [tracks.length, totalDuration, formatDuration]);
+  }), [safeTracks.length, totalDuration, formatDuration]);
 
   if (loading) return <div className="p-8 text-center text-muted-foreground italic animate-pulse">Loading library...</div>;
 
   return (
     <div className="w-full">
-      {tracks.length > 0 && (
+      {safeTracks.length > 0 && (
         <div 
           className="flex items-center gap-2 mb-4 px-4 py-2 bg-secondary/5 rounded-lg border border-secondary/10"
         >
@@ -358,7 +362,7 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
             </div>
           );
         })}
-        {tracks.length === 0 && (
+        {safeTracks.length === 0 && (
           <div className="p-12 text-center text-muted-foreground">
             No tracks found in your library.
           </div>

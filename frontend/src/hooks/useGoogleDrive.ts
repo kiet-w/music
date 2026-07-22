@@ -193,16 +193,16 @@ export function useGoogleDrive() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchGoogleDriveFiles(appToken);
+      const data: any = await fetchGoogleDriveFiles(appToken);
       
       // If backend returns an error object (common in some API patterns)
-      if (data && (data.error || data.message === 'Google Drive not connected')) {
+      if (data && !Array.isArray(data) && (data.error || data.message === 'Google Drive not connected')) {
         setIsConnected(false);
         setFiles([]);
         return;
       }
 
-      setFiles(data);
+      setFiles(Array.isArray(data) ? data : []);
       setIsConnected(true);
     } catch (err: any) {
       console.error('Error listing files:', err);
