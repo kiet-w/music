@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
-import { fetchChatHistory, sendMessage as apiSendMessage } from '@/lib/api';
+import { fetchChatHistory, sendMessage as apiSendMessage, API_URL } from '@/lib/api';
 
 export type Message = {
   id: string;
@@ -31,7 +31,7 @@ type ChatState = {
   unsubscribeFromMessages: () => void;
 };
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || API_URL;
 
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],

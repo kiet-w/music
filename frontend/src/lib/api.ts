@@ -10,9 +10,10 @@ if (isProd) {
   }
 }
 
-const defaultApiUrl = isServer ? (process.env.BACKEND_INTERNAL_URL || 'http://localhost:4000') : '/api-proxy';
+const defaultApiUrl = isProd
+  ? 'https://music-backend-cb0i.onrender.com'
+  : (isServer ? (process.env.BACKEND_INTERNAL_URL || 'http://localhost:4000') : '/api-proxy');
 const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || defaultApiUrl;
-// Remove trailing slash if exists to prevent double slashes in paths
 export const API_URL = RAW_API_URL.replace(/\/$/, '');
 
 const RAW_PYTHON_API_URL = process.env.NEXT_PUBLIC_PYTHON_API_URL || 'http://localhost:8001';
