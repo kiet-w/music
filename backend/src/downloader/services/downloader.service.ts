@@ -142,6 +142,8 @@ export class DownloaderService implements IDownloaderProvider, OnModuleInit {
         '-f',
         'ba[ext=m4a]/ba[ext=webm]/bestaudio/best',
         '--no-playlist',
+        '--fixup',
+        'never',
         '--concurrent-fragments',
         '8',
         '--buffer-size',
@@ -166,7 +168,10 @@ export class DownloaderService implements IDownloaderProvider, OnModuleInit {
         args.push('--cookies', cookiesPath);
       }
 
-      args.push('-o', outputPath, url);
+      const outputTemplate = outputPath.endsWith('.mp3')
+        ? outputPath.replace(/\.mp3$/, '.%(ext)s')
+        : outputPath;
+      args.push('-o', outputTemplate, url);
       await execFileAsync(binaryPath, args);
 
       this.logger.info({ outputPath }, 'Download completed');
