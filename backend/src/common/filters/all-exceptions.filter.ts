@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import * as Sentry from '@sentry/node';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -82,6 +83,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // Logging strategy
     if (httpStatus >= 500) {
+      Sentry.captureException(exception);
       this.logger.error(
         {
           err: exception instanceof Error ? exception : undefined,

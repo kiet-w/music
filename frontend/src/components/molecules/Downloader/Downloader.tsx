@@ -1,18 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/ui/button';
 import { Input } from '@/components/atoms/ui/input';
 import { Download, Loader2, CheckCircle2 } from 'lucide-react';
-import { downloadFromYoutube, fetchTrack, fetchYoutubeInfo } from '@/lib/api';
-import { supabase, isConfigured } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuthStore } from '@/store/useAuthStore';
-import { useRouter } from 'next/navigation';
-
-import { useAlbumStore } from '@/store/useAlbumStore';
-import { useDownloadHistoryStore } from '@/store/useDownloadHistoryStore';
+import { useYoutubeDownloader } from '@/hooks/useYoutubeDownloader';
 
 interface DownloaderProps {
   onDownloadStarted?: (url: string) => void;
@@ -20,174 +14,22 @@ interface DownloaderProps {
 
 export default function Downloader({ onDownloadStarted }: DownloaderProps) {
   const t = useTranslations('Music');
-  const router = useRouter();
-  const locale = useLocale();
-  const { accessToken } = useAuthStore();
-  const [url, setUrl] = useState('');
-  const [title, setTitle] = useState('');
-  const [artist, setArtist] = useState('');
-  const { albums, loadAlbums: originalLoadAlbums } = useAlbumStore();
-  const { addHistory } = useDownloadHistoryStore();
-  const [selectedAlbumId, setSelectedAlbumId] = useState<string>('');
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [isFetchingInfo, setIsFetchingInfo] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
-
-  const loadAlbums = useCallback(() => {
-    if (accessToken) {
-      originalLoadAlbums(accessToken);
-    }
-  }, [accessToken, originalLoadAlbums]);
-
-  useEffect(() => {
-    loadAlbums();
-  }, [loadAlbums]);
-
-  useEffect(() => {
-    const fetchInfo = async () => {
-      if (!url || !accessToken || title) return; // don't override if title is already typed
-      
-      const isYoutubeUrl = /^(https?\:\/\/)?(www\.youtube\.com|youtu\.be)\/.+$/i.test(url);
-      if (!isYoutubeUrl) return;
-
-      setIsFetchingInfo(true);
-      try {
-        const info = await fetchYoutubeInfo(accessToken, url);
-        if (info.title && !title) setTitle(info.title);
-        if (info.artist && !artist) setArtist(info.artist);
-      } catch (error) {
-        console.error('Failed to fetch YouTube info:', error);
-      } finally {
-        setIsFetchingInfo(false);
-      }
-    };
-
-    const timer = setTimeout(fetchInfo, 500);
-    return () => clearTimeout(timer);
-  }, [url, accessToken]); // Intentionally omitting title and artist to avoid infinite loops, we only want to fetch when url changes
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!accessToken) {
-      router.push(`/${locale}/login`);
-      return;
-    }
-    if (!url || !title) return;
-
-    setIsDownloading(true);
-    setStatus(t('preparing'));
-
-    try {
-      const song = await downloadFromYoutube(accessToken, url, title, artist, selectedAlbumId || undefined);
-      const songId = song.id;
-      
-      let isCompleted = false;
-
-      const handleSuccess = (updatedTrack?: any) => {
-        if (isCompleted) return;
-        isCompleted = true;
-        setStatus(t('import_success'));
-        setIsDownloading(false);
-        
-        // Add to history
-        const album = (Array.isArray(albums) ? albums : []).find(a => a.id === selectedAlbumId);
-        const { user } = useAuthStore.getState();
-        if (user) {
-          addHistory(user.id, updatedTrack || song, album?.title || 'Single');
-        }
-
-        setUrl('');
-        setTitle('');
-        setArtist('');
-        setSelectedAlbumId('');
-        if (onDownloadStarted) onDownloadStarted(url);
-        setTimeout(() => setStatus(null), 5000);
-      };
-
-      // Handle immediate cache hit (no need to subscribe to updates if URL exists)
-      if (song.url) {
-        handleSuccess(song);
-        return;
-      }
-
-      // 1. Supabase Realtime Subscription (if configured)
-      let channel: any = null;
-      let isSubscribed = false;
-      if (isConfigured && supabase) {
-        try {
-          channel = supabase
-            .channel(`download-${songId}`)
-            .on(
-              'postgres_changes',
-              {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'Track',
-                filter: `id=eq.${songId}`,
-              },
-              (payload) => {
-                const updatedSong = payload.new as any;
-                if (updatedSong.url && !isCompleted) {
-                   handleSuccess(updatedSong);
-                   if (channel) supabase.removeChannel(channel);
-                }
-              }
-            )
-            .subscribe((status) => {
-              if (status === 'SUBSCRIBED') {
-                isSubscribed = true;
-                setStatus(t('converting'));
-              }
-            });
-        } catch (err) {
-          console.error('Supabase subscription error:', err);
-          setStatus(t('converting'));
-        }
-      } else {
-        setStatus(t('converting'));
-      }
-
-      // 2. Polling Fallback
-      const poll = async () => {
-        if (isCompleted) return;
-
-        try {
-          const updatedSong = await fetchTrack(accessToken, songId);
-          if (updatedSong.url && !isCompleted) {
-            handleSuccess(updatedSong);
-            if (channel) supabase.removeChannel(channel);
-          } else if (!isCompleted) {
-            setTimeout(poll, 3000);
-          }
-        } catch (err: any) {
-          console.error('Polling error:', err);
-          if (!isCompleted) setTimeout(poll, 5000);
-        }
-      };
-
-      setTimeout(() => {
-        if (!isCompleted) {
-          console.log('Starting HTTP polling fallback...');
-          poll();
-        }
-      }, 4000);
-
-      // 3. Fallback timeout to cleanup
-      setTimeout(() => {
-        if (!isCompleted) {
-          isCompleted = true;
-          if (channel) supabase.removeChannel(channel);
-          setIsDownloading(false);
-          setStatus('Download timed out');
-        }
-      }, 180000); // 3 minutes
-
-    } catch (error: any) {
-      console.error('Error starting download:', error);
-      setStatus('Error starting download');
-      setIsDownloading(false);
-    }
-  }, [url, title, artist, selectedAlbumId, t, onDownloadStarted, accessToken, router, locale]);
+  const {
+    url,
+    setUrl,
+    title,
+    setTitle,
+    artist,
+    setArtist,
+    albums,
+    selectedAlbumId,
+    setSelectedAlbumId,
+    isDownloading,
+    isFetchingInfo,
+    loadAlbums,
+    status,
+    handleSubmit,
+  } = useYoutubeDownloader(onDownloadStarted);
 
   return (
     <div className="w-full space-y-4 p-5 rounded-2xl bg-secondary/5 border-none shadow-inner">

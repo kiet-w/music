@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { GoogleLoginButton } from '@/components/molecules/Auth/GoogleLoginButton';
 import { login } from '@/lib/api';
@@ -11,6 +11,8 @@ import { AuthTemplate } from '@/components/templates/Auth/AuthTemplate';
 import { LoginForm } from '@/components/molecules/Auth/LoginForm';
 import { OtpForm } from '@/components/molecules/Auth/OtpForm';
 
+import { getInviteCookie } from '@/lib/inviteCookie';
+
 interface LoginPageProps {
   locale: string;
 }
@@ -18,6 +20,12 @@ interface LoginPageProps {
 export function LoginPage({ locale }: LoginPageProps) {
   const t = useTranslations('Auth');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const pendingCookie = getInviteCookie();
+  const defaultRedirect = pendingCookie ? `/${locale}/invite/${pendingCookie}` : `/${locale}`;
+  const redirectTarget = searchParams.get('redirect') || defaultRedirect;
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,9 +36,9 @@ export function LoginPage({ locale }: LoginPageProps) {
 
   useEffect(() => {
     if (user) {
-      router.push(`/${locale}`);
+      router.push(redirectTarget);
     }
-  }, [locale, router, user]);
+  }, [locale, redirectTarget, router, user]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,7 +49,7 @@ export function LoginPage({ locale }: LoginPageProps) {
       const response = await login({ email, password });
       if (response.accessToken && response.user) {
         setSession(response.accessToken, response.user);
-        router.push(`/${locale}`);
+        router.push(redirectTarget);
       }
     } catch (err: any) {
       if (err.message && err.message.includes('xác thực email')) {

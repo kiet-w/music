@@ -97,9 +97,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       const user = await fetchMe(accessToken);
       set({ accessToken, user, isHydrated: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to hydrate auth session:', error);
-      await get().clearSession();
+      if (error?.status === 401) {
+        await get().clearSession();
+      }
       set({ isHydrated: true });
     }
   },

@@ -3,15 +3,21 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/ui/button';
-import { User, Check, X } from 'lucide-react';
+import { User, Check, X, Loader2 } from 'lucide-react';
 
 interface InvitePopupProps {
   senderName: string;
   onAccept: () => void;
   onDecline: () => void;
+  isLoading?: boolean;
 }
 
-export const InvitePopup: React.FC<InvitePopupProps> = ({ senderName, onAccept, onDecline }) => {
+export const InvitePopup: React.FC<InvitePopupProps> = ({
+  senderName,
+  onAccept,
+  onDecline,
+  isLoading = false,
+}) => {
   const t = useTranslations('Chat');
 
   return (
@@ -33,15 +39,21 @@ export const InvitePopup: React.FC<InvitePopupProps> = ({ senderName, onAccept, 
           <div className="w-full flex flex-col gap-3">
             <Button 
               onClick={onAccept}
-              className="w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all"
+              disabled={isLoading}
+              className="w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all disabled:opacity-50"
             >
-              <Check className="w-5 h-5 mr-2" />
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+              ) : (
+                <Check className="w-5 h-5 mr-2" />
+              )}
               {t('accept')}
             </Button>
             
             <Button 
               variant="ghost"
               onClick={onDecline}
+              disabled={isLoading}
               className="w-full h-12 text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all text-xs"
             >
               <X className="w-4 h-4 mr-2" />

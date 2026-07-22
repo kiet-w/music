@@ -14,6 +14,21 @@ const nextConfig = {
 
   images: {
     unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
+  },
+
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      '@base-ui/react',
+      'sonner',
+      'howler',
+    ],
+  },
+
+  compiler: {
+    removeConsole: isDev ? false : { exclude: ['error', 'warn'] },
   },
 
   // Tắt type-check và lint khi dev để compile nhanh hơn (IDE đã check rồi)
@@ -24,10 +39,11 @@ const nextConfig = {
     ignoreDuringBuilds: isDev,
   },
   async rewrites() {
+    const backendUrl = (process.env.BACKEND_INTERNAL_URL || 'http://localhost:4000').replace(/\/$/, '');
     return [
       {
         source: '/api-proxy/:path*',
-        destination: 'http://localhost:4000/:path*',
+        destination: `${backendUrl}/:path*`,
       },
     ];
   },

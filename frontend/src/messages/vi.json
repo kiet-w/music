@@ -49,7 +49,12 @@
     "move_to_album": "Di chuyển đến Album",
     "select_album": "Chọn album đích",
     "cancel": "Hủy",
-    "confirm": "Xác nhận"
+    "confirm": "Xác nhận",
+    "youtube_upgrade_title": "Hệ thống tải nhạc đã nâng cấp!",
+    "youtube_upgrade_desc1": "Trang chuyển đổi YouTube cũ sử dụng API dịch vụ Python (cổng 8001) đã được thay thế hoàn toàn bằng trình tải nhạc hợp nhất sử dụng NestJS backend kết hợp hàng đợi BullMQ hiệu năng cao.",
+    "youtube_upgrade_desc2": "Giờ đây, bạn có thể tải nhạc YouTube trực tiếp ngay trong giao diện trang Music của bạn với độ ổn định vượt trội và tốc độ tải aria2c cực nhanh.",
+    "go_to_music": "Đi tới trang Music",
+    "pipeline_enabled": "Unified NestJS Downloader Pipeline Enabled"
   },
   "Auth": {
     "login": "Đăng nhập",
@@ -66,7 +71,23 @@
     "invalid_credentials": "Email hoặc mật khẩu không đúng",
     "email_exists": "Email đã tồn tại",
     "error_generic": "Có lỗi xảy ra. Vui lòng thử lại.",
-    "loading": "Đang xử lý..."
+    "loading": "Đang xử lý...",
+    "forgot_password": "Quên mật khẩu",
+    "reset_password": "Đặt lại mật khẩu",
+    "forgot_password_sub": "Nhập địa chỉ email để nhận mã OTP đặt lại mật khẩu",
+    "reset_password_sub": "Nhập mã OTP 6 chữ số gửi tới {email} và mật khẩu mới",
+    "back_to_login": "Đã nhớ mật khẩu?",
+    "send_otp": "Gửi mã OTP",
+    "confirm_reset": "Xác nhận đặt lại",
+    "otp_placeholder": "Mã OTP 6 chữ số",
+    "new_password_placeholder": "Mật khẩu mới (tối thiểu 8 ký tự)",
+    "confirm_password_placeholder": "Xác nhận mật khẩu mới",
+    "google_connect_title": "Kết nối Google Drive",
+    "google_connect_loading": "Vui lòng đợi trong giây lát...",
+    "google_connect_success_title": "Thành công!",
+    "google_connect_success_desc": "Đã kết nối Drive. Đang quay lại thư viện...",
+    "google_connect_error_title": "Lỗi kết nối",
+    "back_to_music": "Quay lại trang Nhạc"
   },
   "Navbar": {
     "home": "Trang chủ",
@@ -83,12 +104,38 @@
     "send": "Gửi",
     "invite": "Mời",
     "accept": "Chấp nhận",
+    "decline": "Từ chối",
     "invite_popup_title": "Lời mời kết bạn",
     "invite_popup_description": "{name} muốn kết nối với bạn. Chấp nhận để bắt đầu trò chuyện!",
     "link_expired": "Liên kết mời đã hết hạn hoặc không hợp lệ.",
     "invite_success": "Bạn và {name} đã trở thành bạn bè!",
     "invite_loading": "Đang kiểm tra lời mời...",
     "invite_button": "Mời bạn bè",
-    "invite_success_copied": "Đã sao chép liên kết mời vào bộ nhớ tạm!"
+    "invite_success_copied": "Đã sao chép liên kết mời vào bộ nhớ tạm!",
+    "friend_code": "Mã kết bạn",
+    "friend_code_token": "Mã kết bạn (Token)",
+    "no_conversations_title": "Chưa có cuộc trò chuyện nào",
+    "no_conversations_desc": "Nhận lời mời kết bạn hoặc sao chép liên kết mời để kết nối và bắt đầu nhắn tin ngay!",
+    "no_chat_selected": "Chưa chọn cuộc trò chuyện",
+    "no_chat_selected_desc": "Chọn một người bạn từ danh sách ở bên trái để bắt đầu nhắn tin!",
+    "friend_accepted_toast": "🎉 Bạn vừa kết bạn mới thành công!",
+    "prompt_enter_token": "Nhập link lời mời hoặc Token kết bạn:",
+    "accept_invite_success": "Đã chấp nhận lời mời kết bạn thành công!",
+    "error_accept_invite": "Không thể chấp nhận lời mời kết bạn",
+    "conversation": "Cuộc trò chuyện",
+    "top_of_chat": "Đầu cuộc trò chuyện",
+    "no_messages_title": "Chưa có tin nhắn nào",
+    "no_messages_desc": "Hãy gửi tin nhắn đầu tiên để bắt đầu cuộc trò chuyện hoặc chia sẻ lời mời bạn bè!",
+    "accept_invite_btn": "Nhận lời mời"
+  },
+  "Error": {
+    "not_found_title": "Trang không tồn tại",
+    "not_found_desc": "Trang bạn đang tìm kiếm không tồn tại, đã bị xóa hoặc đường dẫn bị hỏng.",
+    "error_title": "Đã có lỗi xảy ra",
+    "error_subtitle": "Không thể tải trang này",
+    "error_desc_default": "Hệ thống gặp sự cố ngoài ý muốn. Vui lòng thử lại hoặc quay về trang chủ.",
+    "go_back": "Quay lại",
+    "go_home": "Trang chủ",
+    "try_again": "Thử lại"
   }
 }

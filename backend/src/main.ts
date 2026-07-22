@@ -1,7 +1,4 @@
-import { config } from 'dotenv';
 import * as cookieParser from 'cookie-parser';
-
-config({ override: true });
 
 // ── Sentry: must be initialized before anything else ──────────────────────
 import * as Sentry from '@sentry/node';
@@ -114,7 +111,7 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
   logger.log(
-    `🚀 Backend Music App started on http://localhost:${port}`,
+    `🚀 Backend Music App started on port ${port}`,
     'Bootstrap',
   );
 }

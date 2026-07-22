@@ -43,6 +43,7 @@ export default function BottomTabBar() {
             <Link 
               key={tab.name}
               href={`/${locale}${tab.path === '/' ? '' : tab.path}`}
+              prefetch={true}
               className={cn(
                 "relative flex flex-col items-center justify-center w-16 h-full transition-all duration-200 active:scale-[0.98]",
                 active ? "text-foreground" : "text-muted-foreground hover:text-foreground/80"

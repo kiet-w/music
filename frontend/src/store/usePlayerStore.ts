@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { Howl } from 'howler';
+import { toast } from 'sonner';
 
 export interface Track {
   id: string;
@@ -88,6 +89,18 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
         onend: () => {
           set({ isPlaying: false, currentTime: 0 });
           stopTimer();
+        },
+        onloaderror: (_id, error) => {
+          console.error('Audio load error:', error);
+          set({ isPlaying: false, currentTime: 0 });
+          stopTimer();
+          toast.error('Không thể tải file âm thanh này');
+        },
+        onplayerror: (_id, error) => {
+          console.error('Audio play error:', error);
+          set({ isPlaying: false });
+          stopTimer();
+          toast.error('Lỗi khi phát bài hát');
         },
       });
 

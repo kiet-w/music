@@ -1,40 +1,14 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
-import { useParams, usePathname, useRouter } from 'next/navigation';
-
-import { useAuthStore } from '@/store/useAuthStore';
+import { type ReactNode } from 'react';
+import { useAuthGate } from '@/hooks/useAuthGate';
 
 type AuthGateProps = {
   children: ReactNode;
 };
 
 export function AuthGate({ children }: AuthGateProps) {
-  const { isHydrated, accessToken, hydrate } = useAuthStore();
-  const pathname = usePathname();
-  const router = useRouter();
-  const params = useParams();
-  const locale = typeof params?.locale === 'string' ? params.locale : 'en';
-
-  useEffect(() => {
-    void hydrate();
-  }, [hydrate]);
-
-  const isPublicRoute =
-    pathname === `/${locale}/login` || pathname === `/${locale}/register`;
-
-  useEffect(() => {
-    if (!isHydrated) return;
-
-    if (!accessToken && !isPublicRoute) {
-      router.push(`/${locale}/login`);
-      return;
-    }
-
-    if (accessToken && isPublicRoute) {
-      router.push(`/${locale}`);
-    }
-  }, [accessToken, isHydrated, isPublicRoute, locale, router]);
+  const { isHydrated, isPublicRoute } = useAuthGate();
 
   if (!isHydrated) {
     return (
@@ -50,3 +24,4 @@ export function AuthGate({ children }: AuthGateProps) {
 
   return <div className="relative min-h-[100dvh] bg-background">{children}</div>;
 }
+

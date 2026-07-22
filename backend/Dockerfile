@@ -80,4 +80,4 @@ ENV PORT=3000
 ENTRYPOINT ["tini", "--"]
 
 # Run Prisma migrations then start
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+CMD ["node", "dist/main.js"]

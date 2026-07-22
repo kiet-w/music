@@ -6,9 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { forgotPassword, resetPassword } from '@/lib/api';
 import { AuthTemplate } from '@/components/templates/Auth/AuthTemplate';
-import { Button } from '@/components/atoms/ui/button';
-import { Input } from '@/components/atoms/ui/input';
-import { Mail, Lock, KeyRound, Loader2 } from 'lucide-react';
+import { ForgotPasswordForm } from '@/components/molecules/Auth/ForgotPasswordForm';
+import { ResetPasswordForm } from '@/components/molecules/Auth/ResetPasswordForm';
 import { toast } from 'sonner';
 
 interface ForgotPasswordPageProps {
@@ -106,112 +105,24 @@ export function ForgotPasswordPage({ locale }: ForgotPasswordPageProps) {
       )}
 
       {step === 'request' ? (
-        <form onSubmit={handleRequestOtp} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-[11px] uppercase tracking-widest font-mono text-muted-foreground" htmlFor="reset-email">
-              Địa chỉ Email
-            </label>
-            <div className="relative">
-              <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/60" strokeWidth={1.5} />
-              <Input
-                id="reset-email"
-                type="email"
-                placeholder="email@example.com"
-                className="h-12 rounded-2xl bg-muted/30 border border-white/5 pl-12 text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-white/20 transition-all"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <Button
-            type="submit"
-            className="h-12 w-full rounded-full bg-foreground text-background hover:bg-white/90 active:scale-[0.98] font-medium transition-all text-sm"
-            disabled={loading}
-          >
-            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-            Gửi mã OTP đặt lại mật khẩu
-          </Button>
-        </form>
+        <ForgotPasswordForm
+          email={email}
+          setEmail={setEmail}
+          loading={loading}
+          onSubmit={handleRequestOtp}
+        />
       ) : (
-        <form onSubmit={handleResetPassword} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-[11px] uppercase tracking-widest font-mono text-muted-foreground" htmlFor="reset-otp">
-              Mã OTP (6 chữ số)
-            </label>
-            <div className="relative">
-              <KeyRound className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/60" strokeWidth={1.5} />
-              <Input
-                id="reset-otp"
-                type="text"
-                maxLength={6}
-                placeholder="123456"
-                className="h-12 rounded-2xl bg-muted/30 border border-white/5 pl-12 text-sm text-foreground placeholder:text-muted-foreground/40 font-mono tracking-widest"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[11px] uppercase tracking-widest font-mono text-muted-foreground" htmlFor="reset-new-password">
-              Mật khẩu mới (tối thiểu 8 ký tự)
-            </label>
-            <div className="relative">
-              <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/60" strokeWidth={1.5} />
-              <Input
-                id="reset-new-password"
-                type="password"
-                placeholder="••••••••"
-                className="h-12 rounded-2xl bg-muted/30 border border-white/5 pl-12 text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-white/20 transition-all"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-                minLength={8}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[11px] uppercase tracking-widest font-mono text-muted-foreground" htmlFor="reset-confirm-password">
-              Xác nhận lại mật khẩu mới
-            </label>
-            <div className="relative">
-              <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/60" strokeWidth={1.5} />
-              <Input
-                id="reset-confirm-password"
-                type="password"
-                placeholder="••••••••"
-                className="h-12 rounded-2xl bg-muted/30 border border-white/5 pl-12 text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-white/20 transition-all"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={8}
-              />
-            </div>
-          </div>
-
-          <Button
-            type="submit"
-            className="h-12 w-full rounded-full bg-foreground text-background hover:bg-white/90 active:scale-[0.98] font-medium transition-all text-sm"
-            disabled={loading}
-          >
-            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-            Xác nhận đổi mật khẩu
-          </Button>
-
-          <div className="text-center pt-2">
-            <button
-              type="button"
-              onClick={() => setStep('request')}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
-            >
-              Gửi lại yêu cầu OTP
-            </button>
-          </div>
-        </form>
+        <ResetPasswordForm
+          otp={otp}
+          setOtp={setOtp}
+          newPassword={newPassword}
+          setNewPassword={setNewPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          loading={loading}
+          onSubmit={handleResetPassword}
+          onBackToRequest={() => setStep('request')}
+        />
       )}
     </AuthTemplate>
   );

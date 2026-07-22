@@ -50,7 +50,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     if (exists) return;
 
     set((state) => {
-      const isFromActiveChat = state.activeReceiverId === message.senderId;
+      const isFromActiveChat =
+        state.activeReceiverId === message.senderId ||
+        state.activeReceiverId === message.receiverId;
       const newState: Partial<ChatState> = {
         messages: [...state.messages, message],
       };
@@ -75,7 +77,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         set({ messages: history, hasMoreMessages: history.length >= 30 });
       } catch (error) {
         console.error('Failed to fetch chat history:', error);
-        throw error;
+        set({ messages: [] });
       } finally {
         set({ isLoading: false });
       }

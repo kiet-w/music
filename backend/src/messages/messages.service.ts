@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { MessageRepository } from './repositories/message.repository';
 import { MessagesGateway } from './messages.gateway';
@@ -87,10 +88,6 @@ export class MessagesService {
     }
 
     if (new Date() > invite.expiresAt) {
-      await this.messageRepository.updateFriendRequest(
-        { id: invite.id },
-        { status: RequestStatus.EXPIRED },
-      );
       throw new BadRequestException('Invite link has expired');
     }
 
@@ -107,13 +104,37 @@ export class MessagesService {
       throw new BadRequestException('You cannot accept your own invite');
     }
 
-    return this.messageRepository.updateFriendRequest(
-      { id: invite.id },
-      {
-        status: RequestStatus.ACCEPTED,
-        receiver: { connect: { id: receiverId } },
-      },
+    if (invite.receiverId && invite.receiverId !== receiverId) {
+      throw new BadRequestException('This invite is intended for another user');
+    }
+
+    const isAlreadyConnected = await this.messageRepository.checkConnection(
+      invite.senderId,
+      receiverId,
     );
+    if (isAlreadyConnected) {
+      throw new BadRequestException('You are already connected with this user');
+    }
+
+    const result = await this.messageRepository.acceptFriendRequestAtomically(
+      invite.id,
+      receiverId,
+    );
+
+    if (!result) {
+      throw new ConflictException(
+        'Invite link was already accepted or has expired',
+      );
+    }
+
+    // Emit real-time WebSocket event to both Sender & Receiver to update friend list instantly
+    this.messagesGateway.emitFriendRequestAccepted(
+      invite.senderId,
+      receiverId,
+      result,
+    );
+
+    return result;
   }
 
   async getFriends(userId: string): Promise<any[]> {

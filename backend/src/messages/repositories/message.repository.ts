@@ -106,4 +106,29 @@ export class MessageRepository extends BaseRepository<
   ): Promise<FriendRequest> {
     return this.prisma.friendRequest.update({ where, data });
   }
+
+  async acceptFriendRequestAtomically(
+    inviteId: string,
+    receiverId: string,
+  ): Promise<FriendRequest | null> {
+    const updated = await this.prisma.friendRequest.updateMany({
+      where: {
+        id: inviteId,
+        status: RequestStatus.PENDING,
+        expiresAt: { gt: new Date() },
+      },
+      data: {
+        status: RequestStatus.ACCEPTED,
+        receiverId: receiverId,
+      },
+    });
+
+    if (updated.count === 0) {
+      return null;
+    }
+
+    return this.prisma.friendRequest.findUnique({
+      where: { id: inviteId },
+    });
+  }
 }

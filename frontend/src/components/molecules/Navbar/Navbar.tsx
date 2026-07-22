@@ -47,6 +47,7 @@ export function Navbar() {
           <Link 
             key={item.href} 
             href={`/${locale}${item.href === '/' ? '' : item.href}`}
+            prefetch={true}
             className={cn(
               "relative flex flex-col items-center gap-1 transition-all duration-300",
               active ? "text-white scale-110" : "text-white/40 hover:text-white/70"

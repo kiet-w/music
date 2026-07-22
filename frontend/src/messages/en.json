@@ -49,7 +49,12 @@
     "move_to_album": "Move to Album",
     "select_album": "Select target album",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "youtube_upgrade_title": "Music downloader system upgraded!",
+    "youtube_upgrade_desc1": "The legacy YouTube converter page using Python API has been completely replaced with a unified NestJS backend downloader powered by high-performance BullMQ queues.",
+    "youtube_upgrade_desc2": "You can now download YouTube music directly inside your Music library page with superior stability and lightning-fast aria2c speeds.",
+    "go_to_music": "Go to Music Page",
+    "pipeline_enabled": "Unified NestJS Downloader Pipeline Enabled"
   },
   "Auth": {
     "login": "Login",
@@ -66,7 +71,23 @@
     "invalid_credentials": "Invalid email or password",
     "email_exists": "Email already exists",
     "error_generic": "Something went wrong. Please try again.",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "forgot_password": "Forgot Password",
+    "reset_password": "Reset Password",
+    "forgot_password_sub": "Enter your email address to receive a password reset OTP",
+    "reset_password_sub": "Enter the 6-digit OTP sent to {email} and your new password",
+    "back_to_login": "Remembered password?",
+    "send_otp": "Send OTP",
+    "confirm_reset": "Confirm Reset",
+    "otp_placeholder": "6-digit OTP code",
+    "new_password_placeholder": "New password (min 8 characters)",
+    "confirm_password_placeholder": "Confirm new password",
+    "google_connect_title": "Connecting Google Drive",
+    "google_connect_loading": "Please wait a moment...",
+    "google_connect_success_title": "Success!",
+    "google_connect_success_desc": "Drive connected. Returning to library...",
+    "google_connect_error_title": "Connection Error",
+    "back_to_music": "Back to Music Page"
   },
   "Navbar": {
     "home": "Home",
@@ -83,12 +104,38 @@
     "send": "Send",
     "invite": "Invite",
     "accept": "Accept",
+    "decline": "Decline",
     "invite_popup_title": "Friend Invitation",
     "invite_popup_description": "{name} wants to connect with you. Accept to start chatting!",
     "link_expired": "Invitation link is expired or invalid.",
     "invite_success": "You are now friends with {name}!",
     "invite_loading": "Checking invitation...",
     "invite_button": "Invite Friend",
-    "invite_success_copied": "Invitation link copied to clipboard!"
+    "invite_success_copied": "Invitation link copied to clipboard!",
+    "friend_code": "Friend Code",
+    "friend_code_token": "Friend Code (Token)",
+    "no_conversations_title": "No conversations yet",
+    "no_conversations_desc": "Accept a friend invite or copy your invite link to connect and start chatting!",
+    "no_chat_selected": "No conversation selected",
+    "no_chat_selected_desc": "Select a friend from the list on the left to start messaging!",
+    "friend_accepted_toast": "🎉 You successfully connected with a new friend!",
+    "prompt_enter_token": "Enter invite link or friend Token:",
+    "accept_invite_success": "Successfully accepted friend invite!",
+    "error_accept_invite": "Failed to accept friend invite",
+    "conversation": "Conversation",
+    "top_of_chat": "Beginning of conversation",
+    "no_messages_title": "No messages yet",
+    "no_messages_desc": "Send your first message to start chatting or share a friend invite!",
+    "accept_invite_btn": "Accept Invite"
+  },
+  "Error": {
+    "not_found_title": "Page not found",
+    "not_found_desc": "The page you are looking for does not exist, was removed, or the link is broken.",
+    "error_title": "An error occurred",
+    "error_subtitle": "Unable to load this page",
+    "error_desc_default": "An unexpected error occurred. Please try again or return to the home page.",
+    "go_back": "Go Back",
+    "go_home": "Home Page",
+    "try_again": "Try Again"
   }
 }

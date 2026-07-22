@@ -1,10 +1,21 @@
 const isServer = typeof window === 'undefined';
-const defaultApiUrl = isServer ? 'http://localhost:4000' : '/api-proxy';
-const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL ?? defaultApiUrl;
-// Remove trailing slash if exists to prevent double slashes in paths
-const API_URL = RAW_API_URL.replace(/\/$/, '');
+const isProd = process.env.NODE_ENV === 'production';
 
-const RAW_PYTHON_API_URL = process.env.NEXT_PUBLIC_PYTHON_API_URL ?? 'http://localhost:8001';
+if (isProd) {
+  if (!process.env.NEXT_PUBLIC_API_URL) {
+    console.warn('[API Warning] NEXT_PUBLIC_API_URL is missing in production environment. Using default fallback.');
+  }
+  if (!process.env.NEXT_PUBLIC_PYTHON_API_URL) {
+    console.warn('[API Warning] NEXT_PUBLIC_PYTHON_API_URL is missing in production environment. Using default fallback.');
+  }
+}
+
+const defaultApiUrl = isServer ? (process.env.BACKEND_INTERNAL_URL || 'http://localhost:4000') : '/api-proxy';
+const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || defaultApiUrl;
+// Remove trailing slash if exists to prevent double slashes in paths
+export const API_URL = RAW_API_URL.replace(/\/$/, '');
+
+const RAW_PYTHON_API_URL = process.env.NEXT_PUBLIC_PYTHON_API_URL || 'http://localhost:8001';
 export const PYTHON_API_URL = RAW_PYTHON_API_URL.replace(/\/$/, '');
 
 export type AuthUser = {
@@ -179,15 +190,10 @@ export async function fetchMe(appToken: string): Promise<AuthUser> {
 }
 
 function extractArrayData<T = any>(result: any): T[] {
-  if (Array.isArray(result?.data?.data)) return result.data.data;
-  if (Array.isArray(result?.data)) return result.data;
-  if (Array.isArray(result)) return result;
-  if (Array.isArray(result?.data?.songs)) return result.data.songs;
-  if (Array.isArray(result?.data?.tracks)) return result.data.tracks;
-  if (Array.isArray(result?.data?.items)) return result.data.items;
-  if (Array.isArray(result?.songs)) return result.songs;
-  if (Array.isArray(result?.tracks)) return result.tracks;
-  if (Array.isArray(result?.items)) return result.items;
+  const data = result?.data ?? result;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.items)) return data.items;
   return [];
 }
 

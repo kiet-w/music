@@ -19,7 +19,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { MailService } from '../mail/mail.service';
 import { EncryptionService } from '../common/services/encryption.service';
-import { randomBytes, randomUUID, createHash } from 'crypto';
+import { randomBytes, randomUUID, createHash, randomInt } from 'crypto';
 import * as argon2 from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RefreshToken } from '@prisma/client';
@@ -46,7 +46,7 @@ export class AuthService {
   }
 
   private generateOtp(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    return randomInt(100000, 1000000).toString();
   }
 
   // ─── Public Methods ───────────────────────────────────────────
@@ -425,9 +425,10 @@ export class AuthService {
     userAgent: string,
     family: string,
   ): Promise<AuthResponseDto> {
+    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '15m';
     const accessToken = await this.jwtService.signAsync(
       { sub: user.id, email: user.email, role: user.role },
-      { expiresIn: '15m' },
+      { expiresIn: expiresIn as any },
     );
     const refreshToken = randomBytes(64).toString('hex');
     const tokenHash = createHash('sha256').update(refreshToken).digest('hex');

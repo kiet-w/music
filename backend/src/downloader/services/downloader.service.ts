@@ -11,6 +11,8 @@ import { IDownloaderProvider } from '../../common/interfaces/downloader-provider
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
+import { ConfigService } from '@nestjs/config';
+
 const ffmpegStatic = require('ffmpeg-static');
 const execFileAsync = promisify(execFile);
 
@@ -21,7 +23,22 @@ export class DownloaderService implements IDownloaderProvider {
   constructor(
     @InjectPinoLogger(DownloaderService.name)
     private readonly logger: PinoLogger,
+    private readonly configService: ConfigService,
   ) {}
+
+  private getYtDlpBinaryPath(): string {
+    const customPath =
+      this.configService.get<string>('YTDLP_BINARY_PATH') ||
+      process.env.YTDLP_BINARY_PATH;
+    return customPath ? path.resolve(customPath) : path.resolve('./yt-dlp');
+  }
+
+  private getCookiesPath(): string {
+    const customPath =
+      this.configService.get<string>('YTDLP_COOKIES_PATH') ||
+      process.env.YTDLP_COOKIES_PATH;
+    return customPath ? path.resolve(customPath) : path.resolve('./cookies.txt');
+  }
 
   async download(url: string, outputPath: string): Promise<void> {
     // Defense-in-depth: block SSRF even if DTO validation is bypassed
@@ -64,12 +81,13 @@ export class DownloaderService implements IDownloaderProvider {
         ffmpegStatic as unknown as string,
       ];
 
-      if (fs.existsSync(path.resolve('./cookies.txt'))) {
-        args.push('--cookies', path.resolve('./cookies.txt'));
+      const cookiesPath = this.getCookiesPath();
+      if (fs.existsSync(cookiesPath)) {
+        args.push('--cookies', cookiesPath);
       }
 
       args.push('-o', outputPath, url);
-      await execFileAsync(path.resolve('./yt-dlp'), args);
+      await execFileAsync(this.getYtDlpBinaryPath(), args);
 
       this.logger.info({ outputPath }, 'Download completed');
     } catch (error: any) {
@@ -141,13 +159,14 @@ export class DownloaderService implements IDownloaderProvider {
         '--no-playlist',
       ];
 
-      if (fs.existsSync(path.resolve('./cookies.txt'))) {
-        args.push('--cookies', path.resolve('./cookies.txt'));
+      const cookiesPath = this.getCookiesPath();
+      if (fs.existsSync(cookiesPath)) {
+        args.push('--cookies', cookiesPath);
       }
 
       args.push(url);
 
-      const { stdout } = await execFileAsync(path.resolve('./yt-dlp'), args);
+      const { stdout } = await execFileAsync(this.getYtDlpBinaryPath(), args);
       const info = JSON.parse(stdout);
       
       return {

@@ -1,19 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useAuthStore } from '@/store/useAuthStore';
-import { useChatStore } from '@/store/useChatStore';
+import React from 'react';
+import { useChatSubscription } from '@/hooks/useChatSubscription';
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuthStore();
-  const { subscribeToMessages, unsubscribeFromMessages } = useChatStore();
-
-  useEffect(() => {
-    if (user?.id) {
-      subscribeToMessages(user.id);
-    }
-    return () => unsubscribeFromMessages();
-  }, [user?.id, subscribeToMessages, unsubscribeFromMessages]);
+  useChatSubscription();
 
   return <>{children}</>;
 }
+

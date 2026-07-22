@@ -13,7 +13,13 @@ export function NavWrapper({ children }: NavWrapperProps) {
   const locale = typeof params?.locale === 'string' ? params.locale : 'en';
 
   const isPublicRoute =
-    pathname === `/${locale}/login` || pathname === `/${locale}/register`;
+    pathname === `/${locale}/login` ||
+    pathname === `/${locale}/register` ||
+    pathname === `/${locale}/forgot-password` ||
+    pathname.startsWith(`/${locale}/invite`) ||
+    pathname === `/${locale}/auth/callback/google` ||
+    pathname === '/auth/callback/google' ||
+    pathname.includes('/auth/callback');
 
   if (isPublicRoute) {
     return null;

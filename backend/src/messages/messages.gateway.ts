@@ -53,10 +53,12 @@ export class MessagesGateway
       this.userSockets.delete(userId);
       const now = new Date();
       this.userLastSeen.set(userId, now);
-      // Emit to the user's own room only — friends subscribed to chat with them will see it
-      this.server
-        .to(`user_${userId}`)
-        .emit('userPresenceChanged', { userId, isOnline: false, lastSeen: now.toISOString() });
+      // Broadcast presence change to all clients so friends update status real-time
+      this.server.emit('userPresenceChanged', {
+        userId,
+        isOnline: false,
+        lastSeen: now.toISOString(),
+      });
     }
   }
 
@@ -81,9 +83,12 @@ export class MessagesGateway
     this.logger.log(`Client ${client.id} joined room: ${roomName}`);
 
     if (wasOffline) {
-      this.server
-        .to(roomName)
-        .emit('userPresenceChanged', { userId, isOnline: true, lastSeen: null });
+      // Broadcast presence change to all clients so friends update status real-time
+      this.server.emit('userPresenceChanged', {
+        userId,
+        isOnline: true,
+        lastSeen: null,
+      });
     }
   }
 
@@ -97,5 +102,23 @@ export class MessagesGateway
     const roomName = `user_${receiverId}`;
     this.server.to(roomName).emit('newMessage', message);
     this.logger.log(`Emitted newMessage to room: ${roomName}`);
+  }
+
+  emitFriendRequestAccepted(
+    senderId: string,
+    receiverId: string,
+    friendRequest: any,
+  ) {
+    this.server.to(`user_${senderId}`).emit('friendRequestAccepted', {
+      friendId: receiverId,
+      friendRequest,
+    });
+    this.server.to(`user_${receiverId}`).emit('friendRequestAccepted', {
+      friendId: senderId,
+      friendRequest,
+    });
+    this.logger.log(
+      `Emitted friendRequestAccepted to user_${senderId} and user_${receiverId}`,
+    );
   }
 }

@@ -19,7 +19,7 @@ interface UserListProps {
   onSelectUser: (userId: string) => void;
 }
 
-export function UserList({ users, activeUserId, unreadUserIds = [], onSelectUser }: UserListProps) {
+export const UserList = React.memo(function UserList({ users, activeUserId, unreadUserIds = [], onSelectUser }: UserListProps) {
   return (
     <div className="flex flex-col gap-2">
       {users.map((user) => {
@@ -29,12 +29,16 @@ export function UserList({ users, activeUserId, unreadUserIds = [], onSelectUser
         return (
           <button
             key={user.id}
-            onClick={() => onSelectUser(user.id)}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onSelectUser(user.id);
+            }}
             className={cn(
-              "flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 text-left relative",
+              "w-full flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 text-left relative cursor-pointer select-none",
               activeUserId === user.id 
-                ? "glass-light text-white shadow-soft" 
-                : "text-white/60 hover:text-white hover:bg-white/5"
+                ? "glass-light text-white shadow-soft ring-1 ring-emerald-500/50 bg-white/10" 
+                : "text-white/60 hover:text-white hover:bg-white/5 active:scale-[0.98]"
             )}
           >
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center font-bold text-white border border-white/10 relative shrink-0">
@@ -68,4 +72,4 @@ export function UserList({ users, activeUserId, unreadUserIds = [], onSelectUser
       })}
     </div>
   );
-}
+});

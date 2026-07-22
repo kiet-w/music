@@ -7,15 +7,29 @@ import { CleanupService } from './cleanup.service';
 import { makeGaugeProvider } from '@willsoto/nestjs-prometheus';
 import { JobsMetricsService } from './jobs.metrics.service';
 
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 @Module({
   imports: [
-    BullModule.forRoot({
-      connection: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        password: process.env.REDIS_PASSWORD,
-        tls: process.env.REDIS_HOST?.includes('upstash') ? {} : undefined,
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const host = configService.get<string>('REDIS_HOST') || process.env.REDIS_HOST || 'localhost';
+        const port = parseInt(
+          configService.get<string>('REDIS_PORT') || process.env.REDIS_PORT || '6379',
+          10,
+        );
+        const password = configService.get<string>('REDIS_PASSWORD') || process.env.REDIS_PASSWORD;
+        return {
+          connection: {
+            host,
+            port,
+            password,
+            tls: host?.includes('upstash') ? {} : undefined,
+          },
+        };
       },
+      inject: [ConfigService],
     }),
     BullModule.registerQueue({
       name: 'conversion',

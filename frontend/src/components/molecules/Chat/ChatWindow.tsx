@@ -1,14 +1,17 @@
 'use client';
 
 import React, { useLayoutEffect, useRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Message } from '@/store/useChatStore';
+import { User } from '@/components/molecules/Chat/UserList';
 import { Button } from '@/components/atoms/ui/button';
-import { UserPlus, Link2, MessageSquare } from 'lucide-react';
+import { UserPlus, Link2, MessageSquare, User as UserIcon } from 'lucide-react';
 
 interface ChatWindowProps {
   messages: Message[];
   currentUserId: string;
+  partner?: User;
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
@@ -19,12 +22,14 @@ interface ChatWindowProps {
 export function ChatWindow({
   messages,
   currentUserId,
+  partner,
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
   onAcceptInvite,
   onCreateInvite,
 }: ChatWindowProps) {
+  const t = useTranslations('Chat');
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevScrollHeightRef = useRef<number>(0);
   const isPrependingRef = useRef<boolean>(false);
@@ -77,7 +82,7 @@ export function ChatWindow({
 
       {!hasMore && messages.length > 0 && (
         <div className="text-center text-xs text-white/30 py-2 italic shrink-0">
-          Đầu cuộc trò chuyện
+          {t('top_of_chat')}
         </div>
       )}
 
@@ -88,10 +93,10 @@ export function ChatWindow({
             <MessageSquare className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-white mb-1">
-            Chưa có tin nhắn nào
+            {t('no_messages_title')}
           </h3>
           <p className="text-xs text-white/50 max-w-xs mb-6">
-            Hãy gửi tin nhắn đầu tiên để bắt đầu cuộc trò chuyện hoặc chia sẻ lời mời bạn bè!
+            {t('no_messages_desc')}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -102,7 +107,7 @@ export function ChatWindow({
                 className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 font-bold rounded-2xl text-xs px-4 py-2.5 h-10 flex items-center gap-2"
               >
                 <UserPlus className="w-4 h-4" />
-                Nhận lời mời
+                {t('accept_invite_btn')}
               </Button>
             )}
             {onCreateInvite && (
@@ -111,7 +116,7 @@ export function ChatWindow({
                 className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-2xl text-xs px-4 py-2.5 h-10 flex items-center gap-2 shadow-lg shadow-emerald-500/20"
               >
                 <Link2 className="w-4 h-4" />
-                Mời bạn bè
+                {t('invite_button')}
               </Button>
             )}
           </div>
@@ -121,27 +126,49 @@ export function ChatWindow({
       {/* Render Message List when messages exist */}
       {messages.map((msg) => {
         const isMe = msg.senderId === currentUserId;
+        const partnerInitial = partner?.name?.[0]?.toUpperCase() || partner?.email?.[0]?.toUpperCase();
+
         return (
           <div
             key={msg.id}
             className={cn(
-              "max-w-[80%] flex flex-col gap-1",
-              isMe ? "self-end items-end" : "self-start items-start"
+              "max-w-[85%] sm:max-w-[80%] flex gap-2.5",
+              isMe ? "self-end flex-row-reverse" : "self-start flex-row"
             )}
           >
+            {!isMe && (
+              <div
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center font-bold text-xs text-white border border-white/10 shrink-0 self-start mt-0.5 shadow-sm select-none"
+                title={partner?.name || partner?.email || 'User'}
+              >
+                {partnerInitial ? (
+                  partnerInitial
+                ) : (
+                  <UserIcon className="w-4 h-4 text-white/70" />
+                )}
+              </div>
+            )}
+
             <div
               className={cn(
-                "px-4 py-2 rounded-2xl text-sm break-words shadow-soft",
-                isMe
-                  ? "bg-white text-black rounded-tr-none"
-                  : "glass-light text-white rounded-tl-none border border-white/10"
+                "flex flex-col gap-1 min-w-0",
+                isMe ? "items-end" : "items-start"
               )}
             >
-              {msg.content}
+              <div
+                className={cn(
+                  "px-4 py-2 rounded-2xl text-sm break-words shadow-soft",
+                  isMe
+                    ? "bg-white text-black rounded-tr-none"
+                    : "glass-light text-white rounded-tl-none border border-white/10"
+                )}
+              >
+                {msg.content}
+              </div>
+              <span className="text-[10px] text-white/30 px-1">
+                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
             </div>
-            <span className="text-[10px] text-white/30 px-1">
-              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
           </div>
         );
       })}

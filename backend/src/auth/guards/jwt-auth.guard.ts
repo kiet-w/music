@@ -39,13 +39,19 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAsync(token);
+      if (!payload?.sub || !payload?.role) {
+        throw new UnauthorizedException('Token payload is incomplete or invalid');
+      }
       request['user'] = {
         id: payload.sub,
         email: payload.email,
-        role: payload.role ?? UserRole.USER,
+        role: payload.role,
       };
       return true;
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       this.logger.warn({ error: error.message }, 'Auth failed: Invalid token');
       throw new UnauthorizedException('Invalid or expired token');
     }

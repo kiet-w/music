@@ -8,7 +8,6 @@ import { Button } from '@/components/atoms/ui/button';
 import { cn } from '@/lib/utils';
 import { fetchTracks, deleteTrack, moveTrackToAlbum } from '@/lib/api';
 import dynamic from 'next/dynamic';
-import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useAlbumStore } from '@/store/useAlbumStore';
 import { toast } from 'sonner';
@@ -165,39 +164,6 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
   useEffect(() => {
     loadTracks();
   }, [loadTracks]);
-
-  const handleRealtimeTrackChange = useCallback((payload: any) => {
-    const { eventType, new: newRecord, old: oldRecord } = payload;
-
-    // If we're inside a specific album, filter out changes that don't belong to this album
-    if (albumId && eventType !== 'DELETE' && newRecord.albumId !== albumId) {
-      return;
-    }
-
-    setTracks((prevTracks) => {
-      const currentTracks = Array.isArray(prevTracks) ? prevTracks : [];
-      switch (eventType) {
-        case 'INSERT': {
-          if (currentTracks.some(t => t.id === newRecord.id)) return currentTracks;
-          return [newRecord as Track, ...currentTracks];
-        }
-        case 'UPDATE':
-          return currentTracks.map((track) =>
-            track.id === newRecord.id ? { ...track, ...newRecord } : track
-          );
-        case 'DELETE':
-          return currentTracks.filter((track) => track.id !== oldRecord.id);
-        default:
-          return currentTracks;
-      }
-    });
-  }, [albumId]);
-
-  useSupabaseRealtime(
-    accessToken && user?.id ? 'Track' : '',
-    handleRealtimeTrackChange,
-    user?.id ? `userId=eq.${user.id}` : undefined
-  );
 
 
   const handleAddToPlaylist = useCallback((e: React.MouseEvent, title: string) => {
