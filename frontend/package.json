@@ -16,6 +16,7 @@
     "@base-ui/react": "^1.5.0",
     "@capacitor/core": "^8.3.4",
     "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/keyboard": "^8.0.5",
     "@capacitor/preferences": "^8.0.1",
     "@react-oauth/google": "^0.13.5",
     "@sentry/nextjs": "^10.59.0",

@@ -8,6 +8,7 @@ import { User } from '@/components/molecules/Chat/UserList';
 import { Button } from '@/components/atoms/ui/button';
 import { UserPlus, Link2, MessageSquare, User as UserIcon, Smile } from 'lucide-react';
 import { useKeyboardVisible } from '@/hooks/useKeyboardVisible';
+import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { ReactionPicker } from '@/components/molecules/Chat/ReactionPicker';
 
 interface ChatWindowProps {
@@ -39,6 +40,7 @@ export function ChatWindow({
   const isPrependingRef = useRef<boolean>(false);
   const prevMessagesLengthRef = useRef<number>(0);
   const isKeyboardVisible = useKeyboardVisible();
+  const keyboardHeight = useKeyboardHeight();
   const [activePickerMessageId, setActivePickerMessageId] = useState<string | null>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -56,7 +58,7 @@ export function ChatWindow({
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [isKeyboardVisible, scrollToBottom]);
+  }, [isKeyboardVisible, keyboardHeight, scrollToBottom]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -104,8 +106,9 @@ export function ChatWindow({
     <div
       ref={scrollRef}
       onScroll={handleScroll}
+      style={keyboardHeight > 0 ? { paddingBottom: `${keyboardHeight}px` } : undefined}
       className={cn(
-        "flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col gap-4 scrollbar-hide",
+        "flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col gap-4 scrollbar-hide transition-all duration-200",
         messages.length === 0 && "justify-center items-center"
       )}
     >

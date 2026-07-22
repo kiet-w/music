@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
+import { cn } from '@/lib/utils';
 
 interface ChatInputProps {
   onSend: (content: string) => void;
@@ -12,6 +14,7 @@ interface ChatInputProps {
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [content, setContent] = useState('');
   const t = useTranslations('Chat');
+  const keyboardHeight = useKeyboardHeight();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +31,14 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-3 sm:p-4 border-t border-white/10 shrink-0 bg-black/20">
+    <form
+      onSubmit={handleSubmit}
+      style={keyboardHeight > 0 ? { transform: `translateY(-${keyboardHeight}px)` } : undefined}
+      className={cn(
+        "p-3 sm:p-4 border-t border-white/10 shrink-0 bg-black/80 backdrop-blur-md transition-transform duration-200 z-40 relative",
+        keyboardHeight > 0 && "shadow-2xl border-emerald-500/30"
+      )}
+    >
       <div className="flex gap-2">
         <input
           type="text"
