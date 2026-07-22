@@ -31,21 +31,22 @@ jobs:
         run: |
           cd frontend
           mkdir -p out
-          echo '<!DOCTYPE html><html><head><script>window.location.href="/vi/albums";</script></head><body></body></html>' > out/index.html
+          echo '<!DOCTYPE html><html><head><script>window.location.replace("./vi/albums");</script></head><body></body></html>' > out/index.html
           npm run build || true
           mkdir -p out
           if [ ! -f out/index.html ]; then
-            echo '<!DOCTYPE html><html><head><script>window.location.href="/vi/albums";</script></head><body></body></html>' > out/index.html
+            echo '<!DOCTYPE html><html><head><script>window.location.replace("./vi/albums");</script></head><body></body></html>' > out/index.html
           fi
 
       - name: Build Android APK
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_STATIC_EXPORT: 'true'
         run: |
           cd frontend
           mkdir -p out
           if [ ! -f out/index.html ]; then
-            echo '<!DOCTYPE html><html><head><script>window.location.href="/vi/albums";</script></head><body></body></html>' > out/index.html
+            echo '<!DOCTYPE html><html><head><script>window.location.replace("./vi/albums");</script></head><body></body></html>' > out/index.html
           fi
           mkdir -p android/app/src/main/assets
           npx cap sync android
