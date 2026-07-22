@@ -19,7 +19,7 @@ export default function BottomTabBar() {
   const { clearSession, user } = useAuthStore();
   const { unreadMessages, activeReceiverId } = useChatStore();
 
-  if (activeReceiverId) {
+  if (activeReceiverId || isKeyboardVisible) {
     return null;
   }
 
