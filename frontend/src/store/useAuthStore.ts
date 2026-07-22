@@ -82,6 +82,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   hydrate: async () => {
+    if (get().isHydrated) return;
+
     if (typeof window === 'undefined') {
       set({ isHydrated: true });
       return;

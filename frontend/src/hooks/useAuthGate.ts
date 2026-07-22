@@ -12,8 +12,10 @@ export function useAuthGate() {
   const locale = typeof params?.locale === 'string' ? params.locale : 'en';
 
   useEffect(() => {
-    void hydrate();
-  }, [hydrate]);
+    if (!isHydrated) {
+      void hydrate();
+    }
+  }, [isHydrated, hydrate]);
 
   const isPublicRoute =
     pathname === '/' ||
