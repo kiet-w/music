@@ -24,7 +24,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: 'cover',
-  interactiveWidget: 'overlays-content',
+  interactiveWidget: 'resizes-content',
 };
 
 export default function RootLayout({
