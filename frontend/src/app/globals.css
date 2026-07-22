@@ -157,19 +157,25 @@ nextjs-portal {
   left: 50% !important;
   transform: translateX(-50%) !important;
   width: max-content !important;
-  max-width: 88vw !important;
 }
 
 [data-sonner-toast] {
-  border-radius: 1.25rem !important;
-  padding: 12px 20px !important;
-  background: rgba(10, 10, 10, 0.9) !important;
-  backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5) !important;
+  width: 130px !important;
+  min-width: 130px !important;
+  height: 130px !important;
+  min-height: 130px !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 1.5rem !important;
+  padding: 14px !important;
+  background: rgba(12, 12, 12, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
   display: flex !important;
+  flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
   margin: 0 auto !important;
+  word-break: break-word !important;
 }
