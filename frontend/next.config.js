@@ -39,7 +39,7 @@ const nextConfig = {
     ignoreDuringBuilds: isDev,
   },
   async rewrites() {
-    const backendUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_INTERNAL_URL || 'https://inquiry-santa-archive-minute.trycloudflare.com').replace(/\/$/, '');
+    const backendUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_INTERNAL_URL || 'https://memphis-lace-plastic-policies.trycloudflare.com').replace(/\/$/, '');
     return [
       {
         source: '/api-proxy/:path*',

@@ -12,7 +12,7 @@ if (isProd) {
 
 const isRenderUrl = process.env.NEXT_PUBLIC_API_URL?.includes('render.com');
 const RAW_API_URL = (!process.env.NEXT_PUBLIC_API_URL || isRenderUrl)
-  ? 'https://inquiry-santa-archive-minute.trycloudflare.com'
+  ? 'https://memphis-lace-plastic-policies.trycloudflare.com'
   : process.env.NEXT_PUBLIC_API_URL;
 export const API_URL = RAW_API_URL.replace(/\/$/, '');
 
