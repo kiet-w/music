@@ -10,10 +10,10 @@ if (isProd) {
   }
 }
 
-const defaultApiUrl = isProd
+const isRenderUrl = process.env.NEXT_PUBLIC_API_URL?.includes('render.com');
+const RAW_API_URL = (!process.env.NEXT_PUBLIC_API_URL || isRenderUrl)
   ? 'https://inquiry-santa-archive-minute.trycloudflare.com'
-  : (isServer ? (process.env.BACKEND_INTERNAL_URL || 'http://localhost:4000') : '/api-proxy');
-const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || defaultApiUrl;
+  : process.env.NEXT_PUBLIC_API_URL;
 export const API_URL = RAW_API_URL.replace(/\/$/, '');
 
 const RAW_PYTHON_API_URL = process.env.NEXT_PUBLIC_PYTHON_API_URL || 'http://localhost:8001';
