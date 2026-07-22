@@ -10,7 +10,7 @@ if (isProd) {
   }
 }
 
-const DEFAULT_API_FALLBACK = 'http://192.168.1.16:4000';
+const DEFAULT_API_FALLBACK = 'http://localhost:4000';
 
 const rawApi = process.env.NEXT_PUBLIC_API_URL;
 export const API_URL = (
