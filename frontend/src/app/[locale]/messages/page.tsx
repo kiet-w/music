@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, UserPlus, Link2, MessageSquare } from 'lucide-react';
 import { UserList, User } from '@/components/molecules/Chat/UserList';
 import { ChatWindow } from '@/components/molecules/Chat/ChatWindow';
 import { ChatInput } from '@/components/molecules/Chat/ChatInput';
@@ -161,25 +161,8 @@ export default function MessagesPage() {
 
   return (
     <MainContainer className="h-[100dvh] max-h-[100dvh] overflow-hidden !pb-[100px] flex flex-col gap-3">
-      <header className="flex flex-wrap items-center justify-between gap-2 shrink-0">
+      <header className="flex items-center justify-between gap-2 shrink-0">
         <h1 className="text-2xl font-bold text-white shadow-text">{t('title')}</h1>
-        <div className={cn("flex items-center gap-1.5 shrink-0", activeReceiverId && "hidden md:flex")}>
-          <Button 
-            onClick={handleAcceptInvite}
-            variant="outline"
-            size="sm"
-            className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 font-bold rounded-xl text-xs px-2.5 py-1.5 h-8"
-          >
-            Nhận lời mời
-          </Button>
-          <Button 
-            onClick={handleCreateInvite}
-            size="sm"
-            className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl text-xs px-2.5 py-1.5 h-8"
-          >
-            {t('invite_button')}
-          </Button>
-        </div>
       </header>
 
       <div className="flex-1 min-h-0 glass-dark rounded-3xl border border-white/10 overflow-hidden flex flex-col md:flex-row">
@@ -245,13 +228,40 @@ export default function MessagesPage() {
                   onLoadMore={() => accessToken && loadMoreMessages(accessToken)}
                   hasMore={hasMoreMessages}
                   isLoadingMore={isLoadingMore}
+                  onAcceptInvite={handleAcceptInvite}
+                  onCreateInvite={handleCreateInvite}
                 />
               )}
               <ChatInput onSend={handleSend} />
             </>
           ) : (
-            <div className="flex-1 p-6 flex items-center justify-center text-white/40 italic text-sm">
-              {t('select_user')}
+            <div className="flex-1 p-6 flex flex-col items-center justify-center text-center my-auto">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400 shadow-lg shadow-emerald-500/10">
+                <MessageSquare className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1">
+                Chưa chọn cuộc trò chuyện
+              </h3>
+              <p className="text-xs text-white/50 max-w-xs mb-6">
+                Chọn một người bạn từ danh sách hoặc nhận/gửi lời mời để bắt đầu nhắn tin!
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Button
+                  onClick={handleAcceptInvite}
+                  variant="outline"
+                  className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 font-bold rounded-2xl text-xs px-4 py-2.5 h-10 flex items-center gap-2"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Nhận lời mời
+                </Button>
+                <Button
+                  onClick={handleCreateInvite}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-2xl text-xs px-4 py-2.5 h-10 flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+                >
+                  <Link2 className="w-4 h-4" />
+                  {t('invite_button')}
+                </Button>
+              </div>
             </div>
           )}
         </section>
