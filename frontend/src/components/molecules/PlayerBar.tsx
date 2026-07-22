@@ -4,15 +4,19 @@ import React from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume1, Volume2, VolumeX } from 'lucide-react';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { useKeyboardVisible } from '@/hooks/useKeyboardVisible';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PlayerBar() {
   const isKeyboardVisible = useKeyboardVisible();
+  const pathname = usePathname();
   const { currentTrack, isPlaying, togglePlay, currentTime, duration, seek, volume, setVolume } = usePlayerStore();
 
-  if (!currentTrack || isKeyboardVisible) return null;
+  const isMessagesPage = pathname?.includes('/messages');
+
+  if (!currentTrack || isKeyboardVisible || isMessagesPage) return null;
 
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return '0:00';

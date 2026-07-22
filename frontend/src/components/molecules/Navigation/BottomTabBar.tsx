@@ -19,7 +19,9 @@ export default function BottomTabBar() {
   const { clearSession, user } = useAuthStore();
   const { unreadMessages } = useChatStore();
 
-  if (isKeyboardVisible) {
+  const isMessagesPage = pathname?.includes('/messages');
+
+  if (isKeyboardVisible || isMessagesPage) {
     return null;
   }
 

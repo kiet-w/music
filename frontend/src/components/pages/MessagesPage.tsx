@@ -22,11 +22,9 @@ const FriendCodeModal = dynamic(
   { ssr: false }
 );
 
-import { useKeyboardVisible } from '@/hooks/useKeyboardVisible';
 import { cn } from '@/lib/utils';
 
 export function MessagesPage() {
-  const isKeyboardVisible = useKeyboardVisible();
   const t = useTranslations('Chat');
   const { users, loadUsers, currentUser, accessToken, isLoading: isLoadingFriends } = useFriends();
   const searchParams = useSearchParams();
@@ -125,8 +123,7 @@ export function MessagesPage() {
   return (
     <MainContainer
       className={cn(
-        "h-[var(--vh,100dvh)] max-h-[var(--vh,100dvh)] overflow-hidden flex flex-col gap-3 transition-all duration-200",
-        isKeyboardVisible ? "!pb-2" : "!pb-[100px]"
+        "h-[var(--vh,100dvh)] max-h-[var(--vh,100dvh)] overflow-hidden flex flex-col gap-3 transition-all duration-200 pb-0 sm:pb-2"
       )}
     >
       <MessagesHeader
