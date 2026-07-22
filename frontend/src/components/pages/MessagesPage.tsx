@@ -138,7 +138,7 @@ export function MessagesPage() {
         onOpenTokenModal={() => setIsTokenModalOpen(true)}
       />
 
-      <div className="flex-1 min-h-0 glass-dark border border-white/10 rounded-3xl overflow-hidden flex flex-col lg:flex-row">
+      <div className="w-full flex-1 min-h-[460px] h-[calc(100dvh-220px)] sm:h-[540px] glass-dark border border-white/10 rounded-3xl overflow-hidden flex flex-col lg:flex-row">
         {isLoadingFriends ? (
           <EmptyFriendListState
             onOpenTokenModal={() => setIsTokenModalOpen(true)}
