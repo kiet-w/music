@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
   Pause,
@@ -11,7 +10,6 @@ import {
   Volume2,
   VolumeX,
   Layers,
-  X,
 } from 'lucide-react';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { usePathname } from 'next/navigation';
@@ -31,11 +29,10 @@ const useSetVolume = () => usePlayerStore((s) => s.setVolume);
 const usePlayNext = () => usePlayerStore((s) => s.playNext);
 const usePlayPrevious = () => usePlayerStore((s) => s.playPrevious);
 
-// ponytail: Player Bar with Left-Side Vertical Stacked Cards Panel
+// ponytail: Player Bar mounting single-layer StackedFanDeck panel anchored at left margin
 export default function PlayerBar() {
   const pathname = usePathname();
   const currentTrack = useCurrentTrack();
-  const queue = useQueue();
   const isPlaying = useIsPlaying();
   const togglePlay = useTogglePlay();
   const currentTime = useCurrentTime();
@@ -68,37 +65,11 @@ export default function PlayerBar() {
 
   return (
     <>
-      {/* --- LEFT-SIDE VERTICAL STACKED CARDS PANEL (Anchored at Left Margin matching hand-drawn box) --- */}
-      <AnimatePresence>
-        {isStackExpanded && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, x: -30 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.95, x: -30 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 320 }}
-            className="fixed top-20 left-3 sm:left-6 lg:left-8 z-40 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[420px] max-h-[calc(100dvh-7rem)] rounded-[2.5rem] bg-zinc-950/95 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl p-5 flex flex-col text-white"
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-white" />
-                <h3 className="text-sm font-bold tracking-tight font-instrument">
-                  Stacked Cards Queue ({queue.length} bài)
-                </h3>
-              </div>
-              <button
-                onClick={() => setIsStackExpanded(false)}
-                className="p-1.5 rounded-full bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                aria-label="Đóng Stacked Queue"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto py-3 pr-0.5 scrollbar-hide">
-              <StackedFanDeck onClose={() => setIsStackExpanded(false)} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* --- SINGLE-LAYER LEFT-SIDE VERTICAL STACKED CARDS PANEL --- */}
+      <StackedFanDeck
+        isOpen={isStackExpanded}
+        onClose={() => setIsStackExpanded(false)}
+      />
 
       {/* --- MASTER PLAYER BAR --- */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[420px] z-40">
