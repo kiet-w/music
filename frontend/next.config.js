@@ -15,20 +15,28 @@ const nextConfig = {
   outputFileTracingRoot: path.resolve(__dirname, '../'),
   reactStrictMode: true,
   trailingSlash: true,
+  compress: true,
 
   // Bật standalone trong production (build Docker)
   ...(isDev ? {} : { output: 'standalone' }),
 
   images: {
-    unoptimized: true,
+    unoptimized: false,
     formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96],
+    minimumCacheTTL: 60,
   },
 
   experimental: {
     optimizePackageImports: [
       'lucide-react',
       'framer-motion',
+      '@geist/font',
+      'geist',
     ],
+    // Optimize CSS
+    optimizeCss: true,
   },
 
   compiler: {
@@ -40,6 +48,13 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: false,
+  },
+
+  // Performance optimizations
+  poweredByHeader: false,
+  generateEtags: true,
+  httpAgentOptions: {
+    keepAlive: true,
   },
   async rewrites() {
     const backendUrl = (

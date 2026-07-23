@@ -98,10 +98,10 @@ export class MessagesGateway
     return { isOnline, lastSeen };
   }
 
-  emitNewMessage(receiverId: string, message: any) {
-    const roomName = `user_${receiverId}`;
-    this.server.to(roomName).emit('newMessage', message);
-    this.logger.log(`Emitted newMessage to room: ${roomName}`);
+  emitNewMessage(senderId: string, receiverId: string, message: any) {
+    this.server.to(`user_${senderId}`).emit('newMessage', message);
+    this.server.to(`user_${receiverId}`).emit('newMessage', message);
+    this.logger.log(`Emitted newMessage to user_${senderId} and user_${receiverId}`);
   }
 
   emitFriendRequestAccepted(

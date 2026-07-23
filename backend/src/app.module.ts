@@ -40,7 +40,15 @@ import { HttpMetricsInterceptor } from './common/interceptors/http-metrics.inter
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 10,
+        limit: 100, // General API limit
+      },
+      {
+        ttl: 60000,
+        limit: 20, // Auth endpoints
+      },
+      {
+        ttl: 60000,
+        limit: 50, // Upload endpoints
       },
     ]),
 
@@ -117,6 +125,11 @@ import { HttpMetricsInterceptor } from './common/interceptors/http-metrics.inter
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
     },
+    // CacheInterceptor should be applied selectively, not globally
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: CacheInterceptor,
+    // },
   ],
 })
 export class AppModule {}

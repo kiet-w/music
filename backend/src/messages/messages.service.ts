@@ -42,8 +42,8 @@ export class MessagesService {
       },
     });
 
-    // Emit real-time WebSocket event to the receiver
-    this.messagesGateway.emitNewMessage(createMessageDto.receiverId, newMessage);
+    // Emit real-time WebSocket event to both sender and receiver
+    this.messagesGateway.emitNewMessage(senderId, createMessageDto.receiverId, newMessage);
 
     return newMessage;
   }

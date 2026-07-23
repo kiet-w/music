@@ -22,14 +22,6 @@ import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 
 async function bootstrap() {
-  const corsOriginsEnv = process.env.CORS_ORIGINS || '*';
-  const corsOrigins = corsOriginsEnv === '*'
-    ? '*'
-    : corsOriginsEnv
-        .split(',')
-        .map((origin) => origin.trim())
-        .filter((origin) => origin.length > 0);
-
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   const logger = new AppLogger();
@@ -61,9 +53,27 @@ async function bootstrap() {
     next();
   });
 
+  const corsOriginsEnv = process.env.CORS_ORIGINS || 'http://localhost:3003,https://localhost,http://localhost,capacitor://localhost';
+  const allowedOrigins = corsOriginsEnv.split(',').map(origin => origin.trim());
+
   app.enableCors({
-    origin: (_origin, callback) => {
-      callback(null, true);
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.startsWith('http://localhost') ||
+        origin.startsWith('https://localhost') ||
+        origin.startsWith('capacitor://localhost')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,

@@ -13,8 +13,11 @@ dist/
 **/dist/
 
 # Env files (sensitive)
-.env*
-**/.env*
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
 
 # Logs & temp build infos
 *.log

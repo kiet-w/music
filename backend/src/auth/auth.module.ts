@@ -20,7 +20,11 @@ import { EncryptionService } from '../common/services/encryption.service';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get<any>('JWT_EXPIRES_IN', '1d'),
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '15m') as any,
+          algorithm: 'HS256',
+        },
+        verifyOptions: {
+          algorithms: ['HS256'],
         },
       }),
     }),

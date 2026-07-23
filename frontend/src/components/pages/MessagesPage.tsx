@@ -64,22 +64,29 @@ export function MessagesPage({ locale }: MessagesPageProps) {
   }, [accessToken, targetUserId, loadUsers, setActiveReceiverId]);
 
   const handleSelectUser = useCallback((userId: string | null) => {
-    const token = getEffectiveAccessToken();
+    const token = getEffectiveAccessToken() || accessToken;
+    if (!userId && typeof window !== 'undefined') {
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    }
     setActiveReceiverId(userId, token || undefined).catch((err) => {
       console.error('Failed to load chat:', err);
     });
-  }, [setActiveReceiverId]);
+  }, [accessToken, setActiveReceiverId]);
 
   const handleSend = useCallback(async (content: string) => {
-    const token = getEffectiveAccessToken();
-    if (!token) return;
+    const token = getEffectiveAccessToken() || accessToken;
+    if (!token) {
+      toast.error(t('error_not_authenticated') || 'Vui lòng đăng nhập lại để gửi tin nhắn');
+      return;
+    }
     try {
       await sendMessage(token, content);
     } catch (error: any) {
       console.error('Failed to send message:', error);
-      toast.error(error?.message || t('error_send_message') || 'Failed to send message');
+      toast.error(error?.message || t('error_send_message') || 'Không thể gửi tin nhắn');
     }
-  }, [sendMessage, t]);
+  }, [accessToken, sendMessage, t]);
 
   const handleReactToMessage = useCallback(async (messageId: string, emoji: string) => {
     const token = getEffectiveAccessToken();
@@ -140,7 +147,7 @@ export function MessagesPage({ locale }: MessagesPageProps) {
   return (
     <MainContainer
       className={cn(
-        activeReceiverId && "!max-w-full !w-full !px-3 sm:!px-4 !pt-[calc(0.5rem+env(safe-area-inset-top))] !pb-[calc(0.5rem+env(safe-area-inset-bottom))] h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden"
+        activeReceiverId && "!max-w-full !w-full !px-3 sm:!px-4 !pt-[calc(0.5rem+env(safe-area-inset-top))] !pb-[calc(5.25rem+env(safe-area-inset-bottom))] h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden"
       )}
     >
       {!activeReceiverId && (

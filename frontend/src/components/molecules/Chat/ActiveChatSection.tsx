@@ -56,10 +56,11 @@ export function ActiveChatSection({
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onBack}
-            className="p-1 -ml-1 hover:bg-white/10 rounded-full transition-colors text-white lg:hidden shrink-0"
-            title="Back to list"
+            className="p-1.5 -ml-1 hover:bg-white/10 rounded-full transition-colors text-white shrink-0 flex items-center gap-1 cursor-pointer"
+            title={t('back_to_list') || 'Quay lại danh sách bạn bè'}
           >
             <ChevronLeft className="w-6 h-6" />
+            <span className="text-xs text-white/70 font-medium hidden sm:inline">{t('friends') || 'Bạn bè'}</span>
           </button>
           <div className="min-w-0">
             <h2 className="text-white font-bold truncate text-sm sm:text-base">

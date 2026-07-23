@@ -7,20 +7,29 @@ import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { cn } from '@/lib/utils';
 
 interface ChatInputProps {
-  onSend: (content: string) => void;
+  onSend: (content: string) => Promise<void> | void;
   disabled?: boolean;
 }
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [content, setContent] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const t = useTranslations('Chat');
   const keyboardHeight = useKeyboardHeight();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (content.trim() && !disabled) {
-      onSend(content.trim());
-      setContent('');
+    const text = content.trim();
+    if (!text || disabled || isSending) return;
+
+    setContent('');
+    setIsSending(true);
+    try {
+      await onSend(text);
+    } catch (error) {
+      setContent(text); // Restore text if send failed
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -42,12 +51,12 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           onChange={(e) => setContent(e.target.value)}
           onFocus={handleFocus}
           placeholder={t('type_placeholder') || 'Nhập tin nhắn...'}
-          disabled={disabled}
+          disabled={disabled || isSending}
           className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition-colors text-sm"
         />
         <button
           type="submit"
-          disabled={disabled || !content.trim()}
+          disabled={disabled || isSending || !content.trim()}
           className="w-12 h-12 flex items-center justify-center rounded-2xl bg-emerald-500 text-black font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-400 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer"
         >
           <Send size={18} />

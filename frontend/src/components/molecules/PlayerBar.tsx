@@ -90,9 +90,9 @@ export default function PlayerBar() {
       </div>
 
       <div className="mt-4 px-1">
-        <div className="relative w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div className="relative w-full h-1.5 bg-white/10 rounded-full overflow-hidden group">
           <div
-            className="absolute h-full bg-white transition-[width] duration-1000 ease-linear"
+            className="absolute h-full bg-white transition-[width] duration-1000 ease-linear group-hover:bg-emerald-400"
             style={{ width: `${progressPct}%` }}
           />
           <input
@@ -102,7 +102,7 @@ export default function PlayerBar() {
             step="0.1"
             value={currentTime}
             onChange={handleSeek}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            className="absolute inset-0 w-full h-full cursor-pointer pointer-events-auto z-10 player-slider"
           />
         </div>
         <div className="flex items-center justify-between mt-2 text-[10px] font-medium text-white/20 tabular-nums tracking-widest uppercase">
@@ -127,7 +127,7 @@ export default function PlayerBar() {
                 step="0.01"
                 value={volume}
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                className="absolute inset-0 w-full h-full cursor-pointer pointer-events-auto z-10 player-slider"
               />
             </div>
           </div>

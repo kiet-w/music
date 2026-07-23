@@ -5,13 +5,16 @@ const serverUrl =
   process.env.CAPACITOR_SERVER_URL ||
   'http://localhost:3003';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const config: CapacitorConfig = {
   appId: 'com.kietw.music',
   appName: 'music',
   webDir: 'out',
   server: {
     url: serverUrl,
-    cleartext: true
+    cleartext: !isProduction, // HTTPS only for production
+    androidScheme: isProduction ? 'https' : 'http'
   },
   plugins: {
     Keyboard: {

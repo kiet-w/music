@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+
 const isServer = typeof window === 'undefined';
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -10,7 +12,12 @@ if (isProd) {
   }
 }
 
-const DEFAULT_API_FALLBACK = 'http://localhost:4000';
+const PRODUCTION_API_URL = 'https://music-backend-cb0i.onrender.com';
+const isNative = typeof window !== 'undefined' && Capacitor.isNativePlatform();
+
+const DEFAULT_API_FALLBACK = (isNative || isProd)
+  ? PRODUCTION_API_URL
+  : 'http://localhost:4000';
 
 const rawApi = process.env.NEXT_PUBLIC_API_URL;
 export const API_URL = (
