@@ -1,6 +1,6 @@
 'use client';
 
-// ponytail: single-layer vertical 50% half-overlapping stacked deck anchored at bottom-left position matching user hand-drawn diagram
+// ponytail: single-layer vertical 50% half-overlapping stacked deck — inline (not fixed), placed by parent PlayerBar
 import React, { useState } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { Play, Pause, GripVertical, Layers, X } from 'lucide-react';
@@ -12,16 +12,7 @@ interface StackedFanDeckProps {
   onClose: () => void;
 }
 
-/*
-  Half-Overlapping Straight Vertical Stack Formula (Xếp gối 1 nửa 50%):
-  Card Height = 72px, Step Offset = 36px (đúng 1/2 chiều cao thẻ)
-  card 1: top: 0px,   zIndex: 10
-  card 2: top: 36px,  zIndex: 20
-  card 3: top: 72px,  zIndex: 30
-  card 4: top: 108px, zIndex: 40
-  card 5: top: 144px, zIndex: 50
-*/
-const HALF_STACK_STEP = 36; // 50% half overlap step
+const HALF_STACK_STEP = 36; // 50% half overlap step (card height 72px)
 
 export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) {
   const { queue, currentTrack, isPlaying, play, togglePlay, moveQueueTrack } = usePlayerStore();
@@ -44,7 +35,7 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
 
   const handleDragEnd = (index: number, info: PanInfo) => {
     setDraggingIdx(null);
-    const threshold = 24; // vertical px threshold to swap positions
+    const threshold = 24;
     if (info.offset.y > threshold && index < queue.length - 1) {
       moveQueueTrack(index, index + 1);
     } else if (info.offset.y < -threshold && index > 0) {
@@ -55,13 +46,14 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 30 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 30 }}
+        initial={{ opacity: 0, scale: 0.95, x: -20 }}
+        animate={{ opacity: 1, scale: 1, x: 0 }}
+        exit={{ opacity: 0, scale: 0.95, x: -20 }}
         transition={{ type: 'spring', damping: 25, stiffness: 320 }}
-        className="fixed bottom-20 left-3 sm:left-6 lg:left-8 z-40 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[400px] rounded-[2.5rem] bg-zinc-950/95 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl p-4 sm:p-5 flex flex-col text-white"
+        // ponytail: NO fixed positioning — parent PlayerBar places this inline to the left
+        className="w-[380px] max-w-[45vw] rounded-[2.5rem] bg-zinc-950/95 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl p-4 sm:p-5 flex flex-col text-white shrink-0 self-end"
       >
-        {/* Single Clean Header */}
+        {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-white" />
@@ -93,20 +85,12 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
               {displayQueue.map((track, idx) => {
                 const isCurrent = currentTrack?.id === track.id;
                 const isPinned = pinnedId === track.id;
-
                 const topPos = idx * HALF_STACK_STEP;
                 const baseZIndex = (idx + 1) * 10;
 
                 const style = isPinned
-                  ? {
-                      top: '0px',
-                      transform: 'scale(1.02)',
-                      zIndex: 100,
-                    }
-                  : {
-                      top: `${topPos}px`,
-                      zIndex: draggingIdx === idx ? 150 : baseZIndex,
-                    };
+                  ? { top: '0px', transform: 'scale(1.02)', zIndex: 100 }
+                  : { top: `${topPos}px`, zIndex: draggingIdx === idx ? 150 : baseZIndex };
 
                 return (
                   <motion.div
@@ -132,7 +116,6 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
                         : "bg-zinc-900/95 text-white border-white/15 hover:border-white/40 hover:bg-zinc-900"
                     )}
                   >
-                    {/* Left: Drag Handle & Track Details */}
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <GripVertical
                         className={cn(
@@ -140,7 +123,6 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
                           isCurrent ? "text-zinc-950" : "text-zinc-400"
                         )}
                       />
-
                       <span
                         className={cn(
                           "text-xs font-bold w-4 text-center font-mono shrink-0",
@@ -149,8 +131,6 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
                       >
                         #{idx + 1}
                       </span>
-
-                      {/* Album Art & Title */}
                       <div className="w-10 h-10 rounded-xl bg-black/20 overflow-hidden shrink-0 border border-white/10">
                         {track.coverUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -160,26 +140,15 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
                         )}
                       </div>
                       <div className="min-w-0 flex-1 pr-2">
-                        <p
-                          className={cn(
-                            "text-xs font-bold truncate font-instrument leading-tight",
-                            isCurrent ? "text-zinc-950" : "text-white"
-                          )}
-                        >
+                        <p className={cn("text-xs font-bold truncate font-instrument leading-tight", isCurrent ? "text-zinc-950" : "text-white")}>
                           {track.title}
                         </p>
-                        <p
-                          className={cn(
-                            "text-[10px] truncate font-medium",
-                            isCurrent ? "text-zinc-700" : "text-zinc-400"
-                          )}
-                        >
+                        <p className={cn("text-[10px] truncate font-medium", isCurrent ? "text-zinc-700" : "text-zinc-400")}>
                           {track.artist || 'Nghệ sĩ'}
                         </p>
                       </div>
                     </div>
 
-                    {/* Right: Play Status & Action */}
                     <div className="flex items-center gap-2 shrink-0">
                       <span
                         className={cn(
@@ -189,12 +158,8 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
                       >
                         {isCurrent ? (isPlaying ? 'Playing' : 'Paused') : 'Queue'}
                       </span>
-
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCardClick(track);
-                        }}
+                        onClick={(e) => { e.stopPropagation(); handleCardClick(track); }}
                         className={cn(
                           "p-1.5 rounded-lg transition-colors cursor-pointer",
                           isCurrent ? "bg-zinc-950 text-white" : "bg-white/10 text-white hover:bg-white/20"

@@ -64,15 +64,16 @@ export default function PlayerBar() {
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <>
-      {/* --- SINGLE-LAYER LEFT-SIDE VERTICAL STACKED CARDS PANEL --- */}
+    // ponytail: single fixed-bottom container with flex-row — Stack on left, PlayerBar on right
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-end gap-3 w-[calc(100%-2rem)] max-w-[860px] justify-end">
+      {/* --- STACKED CARDS DECK — inline to the LEFT of player bar --- */}
       <StackedFanDeck
         isOpen={isStackExpanded}
         onClose={() => setIsStackExpanded(false)}
       />
 
       {/* --- MASTER PLAYER BAR --- */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[420px] z-40">
+      <div className="w-full max-w-[420px] shrink-0">
         <div className="relative w-full bg-zinc-950/95 border border-white/15 backdrop-blur-2xl rounded-[2.5rem] flex flex-col p-4 sm:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.9)] transition-all duration-300">
           <div className="flex items-center w-full gap-3">
             {/* Track Cover & Details */}
@@ -95,7 +96,7 @@ export default function PlayerBar() {
 
             {/* Audio & Stack Queue Controls */}
             <div className="flex items-center gap-1.5">
-              {/* Stacked Cards Queue Reorder Toggle Button (Left of Prev/Play/Next) */}
+              {/* Stacked Cards Queue Reorder Toggle Button */}
               <button
                 onClick={() => setIsStackExpanded((prev) => !prev)}
                 className={cn(
@@ -104,7 +105,7 @@ export default function PlayerBar() {
                     ? "bg-white text-zinc-950 border-white shadow-md"
                     : "bg-white/5 text-zinc-400 hover:text-white border-white/10 hover:bg-white/10"
                 )}
-                title="Mở Stacked Cards ở góc trái màn hình"
+                title="Mở Stacked Cards bên trái Player"
                 aria-label="Sắp xếp danh sách phát"
               >
                 <Layers size={18} strokeWidth={2} />
@@ -187,6 +188,6 @@ export default function PlayerBar() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
