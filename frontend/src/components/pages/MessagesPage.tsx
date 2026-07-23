@@ -164,8 +164,8 @@ export function MessagesPage({ locale }: MessagesPageProps) {
           activeReceiverId && "h-full rounded-3xl border border-white/10 bg-black/80 backdrop-blur-xl shadow-2xl"
         )}
       >
-        {isLoadingFriends ? (
-          <GlobalLoading message={t('invite_loading') || 'Đang kiểm tra lời mời...'} />
+        {isLoadingFriends || (activeReceiverId && isLoading && messages.length === 0) ? (
+          <GlobalLoading message={t('invite_loading') || 'Đang tải dữ liệu...'} />
         ) : users.length === 0 ? (
           <EmptyFriendListState
             onOpenTokenModal={() => setIsTokenModalOpen(true)}
