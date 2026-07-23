@@ -1,5 +1,5 @@
 import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
-export default function Loading() {
+export default function RootLoading() {
   return <GlobalLoading fullScreen={false} />;
 }
