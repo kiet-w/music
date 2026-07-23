@@ -8,6 +8,7 @@ import { useGoogleDrive } from '@/hooks/useGoogleDrive';
 import { useAlbumStore } from '@/store/useAlbumStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { MusicTemplate } from '@/components/features/music/MusicTemplate';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
 export function MusicPage() {
   const t = useTranslations('Music');
@@ -78,17 +79,22 @@ export function MusicPage() {
   };
 
   return (
-    <MusicTemplate 
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      onBrowseDrive={handleBrowseDrive}
-      isCheckingConnection={isCheckingConnection}
-      isDriveLoading={isDriveLoading}
-      selectedAlbumId={selectedAlbumId}
-      setSelectedAlbumId={setSelectedAlbumId}
-      albums={albums}
-      history={history}
-      t={t}
-    />
+    <>
+      {(isCheckingConnection || isDriveLoading) && (
+        <GlobalLoading fullScreen message={t('loading') || 'Đang xử lý...'} />
+      )}
+      <MusicTemplate 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onBrowseDrive={handleBrowseDrive}
+        isCheckingConnection={isCheckingConnection}
+        isDriveLoading={isDriveLoading}
+        selectedAlbumId={selectedAlbumId}
+        setSelectedAlbumId={setSelectedAlbumId}
+        albums={albums}
+        history={history}
+        t={t}
+      />
+    </>
   );
 }
