@@ -63,7 +63,9 @@
   }
 
   html, body {
-    height: 100%;
+    height: 100dvh; /* Dynamic viewport height for mobile keyboard fix */
+    height: var(--vh, 100vh); /* JavaScript fallback for older browsers */
+    height: 100%; /* Ultimate fallback */
     width: 100%;
     margin: 0;
     padding: 0;
@@ -74,6 +76,26 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground;
+  }
+
+  /* Fix for mobile keyboard: ensure containers use dynamic viewport height */
+  main, [role="main"], .main-container {
+    min-height: 100dvh;
+    min-height: var(--vh, 100vh);
+  }
+
+  /* Additional keyboard handling for input fields */
+  input, textarea, select {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+
+  /* Safe area handling for notched devices */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 20px);
   }
 }
 

@@ -7,6 +7,7 @@ import { NavWrapper } from '@/components/templates/wrappers/NavWrapper';
 import { GoogleAuthProvider } from '@/components/templates/wrappers/GoogleAuthProvider';
 import { ChatProvider } from '@/components/templates/wrappers/ChatProvider';
 import { ClientShell } from '@/components/templates/wrappers/ClientShell';
+import { ViewportFix } from '@/components/features/shared/ViewportFix';
 
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'vi' }];
@@ -24,6 +25,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
+      <ViewportFix />
       <GoogleAuthProvider>
         <ChatProvider>
           <AuthGate>

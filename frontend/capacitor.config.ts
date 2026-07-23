@@ -18,7 +18,8 @@ const config: CapacitorConfig = {
   },
   plugins: {
     Keyboard: {
-      resize: 'body' as any
+      resize: 'ionic' as any, // Better compatibility with viewport fixes
+      resizeOnFullScreen: true
     }
   }
 };
