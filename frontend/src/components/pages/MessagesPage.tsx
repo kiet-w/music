@@ -18,6 +18,7 @@ import { getUserStatusText } from '@/lib/userStatus';
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
 import { cn } from '@/lib/utils';
 import { useKeyboardMode } from '@/hooks/useKeyboardMode';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
 import { getEffectiveAccessToken } from '@/store/useAuthStore';
 
@@ -164,10 +165,7 @@ export function MessagesPage({ locale }: MessagesPageProps) {
         )}
       >
         {isLoadingFriends ? (
-          <EmptyFriendListState
-            onOpenTokenModal={() => setIsTokenModalOpen(true)}
-            isLoading={true}
-          />
+          <GlobalLoading message={t('invite_loading') || 'Đang kiểm tra lời mời...'} />
         ) : users.length === 0 ? (
           <EmptyFriendListState
             onOpenTokenModal={() => setIsTokenModalOpen(true)}
