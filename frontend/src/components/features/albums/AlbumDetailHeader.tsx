@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Disc, Camera, Loader2 } from 'lucide-react';
 import { getMediaUrl } from '@/lib/utils';
 import { uploadImage, updateAlbum } from '@/lib/api';
@@ -22,6 +23,8 @@ interface AlbumDetailHeaderProps {
 }
 
 export function AlbumDetailHeader({ album, isAlbumActive, onAlbumUpdated }: AlbumDetailHeaderProps) {
+  const t = useTranslations('Music');
+  const tAuth = useTranslations('Auth');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { accessToken } = useAuthStore();
   const { albums, setAlbums, loadAlbums } = useAlbumStore();
@@ -40,7 +43,7 @@ export function AlbumDetailHeader({ album, isAlbumActive, onAlbumUpdated }: Albu
         try {
           const parsed = JSON.parse(stored);
           return parsed.accessToken || parsed.state?.accessToken || null;
-        } catch (e) {
+        } catch {
           return null;
         }
       }
@@ -54,17 +57,17 @@ export function AlbumDetailHeader({ album, isAlbumActive, onAlbumUpdated }: Albu
 
     const token = getEffectiveToken();
     if (!token) {
-      toast.error(t('Auth.session_expired') || 'Phiên đăng nhập hết hạn');
+      toast.error(tAuth('session_expired') || 'Phiên đăng nhập hết hạn');
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      toast.error(t('Auth.invalid_file_type') || 'Vui lòng chọn tệp hình ảnh (JPEG, PNG, WEBP)');
+      toast.error(tAuth('invalid_file_type') || 'Vui lòng chọn tệp hình ảnh (JPEG, PNG, WEBP)');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('Auth.image_size_exceeded') || 'Kích thước ảnh không vượt quá 5MB');
+      toast.error(tAuth('image_size_exceeded') || 'Kích thước ảnh không vượt quá 5MB');
       return;
     }
 
