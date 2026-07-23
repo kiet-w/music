@@ -8,6 +8,7 @@ interface AlbumDetailPageProps {
   locale: string;
 }
 
+// ponytail: unified album detail page view
 export function AlbumDetailPage({ locale }: AlbumDetailPageProps) {
   const { album, loading, isAlbumActive, id, currentTrackId, play, t } = useAlbumDetail(locale);
 

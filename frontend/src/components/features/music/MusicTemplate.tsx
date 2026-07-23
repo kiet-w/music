@@ -36,6 +36,7 @@ interface MusicTemplateProps {
 import { useKeyboardMode } from '@/hooks/useKeyboardMode';
 import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
+// ponytail: unified music page template structure
 export function MusicTemplate({
   activeTab,
   setActiveTab,
@@ -55,7 +56,7 @@ export function MusicTemplate({
         <GlobalLoading fullScreen message={t('loading') || 'Đang xử lý...'} />
       )}
       <div className="flex flex-col gap-2 mb-6 mt-2">
-        <h1 className="font-instrument text-4xl sm:text-5xl tracking-tighter leading-none">{t('add_music')}</h1>
+        <h1 className="font-instrument text-4xl sm:text-5xl tracking-tighter leading-none text-foreground">{t('add_music')}</h1>
         <p className="text-base text-muted-foreground leading-relaxed font-sans">
           {activeTab === 'youtube' ? 'Convert YouTube to MP3.' : 'Import MP3s from your Drive.'}
         </p>

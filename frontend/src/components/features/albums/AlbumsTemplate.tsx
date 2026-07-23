@@ -43,6 +43,7 @@ interface AlbumsTemplateProps {
   t: (key: string, values?: any) => string;
 }
 
+// ponytail: unified albums page template structure with 3xN grid layout
 export function AlbumsTemplate({
   albums,
   isLoading,
@@ -64,7 +65,7 @@ export function AlbumsTemplate({
 }: AlbumsTemplateProps) {
   useKeyboardMode('none');
   return (
-    <MainContainer className="h-[100dvh] max-h-[100dvh] overflow-hidden !pb-[100px] flex flex-col gap-4">
+    <MainContainer className="flex-1 min-h-0 flex flex-col gap-4">
       <div className="shrink-0">
         <AlbumsHeader 
           albumsCount={albums.length}
@@ -80,7 +81,7 @@ export function AlbumsTemplate({
         {isLoading && albums.length === 0 ? (
           <GlobalLoading />
         ) : albums.length > 0 ? (
-          <div className={viewMode === 'grid' ? "grid grid-cols-2 gap-x-6 gap-y-10 px-1.5" : "flex flex-col gap-4"}>
+          <div className={viewMode === 'grid' ? "grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-3 sm:gap-x-4 md:gap-x-5 gap-y-6 px-1 py-2" : "flex flex-col gap-4"}>
             {albums.map((album, index) => (
               viewMode === 'grid' ? (
                 <AlbumGridItem 

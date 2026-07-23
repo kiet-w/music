@@ -1,23 +1,16 @@
 import { Suspense } from 'react';
 import MessagesPage from '@/components/pages/MessagesPage';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
-export const dynamic = 'force-dynamic';
-
-export default function Page({ params }: { params: Promise<{ locale: string }> }) {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex-1 flex items-center justify-center min-h-[50vh] text-white/40">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-        </div>
-      }
-    >
-      <MessagesPageWrapper params={params} />
-    </Suspense>
-  );
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'vi' }];
 }
 
-async function MessagesPageWrapper({ params }: { params: Promise<{ locale: string }> }) {
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  return <MessagesPage locale={locale} />;
+  return (
+    <Suspense fallback={<GlobalLoading fullScreen />}>
+      <MessagesPage locale={locale} />
+    </Suspense>
+  );
 }

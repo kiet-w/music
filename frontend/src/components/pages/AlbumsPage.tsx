@@ -8,6 +8,7 @@ interface AlbumsPageProps {
   locale: string;
 }
 
+// ponytail: unified albums page view
 export function AlbumsPage({ locale }: AlbumsPageProps) {
   const {
     albums,

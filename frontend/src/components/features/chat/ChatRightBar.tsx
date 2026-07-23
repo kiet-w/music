@@ -4,40 +4,31 @@ import React, { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { User } from '@/components/features/chat/sidebar/UserList';
-import { MessagesHeader } from '@/components/features/chat/window/MessagesHeader';
 import { EmptyFriendListState } from '@/components/features/chat/sidebar/EmptyFriendListState';
-import { EmptyChatState } from '@/components/features/chat/window/EmptyChatState';
 import { ChatSidebar } from '@/components/features/chat/sidebar/ChatSidebar';
 import { ActiveChatSection } from '@/components/features/chat/window/ActiveChatSection';
 import { useChatStore } from '@/store/useChatStore';
 import { useFriends } from '@/hooks/useFriends';
 import { createInvite, acceptInvite } from '@/lib/api';
-import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { getUserStatusText } from '@/lib/userStatus';
-import { MainContainer } from '@/components/templates/wrappers/MainContainer';
-import { cn } from '@/lib/utils';
-import { useKeyboardMode } from '@/hooks/useKeyboardMode';
 import { GlobalLoading } from '@/components/atoms/GlobalLoading';
-
 import { getEffectiveAccessToken } from '@/store/useAuthStore';
+import { MessageSquare, X } from 'lucide-react';
 
 const FriendCodeModal = dynamic(
   () => import('@/components/features/chat/FriendCodeModal').then((mod) => mod.FriendCodeModal),
   { ssr: false }
 );
 
-interface MessagesPageProps {
-  locale: string;
+interface ChatRightBarProps {
+  onClose?: () => void;
 }
 
-// ponytail: unified chat page module wrapper with rounded-[2.5rem] and card surface
-export function MessagesPage({ locale }: MessagesPageProps) {
-  useKeyboardMode('body');
+// ponytail: chat rightbar widget with clean header layout and optional close button
+export default function ChatRightBar({ onClose }: ChatRightBarProps) {
   const t = useTranslations('Chat');
   const { users, loadUsers, currentUser, accessToken, isLoading: isLoadingFriends } = useFriends();
-  const searchParams = useSearchParams();
-  const targetUserId = searchParams.get('u');
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const { 
     messages, 
@@ -57,20 +48,12 @@ export function MessagesPage({ locale }: MessagesPageProps) {
   useEffect(() => {
     if (accessToken && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
-      loadUsers(accessToken).then((filteredUsers) => {
-        if (targetUserId && filteredUsers.some((u: User) => u.id === targetUserId)) {
-          setActiveReceiverId(targetUserId, accessToken);
-        }
-      });
+      loadUsers(accessToken);
     }
-  }, [accessToken, targetUserId, loadUsers, setActiveReceiverId]);
+  }, [accessToken, loadUsers]);
 
   const handleSelectUser = useCallback((userId: string | null) => {
     const token = getEffectiveAccessToken() || accessToken;
-    if (!userId && typeof window !== 'undefined') {
-      const cleanUrl = window.location.pathname;
-      window.history.replaceState({}, '', cleanUrl);
-    }
     setActiveReceiverId(userId, token || undefined).catch((err) => {
       console.error('Failed to load chat:', err);
     });
@@ -79,7 +62,7 @@ export function MessagesPage({ locale }: MessagesPageProps) {
   const handleSend = useCallback(async (content: string) => {
     const token = getEffectiveAccessToken() || accessToken;
     if (!token) {
-      toast.error(t('error_not_authenticated') || 'Vui lòng đăng nhập lại để gửi tin nhắn');
+      toast.error(t('error_not_authenticated') || 'Vui lòng đăng nhập lại');
       return;
     }
     try {
@@ -96,7 +79,7 @@ export function MessagesPage({ locale }: MessagesPageProps) {
     try {
       await reactToMessage(token, messageId, emoji);
     } catch (error) {
-      console.error('Failed to react to message:', error);
+      console.error('Failed to react:', error);
     }
   }, [reactToMessage]);
 
@@ -105,17 +88,13 @@ export function MessagesPage({ locale }: MessagesPageProps) {
     try {
       const { token } = await createInvite(accessToken);
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      const locale = searchParams.get('locale') || 'vi';
-      const inviteUrl = `${baseUrl}/${locale}/invite/${token}`;
-      
-      // Copy to clipboard
+      const inviteUrl = `${baseUrl}/vi/invite/${token}`;
       await navigator.clipboard.writeText(inviteUrl);
       toast.success(t('invite_success_copied') || 'Link copied to clipboard!');
     } catch (error) {
-      console.error('Failed to create invite:', error);
       toast.error(t('error_create_invite') || 'Failed to create invite link');
     }
-  }, [accessToken, searchParams, t]);
+  }, [accessToken, t]);
 
   const handleAcceptInvite = useCallback(async () => {
     if (!accessToken) return;
@@ -138,8 +117,7 @@ export function MessagesPage({ locale }: MessagesPageProps) {
         setActiveReceiverId(res.senderId, accessToken);
       }
     } catch (error: any) {
-      console.error('Failed to accept invite:', error);
-      toast.error(error?.message || t('error_accept_invite') || 'Failed to accept friend invite');
+      toast.error(error?.message || t('error_accept_invite') || 'Failed to accept invite');
     }
   }, [accessToken, loadUsers, setActiveReceiverId, t]);
 
@@ -147,24 +125,41 @@ export function MessagesPage({ locale }: MessagesPageProps) {
   const partnerStatus = getUserStatusText(activeChatPartner?.isOnline, activeChatPartner?.lastSeen);
 
   return (
-    <MainContainer
-      className="flex-1 min-h-0 flex flex-col overflow-hidden"
-    >
-      {!activeReceiverId && (
-        <MessagesHeader
-          title={t('title')}
-          onOpenTokenModal={() => setIsTokenModalOpen(true)}
-        />
-      )}
+    <div className="w-full h-full max-h-full bg-card border-none rounded-[2.5rem] overflow-hidden flex flex-col relative min-h-0 text-white">
+      {/* RightBar Header */}
+      <div className="px-5 py-3 border-b border-white/5 flex items-center justify-between bg-white/[0.02] shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="p-2 rounded-xl bg-white/5 text-white shrink-0">
+            <MessageSquare size={18} />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-sm font-bold text-white leading-tight truncate font-instrument">{t('title_and_friends')}</h2>
+            <p className="text-[11px] text-zinc-400 font-medium">{t('friends_count', { count: users.length })}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setIsTokenModalOpen(true)}
+            className="text-xs font-semibold text-white/80 hover:text-white px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
+          >
+            {t('add_friend')}
+          </button>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-full bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              aria-label="Đóng Chat"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
 
-      <div
-        className={cn(
-          "w-full flex-1 min-h-0 bg-card border border-white/10 rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row shadow-2xl relative",
-          activeReceiverId && "h-full rounded-[2.5rem] border border-white/10 bg-card/90 backdrop-blur-xl shadow-2xl"
-        )}
-      >
+      {/* Content Area */}
+      <div className="flex-1 min-h-0 relative flex flex-col overflow-hidden">
         {isLoadingFriends || (activeReceiverId && isLoading && messages.length === 0) ? (
-          <GlobalLoading message={t('invite_loading') || 'Đang tải dữ liệu...'} />
+          <GlobalLoading message={t('loading_messages')} />
         ) : users.length === 0 ? (
           <EmptyFriendListState
             onOpenTokenModal={() => setIsTokenModalOpen(true)}
@@ -173,41 +168,32 @@ export function MessagesPage({ locale }: MessagesPageProps) {
             users={users}
             isLoading={false}
           />
+        ) : activeReceiverId ? (
+          <ActiveChatSection
+            activeReceiverId={activeReceiverId}
+            activeChatPartner={activeChatPartner}
+            partnerStatus={partnerStatus}
+            messages={messages}
+            currentUserId={currentUser?.id || ''}
+            isLoading={isLoading}
+            isLoadingMore={isLoadingMore}
+            hasMoreMessages={hasMoreMessages}
+            onBack={() => handleSelectUser(null)}
+            onLoadMore={() => accessToken && loadMoreMessages(accessToken)}
+            onAcceptInvite={handleAcceptInvite}
+            onCreateInvite={handleCreateInvite}
+            onSend={handleSend}
+            onReactToMessage={handleReactToMessage}
+          />
         ) : (
-          <>
-            {/* Sidebar - User List Section */}
+          <div className="flex-1 overflow-y-auto p-2">
             <ChatSidebar
               users={users}
-              activeReceiverId={activeReceiverId}
+              activeReceiverId={null}
               unreadMessages={unreadMessages}
               onSelectUser={handleSelectUser}
-              showBorder={true}
             />
-
-            {/* Main Chat Area Section */}
-            {activeReceiverId ? (
-              <ActiveChatSection
-                activeReceiverId={activeReceiverId}
-                activeChatPartner={activeChatPartner}
-                partnerStatus={partnerStatus}
-                messages={messages}
-                currentUserId={currentUser?.id || ''}
-                isLoading={isLoading}
-                isLoadingMore={isLoadingMore}
-                hasMoreMessages={hasMoreMessages}
-                onBack={() => handleSelectUser(null)}
-                onLoadMore={() => accessToken && loadMoreMessages(accessToken)}
-                onAcceptInvite={handleAcceptInvite}
-                onCreateInvite={handleCreateInvite}
-                onSend={handleSend}
-                onReactToMessage={handleReactToMessage}
-              />
-            ) : (
-              <section className="hidden lg:flex flex-1 flex-col h-full overflow-hidden">
-                <EmptyChatState users={users} onSelectUser={handleSelectUser} />
-              </section>
-            )}
-          </>
+          </div>
         )}
       </div>
 
@@ -224,8 +210,6 @@ export function MessagesPage({ locale }: MessagesPageProps) {
           }}
         />
       )}
-    </MainContainer>
+    </div>
   );
 }
-
-export default MessagesPage;

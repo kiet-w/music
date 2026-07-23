@@ -13,6 +13,7 @@ interface RegisterPageProps {
   locale: string;
 }
 
+// ponytail: unified register page view with design.md tokens
 export function RegisterPage({ locale }: RegisterPageProps) {
   const t = useTranslations('Auth');
   const router = useRouter();
@@ -70,7 +71,7 @@ export function RegisterPage({ locale }: RegisterPageProps) {
       title={showOtp ? 'Xác thực Email' : t('register')}
       subtitle={showOtp ? 'Nhập mã OTP đã được gửi đến email của bạn' : t('have_account')}
       footer={footer}
-      gradientStyle="bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.18),_transparent_34%),linear-gradient(180deg,_#07111f_0%,_#111827_100%)]"
+      gradientStyle="bg-background"
     >
       {showOtp ? (
         <OtpForm 
@@ -97,3 +98,4 @@ export function RegisterPage({ locale }: RegisterPageProps) {
     </AuthTemplate>
   );
 }
+

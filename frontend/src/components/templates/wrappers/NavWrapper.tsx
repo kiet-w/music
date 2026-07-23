@@ -7,10 +7,9 @@ type NavWrapperProps = {
   children: ReactNode;
 };
 
+// ponytail: optimized public route detection to bypass navigation shell on authentication screens
 export function NavWrapper({ children }: NavWrapperProps) {
   const pathname = usePathname();
-  const params = useParams();
-  const locale = typeof params?.locale === 'string' ? params.locale : 'en';
 
   const cleanPath = pathname ? pathname.replace(/^\/(en|vi)/, '') : '';
   const isPublicRoute =

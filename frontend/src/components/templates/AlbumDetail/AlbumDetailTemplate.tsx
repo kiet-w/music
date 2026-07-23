@@ -36,6 +36,7 @@ interface AlbumDetailTemplateProps {
   t: (key: string) => string;
 }
 
+// ponytail: unified album detail page template structure
 export function AlbumDetailTemplate({
   album,
   loading,

@@ -17,6 +17,7 @@ interface LoginPageProps {
   locale: string;
 }
 
+// ponytail: unified login page view with design.md tokens
 export function LoginPage({ locale }: LoginPageProps) {
   const t = useTranslations('Auth');
   const router = useRouter();
@@ -79,7 +80,7 @@ export function LoginPage({ locale }: LoginPageProps) {
       title={showOtp ? 'Xác thực Email' : t('login')}
       subtitle={showOtp ? 'Tài khoản chưa được xác thực. Nhập mã OTP đã gửi đến email của bạn.' : 'Sign in to continue listening.'}
       footer={footer}
-      gradientStyle="bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.16),_transparent_36%),linear-gradient(180deg,_#070b14_0%,_#0f172a_100%)]"
+      gradientStyle="bg-background"
     >
       {showOtp ? (
         <OtpForm 
@@ -106,7 +107,7 @@ export function LoginPage({ locale }: LoginPageProps) {
               <span className="w-full border-t border-white/5" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-background px-4 text-[10px] font-mono font-semibold uppercase tracking-widest text-muted-foreground/60">
+              <span className="bg-card px-4 text-[10px] font-mono font-semibold uppercase tracking-widest text-muted-foreground/60">
                 OR
               </span>
             </div>
@@ -118,3 +119,4 @@ export function LoginPage({ locale }: LoginPageProps) {
     </AuthTemplate>
   );
 }
+

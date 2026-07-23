@@ -1,20 +1,17 @@
-'use client';
+import { LocaleRedirect } from '@/components/atoms/LocaleRedirect';
 
-import React, { useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
-import { GlobalLoading } from '@/components/atoms/GlobalLoading';
+export async function generateStaticParams() {
+  return [
+    { locale: 'vi' },
+    { locale: 'en' },
+  ];
+}
 
-export default function LocalePage({
+export default async function LocalePage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = use(params);
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace(`/${locale || 'vi'}/albums`);
-  }, [locale, router]);
-
-  return <GlobalLoading fullScreen />;
+  const { locale } = await params;
+  return <LocaleRedirect locale={locale} />;
 }

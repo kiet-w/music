@@ -1,5 +1,9 @@
 import { RegisterPage } from '@/components/pages/RegisterPage';
 
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'vi' }];
+}
+
 export default async function Page({
   params,
 }: {

@@ -102,7 +102,7 @@ export function ChatWindow({
       ref={scrollRef}
       onScroll={handleScroll}
       className={cn(
-        "flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col gap-4 scrollbar-hide",
+        "flex-1 min-h-0 p-4 sm:p-6 overflow-y-auto flex flex-col gap-4 scrollbar-hide",
         messages.length === 0 && "justify-center items-center"
       )}
     >

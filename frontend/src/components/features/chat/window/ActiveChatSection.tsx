@@ -26,6 +26,7 @@ interface ActiveChatSectionProps {
   onReactToMessage?: (messageId: string, emoji: string) => void;
 }
 
+// ponytail: active chat section with rounded 4-corner styling and padded bottom chat input
 export function ActiveChatSection({
   activeReceiverId,
   activeChatPartner,
@@ -47,12 +48,12 @@ export function ActiveChatSection({
   return (
     <section
       className={cn(
-        'flex-1 flex flex-col h-full overflow-hidden min-w-0 min-h-0',
+        'flex-1 min-h-0 flex flex-col overflow-hidden min-w-0 h-full relative',
         activeReceiverId ? 'flex' : 'hidden lg:flex'
       )}
     >
       {/* Chat Header */}
-      <div className="px-4 sm:px-6 py-3 border-b border-white/10 flex items-center justify-between bg-black/60 backdrop-blur-md shrink-0 w-full">
+      <div className="px-4 sm:px-6 py-3 border-b border-white/10 flex items-center justify-between bg-black/60 backdrop-blur-md shrink-0 w-full z-10">
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onBack}
@@ -82,25 +83,31 @@ export function ActiveChatSection({
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex-1 flex items-center justify-center text-white/40">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-        </div>
-      ) : (
-        <ChatWindow
-          messages={messages}
-          currentUserId={currentUserId}
-          partner={activeChatPartner}
-          onLoadMore={onLoadMore}
-          hasMore={hasMoreMessages}
-          isLoadingMore={isLoadingMore}
-          onAcceptInvite={onAcceptInvite}
-          onCreateInvite={onCreateInvite}
-          onReactToMessage={onReactToMessage}
-        />
-      )}
+      {/* Chat Messages Area */}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center text-white/40">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          </div>
+        ) : (
+          <ChatWindow
+            messages={messages}
+            currentUserId={currentUserId}
+            partner={activeChatPartner}
+            onLoadMore={onLoadMore}
+            hasMore={hasMoreMessages}
+            isLoadingMore={isLoadingMore}
+            onAcceptInvite={onAcceptInvite}
+            onCreateInvite={onCreateInvite}
+            onReactToMessage={onReactToMessage}
+          />
+        )}
+      </div>
 
-      <ChatInput onSend={onSend} />
+      {/* Chat Input Container with Padding */}
+      <div className="shrink-0 z-20 p-2.5 sm:p-3 border-t border-white/10 bg-black/40">
+        <ChatInput onSend={onSend} />
+      </div>
     </section>
   );
 }

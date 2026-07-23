@@ -81,7 +81,7 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
         .catch((err) => {
           console.error('Invite lookup error:', err);
           setPreviewInfo(null);
-          setPreviewError('Mã kết bạn không tồn tại hoặc đã hết hạn');
+          setPreviewError(t('invalid_or_expired_code'));
         })
         .finally(() => {
           setIsPreviewLoading(false);
@@ -89,7 +89,7 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [inputToken]);
+  }, [inputToken, t]);
 
   if (!isOpen) return null;
 
@@ -106,10 +106,10 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
     try {
       const { token } = await createInvite(accessToken);
       setGeneratedToken(token);
-      toast.success('Đã tạo Mã Kết Bạn thành công!');
+      toast.success(t('code_created_success'));
     } catch (err: any) {
       console.error('Failed to create invite token:', err);
-      toast.error(err?.message || 'Không thể tạo mã kết bạn');
+      toast.error(err?.message || t('create_friend_code_error'));
     } finally {
       setIsCreating(false);
     }
@@ -119,19 +119,19 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
     if (!generatedToken) return;
     await navigator.clipboard.writeText(generatedToken);
     setCopiedToken(true);
-    toast.success('Đã sao chép Mã Kết Bạn!');
+    toast.success(t('code_copied_success'));
     setTimeout(() => setCopiedToken(false), 2000);
   };
 
   const handleShareToken = async () => {
     if (!generatedToken) return;
     const shortCode = getShortDisplayCode(generatedToken);
-    const textToShare = `Nhập mã kết bạn [ ${shortCode} ] để kết bạn với mình nhé!`;
+    const textToShare = t('connect_with_user', { name: shortCode });
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Mã kết bạn',
+          title: t('friend_code'),
           text: textToShare,
         });
       } catch (err) {
@@ -147,10 +147,10 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
       const text = await navigator.clipboard.readText();
       if (text) {
         setInputToken(text.trim());
-        toast.success('Đã dán mã!');
+        toast.success(t('pasted_code_success'));
       }
     } catch (err) {
-      toast.error('Vui lòng cấp quyền dán hoặc dán thủ công');
+      toast.error(t('grant_paste_permission'));
     }
   };
 
@@ -158,7 +158,7 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
     e.preventDefault();
     let tokenStr = inputToken.trim();
     if (!tokenStr) {
-      toast.error('Vui lòng nhập Mã kết bạn');
+      toast.error(t('enter_friend_code'));
       return;
     }
 
@@ -172,14 +172,14 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
     setIsSubmitting(true);
     try {
       const res = await acceptInvite(accessToken, tokenStr);
-      toast.success('Đã kết bạn thành công!');
+      toast.success(t('accept_invite_success'));
       onClose();
       if (res?.senderId) {
         onSuccessConnect(res.senderId);
       }
     } catch (err: any) {
       console.error('Failed to accept by token:', err);
-      toast.error(err?.message || 'Không thể chấp nhận mã kết bạn');
+      toast.error(err?.message || t('accept_friend_code_error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -201,8 +201,8 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
             <div className="w-10 h-10 rounded-full bg-[#1b211d] flex items-center justify-center mb-1 border border-white/10">
               <KeyRound className="w-5 h-5 text-white" />
             </div>
-            <h1 className="font-bold text-lg text-white">Mã Kết Bạn</h1>
-            <p className="font-normal text-xs text-[#71717A]">Chia sẻ mã ngắn gọn để kết bạn nhanh chóng</p>
+            <h1 className="font-bold text-lg text-white">{t('friend_code')}</h1>
+            <p className="font-normal text-xs text-[#71717A]">{t('friend_code_modal_sub')}</p>
           </div>
 
           <div className="bg-[#18181B] rounded-full p-1 flex border border-white/10 text-xs">
@@ -214,7 +214,7 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
                   : 'text-[#71717A] hover:text-white'
               }`}
             >
-              Lấy mã của tôi
+              {t('tab_get_code')}
             </button>
             <button
               onClick={() => setActiveTab('enter')}
@@ -224,7 +224,7 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
                   : 'text-[#71717A] hover:text-white'
               }`}
             >
-              Nhập mã kết bạn
+              {t('tab_enter_code')}
             </button>
           </div>
 
@@ -244,14 +244,14 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
                       className="flex-1 bg-[#27272A] text-white hover:bg-[#3f3f46] border border-white/10 font-medium text-xs py-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5"
                     >
                       {copiedToken ? <Check className="w-3.5 h-3.5 text-[#059669]" /> : <Copy className="w-3.5 h-3.5" />}
-                      {copiedToken ? 'Đã sao chép' : 'Sao chép'}
+                      {copiedToken ? t('copied') : t('copy')}
                     </button>
                     <button
                       onClick={handleShareToken}
                       className="flex-1 bg-[#27272A] text-white hover:bg-[#3f3f46] border border-white/10 font-medium text-xs py-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5"
                     >
                       <Share2 className="w-3.5 h-3.5" />
-                      Chia sẻ
+                      {t('share')}
                     </button>
                   </div>
                 </div>
@@ -259,14 +259,14 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
                 <div className="animate-in fade-in slide-in-from-right-4">
                   <div className="text-center py-1 mb-3">
                     <p className="font-normal text-xs text-[#71717A]">
-                      Bấm nút bên dưới để tạo mã kết bạn. Bạn bè chỉ cần nhập mã này để kết bạn ngay lập tức!
+                      {t('create_code_desc')}
                     </p>
                   </div>
                   <button
                     onClick={handleGenerateToken}
                     className="w-full bg-[#059669] text-white font-medium text-xs py-3 rounded-xl transition-transform hover:bg-[#047857] active:scale-[0.98]"
                   >
-                    Tạo Mã Kết Bạn Nhanh
+                    {t('create_code_btn')}
                   </button>
                 </div>
               )}
@@ -277,20 +277,20 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
             <form onSubmit={handleAcceptByToken} className="flex flex-col gap-3 animate-in fade-in slide-in-from-left-4">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-medium text-[#71717A]">Nhập hoặc dán Mã Kết Bạn:</label>
+                  <label className="text-[11px] font-medium text-[#71717A]">{t('enter_or_paste_code')}</label>
                   <button
                     type="button"
                     onClick={handlePasteFromClipboard}
                     className="text-[11px] text-[#059669] hover:text-white transition-colors flex items-center gap-1 font-medium"
                   >
-                    <Clipboard className="w-3 h-3" /> Dán nhanh
+                    <Clipboard className="w-3 h-3" /> {t('paste_fast')}
                   </button>
                 </div>
                 <div className="relative">
                   <Input
                     value={inputToken}
                     onChange={(e) => setInputToken(e.target.value)}
-                    placeholder="Ví dụ: 5468-C0C9"
+                    placeholder={t('code_placeholder')}
                     className="bg-[#1b211d] border-white/10 text-white font-mono text-sm h-10 rounded-lg focus:border-[#059669] focus:ring-1 focus:ring-[#059669] uppercase tracking-widest px-3"
                   />
                 </div>
@@ -303,7 +303,7 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-[9px] text-[#059669] font-semibold flex items-center gap-1 uppercase tracking-wider mb-0.5">
-                      <CheckCircle2 className="w-3 h-3" /> Người mời
+                      <CheckCircle2 className="w-3 h-3" /> {t('inviter')}
                     </div>
                     <div className="text-xs font-medium text-white truncate">
                       {previewInfo.sender?.name || previewInfo.sender?.email}
@@ -325,7 +325,7 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
                 className="w-full bg-[#059669] disabled:opacity-50 disabled:active:scale-100 text-white font-medium text-xs py-3 rounded-xl transition-all hover:bg-[#047857] active:scale-[0.98] flex items-center justify-center gap-1.5 mt-1"
               >
                 <UserPlus className="w-3.5 h-3.5" />
-                {previewInfo ? `Kết bạn với ${previewInfo.sender?.name?.split(' ')[0] || 'người dùng'}` : 'Xác nhận'}
+                {previewInfo ? t('connect_with_user', { name: previewInfo.sender?.name?.split(' ')[0] || t('user') }) : t('confirm')}
               </button>
             </form>
           )}
@@ -333,9 +333,9 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
       </div>
       
       {/* Synchronizing loading states globally using the LoadingPopup */}
-      <LoadingPopup isOpen={isCreating} text="Đang tạo mã kết bạn..." />
-      <LoadingPopup isOpen={isSubmitting} text="Đang xác nhận kết bạn..." />
-      <LoadingPopup isOpen={isPreviewLoading} text="Đang tìm kiếm mã..." />
+      <LoadingPopup isOpen={isCreating} text={t('loading_creating_code')} />
+      <LoadingPopup isOpen={isSubmitting} text={t('loading_confirming_friend')} />
+      <LoadingPopup isOpen={isPreviewLoading} text={t('loading_searching_code')} />
     </>
   );
 };

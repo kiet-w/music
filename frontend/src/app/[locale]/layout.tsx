@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
 
 import { AuthGate } from '@/components/templates/wrappers/AuthGate';
 import { NavWrapper } from '@/components/templates/wrappers/NavWrapper';
@@ -21,7 +20,13 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const messages = await getMessages();
+  
+  let messages;
+  try {
+    messages = (await import(`../../messages/${locale}.json`)).default;
+  } catch (e) {
+    messages = (await import('../../messages/vi.json')).default;
+  }
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>

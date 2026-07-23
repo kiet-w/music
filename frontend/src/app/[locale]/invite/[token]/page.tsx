@@ -1,5 +1,12 @@
 import InviteTokenPage from '@/components/pages/InviteTokenPage';
 
+export async function generateStaticParams() {
+  return [
+    { locale: 'vi', token: 'default' },
+    { locale: 'en', token: 'default' },
+  ];
+}
+
 export default function Page({
   params,
 }: {

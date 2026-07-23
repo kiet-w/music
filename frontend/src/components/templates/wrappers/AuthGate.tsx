@@ -3,6 +3,8 @@
 import { type ReactNode } from 'react';
 import { useAuthGate } from '@/hooks/useAuthGate';
 
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
+
 type AuthGateProps = {
   children: ReactNode;
 };
@@ -11,11 +13,7 @@ export function AuthGate({ children }: AuthGateProps) {
   const { isHydrated, isPublicRoute } = useAuthGate();
 
   if (!isHydrated) {
-    return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
-      </div>
-    );
+    return <GlobalLoading fullScreen />;
   }
 
   if (isPublicRoute) {

@@ -7,6 +7,7 @@ import { MainContainer } from '@/components/templates/wrappers/MainContainer';
 import { InviteStateCard } from '@/components/features/chat/InviteStateCard';
 import { setInviteCookie } from '@/lib/inviteCookie';
 
+// ponytail: unified invite legacy page view
 function InviteLegacyContent() {
   const t = useTranslations('Chat');
   const searchParams = useSearchParams();

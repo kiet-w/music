@@ -1,6 +1,10 @@
 import React from 'react';
 import { UserPage } from '@/components/pages/UserPage';
 
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'vi' }];
+}
+
 export default async function Page({
   params,
 }: {

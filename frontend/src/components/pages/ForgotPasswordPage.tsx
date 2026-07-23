@@ -14,6 +14,7 @@ interface ForgotPasswordPageProps {
   locale: string;
 }
 
+// ponytail: unified forgot password page view with design.md tokens
 function ForgotPasswordContent({ locale }: ForgotPasswordPageProps) {
   const t = useTranslations('Auth');
   const router = useRouter();
@@ -175,7 +176,7 @@ function ForgotPasswordContent({ locale }: ForgotPasswordPageProps) {
           : `Đang xử lý đặt lại mật khẩu cho tài khoản ${email}`
       }
       footer={footer}
-      gradientStyle="bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.15),_transparent_36%),linear-gradient(180deg,_#0f0714_0%,_#170f1e_100%)]"
+      gradientStyle="bg-background"
     >
       {error && (
         <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20 mb-4 text-center">
@@ -221,7 +222,7 @@ function ForgotPasswordContent({ locale }: ForgotPasswordPageProps) {
 export function ForgotPasswordPage({ locale }: ForgotPasswordPageProps) {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-[#0f0714] text-white font-mono text-sm">
+      <div className="flex min-h-screen items-center justify-center bg-background text-white font-mono text-sm">
         Đang tải trang đặt lại mật khẩu...
       </div>
     }>
@@ -229,3 +230,4 @@ export function ForgotPasswordPage({ locale }: ForgotPasswordPageProps) {
     </Suspense>
   );
 }
+

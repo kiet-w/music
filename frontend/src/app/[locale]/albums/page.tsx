@@ -1,5 +1,9 @@
 import { AlbumsPage } from '@/components/pages/AlbumsPage';
 
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'vi' }];
+}
+
 export default async function Page({
   params,
 }: {

@@ -1,27 +1,34 @@
 'use client';
 
+// ponytail: youtube converter section wrapper for music import modal
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 
 const Downloader = dynamic(() => import('@/components/features/music/youtube/Downloader'), {
   ssr: false,
-  loading: () => <div className="h-[200px] bg-muted animate-pulse rounded-[2rem]" />
+  loading: () => <div className="h-[200px] bg-zinc-900/50 animate-pulse rounded-2xl" />,
 });
 
-export function YoutubeSection() {
+export interface YoutubeSectionProps {
+  onSuccess?: () => void;
+}
+
+export function YoutubeSection({ onSuccess }: YoutubeSectionProps) {
   return (
-    <motion.section 
+    <motion.section
       key="youtube"
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className="space-y-6"
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.15 }}
+      className="space-y-3"
     >
-      <div className="bg-card border-[0.5px] border-border p-6 rounded-[2.5rem] shadow-sm relative">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 overflow-hidden pointer-events-none" />
-        <Downloader />
+      <div className="bg-transparent p-0 relative overflow-hidden">
+        <Downloader onDownloadStarted={onSuccess} />
       </div>
     </motion.section>
   );
 }
+
+export default YoutubeSection;

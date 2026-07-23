@@ -13,6 +13,7 @@ interface InviteTokenPageProps {
   }>;
 }
 
+// ponytail: unified invite token page structure
 export function InviteTokenPage({ params }: InviteTokenPageProps) {
   const { locale, token } = use(params);
   const {

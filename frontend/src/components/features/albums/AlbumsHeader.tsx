@@ -30,14 +30,14 @@ export function AlbumsHeader({
           </p>
           <div className="flex gap-2">
             <button 
-              onClick={onImportClick}
-              className="flex items-center justify-center w-10 h-10 bg-blue-500/10 text-blue-600 rounded-full hover:bg-blue-500/20 transition-all active:scale-95 border border-blue-500/20 shadow-sm"
-              title={t('import_from_drive')}>
-              <HardDrive size={20} strokeWidth={1.5} />
+              onClick={() => window.dispatchEvent(new CustomEvent('open-add-music-popup'))}
+              className="flex items-center gap-2 bg-foreground text-background rounded-full px-4 h-10 hover:opacity-90 transition-all active:scale-95 text-xs font-bold uppercase tracking-wider shadow-lg shadow-foreground/10 cursor-pointer">
+              <Plus size={18} strokeWidth={2} />
+              <span>Convert / Thêm Nhạc</span>
             </button>
             <button 
               onClick={onCreateClick}
-              className="flex items-center gap-2 bg-foreground text-background rounded-full px-4 h-10 hover:opacity-90 transition-all active:scale-95 text-sm font-medium shadow-lg shadow-foreground/10">
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white rounded-full px-4 h-10 transition-all active:scale-95 text-xs font-bold uppercase tracking-wider border border-white/10 cursor-pointer">
               <Plus size={18} strokeWidth={2} />
               <span>{t('create')}</span>
             </button>

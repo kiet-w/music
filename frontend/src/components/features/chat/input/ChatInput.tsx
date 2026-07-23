@@ -3,19 +3,17 @@
 import React, { useState } from 'react';
 import { Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
-import { cn } from '@/lib/utils';
 
 interface ChatInputProps {
   onSend: (content: string) => Promise<void> | void;
   disabled?: boolean;
 }
 
+// ponytail: floating chat input card with rounded corners and high contrast send button
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [content, setContent] = useState('');
   const [isSending, setIsSending] = useState(false);
   const t = useTranslations('Chat');
-  const keyboardHeight = useKeyboardHeight();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,39 +25,32 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     try {
       await onSend(text);
     } catch (error) {
-      setContent(text); // Restore text if send failed
+      setContent(text);
     } finally {
       setIsSending(false);
-    }
-  };
-
-  const handleFocus = () => {
-    if (typeof window !== 'undefined') {
-      window.scrollTo(0, 0);
     }
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] border-t border-white/10 shrink-0 bg-black/90 backdrop-blur-md"
+      className="p-2 sm:p-2.5 bg-white/5 border border-white/10 rounded-2xl shrink-0 backdrop-blur-md relative z-20 w-full shadow-lg"
     >
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         <input
           type="text"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          onFocus={handleFocus}
           placeholder={t('type_placeholder') || 'Nhập tin nhắn...'}
           disabled={disabled || isSending}
-          className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition-colors text-sm"
+          className="flex-1 bg-transparent px-3 py-2 text-white placeholder:text-white/30 focus:outline-none transition-colors text-sm"
         />
         <button
           type="submit"
           disabled={disabled || isSending || !content.trim()}
-          className="w-12 h-12 flex items-center justify-center rounded-2xl bg-emerald-500 text-black font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-400 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer"
+          className="w-10 h-10 flex items-center justify-center rounded-xl bg-emerald-500 text-black font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-400 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer"
         >
-          <Send size={18} />
+          <Send size={16} />
         </button>
       </div>
     </form>

@@ -36,6 +36,7 @@ interface AlbumDetailTemplateProps {
   t: (key: string) => string;
 }
 
+// ponytail: unified album detail page template structure
 export function AlbumDetailTemplate({
   album,
   loading,
@@ -62,7 +63,7 @@ export function AlbumDetailTemplate({
   }
 
   return (
-    <MainContainer className="h-[100dvh] max-h-[100dvh] overflow-hidden !pb-[100px] flex flex-col gap-4">
+    <MainContainer className="flex-1 min-h-0 flex flex-col gap-4">
       <div className="flex items-center justify-between shrink-0">
         <Link href={`/${locale}/albums`}>
           <Button variant="ghost" size="sm" shape="full" className="-ml-2 bg-muted/50 hover:bg-muted">

@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AppLogger } from '../common/logger/app.logger';
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import { createReadStream } from 'fs';
 
 @Processor('conversion', { concurrency: 2 })
 export class ConversionProcessor extends WorkerHost {
@@ -42,7 +43,7 @@ export class ConversionProcessor extends WorkerHost {
       // 2. Upload to Supabase Storage using stream to avoid OOM
       this.appLogger.step('Uploading to Supabase Storage');
       const storagePath = `songs/${songId}.mp3`;
-      const fileStream = fs.createReadStream(outputPath);
+      const fileStream = createReadStream(outputPath);
       await this.storageService.uploadStream(fileStream, 'music', storagePath);
 
       // 3. Get Public URL

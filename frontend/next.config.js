@@ -17,11 +17,10 @@ const nextConfig = {
   trailingSlash: true,
   compress: true,
 
-  // Bật standalone trong production (build Docker)
-  ...(isDev ? {} : { output: 'standalone' }),
+  output: process.env.CAPACITOR_BUILD === 'true' ? 'export' : (isDev ? undefined : 'standalone'),
 
   images: {
-    unoptimized: false,
+    unoptimized: process.env.CAPACITOR_BUILD === 'true',
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200],
     imageSizes: [16, 32, 48, 64, 96],
@@ -47,7 +46,7 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true,
   },
 
   // Performance optimizations

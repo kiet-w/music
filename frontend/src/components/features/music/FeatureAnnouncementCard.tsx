@@ -14,6 +14,7 @@ export interface FeatureAnnouncementCardProps {
   footerIcon?: LucideIcon;
 }
 
+// ponytail: unified announcement card with monochromatic studio aesthetic & rounded-[2.5rem]
 export const FeatureAnnouncementCard: React.FC<FeatureAnnouncementCardProps> = ({
   icon: Icon = Sparkles,
   title,
@@ -25,22 +26,22 @@ export const FeatureAnnouncementCard: React.FC<FeatureAnnouncementCardProps> = (
   footerIcon: FooterIcon = Music,
 }) => {
   return (
-    <div className="max-w-2xl w-full bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-white/20 dark:border-gray-700/50 shadow-2xl rounded-3xl p-8 md:p-12 transition-all duration-300 hover:shadow-cyan-500/10 text-center">
-      <div className="flex justify-center mb-8">
-        <div className="h-20 w-20 bg-gradient-to-tr from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6 hover:rotate-0 transition-transform duration-300">
-          <Icon className="h-10 w-10 text-white animate-pulse" />
+    <div className="max-w-xl w-full bg-card border border-white/10 shadow-2xl rounded-[2.5rem] p-8 md:p-12 transition-all duration-300 text-center">
+      <div className="flex justify-center mb-6">
+        <div className="h-16 w-16 bg-white/10 border border-white/15 rounded-2xl flex items-center justify-center shadow-lg">
+          <Icon className="h-8 w-8 text-white" />
         </div>
       </div>
 
-      <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500 mb-6">
+      <h1 className="text-3xl md:text-4xl font-bold font-instrument tracking-tighter text-foreground mb-4">
         {title}
       </h1>
 
-      <div className="space-y-4 text-gray-600 dark:text-gray-300 text-lg mb-8 max-w-lg mx-auto">
+      <div className="space-y-3 text-muted-foreground text-base mb-8 max-w-md mx-auto leading-relaxed">
         {typeof description === 'string' ? <p>{description}</p> : description}
         {secondaryDescription && (
           typeof secondaryDescription === 'string' ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">{secondaryDescription}</p>
+            <p className="text-xs text-muted-foreground/80">{secondaryDescription}</p>
           ) : (
             secondaryDescription
           )
@@ -50,15 +51,15 @@ export const FeatureAnnouncementCard: React.FC<FeatureAnnouncementCardProps> = (
       <div className="flex justify-center">
         <button
           onClick={onAction}
-          className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2 overflow-hidden"
+          className="group px-6 py-3.5 bg-white hover:bg-white/90 text-black font-bold rounded-xl transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-lg cursor-pointer"
         >
           <span>{actionText}</span>
-          <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
 
       {footerText && (
-        <div className="mt-8 flex justify-center items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+        <div className="mt-8 flex justify-center items-center gap-2 text-xs text-muted-foreground font-mono">
           <FooterIcon className="h-4 w-4" />
           <span>{footerText}</span>
         </div>
@@ -68,3 +69,4 @@ export const FeatureAnnouncementCard: React.FC<FeatureAnnouncementCardProps> = (
 };
 
 export default FeatureAnnouncementCard;
+

@@ -18,6 +18,7 @@ interface UserPageProps {
   locale: string;
 }
 
+// ponytail: unified user settings module cards with rounded-[2.5rem] extreme corner radii
 export function UserPage({ locale }: UserPageProps) {
   useKeyboardMode('none');
   const t = useTranslations('Music');
@@ -185,11 +186,11 @@ export function UserPage({ locale }: UserPageProps) {
       <div className="w-full pb-32">
         <div className="flex flex-col gap-5 max-w-2xl">
           {/* User Info Overview Card */}
-          <div className="bg-card border-[0.5px] border-border p-5 sm:p-6 rounded-3xl shadow-sm relative flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
+          <div className="bg-card border border-white/10 p-5 sm:p-6 rounded-[2.5rem] shadow-xl relative flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
             {/* Avatar Container */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="relative w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-foreground font-instrument text-3xl border border-border shadow-inner cursor-pointer group overflow-hidden shrink-0"
+              className="relative w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-foreground font-instrument text-3xl border border-white/10 shadow-inner cursor-pointer group overflow-hidden shrink-0"
               title="Nhấp để thay đổi ảnh đại diện"
             >
               {displayAvatarUrl && !avatarError ? (
@@ -211,7 +212,7 @@ export function UserPage({ locale }: UserPageProps) {
 
             <div className="flex flex-col gap-1 min-w-0 flex-1 my-auto">
               <div className="flex items-center justify-center sm:justify-start gap-2">
-                <h2 className="text-lg font-bold text-foreground font-instrument truncate">{user?.name || 'Người dùng'}</h2>
+                <h2 className="text-lg font-bold text-foreground font-instrument tracking-tight truncate">{user?.name || 'Người dùng'}</h2>
                 <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider shrink-0">
                   <ShieldCheck className="w-3 h-3" /> Verified
                 </span>
@@ -221,10 +222,10 @@ export function UserPage({ locale }: UserPageProps) {
           </div>
 
           {/* Change Display Name Card */}
-          <div className="bg-card border-[0.5px] border-border p-5 sm:p-6 rounded-3xl shadow-sm relative">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
+          <div className="bg-card border border-white/10 p-5 sm:p-6 rounded-[2.5rem] shadow-xl relative">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
               <Sparkles className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-bold font-instrument">Thay đổi tên hiển thị</h2>
+              <h2 className="text-lg font-bold font-instrument tracking-tight">Thay đổi tên hiển thị</h2>
             </div>
 
             <form onSubmit={handleUpdateName} className="flex flex-col gap-4">
@@ -235,7 +236,7 @@ export function UserPage({ locale }: UserPageProps) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Nhập tên mới..."
-                  className="w-full px-4 py-3 bg-muted/50 rounded-2xl border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium transition-all"
+                  className="w-full px-4 py-3 bg-background/50 rounded-xl border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium transition-all"
                   required
                 />
               </div>
@@ -243,7 +244,7 @@ export function UserPage({ locale }: UserPageProps) {
               <button
                 type="submit"
                 disabled={isUpdatingName || !name.trim()}
-                className="w-full h-11 bg-foreground text-background font-bold rounded-2xl text-sm transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-foreground/10"
+                className="w-full h-11 bg-foreground text-background font-bold rounded-xl text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-foreground/10"
               >
                 Lưu thay đổi tên
               </button>
@@ -251,10 +252,10 @@ export function UserPage({ locale }: UserPageProps) {
           </div>
 
           {/* Change Password Card */}
-          <div className="bg-card border-[0.5px] border-border p-5 sm:p-6 rounded-3xl shadow-sm relative">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
+          <div className="bg-card border border-white/10 p-5 sm:p-6 rounded-[2.5rem] shadow-xl relative">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
               <KeyRound className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-bold font-instrument">Đổi mật khẩu</h2>
+              <h2 className="text-lg font-bold font-instrument tracking-tight">Đổi mật khẩu</h2>
             </div>
 
             <form onSubmit={handleChangePassword} className="flex flex-col gap-4">
@@ -265,7 +266,7 @@ export function UserPage({ locale }: UserPageProps) {
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-muted/50 rounded-2xl border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium transition-all"
+                  className="w-full px-4 py-3 bg-background/50 rounded-xl border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium transition-all"
                 />
               </div>
 
@@ -277,7 +278,7 @@ export function UserPage({ locale }: UserPageProps) {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Tối thiểu 6 ký tự..."
-                    className="w-full px-4 py-3 bg-muted/50 rounded-2xl border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium transition-all"
+                    className="w-full px-4 py-3 bg-background/50 rounded-xl border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium transition-all"
                     required
                   />
                 </div>
@@ -289,7 +290,7 @@ export function UserPage({ locale }: UserPageProps) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Nhập lại mật khẩu..."
-                    className="w-full px-4 py-3 bg-muted/50 rounded-2xl border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium transition-all"
+                    className="w-full px-4 py-3 bg-background/50 rounded-xl border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium transition-all"
                     required
                   />
                 </div>
@@ -298,7 +299,7 @@ export function UserPage({ locale }: UserPageProps) {
               <button
                 type="submit"
                 disabled={isUpdatingPassword || !newPassword || !confirmPassword}
-                className="w-full h-11 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-2xl text-sm transition-all border border-border disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-1"
+                className="w-full h-11 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl text-sm transition-all border border-white/10 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-1"
               >
                 <Lock className="w-4 h-4 text-primary" /> Đổi mật khẩu
               </button>
@@ -306,14 +307,14 @@ export function UserPage({ locale }: UserPageProps) {
           </div>
 
           {/* Danger Zone / Logout */}
-          <div className="bg-destructive/5 border-[0.5px] border-destructive/20 p-5 sm:p-6 rounded-3xl shadow-sm relative flex items-center justify-between">
+          <div className="bg-destructive/5 border border-destructive/20 p-5 sm:p-6 rounded-[2.5rem] shadow-xl relative flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-destructive">Đăng xuất tài khoản</h3>
+              <h3 className="text-sm font-bold text-destructive font-instrument tracking-tight">Đăng xuất tài khoản</h3>
               <p className="text-xs text-muted-foreground">Thoát khỏi phiên làm việc hiện tại trên thiết bị này</p>
             </div>
             <button
               onClick={handleLogout}
-              className="px-5 py-2.5 bg-destructive text-destructive-foreground font-bold rounded-2xl text-xs transition-all flex items-center gap-2 shadow-md shadow-destructive/20 cursor-pointer hover:opacity-90"
+              className="px-5 py-2.5 bg-destructive text-destructive-foreground font-bold rounded-xl text-xs transition-all active:scale-95 flex items-center gap-2 shadow-md shadow-destructive/20 cursor-pointer hover:opacity-90"
             >
               <LogOut className="w-4 h-4" /> Đăng xuất
             </button>

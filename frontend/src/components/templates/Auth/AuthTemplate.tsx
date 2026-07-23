@@ -14,6 +14,7 @@ interface AuthTemplateProps {
   gradientStyle: string;
 }
 
+// ponytail: unified auth layout container with rounded-[2.5rem] extreme corner radii
 export function AuthTemplate({
   title,
   subtitle,
@@ -23,19 +24,20 @@ export function AuthTemplate({
 }: AuthTemplateProps) {
   useKeyboardMode('none');
   return (
-    <MainContainer className="flex flex-col justify-start pt-16 sm:pt-20 text-foreground !pb-[calc(2rem+env(safe-area-inset-bottom))]">
-      <div className="w-full max-w-[360px] mx-auto">
-        <div className="mb-12 flex flex-col gap-2 items-start text-left">
-          <h1 className="font-instrument text-5xl md:text-6xl tracking-tighter leading-none">{title}</h1>
-          <p className="text-sm text-muted-foreground font-sans">{subtitle}</p>
+    <MainContainer className="flex flex-col justify-center pt-8 sm:pt-12 text-foreground !pb-[calc(2rem+env(safe-area-inset-bottom))]">
+      <div className="w-full max-w-[400px] mx-auto bg-card border border-white/10 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl relative">
+        <div className="mb-8 flex flex-col gap-2 items-start text-left">
+          <h1 className="font-instrument text-4xl sm:text-5xl tracking-tighter leading-none text-foreground">{title}</h1>
+          <p className="text-sm text-muted-foreground font-sans leading-relaxed">{subtitle}</p>
         </div>
 
         {children}
 
-        <footer className="pt-8 text-left text-sm">
+        <footer className="pt-6 text-left text-sm border-t border-white/5 mt-6">
           {footer}
         </footer>
       </div>
     </MainContainer>
   );
 }
+
