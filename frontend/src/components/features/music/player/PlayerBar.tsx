@@ -96,32 +96,8 @@ export default function PlayerBar() {
         )}
       </AnimatePresence>
 
-      {/* --- STACKED CARDS MASTER PLAYER DECK --- */}
+      {/* --- MASTER PLAYER DECK --- */}
       <div className="relative w-full">
-        {/* Layer 2 Card (Next Up Card in Stacked Deck - Offset & Angle Preview) */}
-        {upcomingTracks.length > 0 && (
-          <div
-            onClick={() => setIsStackExpanded(true)}
-            style={{ transform: 'rotate(-3deg) translateY(-8px)' }}
-            className="absolute -top-2 left-1/2 -translate-x-1/2 w-[92%] h-12 rounded-[2rem] bg-zinc-900/90 border border-white/10 shadow-lg z-10 cursor-pointer flex items-center justify-between px-4 text-xs text-zinc-400 opacity-80 hover:opacity-100 hover:rotate-0 transition-all duration-300"
-            title="Nhấp mở Stacked Cards Deck để sắp xếp thứ tự phát nhạc"
-          >
-            <span className="truncate max-w-[200px] text-[11px] font-medium">Kế tiếp: {upcomingTracks[0].title}</span>
-            <div className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-full text-[10px] text-white">
-              <Layers size={12} />
-              <span>Stacked</span>
-            </div>
-          </div>
-        )}
-
-        {/* Layer 3 Card (Deepest Stacked Card - Offset & Angle Preview) */}
-        {upcomingTracks.length > 1 && (
-          <div
-            onClick={() => setIsStackExpanded(true)}
-            style={{ transform: 'rotate(4deg) translateY(-16px)' }}
-            className="absolute -top-4 left-1/2 -translate-x-1/2 w-[84%] h-10 rounded-[1.8rem] bg-zinc-950/80 border border-white/5 shadow-md z-0 cursor-pointer opacity-50 transition-all"
-          />
-        )}
 
         {/* Layer 1 Frontmaster Card (Active Track Player) */}
         <div className="relative z-30 w-full bg-zinc-950/95 border border-white/15 backdrop-blur-2xl rounded-[2.5rem] flex flex-col p-4 sm:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.9)] transition-all duration-300">
