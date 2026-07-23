@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { LoginPage } from '@/components/pages/LoginPage';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
 export default async function Page({
   params,
@@ -8,7 +9,7 @@ export default async function Page({
 }) {
   const { locale } = await params;
   return (
-    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<GlobalLoading fullScreen />}>
       <LoginPage locale={locale} />
     </Suspense>
   );

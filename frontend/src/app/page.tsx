@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
 export default function RootPage() {
   const router = useRouter();
@@ -10,9 +11,5 @@ export default function RootPage() {
     router.replace('/vi/albums');
   }, [router]);
 
-  return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-      <div className="animate-pulse font-mono text-sm text-muted-foreground">Loading music...</div>
-    </div>
-  );
+  return <GlobalLoading fullScreen />;
 }

@@ -2,6 +2,7 @@
 
 import React, { useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
 export default function LocalePage({
   params,
@@ -15,9 +16,5 @@ export default function LocalePage({
     router.replace(`/${locale || 'vi'}/albums`);
   }, [locale, router]);
 
-  return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-      <div className="animate-pulse font-mono text-sm text-muted-foreground">Loading...</div>
-    </div>
-  );
+  return <GlobalLoading fullScreen />;
 }

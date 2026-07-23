@@ -1,5 +1,6 @@
 import { AlbumDetailPage } from '@/components/pages/AlbumDetailPage';
 import { Suspense } from 'react';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
 export default async function Page({
   params,
@@ -8,7 +9,7 @@ export default async function Page({
 }) {
   const { locale } = await params;
   return (
-    <Suspense fallback={<div className="p-8 text-center animate-pulse">Loading...</div>}>
+    <Suspense fallback={<GlobalLoading fullScreen />}>
       <AlbumDetailPage locale={locale} />
     </Suspense>
   );
