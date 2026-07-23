@@ -22,19 +22,20 @@ CACHE_DIR="$SCRIPT_DIR/.next/cache/turbopack"
 
 # Flag --reset để xóa cache khi cần
 if [[ "$1" == "--reset" ]]; then
-  echo -e "${YELLOW}🗑  Đang xóa Turbopack cache...${NC}"
+  echo -e "${YELLOW}🗑  Đang xóa cache .next...${NC}"
   rm -rf "$SCRIPT_DIR/.next"
   echo -e "${GREEN}✅ Cache đã xóa, sẽ compile lại từ đầu${NC}\n"
+elif [ -d "$SCRIPT_DIR/.next" ] && { [ ! -f "$SCRIPT_DIR/.next/routes-manifest.json" ] || [ -d "$SCRIPT_DIR/.next/standalone" ]; }; then
+  echo -e "${YELLOW}ℹ Phát hiện .next từ production build, tự động reset cache cho dev mode...${NC}"
+  rm -rf "$SCRIPT_DIR/.next"
 else
   if [ -d "$CACHE_DIR" ]; then
     CACHE_SIZE=$(du -sh "$CACHE_DIR" 2>/dev/null | cut -f1)
-    echo -e "${CYAN}⚡ Turbopack cache sẵn có ($CACHE_SIZE) — các route đã compile sẽ load nhanh!${NC}"
-  else
-    echo -e "${YELLOW}ℹ  Chưa có cache, lần đầu sẽ compile từng route khi bạn mở...${NC}"
+    echo -e "${CYAN}⚡ Dev cache sẵn có ($CACHE_SIZE)...${NC}"
   fi
 fi
 
 echo -e "${GREEN}▶ Khởi động Next.js với Turbopack...${NC}\n"
 
-# Chạy Turbopack dev server
-npm run dev:turbo
+# Chạy dev server
+npm run dev

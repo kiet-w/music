@@ -111,7 +111,7 @@ export function ReactionPicker({
           onClick={() => setShowMorePicker(!showMorePicker)}
           className={cn(
             "flex items-center justify-center w-6.5 h-6.5 rounded-full text-white/70 hover:text-white bg-white/5 hover:bg-white/20 transition-all focus:outline-none",
-            showMorePicker && "bg-emerald-500/30 text-emerald-400 ring-1 ring-emerald-500/50"
+            showMorePicker && "bg-white/20 text-white ring-1 ring-white/30"
           )}
         >
           <Plus className={cn("w-3.5 h-3.5 transition-transform duration-200", showMorePicker && "rotate-45")} />
@@ -164,7 +164,7 @@ export function ReactionPicker({
                       }}
                       className={cn(
                         "flex items-center justify-center h-7 text-lg rounded-lg hover:bg-white/15 transition-all active:scale-90 hover:scale-110",
-                        currentReaction === emoji && "bg-emerald-500/30 border border-emerald-500/50"
+                        currentReaction === emoji && "bg-white/20 border border-white/40"
                       )}
                     >
                       {emoji}

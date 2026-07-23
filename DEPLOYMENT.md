@@ -7,7 +7,7 @@ Before deploying to production, ensure you have:
 1. **Domain names** for:
    - Frontend (e.g., `music.yourdomain.com`)
    - Backend API (e.g., `api.music.yourdomain.com`)
-   - Python AI service (if used)
+   - Python converter service (e.g., `converter.music.yourdomain.com`)
 
 2. **Server/Hosting**:
    - VPS/Cloud server (DigitalOcean, AWS, GCP, etc.)
@@ -16,14 +16,58 @@ Before deploying to production, ensure you have:
 
 3. **Database**:
    - Supabase PostgreSQL database
-   - Redis server for caching/queues
+   - Redis server for caching/queues and Python service task storage
 
 4. **Services**:
    - Google OAuth credentials
    - Gmail SMTP for emails
    - Sentry account for error tracking
 
+## 🔒 Security Improvements Implemented
+
+The following security improvements have been implemented:
+
+- ✅ Removed hardcoded secrets from Dockerfiles
+- ✅ Generated secure production secrets (JWT, encryption keys)
+- ✅ Created production environment file templates
+- ✅ Fixed JWT configuration with proper token lifetimes
+- ✅ Implemented comprehensive rate limiting
+- ✅ Added health check endpoints for all services
+- ✅ Implemented Redis-based task storage for Python service
+- ✅ Added retry logic with exponential backoff for API calls
+- ✅ Enabled ESLint in production builds
+- ✅ Created Docker Compose configurations for development and production
+
 ## 🔧 Environment Setup
+
+### Quick Start with Docker Compose (Development)
+
+```bash
+# Start all services locally
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Production Deployment with Docker Compose
+
+```bash
+# Copy environment template
+cp .env.docker-compose .env
+
+# Fill in your actual production values
+nano .env
+
+# Start production services
+docker-compose -f docker-compose.prod.yml up -d
+
+# Check service health
+docker-compose -f docker-compose.prod.yml ps
+```
 
 ### 1. Backend Configuration
 
@@ -70,7 +114,32 @@ MAIL_FROM="Music App <your-email@gmail.com>"
 SENTRY_DSN=your-sentry-dsn
 ```
 
-### 2. Frontend Configuration
+### 2. Python Service Configuration
+
+```bash
+cd python-backend
+cp .env.production.example .env.production
+```
+
+Edit `.env.production` with your actual values:
+
+```env
+HOST=0.0.0.0
+PORT=8001
+ENVIRONMENT=production
+CORS_ORIGINS=https://music.yourdomain.com,https://www.music.yourdomain.com
+OUTPUT_DIR=/tmp/music_converter_downloads
+USE_REDIS=true
+REDIS_HOST=your-redis-host
+REDIS_PORT=6379
+REDIS_PASSWORD=your-redis-password
+REDIS_DB=0
+LOG_LEVEL=WARNING
+```
+
+**Important**: Set `USE_REDIS=true` in production to enable Redis-based task storage instead of in-memory storage.
+
+### 3. Frontend Configuration
 
 ```bash
 cd frontend
@@ -91,11 +160,14 @@ NEXT_PUBLIC_APP_URL=https://music.yourdomain.com
 
 ## 📦 Building for Production
 
-### Automated Build
+### Using Docker Compose (Recommended)
 
 ```bash
-# From project root
-./deploy.sh
+# Development build
+docker-compose build
+
+# Production build
+docker-compose -f docker-compose.prod.yml build
 ```
 
 ### Manual Build
@@ -115,6 +187,12 @@ export NODE_ENV=production
 cp .env.production .env.local
 npm install
 npm run build
+```
+
+#### Python Service Build
+```bash
+cd python-backend
+pip install -r requirements.txt
 ```
 
 #### Android APK Build
@@ -311,37 +389,70 @@ export KEY_PASSWORD=your_key_password
 
 ## 🔍 Post-Deployment Checklist
 
+### Health Checks
 - [ ] Backend health check: `https://api.music.yourdomain.com/health`
+- [ ] Backend readiness check: `https://api.music.yourdomain.com/health/ready`
+- [ ] Python service health: `https://converter.music.yourdomain.com/health`
+- [ ] Python service readiness: `https://converter.music.yourdomain.com/health/ready`
 - [ ] Frontend loads correctly
+
+### Functionality Tests
 - [ ] User registration/login works
 - [ ] Google OAuth functions properly
 - [ ] Music playback works
 - [ ] File uploads work
 - [ ] Email sending works
+- [ ] YouTube conversion works
+- [ ] Google Drive integration works
+- [ ] Real-time chat functions
+- [ ] Album management works
+
+### Infrastructure & Security
 - [ ] Sentry error tracking is active
 - [ ] Database connections are stable
 - [ ] Redis caching is working
+- [ ] Redis task storage is enabled for Python service
 - [ ] APK installs and runs on Android
 - [ ] All API endpoints respond correctly
 - [ ] SSL certificates are valid
 - [ ] CORS configuration is correct
 - [ ] Rate limiting is active
 - [ ] Logging is working
+- [ ] Environment variables are properly set
+- [ ] No hardcoded secrets in containers
 
 ## 📊 Monitoring
 
+### Health Check Endpoints
+
+All services now have comprehensive health check endpoints:
+
+**Backend (NestJS):**
+- `GET /health` - Liveness probe (basic status)
+- `GET /health/ready` - Readiness probe (checks database connectivity)
+
+**Python Service:**
+- `GET /health` - Liveness probe (basic status)
+- `GET /health/ready` - Readiness probe (checks storage and task storage)
+
 ### Backend Monitoring
 - **Sentry**: Error tracking (already configured)
-- **Prometheus**: Metrics at `/metrics` endpoint
-- **Logs**: Check PM2 logs: `pm2 logs music-api`
+- **Prometheus**: Metrics at `/metrics` endpoint (protected to internal IPs only)
+- **Logs**: Check PM2 logs: `pm2 logs music-api` or Docker logs: `docker-compose logs -f backend`
 
 ### Frontend Monitoring
 - **Sentry**: Client-side error tracking
 - **Performance**: Use Chrome DevTools Lighthouse
+- **API Retry Logic**: Automatic retry with exponential backoff for failed requests
+
+### Python Service Monitoring
+- **Health Checks**: Monitor service health via `/health` and `/health/ready` endpoints
+- **Task Storage**: Monitor Redis task storage if enabled
+- **Logs**: Check Docker logs: `docker-compose logs -f python-backend`
 
 ### Database Monitoring
 - **Supabase Dashboard**: Monitor database performance
-- **Redis**: Use `redis-cli` to monitor Redis stats
+- **Redis**: Use `redis-cli` to monitor Redis stats or Docker logs: `docker-compose logs -f redis`
 
 ## 🔄 CI/CD Pipeline
 
@@ -391,24 +502,42 @@ jobs:
 ### Common Issues
 
 1. **Backend won't start**
-   - Check environment variables
+   - Check environment variables are properly set
    - Verify database connection
-   - Check logs: `pm2 logs music-api`
+   - Check logs: `pm2 logs music-api` or `docker-compose logs backend`
+   - Ensure Redis is accessible
 
 2. **Frontend build fails**
    - Clear Next.js cache: `rm -rf .next`
    - Verify environment variables
    - Check Node.js version
+   - Ensure ESLint passes (now enabled in production)
 
-3. **APK won't install**
+3. **Python service fails**
+   - Check Redis connection if `USE_REDIS=true`
+   - Verify output directory permissions
+   - Check logs: `docker-compose logs python-backend`
+   - Ensure yt-dlp is properly installed
+
+4. **APK won't install**
    - Verify signing configuration
    - Check Android SDK version
    - Ensure proper permissions
 
-4. **Database connection fails**
+5. **Database connection fails**
    - Verify DATABASE_URL format
    - Check Supabase connection settings
    - Ensure IP whitelist allows your server
+
+6. **Redis connection issues**
+   - Verify Redis host and port
+   - Check Redis password if set
+   - Test connection: `redis-cli -h host -p port ping`
+
+7. **Health checks failing**
+   - Check service logs for specific errors
+   - Verify all dependencies are running
+   - Test endpoints manually: `curl http://localhost:4000/health`
 
 ## 📞 Support
 

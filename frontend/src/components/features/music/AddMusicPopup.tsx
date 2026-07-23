@@ -27,6 +27,20 @@ export function AddMusicPopup({
     setActiveTab(defaultTab);
   }, [defaultTab]);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    }
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -44,14 +58,6 @@ export function AddMusicPopup({
             </p>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          type="button"
-          className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white flex items-center justify-center transition-all cursor-pointer"
-          aria-label="Close modal"
-        >
-          <X className="w-4 h-4" />
-        </button>
       </div>
 
       {/* Tab Switcher */}

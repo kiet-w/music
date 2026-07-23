@@ -190,13 +190,6 @@ export const FriendCodeModal: React.FC<FriendCodeModalProps> = ({
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
         <div className="bg-[#09090B] w-full max-w-[340px] sm:max-w-sm rounded-2xl border border-white/10 p-4 sm:p-5 flex flex-col gap-4 relative shadow-2xl animate-in zoom-in-95 duration-200">
           
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-[#71717A] hover:text-white transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
           <div className="flex flex-col items-center text-center gap-1">
             <div className="w-10 h-10 rounded-full bg-[#1b211d] flex items-center justify-center mb-1 border border-white/10">
               <KeyRound className="w-5 h-5 text-white" />

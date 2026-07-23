@@ -1,5 +1,3 @@
-import { Capacitor } from '@capacitor/core';
-
 const isServer = typeof window === 'undefined';
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -13,7 +11,7 @@ if (isProd) {
 }
 
 const PRODUCTION_API_URL = 'https://music-backend-cb0i.onrender.com';
-const isNative = typeof window !== 'undefined' && Capacitor.isNativePlatform();
+const isNative = false;
 
 const DEFAULT_API_FALLBACK = (isNative || isProd)
   ? PRODUCTION_API_URL
@@ -55,12 +53,49 @@ export function getAuthHeaders(appToken?: string) {
 }
 
 /**
+ * Retry wrapper for API calls with exponential backoff
+ */
+async function fetchWithRetry(url: string, options: RequestInit = {}, maxRetries = 3, delay = 1000): Promise<Response> {
+  let lastError: Error = new Error('Network error');
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      // Retry on server errors (5xx) and network errors
+      if (!response.ok && response.status >= 500 && attempt < maxRetries) {
+        lastError = new Error(`Server error ${response.status}`);
+        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, attempt)));
+        continue;
+      }
+      
+      return response;
+    } catch (err: any) {
+      lastError = err;
+      
+      // Don't retry on abort errors or client errors (4xx)
+      if (err.name === 'AbortError' || (err.status && err.status >= 400 && err.status < 500)) {
+        throw err;
+      }
+      
+      // Retry on network errors
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, attempt)));
+        continue;
+      }
+    }
+  }
+  
+  throw lastError;
+}
+
+/**
  * Custom fetch wrapper to handle standardized backend error responses
  */
 async function customFetch(url: string, options: RequestInit = {}) {
   let res: Response;
   try {
-    res = await fetch(url, options);
+    res = await fetchWithRetry(url, options);
   } catch (err: any) {
     if (err.name === 'AbortError') {
       const error = new Error('Hydration timeout');
@@ -351,7 +386,7 @@ export async function deleteTrack(appToken: string, id: string) {
   return true;
 }
 
-export async function moveTrackToAlbum(appToken: string, id: string, albumId: string) {
+export async function moveTrackToAlbum(appToken: string, id: string, albumId?: string | null) {
   const result = await customFetch(`${API_URL}/songs/${id}/move`, {
     method: 'PATCH',
     headers: getAuthHeaders(appToken),

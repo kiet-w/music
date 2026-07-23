@@ -36,10 +36,10 @@ export const MainContainer = ({ children, className = '' }: MainContainerProps) 
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-20 md:pb-24 lg:pb-24 min-h-[100dvh] h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden">
+    <div className="w-full max-w-full px-4 sm:px-8 lg:px-10 pt-6 sm:pt-8 pb-4 sm:pb-6 min-h-[100dvh] h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden">
       <main
         className={cn(
-          "relative z-0 w-full flex-1 min-h-0 flex flex-col overflow-y-auto scrollbar-hide transition-all duration-300 pb-4",
+          "relative z-0 w-full flex-1 min-h-0 flex flex-col overflow-y-auto scrollbar-hide transition-all duration-300 pb-2",
           className
         )}
       >

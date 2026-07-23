@@ -29,7 +29,7 @@ export function MessagesHeader({
         <h1 className="font-instrument text-4xl sm:text-5xl tracking-tighter leading-none text-foreground">{displayTitle}</h1>
         <Button
           onClick={onOpenTokenModal}
-          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 font-bold rounded-2xl text-xs sm:text-sm px-4 py-2 h-10 flex items-center gap-2 transition-all active:scale-95 shadow-md shadow-emerald-500/10 shrink-0"
+          className="bg-white hover:bg-white/90 text-black border border-white/20 font-bold rounded-2xl text-xs sm:text-sm px-4 py-2 h-10 flex items-center gap-2 transition-all active:scale-95 shadow-md shadow-white/10 shrink-0"
         >
           <UserPlus className="w-4 h-4" />
           {displayButtonText}

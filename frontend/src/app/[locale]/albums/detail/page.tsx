@@ -1,16 +1,12 @@
-import { AlbumDetailPage } from '@/components/pages/AlbumDetailPage';
-import { Suspense } from 'react';
-import { GlobalLoading } from '@/components/atoms/GlobalLoading';
+import { redirect } from 'next/navigation';
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+interface PageProps {
+  params: Promise<{
+    locale: string;
+  }>;
+}
+
+export default async function AlbumDetailPage({ params }: PageProps) {
   const { locale } = await params;
-  return (
-    <Suspense fallback={<GlobalLoading fullScreen />}>
-      <AlbumDetailPage locale={locale} />
-    </Suspense>
-  );
+  redirect(`/${locale}/albums`);
 }

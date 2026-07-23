@@ -1,3 +1,5 @@
+import { notFound } from 'next/navigation';
+
 export async function generateStaticParams() {
   return [
     { locale: 'vi', catchAll: ['404'] },
@@ -6,5 +8,5 @@ export async function generateStaticParams() {
 }
 
 export default function CatchAllNotFound() {
-  return <div className="p-8 text-center text-white">404 - Not Found</div>;
+  notFound();
 }

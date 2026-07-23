@@ -28,6 +28,20 @@ export function CreateAlbumDialog({
   onCoverFileSelect,
   t 
 }: CreateAlbumDialogProps) {
+  React.useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    }
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -41,7 +55,7 @@ export function CreateAlbumDialog({
               placeholder={t('album_title') || 'Nhập tên Album...'} 
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 rounded-2xl border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition-all text-sm sm:text-base font-medium"
+              className="w-full px-4 py-3 bg-white/5 rounded-2xl border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-white/50 transition-all text-sm sm:text-base font-medium"
               required
               autoFocus
             />
@@ -72,7 +86,7 @@ export function CreateAlbumDialog({
             </button>
             <button 
               type="submit"
-              className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20 text-sm cursor-pointer"
+              className="px-8 py-3 bg-white hover:bg-white/90 text-black font-bold rounded-xl transition-all shadow-lg shadow-white/10 text-sm cursor-pointer"
             >
               {t('create') || 'Tạo Album'}
             </button>

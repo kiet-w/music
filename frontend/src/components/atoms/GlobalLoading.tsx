@@ -20,10 +20,10 @@ export function GlobalLoading({ fullScreen = false, message }: GlobalLoadingProp
       <div className="glass-dark border border-white/10 rounded-3xl p-6 sm:p-8 max-w-xs w-full flex flex-col items-center justify-center space-y-4 shadow-2xl animate-in zoom-in-95 duration-200 text-center">
         <div className="relative flex items-center justify-center">
           {/* Glowing pulse backdrop */}
-          <div className="absolute w-12 h-12 rounded-full bg-emerald-500/20 blur-xl animate-pulse" />
+          <div className="absolute w-12 h-12 rounded-full bg-white/10 blur-xl animate-pulse" />
           
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center relative z-10">
-            <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
+          <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center relative z-10">
+            <Loader2 className="w-6 h-6 text-white animate-spin" />
           </div>
         </div>
 

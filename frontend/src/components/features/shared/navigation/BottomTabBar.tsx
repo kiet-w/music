@@ -39,11 +39,11 @@ export default function BottomTabBar() {
   return (
     <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none md:hidden transition-all duration-300",
-        isKeyboardVisible && "translate-y-full opacity-0 pointer-events-none"
+        "fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center pointer-events-none transition-all duration-300",
+        isKeyboardVisible && "translate-y-full opacity-0"
       )}
     >
-      <div className="mx-auto max-w-md w-[calc(100%-2.5rem)] flex items-center justify-around bg-black/90 border border-white/10 rounded-full h-[64px] px-2 shadow-2xl backdrop-blur-xl pointer-events-auto">
+      <div className="flex items-center gap-4 sm:gap-6 pointer-events-auto">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
           const Icon = tab.icon;
@@ -53,31 +53,21 @@ export default function BottomTabBar() {
               href={`/${locale}${tab.path === '/' ? '' : tab.path}`}
               prefetch={true}
               className={cn(
-                "relative flex flex-col items-center justify-center w-16 h-full transition-all duration-200 active:scale-95",
-                active ? "text-white font-bold" : "text-white/40 hover:text-white/80"
+                "relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-95 cursor-pointer",
+                active 
+                  ? "text-white font-bold scale-110" 
+                  : "text-white/50 hover:text-white"
               )}
+              title={tab.name}
             >
-              <div className="relative transition-transform duration-300">
-                <Icon 
-                  size={20} 
-                  strokeWidth={active ? 2.2 : 1.5} 
-                  className={cn(active && "-translate-y-1 scale-110 text-white")}
-                />
-                {tab.badge !== undefined && tab.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-black text-[10px] font-extrabold ring-2 ring-black">
-                    {tab.badge}
-                  </span>
-                )}
-              </div>
-              <span className={cn(
-                "text-[9px] font-bold uppercase tracking-widest absolute bottom-2 opacity-0 transition-opacity duration-200",
-                active && "opacity-100"
-              )}>
-                {tab.name}
-              </span>
-              {/* Dot indicator */}
-              {active && (
-                <span className="absolute bottom-[6px] w-1 h-1 bg-white rounded-full shadow-sm" />
+              <Icon 
+                size={22} 
+                strokeWidth={active ? 2.2 : 1.5} 
+              />
+              {tab.badge !== undefined && tab.badge > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center px-1 rounded-full bg-white text-black text-[10px] font-extrabold shadow-md">
+                  {tab.badge}
+                </span>
               )}
             </Link>
           );
@@ -86,13 +76,10 @@ export default function BottomTabBar() {
         {/* Logout Button */}
         <button 
           onClick={handleLogout}
-          className="relative flex flex-col items-center justify-center w-16 h-full transition-colors duration-200 text-white/40 hover:text-white/80 active:scale-95"
+          className="relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 text-white/50 hover:text-white active:scale-95 cursor-pointer"
           title={user?.email || (t('Navbar.logout') as string) || 'Logout'}
         >
           <LogOut size={20} strokeWidth={1.5} />
-          <span className="text-[10px] font-bold uppercase tracking-widest absolute bottom-2 opacity-0 hover:opacity-100 transition-opacity duration-200">
-            {(t('Navbar.logout') as string) || 'Logout'}
-          </span>
         </button>
       </div>
     </div>

@@ -23,14 +23,14 @@ export function PresenceStatusBadge({
       <span
         className={cn(
           "w-2 h-2 rounded-full shrink-0",
-          isOnline ? "bg-emerald-400 animate-pulse" : "bg-white/30",
+          isOnline ? "bg-white animate-pulse" : "bg-white/30",
           dotClassName
         )}
       />
       <span
         className={cn(
           "font-medium",
-          isOnline ? "text-emerald-400" : "text-white/50",
+          isOnline ? "text-white" : "text-white/50",
           textClassName
         )}
       >

@@ -1,14 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
-import { AlbumSkeleton } from '@/components/features/shared/AlbumSkeleton';
 import { AlbumsHeader } from '@/components/features/albums/AlbumsHeader';
 import { AlbumGridItem } from '@/components/features/albums/grid/AlbumGridItem';
 import { AlbumListItem } from '@/components/features/albums/list/AlbumListItem';
 import { CreateAlbumDialog } from '@/components/features/albums/dialogs/CreateAlbumDialog';
 import { AlbumsEmptyState } from '@/components/features/albums/AlbumsEmptyState';
 import { GlobalLoading } from '@/components/atoms/GlobalLoading';
+import { AlbumDetailModal } from '@/components/features/albums/detail/AlbumDetailModal';
+import { useKeyboardMode } from '@/hooks/useKeyboardMode';
 
 interface Album {
   id: string;
@@ -20,8 +21,6 @@ interface Album {
     songs: number;
   };
 }
-
-import { useKeyboardMode } from '@/hooks/useKeyboardMode';
 
 interface AlbumsTemplateProps {
   albums: Album[];
@@ -43,7 +42,6 @@ interface AlbumsTemplateProps {
   t: (key: string, values?: any) => string;
 }
 
-// ponytail: unified albums page template structure with 3xN grid layout
 export function AlbumsTemplate({
   albums,
   isLoading,
@@ -64,6 +62,8 @@ export function AlbumsTemplate({
   t
 }: AlbumsTemplateProps) {
   useKeyboardMode('none');
+  const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null);
+
   return (
     <MainContainer className="flex-1 min-h-0 flex flex-col gap-4">
       <div className="shrink-0">
@@ -81,7 +81,7 @@ export function AlbumsTemplate({
         {isLoading && albums.length === 0 ? (
           <GlobalLoading />
         ) : albums.length > 0 ? (
-          <div className={viewMode === 'grid' ? "grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-3 sm:gap-x-4 md:gap-x-5 gap-y-6 px-1 py-2" : "flex flex-col gap-4"}>
+          <div className={viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-5 sm:gap-6 w-full px-1 py-2" : "flex flex-col gap-4 w-full"}>
             {albums.map((album, index) => (
               viewMode === 'grid' ? (
                 <AlbumGridItem 
@@ -90,14 +90,16 @@ export function AlbumsTemplate({
                   index={index} 
                   locale={locale} 
                   t={t} 
+                  onSelectAlbum={(target) => setSelectedAlbumId(target.id)}
                 />
               ) : (
-                <AlbumListItem 
-                  key={album.id} 
-                  album={album} 
-                  locale={locale} 
-                  t={t} 
-                />
+                <div key={album.id} onClick={() => setSelectedAlbumId(album.id)}>
+                  <AlbumListItem 
+                    album={album} 
+                    locale={locale} 
+                    t={t} 
+                  />
+                </div>
               )
             ))}
           </div>
@@ -108,6 +110,13 @@ export function AlbumsTemplate({
           />
         )}
       </div>
+
+      {/* Album Detail Popup Modal */}
+      <AlbumDetailModal
+        albumId={selectedAlbumId}
+        isOpen={Boolean(selectedAlbumId)}
+        onClose={() => setSelectedAlbumId(null)}
+      />
 
       <CreateAlbumDialog 
         isOpen={isCreating}

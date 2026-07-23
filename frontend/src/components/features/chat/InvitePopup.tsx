@@ -24,7 +24,7 @@ export const InvitePopup: React.FC<InvitePopupProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
       <div className="glass-dark w-full max-w-md rounded-3xl border border-white/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         <div className="p-8 flex flex-col items-center text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-emerald-500 mb-6 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <div className="w-20 h-20 rounded-full bg-white/10 border border-white/20 mb-6 flex items-center justify-center shadow-lg">
             <User className="w-10 h-10 text-white" />
           </div>
           
@@ -40,7 +40,7 @@ export const InvitePopup: React.FC<InvitePopupProps> = ({
             <Button 
               onClick={onAccept}
               disabled={isLoading}
-              className="w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all disabled:opacity-50"
+              className="w-full h-12 bg-white hover:bg-white/90 text-black font-bold rounded-xl transition-all disabled:opacity-50"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin mr-2" />

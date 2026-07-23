@@ -1,0 +1,310 @@
+/* 
+ * High-Performance Animation Utilities for 120fps Smoothness
+ * Optimized for GPU acceleration and minimal repaints/reflows
+ */
+
+/* GPU Acceleration Base Classes */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+}
+
+.gpu-accelerated-3d {
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Optimized Transitions */
+.transition-fast {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-medium {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Specific Property Transitions (Better than transition-all) */
+.transition-transform {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-opacity {
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-transform-opacity {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-transform-scale {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Scale Animations with GPU Acceleration */
+.scale-enter {
+  transform: scale(0.95) translateZ(0);
+  opacity: 0;
+}
+
+.scale-enter-active {
+  transform: scale(1) translateZ(0);
+  opacity: 1;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scale-exit {
+  transform: scale(1) translateZ(0);
+  opacity: 1;
+}
+
+.scale-exit-active {
+  transform: scale(0.95) translateZ(0);
+  opacity: 0;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 1, 1),
+              opacity 0.15s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Slide Animations with GPU Acceleration */
+.slide-up-enter {
+  transform: translateY(15px) translateZ(0);
+  opacity: 0;
+}
+
+.slide-up-enter-active {
+  transform: translateY(0) translateZ(0);
+  opacity: 1;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-up-exit {
+  transform: translateY(0) translateZ(0);
+  opacity: 1;
+}
+
+.slide-up-exit-active {
+  transform: translateY(15px) translateZ(0);
+  opacity: 0;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 1, 1),
+              opacity 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Slide Down Animation */
+.slide-down-enter {
+  transform: translateY(-15px) translateZ(0);
+  opacity: 0;
+}
+
+.slide-down-enter-active {
+  transform: translateY(0) translateZ(0);
+  opacity: 1;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-down-exit {
+  transform: translateY(0) translateZ(0);
+  opacity: 1;
+}
+
+.slide-down-exit-active {
+  transform: translateY(-15px) translateZ(0);
+  opacity: 0;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 1, 1),
+              opacity 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Fade Animations */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Pulse Animation (Optimized) */
+@keyframes pulse-optimized {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05) translateZ(0);
+  }
+}
+
+.pulse-optimized {
+  animation: pulse-optimized 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform, opacity;
+}
+
+/* Shimmer/Loading Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  will-change: background-position;
+}
+
+/* Bounce Animation (Optimized) */
+@keyframes bounce-optimized {
+  0%, 100% {
+    transform: translateY(0) translateZ(0);
+  }
+  50% {
+    transform: translateY(-5px) translateZ(0);
+  }
+}
+
+.bounce-optimized {
+  animation: bounce-optimized 0.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+/* Spin Animation (Optimized) */
+@keyframes spin-optimized {
+  from {
+    transform: rotate(0deg) translateZ(0);
+  }
+  to {
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+.spin-optimized {
+  animation: spin-optimized 1s linear infinite;
+  will-change: transform;
+}
+
+/* Ripple Effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0) translateZ(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4) translateZ(0);
+    opacity: 0;
+  }
+}
+
+.ripple {
+  animation: ripple 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+/* Hover Effects (Optimized) */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px) translateZ(0);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.hover-scale {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05) translateZ(0);
+}
+
+.hover-glow {
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Button Press Effect */
+.button-press:active {
+  transform: scale(0.97) translateZ(0);
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stagger Animation Delays */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* Performance Helpers */
+.no-layout-shift {
+  contain: layout style paint;
+}
+
+.paint-only {
+  contain: paint;
+}
+
+.layout-only {
+  contain: layout;
+}
+
+/* Content Visibility for Off-screen Elements */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High DPI Display Optimization */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .retina-optimized {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

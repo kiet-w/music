@@ -14,13 +14,11 @@ const isDev = process.env.NODE_ENV === 'development';
 const nextConfig = {
   outputFileTracingRoot: path.resolve(__dirname, '../'),
   reactStrictMode: true,
-  trailingSlash: true,
   compress: true,
 
-  output: process.env.CAPACITOR_BUILD === 'true' ? 'export' : (isDev ? undefined : 'standalone'),
+  output: isDev ? undefined : 'standalone',
 
   images: {
-    unoptimized: process.env.CAPACITOR_BUILD === 'true',
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200],
     imageSizes: [16, 32, 48, 64, 96],

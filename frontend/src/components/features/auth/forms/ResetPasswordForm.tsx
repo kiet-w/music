@@ -62,7 +62,7 @@ export function ResetPasswordForm({
               type="button"
               onClick={onResendOtp}
               disabled={resendingOtp || loading}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-rose-400 hover:text-rose-300 disabled:opacity-50 transition-colors flex items-center gap-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-white/70 hover:text-white disabled:opacity-50 transition-colors flex items-center gap-1"
             >
               {resendingOtp ? <RefreshCw className="h-3 w-3 animate-spin" /> : null}
               Gửi lại OTP
@@ -109,7 +109,7 @@ export function ResetPasswordForm({
 
       <Button
         type="submit"
-        className="h-12 w-full rounded-full bg-rose-600 hover:bg-rose-500 text-white font-medium transition-all text-sm shadow-lg shadow-rose-950/40"
+        className="h-12 w-full rounded-full bg-white hover:bg-zinc-200 text-black font-bold transition-all text-sm"
         disabled={loading}
       >
         {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}

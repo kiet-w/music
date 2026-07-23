@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Play, Plus, Trash2, FolderInput, Download, CheckCircle2, Loader2, X, MoreVertical } from 'lucide-react';
+import { Play, Plus, Trash2, FolderInput, Download, Loader2, X, MoreVertical, Share2 } from 'lucide-react';
 import { useOfflineStorage } from '@/hooks/useOfflineStorage';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -11,6 +11,7 @@ import dynamic from 'next/dynamic';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useAlbumStore } from '@/store/useAlbumStore';
 import { toast } from 'sonner';
+import { ShareTrackModal } from '@/components/features/shared/ShareTrackModal';
 
 const AddToPlaylistDialog = dynamic(() => import('../AddToPlaylist/AddToPlaylistDialog'), {
   ssr: false,
@@ -39,320 +40,342 @@ interface LibraryProps {
   albumId?: string;
 }
 
-const TrackDuration = React.memo(({ trackUrl, initialDuration, formatDuration }: { trackUrl: string; initialDuration: number | null; formatDuration: (seconds: number | null) => string }) => {
+const TrackDuration = React.memo(({ initialDuration, formatDuration }: { trackUrl: string; initialDuration: number | null; formatDuration: (seconds: number | null) => string }) => {
   return <>{formatDuration(initialDuration)}</>;
 });
 
+TrackDuration.displayName = 'TrackDuration';
+
 export default function Library({ onTrackSelect, currentTrackId, albumId }: LibraryProps) {
   const t = useTranslations('Music');
-  const { accessToken, user, isHydrated } = useAuthStore();
+  const { accessToken, isHydrated } = useAuthStore();
   const { albums } = useAlbumStore();
 
-  // Action Popup Modal State for Long-Press / 3-dots Menu
-  const [actionModalState, setActionModalState] = useState<{
-    isOpen: boolean;
-    track: Track | null;
-  }>({
-    isOpen: false,
-    track: null,
-  });
-
-  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isLongPressRef = useRef<boolean>(false);
-
-  const handleTouchStart = (track: Track) => {
-    isLongPressRef.current = false;
-    longPressTimerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-        window.navigator.vibrate(50);
-      }
-      setActionModalState({ isOpen: true, track });
-    }, 450);
-  };
-
-  const handleTouchEnd = () => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-    }
-  };
-
-  const [deleteModalState, setDeleteModalState] = useState<{
-    isOpen: boolean;
-    track: Track | null;
-  }>({
-    isOpen: false,
-    track: null,
-  });
-
-  const [moveModalState, setMoveModalState] = useState<{
-    isOpen: boolean;
-    track: Track | null;
-  }>({
-    isOpen: false,
-    track: null,
-  });
-
-  const getEffectiveToken = useCallback(() => {
-    if (accessToken) return accessToken;
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('music.auth');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          return parsed.accessToken || parsed.state?.accessToken || null;
-        } catch (e) {
-          return null;
-        }
-      }
-    }
-    return null;
-  }, [accessToken]);
-
-  const confirmDelete = async () => {
-    const { track } = deleteModalState;
-    const token = getEffectiveToken();
-    if (!track || !token) {
-      toast.error('Vui lòng kiểm tra đăng nhập');
-      setDeleteModalState({ isOpen: false, track: null });
-      return;
-    }
-    try {
-      await deleteTrack(token, track.id);
-      toast.success(t('delete_success') || 'Đã xóa bài hát khỏi thư viện.');
-      setTracks((prev) => prev.filter((t) => t.id !== track.id));
-    } catch (error: any) {
-      console.error('Error deleting track:', error);
-      toast.error(error?.message || 'Lỗi khi xóa bài hát.');
-    } finally {
-      setDeleteModalState({ isOpen: false, track: null });
-    }
-  };
-
-  const confirmMove = async (targetAlbumId: string) => {
-    const { track } = moveModalState;
-    const token = getEffectiveToken();
-    if (!track || !token) {
-      toast.error('Vui lòng kiểm tra đăng nhập');
-      setMoveModalState({ isOpen: false, track: null });
-      return;
-    }
-    try {
-      await moveTrackToAlbum(token, track.id, targetAlbumId);
-      toast.success(t('move_success') || 'Đã di chuyển bài hát sang album mới.');
-      loadTracks();
-    } catch (error: any) {
-      console.error('Error moving track:', error);
-      toast.error(error?.message || 'Lỗi khi di chuyển bài hát.');
-    } finally {
-      setMoveModalState({ isOpen: false, track: null });
-    }
-  };
-
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dialogState, setDialogState] = useState<{ isOpen: boolean; songTitle: string; songId?: string }>({
+  const [loading, setLoading] = useState<boolean>(true);
+  const [offlineTracks, setOfflineTracks] = useState<Set<string>>(new Set());
+  const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
+
+  // Dialog & Modal State
+  const [dialogState, setDialogState] = useState<{ isOpen: boolean; songTitle: string; songId: string }>({
     isOpen: false,
     songTitle: '',
-    songId: undefined,
+    songId: '',
   });
 
-  const { offlineTracks, downloadTrack, removeTrack, getLocalUri, isSupported } = useOfflineStorage();
-  const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
+  const [deleteModalState, setDeleteModalState] = useState<{ isOpen: boolean; track: Track | null }>({
+    isOpen: false,
+    track: null,
+  });
+
+  const [moveModalState, setMoveModalState] = useState<{ isOpen: boolean; track: Track | null }>({
+    isOpen: false,
+    track: null,
+  });
+
+  const [actionModalState, setActionModalState] = useState<{ isOpen: boolean; track: Track | null }>({
+    isOpen: false,
+    track: null,
+  });
+
+  const [shareTrackState, setShareTrackState] = useState<{ isOpen: boolean; track: Track | null }>({
+    isOpen: false,
+    track: null,
+  });
+
+  const {
+    saveTrackOffline,
+    getOfflineTrack,
+    getAllOfflineTrackIds,
+    deleteOfflineTrack,
+    isSupported,
+  } = useOfflineStorage();
+
+  const formatDuration = useCallback((seconds: number | null) => {
+    if (!seconds) return '--:--';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }, []);
+
+  const loadTracks = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = accessToken || '';
+      const data = await fetchTracks(token);
+      setTracks(data);
+    } catch (err) {
+      console.error('Failed to load tracks:', err);
+      toast.error(t('error_loading_tracks') || 'Failed to load tracks');
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken, t]);
+
+  const loadOfflineStatus = useCallback(async () => {
+    if (!isSupported) return;
+    try {
+      const ids = await getAllOfflineTrackIds();
+      setOfflineTracks(new Set(ids));
+    } catch (err) {
+      console.error('Failed to load offline tracks:', err);
+    }
+  }, [getAllOfflineTrackIds, isSupported]);
+
+  useEffect(() => {
+    if (isHydrated) {
+      loadTracks();
+      loadOfflineStatus();
+    }
+  }, [isHydrated, loadTracks, loadOfflineStatus]);
 
   const handleDownload = async (e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
-    if (downloadingIds.has(track.id)) return;
+    if (!isSupported) {
+      toast.error('Browser does not support offline storage');
+      return;
+    }
 
-    setDownloadingIds(prev => new Set(prev).add(track.id));
-    await downloadTrack(track.id, track.url);
-    setDownloadingIds(prev => {
-      const next = new Set(prev);
-      next.delete(track.id);
-      return next;
-    });
+    setDownloadingIds((prev) => new Set(prev).add(track.id));
+    try {
+      await saveTrackOffline(track.id, track.title, track.artist, track.url);
+      setOfflineTracks((prev) => new Set(prev).add(track.id));
+      toast.success(t('offline_save_success') || 'Track saved offline');
+    } catch (err) {
+      console.error('Failed to save offline:', err);
+      toast.error(t('offline_save_error') || 'Failed to save track offline');
+    } finally {
+      setDownloadingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(track.id);
+        return next;
+      });
+    }
   };
 
   const handleRemoveOffline = async (e: React.MouseEvent, trackId: string) => {
     e.stopPropagation();
-    await removeTrack(trackId);
-  };
-
-  const handleTrackSelect = async (track: Track) => {
-    const localUri = await getLocalUri(track.id);
-    onTrackSelect(track, localUri || undefined);
-  };
-
-  const loadTracks = useCallback(() => {
-    if (!isHydrated) return;
-    const token = getEffectiveToken();
-    if (!token) {
-      setLoading(false);
-      return;
+    try {
+      await deleteOfflineTrack(trackId);
+      setOfflineTracks((prev) => {
+        const next = new Set(prev);
+        next.delete(trackId);
+        return next;
+      });
+      toast.success('Removed offline track');
+    } catch (err) {
+      console.error('Failed to remove offline track:', err);
+      toast.error('Failed to remove offline track');
     }
+  };
 
-    fetchTracks(token, albumId)
-      .then((data: Track[]) => {
-        setTracks(Array.isArray(data) ? data : []);
-      })
-      .catch((err) => {
-        console.error('Error fetching tracks:', err);
-        setTracks([]);
-      })
-      .finally(() => setLoading(false));
-  }, [albumId, getEffectiveToken, isHydrated]);
+  const handleSelectTrack = async (track: Track) => {
+    if (offlineTracks.has(track.id)) {
+      try {
+        const offlineData = await getOfflineTrack(track.id);
+        if (offlineData) {
+          const localUrl = URL.createObjectURL(offlineData.audioBlob);
+          onTrackSelect(track, localUrl);
+          return;
+        }
+      } catch (err) {
+        console.error('Failed to load offline track, falling back to URL:', err);
+      }
+    }
+    onTrackSelect(track);
+  };
 
-  useEffect(() => {
-    loadTracks();
-  }, [loadTracks]);
-
-  const handleAddToPlaylist = useCallback((e: React.MouseEvent, title: string, songId?: string) => {
+  const handleAddToPlaylist = (e: React.MouseEvent, songTitle: string, songId: string) => {
     e.stopPropagation();
-    setDialogState({ isOpen: true, songTitle: title, songId });
-  }, []);
+    setDialogState({
+      isOpen: true,
+      songTitle,
+      songId,
+    });
+  };
 
-  const handleDeleteClick = useCallback((e: React.MouseEvent, track: Track) => {
+  const handleDeleteClick = (e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
-    setDeleteModalState({ isOpen: true, track });
-  }, []);
+    setDeleteModalState({
+      isOpen: true,
+      track,
+    });
+  };
 
-  const handleMoveClick = useCallback((e: React.MouseEvent, track: Track) => {
+  const confirmDelete = async () => {
+    if (!deleteModalState.track) return;
+    const trackId = deleteModalState.track.id;
+    try {
+      const token = accessToken || '';
+      await deleteTrack(token, trackId);
+      if (offlineTracks.has(trackId)) {
+        await deleteOfflineTrack(trackId);
+        setOfflineTracks((prev) => {
+          const next = new Set(prev);
+          next.delete(trackId);
+          return next;
+        });
+      }
+      setTracks((prev) => prev.filter((t) => t.id !== trackId));
+      toast.success(t('delete_success') || 'Track deleted successfully');
+    } catch (err) {
+      console.error('Failed to delete track:', err);
+      toast.error(t('delete_error') || 'Failed to delete track');
+    } finally {
+      setDeleteModalState({ isOpen: false, track: null });
+    }
+  };
+
+  const handleMoveClick = (e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
-    setMoveModalState({ isOpen: true, track });
-  }, []);
+    setMoveModalState({
+      isOpen: true,
+      track,
+    });
+  };
 
-  const formatDuration = useCallback((seconds: number | null) => {
-    if (seconds === null || isNaN(seconds)) return '--:--';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }, []);
+  const confirmMoveToAlbum = async (targetAlbumId: string | null) => {
+    if (!moveModalState.track) return;
+    const trackId = moveModalState.track.id;
+    try {
+      const token = accessToken || '';
+      await moveTrackToAlbum(token, trackId, targetAlbumId);
+      setTracks((prev) =>
+        prev.map((t) => (t.id === trackId ? { ...t, albumId: targetAlbumId || undefined } : t))
+      );
+      toast.success(t('move_success') || 'Track moved successfully');
+    } catch (err) {
+      console.error('Failed to move track:', err);
+      toast.error(t('move_error') || 'Failed to move track');
+    } finally {
+      setMoveModalState({ isOpen: false, track: null });
+    }
+  };
 
-  const safeTracks = React.useMemo(() => (Array.isArray(tracks) ? tracks : []), [tracks]);
+  const filteredTracks = albumId
+    ? tracks.filter((t) => t.albumId === albumId)
+    : tracks;
 
-  const { memoizedTracks, totalDuration } = React.useMemo(() => {
-    const validTracks = safeTracks.filter(t => t?.url);
-    const duration = validTracks.reduce((acc, track) => acc + (track?.duration || 0), 0);
-    return { memoizedTracks: validTracks, totalDuration: duration };
-  }, [safeTracks]);
+  const safeTracks = filteredTracks;
 
-  const stats = React.useMemo(() => ({
-    count: safeTracks.length,
-    formattedTotal: formatDuration(totalDuration)
-  }), [safeTracks.length, totalDuration, formatDuration]);
-
-  if (loading) return <div className="p-8 text-center text-muted-foreground italic animate-pulse">Loading library...</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="w-8 h-8 animate-spin text-white" />
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full">
-      {safeTracks.length > 0 && (
-        <div 
-          className="flex items-center gap-2 mb-4 px-4 py-2 bg-secondary/5 rounded-lg border border-secondary/10"
-        >
-          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider opacity-70">
-            Library Stats
-          </span>
-          <div className="h-1 w-1 rounded-full bg-muted-foreground/30" />
-          <span className="text-xs text-muted-foreground font-medium">
-            Total: {stats.count} songs • {stats.formattedTotal} total time
-          </span>
-        </div>
-      )}
-
-      <div className="flex flex-col gap-2">
-        {memoizedTracks.map((track) => {
-          const isActive = currentTrackId === track.id;
-          const isFailed = !track.url;
-          const isDownloaded = offlineTracks.has(track.id);
+    <div className="space-y-4">
+      {/* Track List */}
+      <div className="space-y-1">
+        {safeTracks.map((track) => {
+          const isCurrent = track.id === currentTrackId;
 
           return (
-            <div 
-              key={track.id} 
+            <div
+              key={track.id}
+              onClick={() => handleSelectTrack(track)}
               className={cn(
-                "group flex justify-between items-center p-3.5 px-4 rounded-2xl transition-all duration-200 gap-3 relative select-none",
-                isFailed ? "opacity-50 grayscale cursor-not-allowed bg-red-500/5" : "bg-secondary/5 hover:bg-secondary/10 active:scale-[0.99] cursor-pointer",
-                isActive && "bg-primary/10 border border-emerald-500/20"
+                'group flex items-center justify-between p-3 rounded-2xl transition-all duration-200 cursor-pointer border select-none',
+                isCurrent
+                  ? 'bg-white text-black border-white font-bold shadow-lg'
+                  : 'bg-zinc-900/40 hover:bg-zinc-900 text-white border-white/5 hover:border-white/20'
               )}
-              onTouchStart={() => handleTouchStart(track)}
-              onTouchEnd={handleTouchEnd}
-              onMouseDown={() => handleTouchStart(track)}
-              onMouseUp={handleTouchEnd}
-              onMouseLeave={handleTouchEnd}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                setActionModalState({ isOpen: true, track });
-              }}
-              onClick={(e) => {
-                if (isLongPressRef.current) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  isLongPressRef.current = false;
-                  return;
-                }
-                if (!isFailed) handleTrackSelect(track);
-              }}
             >
-              <div className="flex flex-col gap-0.5 flex-1 min-w-0 pr-2">
-                <span className={cn(
-                  "block font-semibold leading-tight truncate transition-colors text-sm sm:text-base",
-                  isActive ? "text-primary font-bold" : isFailed ? "text-red-400" : "text-foreground/90 group-hover:text-primary"
-                )}>
-                  {track.title} {isFailed && '(Processing Failed)'}
-                </span>
-                <span className="block text-xs text-muted-foreground/80 truncate">
-                  {track.artist || track.album?.title || 'Unknown Artist'}
-                </span>
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                {/* Visualizer / Play Icon */}
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-white/10">
+                  {isCurrent ? (
+                    <PlayingVisualizer />
+                  ) : (
+                    <Play className="w-4 h-4 fill-current ml-0.5" />
+                  )}
+                </div>
+
+                {/* Track Details */}
+                <div className="min-w-0 flex-1">
+                  <h4 className={cn('text-sm font-bold truncate leading-tight', isCurrent ? 'text-black' : 'text-white')}>
+                    {track.title}
+                  </h4>
+                  <p className={cn('text-xs truncate mt-0.5 font-medium', isCurrent ? 'text-zinc-600' : 'text-zinc-400')}>
+                    {track.artist || 'Nghệ sĩ'}
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-                {isActive && (
-                  <div className="mr-1">
-                    <PlayingVisualizer />
-                  </div>
-                )}
-
-                {isDownloaded && (
-                  <span title="Downloaded">
-                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                  </span>
-                )}
-
-                <span className="text-xs text-muted-foreground/70 font-mono tracking-wider">
-                  {isFailed ? 'Error' : <TrackDuration trackUrl={track.url} initialDuration={track.duration} formatDuration={formatDuration} />}
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className={cn('text-xs font-mono hidden sm:inline-block mr-1', isCurrent ? 'text-zinc-600' : 'text-zinc-400')}>
+                  <TrackDuration trackUrl={track.url} initialDuration={track.duration} formatDuration={formatDuration} />
                 </span>
 
-                {!isFailed && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActionModalState({ isOpen: true, track });
-                    }}
-                    className="p-1.5 hover:bg-white/10 text-white/40 hover:text-white rounded-full transition-colors shrink-0 ml-1"
-                    title="Menu tùy chọn"
-                  >
-                    <MoreVertical size={16} />
-                  </button>
-                )}
+                {/* Action Trigger Button (...) */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActionModalState({ isOpen: true, track });
+                  }}
+                  className={cn(
+                    'p-2 rounded-xl transition-all cursor-pointer',
+                    isCurrent
+                      ? 'text-black hover:bg-zinc-200'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/10'
+                  )}
+                  title="Tùy chọn khác"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
               </div>
             </div>
           );
         })}
         {safeTracks.length === 0 && (
-          <div className="p-12 text-center text-muted-foreground">
-            No tracks found in your library.
+          <div className="p-12 text-center text-zinc-500 font-medium text-sm">
+            Chưa có bài hát nào trong danh sách.
           </div>
         )}
       </div>
 
-      {/* Track Options Action Popup Modal (Features Only) */}
+      {/* Track Options Action Popup Modal — Light Transparent Overlay, Non-Blocking */}
       {actionModalState.isOpen && actionModalState.track && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 select-none">
           <div
             onClick={() => setActionModalState({ isOpen: false, track: null })}
-            className="absolute inset-0"
+            className="absolute inset-0 bg-black/40 backdrop-blur-xs"
           />
-          <div className="relative w-full max-w-xs glass-dark rounded-3xl p-4 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 z-10 flex flex-col gap-2">
+          <div className="relative w-80 bg-zinc-950/95 rounded-[2rem] p-3.5 shadow-2xl border border-white/15 animate-in zoom-in-95 duration-150 z-10 flex flex-col gap-2">
+            {/* Header */}
+            <div className="px-3 py-2 border-b border-white/10 mb-1 flex items-center justify-between">
+              <div className="min-w-0 flex-1 pr-2">
+                <p className="text-xs font-bold truncate text-white">{actionModalState.track.title}</p>
+                <p className="text-[10px] text-zinc-400 truncate">{actionModalState.track.artist || 'Nghệ sĩ'}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActionModalState({ isOpen: false, track: null })}
+                className="w-6 h-6 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-zinc-400 hover:text-white"
+              >
+                <X size={12} />
+              </button>
+            </div>
+
+            {/* Send to Friend */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const target = actionModalState.track;
+                setActionModalState({ isOpen: false, track: null });
+                if (target) setShareTrackState({ isOpen: true, track: target });
+              }}
+              className="w-full flex items-center gap-3 h-11 px-4 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 text-white font-medium text-xs sm:text-sm transition-all cursor-pointer active:scale-95"
+            >
+              <Share2 className="w-4 h-4 text-white shrink-0" />
+              <span>Gửi nhạc cho bạn bè</span>
+            </button>
+
             {/* Download / Remove Offline */}
             {isSupported !== false && (
               offlineTracks.has(actionModalState.track.id) ? (
@@ -362,7 +385,7 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
                     setActionModalState({ isOpen: false, track: null });
                     if (target) handleRemoveOffline(e, target.id);
                   }}
-                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-orange-400 font-medium text-sm transition-all cursor-pointer"
+                  className="w-full flex items-center gap-3 h-11 px-4 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 text-orange-400 font-medium text-xs sm:text-sm transition-all cursor-pointer active:scale-95"
                 >
                   <Trash2 className="w-4 h-4 text-orange-400 shrink-0" />
                   <span>Xóa bản Offline</span>
@@ -374,9 +397,9 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
                     setActionModalState({ isOpen: false, track: null });
                     if (target) handleDownload(e, target);
                   }}
-                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all cursor-pointer"
+                  className="w-full flex items-center gap-3 h-11 px-4 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 text-white font-medium text-xs sm:text-sm transition-all cursor-pointer active:scale-95"
                 >
-                  <Download className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <Download className="w-4 h-4 text-white shrink-0" />
                   <span>Tải về nghe Offline</span>
                 </button>
               )
@@ -389,9 +412,9 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
                 setActionModalState({ isOpen: false, track: null });
                 if (target) handleMoveClick(e, target);
               }}
-              className="w-full flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all cursor-pointer"
+              className="w-full flex items-center gap-3 h-11 px-4 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 text-white font-medium text-xs sm:text-sm transition-all cursor-pointer active:scale-95"
             >
-              <FolderInput className="w-4 h-4 text-blue-400 shrink-0" />
+              <FolderInput className="w-4 h-4 text-white shrink-0" />
               <span>Di chuyển sang Album</span>
             </button>
 
@@ -402,9 +425,9 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
                 setActionModalState({ isOpen: false, track: null });
                 if (target) handleAddToPlaylist(e, target.title, target.id);
               }}
-              className="w-full flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all cursor-pointer"
+              className="w-full flex items-center gap-3 h-11 px-4 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 text-white font-medium text-xs sm:text-sm transition-all cursor-pointer active:scale-95"
             >
-              <Plus className="w-4 h-4 text-teal-400 shrink-0" />
+              <Plus className="w-4 h-4 text-white shrink-0" />
               <span>Thêm vào Playlist / Album</span>
             </button>
 
@@ -415,14 +438,21 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
                 setActionModalState({ isOpen: false, track: null });
                 if (target) handleDeleteClick(e, target);
               }}
-              className="w-full flex items-center gap-3 p-3 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium text-sm transition-all cursor-pointer"
+              className="w-full flex items-center gap-3 h-11 px-4 rounded-xl bg-rose-950/30 hover:bg-rose-900/40 text-rose-400 border border-rose-900/40 font-medium text-xs sm:text-sm transition-all cursor-pointer active:scale-95"
             >
-              <Trash2 className="w-4 h-4 text-red-400 shrink-0" />
+              <Trash2 className="w-4 h-4 text-rose-400 shrink-0" />
               <span>Xóa bài hát</span>
             </button>
           </div>
         </div>
       )}
+
+      {/* Global Share Track Modal */}
+      <ShareTrackModal
+        track={shareTrackState.track}
+        isOpen={shareTrackState.isOpen}
+        onClose={() => setShareTrackState({ isOpen: false, track: null })}
+      />
 
       <AddToPlaylistDialog 
         isOpen={dialogState.isOpen}
@@ -436,79 +466,89 @@ export default function Library({ onTrackSelect, currentTrackId, albumId }: Libr
         <div className="fixed inset-0 flex items-center justify-center z-50 animate-in fade-in duration-200">
           <div
             onClick={() => setDeleteModalState({ isOpen: false, track: null })}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40 backdrop-blur-xs"
           />
-          <div className="relative w-full max-w-md p-6 mx-4 animate-in zoom-in-95 duration-200">
-            <div className="glass-dark rounded-3xl p-6 shadow-soft border border-white/10 text-center">
-              <h3 className="text-xl font-bold text-white mb-2">{t('delete_warning') || 'Xóa bài hát?'}</h3>
-              <p className="text-sm text-white/60 mb-6">
-                Bạn có chắc chắn muốn xóa bài hát "{deleteModalState.track.title}" khỏi thư viện? Hành động này không thể hoàn tác.
-              </p>
-              <div className="flex gap-4">
-                <Button
-                  onClick={() => setDeleteModalState({ isOpen: false, track: null })}
-                  className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3"
-                >
-                  Hủy
-                </Button>
-                <Button
-                  onClick={confirmDelete}
-                  className="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-xl py-3 font-bold"
-                >
-                  Xóa
-                </Button>
-              </div>
+          <div className="relative w-full max-w-sm bg-zinc-950 rounded-3xl p-6 shadow-2xl border border-white/10 z-10 flex flex-col gap-4">
+            <h3 className="text-base font-bold text-white">Xác nhận xóa bài hát</h3>
+            <p className="text-xs text-zinc-400">
+              Bạn có chắc chắn muốn xóa bài hát <strong className="text-white">"{deleteModalState.track.title}"</strong> khỏi hệ thống?
+            </p>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteModalState({ isOpen: false, track: null })}
+                className="border-white/10 text-white hover:bg-white/10 rounded-xl text-xs"
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={confirmDelete}
+                className="bg-white text-black font-bold rounded-xl text-xs hover:bg-zinc-200"
+              >
+                Xóa ngay
+              </Button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Custom Move Modal */}
+      {/* Custom Move to Album Modal */}
       {moveModalState.isOpen && moveModalState.track && (
         <div className="fixed inset-0 flex items-center justify-center z-50 animate-in fade-in duration-200">
           <div
             onClick={() => setMoveModalState({ isOpen: false, track: null })}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40 backdrop-blur-xs"
           />
-          <div className="relative w-full max-w-md p-6 mx-4 animate-in zoom-in-95 duration-200">
-            <div className="glass-dark rounded-3xl p-6 shadow-soft border border-white/10">
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-xl font-bold text-white">{t('select_album') || 'Di chuyển bài hát'}</h3>
-                  <p className="text-sm text-white/40 mt-1">Chọn album cho "{moveModalState.track.title}"</p>
-                </div>
-                <button
-                  onClick={() => setMoveModalState({ isOpen: false, track: null })}
-                  className="p-2 hover:bg-white/10 rounded-full transition-colors"
-                >
-                  <X size={20} className="text-white/60" />
-                </button>
-              </div>
+          <div className="relative w-full max-w-sm bg-zinc-950 rounded-3xl p-6 shadow-2xl border border-white/10 z-10 flex flex-col gap-4">
+            <h3 className="text-base font-bold text-white">Di chuyển bài hát sang Album</h3>
+            <p className="text-xs text-zinc-400 truncate">
+              Chọn album bạn muốn chuyển bài <strong className="text-white">"{moveModalState.track.title}"</strong> vào:
+            </p>
 
-              <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
-                {albums && albums.length > 0 ? (
-                  albums.map((album: any) => (
-                    <button
-                      key={album.id}
-                      onClick={() => confirmMove(album.id)}
-                      className="flex items-center justify-between p-4 rounded-xl border border-transparent bg-white/5 hover:bg-white/10 hover:border-white/10 text-white/80 transition-all text-left"
-                    >
-                      <div>
-                        <div className="font-semibold text-sm">{album.title}</div>
-                        {album.artist && <div className="text-xs text-white/40">{album.artist}</div>}
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="text-sm text-white/40 p-4 text-center">
-                    Không tìm thấy album nào. Vui lòng tạo album trước.
-                  </div>
+            <div className="max-h-48 overflow-y-auto space-y-1 my-2 pr-1 custom-scrollbar">
+              <button
+                onClick={() => confirmMoveToAlbum(null)}
+                className={cn(
+                  "w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition-all border",
+                  !moveModalState.track.albumId
+                    ? "bg-white text-black border-white font-bold"
+                    : "bg-zinc-900 text-zinc-300 border-white/5 hover:bg-zinc-800 hover:text-white"
                 )}
-              </div>
+              >
+                Không thuộc album nào (Thư viện chính)
+              </button>
+
+              {albums.map((alb) => {
+                const isSelected = moveModalState.track?.albumId === alb.id;
+                return (
+                  <button
+                    key={alb.id}
+                    onClick={() => confirmMoveToAlbum(alb.id)}
+                    className={cn(
+                      "w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition-all border truncate",
+                      isSelected
+                        ? "bg-white text-black border-white font-bold"
+                        : "bg-zinc-900 text-zinc-300 border-white/5 hover:bg-zinc-800 hover:text-white"
+                    )}
+                  >
+                    {alb.title}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <Button
+                variant="outline"
+                onClick={() => setMoveModalState({ isOpen: false, track: null })}
+                className="border-white/10 text-white hover:bg-white/10 rounded-xl text-xs"
+              >
+                Đóng
+              </Button>
             </div>
           </div>
         </div>
       )}
     </div>
   );
-};
+}

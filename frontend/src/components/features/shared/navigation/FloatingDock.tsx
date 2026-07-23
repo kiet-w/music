@@ -91,7 +91,7 @@ export default function FloatingDock() {
           className={cn(
             "w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-2xl border cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 group",
             activePopup === 'addMusic'
-              ? "bg-emerald-500 border-emerald-400 text-black shadow-[0_0_25px_rgba(16,185,129,0.5)]"
+              ? "bg-white border-white/20 text-black shadow-[0_0_25px_rgba(255,255,255,0.3)]"
               : "bg-zinc-900/90 hover:bg-zinc-800 border-white/20 text-white backdrop-blur-xl shadow-black/80"
           )}
           title="Thêm Nhạc"
@@ -112,14 +112,14 @@ export default function FloatingDock() {
           className={cn(
             "relative w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-2xl border cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 group",
             activePopup === 'chat'
-              ? "bg-emerald-500 border-emerald-400 text-black shadow-[0_0_25px_rgba(16,185,129,0.5)]"
+              ? "bg-white border-white/20 text-black shadow-[0_0_25px_rgba(255,255,255,0.3)]"
               : "bg-zinc-900/90 hover:bg-zinc-800 border-white/20 text-white backdrop-blur-xl shadow-black/80"
           )}
           title="Mở Chat"
         >
           <MessageCircle size={22} strokeWidth={2.2} />
           {unreadCount > 0 && activePopup !== 'chat' && (
-            <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center px-1 rounded-full bg-rose-500 text-[11px] font-extrabold text-white ring-2 ring-zinc-950 shadow-md animate-bounce">
+            <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center px-1 rounded-full bg-white text-[11px] font-extrabold text-black ring-2 ring-zinc-950 shadow-md animate-bounce">
               {unreadCount}
             </span>
           )}
@@ -131,22 +131,12 @@ export default function FloatingDock() {
           className={cn(
             "w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-2xl border cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 group overflow-hidden",
             activePopup === 'userAccount'
-              ? "bg-emerald-500 border-emerald-400 text-black shadow-[0_0_25px_rgba(16,185,129,0.5)]"
+              ? "bg-white border-white/20 text-black shadow-[0_0_25px_rgba(255,255,255,0.3)]"
               : "bg-zinc-900/90 hover:bg-zinc-800 border-white/20 text-white backdrop-blur-xl shadow-black/80"
           )}
           title="Tài khoản"
         >
-          {avatarMediaUrl && !avatarError && activePopup !== 'userAccount' ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarMediaUrl}
-              alt={user?.name || 'User Avatar'}
-              onError={() => setAvatarError(true)}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <User size={22} strokeWidth={2.2} />
-          )}
+          <User size={22} strokeWidth={2.2} />
         </button>
       </div>
     </>

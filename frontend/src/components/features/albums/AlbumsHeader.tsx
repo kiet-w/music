@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { Plus, LayoutGrid, List, HardDrive } from 'lucide-react';
 
 interface AlbumsHeaderProps {
@@ -20,11 +22,22 @@ export function AlbumsHeader({
   onCreateClick, 
   t 
 }: AlbumsHeaderProps) {
+  const locale = useLocale();
+
   return (
     <div className="flex flex-col gap-6 mb-6 mt-2">
-      <div className="flex flex-col gap-1.5">
+      {/* Breadcrumb: Album / Trang chủ */}
+      <div className="flex items-center gap-3">
         <h1 className="font-instrument text-4xl sm:text-5xl tracking-tighter leading-none">{t('albums')}</h1>
-        <div className="flex items-center justify-between">
+        <span className="text-white/30 text-3xl sm:text-4xl font-light select-none">/</span>
+        <Link 
+          href={`/${locale}`} 
+          className="font-instrument text-4xl sm:text-5xl tracking-tighter leading-none text-white/70 hover:text-white transition-colors duration-200"
+        >
+          Trang chủ
+        </Link>
+      </div>
+      <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground font-sans">
             {albumsCount > 0 ? t('collection_count', { count: albumsCount }) : 'Your music library'}
           </p>
@@ -43,7 +56,6 @@ export function AlbumsHeader({
             </button>
           </div>
         </div>
-      </div>
       
       {albumsCount > 0 && (
         <div className="flex justify-end items-center border-b border-border/50 pb-4">

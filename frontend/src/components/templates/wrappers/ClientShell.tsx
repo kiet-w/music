@@ -6,10 +6,6 @@ import dynamic from 'next/dynamic';
 const PlayerBar = dynamic(() => import('@/components/features/music/player/PlayerBar'), {
   ssr: false,
 });
-const BottomTabBar = dynamic(
-  () => import('@/components/features/shared/navigation/BottomTabBar'),
-  { ssr: false }
-);
 const FloatingWidgetCluster = dynamic(
   () => import('@/components/features/shared/navigation/FloatingWidgetCluster'),
   { ssr: false }
@@ -20,7 +16,6 @@ export function ClientShell() {
     <>
       <PlayerBar />
       <FloatingWidgetCluster />
-      <BottomTabBar />
     </>
   );
 }

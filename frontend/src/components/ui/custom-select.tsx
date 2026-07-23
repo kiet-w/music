@@ -143,9 +143,9 @@ export function CustomSelect({
         className={cn(
           'w-full h-11 px-3.5 rounded-xl bg-background/50 border border-white/10 hover:border-white/20',
           'flex items-center justify-between text-left text-sm font-medium transition-all duration-200 outline-none',
-          'focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20',
+          'focus:border-white/40 focus:ring-2 focus:ring-white/10',
           disabled && 'opacity-50 cursor-not-allowed',
-          isOpen && 'border-emerald-500/50 ring-2 ring-emerald-500/20 bg-background/80',
+          isOpen && 'border-white/40 ring-2 ring-white/10 bg-background/80',
           triggerClassName
         )}
       >
@@ -156,7 +156,7 @@ export function CustomSelect({
                 selectedOption.value === '' ? (
                   <Disc className="w-4 h-4 text-white/50 shrink-0" />
                 ) : (
-                  <Music className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <Music className="w-4 h-4 text-white shrink-0" />
                 )
               )}
               <span className="truncate text-white/90 font-medium">
@@ -217,7 +217,7 @@ export function CustomSelect({
                           'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium',
                           'transition-all duration-150 text-left select-none outline-none',
                           isSelected
-                            ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                            ? 'bg-white/15 text-white font-bold border border-white/30'
                             : 'text-white/80 hover:text-white hover:bg-white/[0.08] border border-transparent'
                         )}
                       >
@@ -225,9 +225,9 @@ export function CustomSelect({
                           {option.icon ? (
                             option.icon
                           ) : option.value === '' ? (
-                            <Disc className={cn('w-4 h-4 shrink-0', isSelected ? 'text-emerald-400' : 'text-white/40')} />
+                            <Disc className={cn('w-4 h-4 shrink-0', isSelected ? 'text-white' : 'text-white/40')} />
                           ) : (
-                            <Music className={cn('w-4 h-4 shrink-0', isSelected ? 'text-emerald-400' : 'text-white/50')} />
+                            <Music className={cn('w-4 h-4 shrink-0', isSelected ? 'text-white' : 'text-white/50')} />
                           )}
                           <div className="truncate">
                             <div className="truncate font-medium">{option.label}</div>
@@ -240,7 +240,7 @@ export function CustomSelect({
                         </div>
 
                         {isSelected && (
-                          <Check className="w-4 h-4 text-emerald-400 shrink-0 ml-1" />
+                          <Check className="w-4 h-4 text-white shrink-0 ml-1" />
                         )}
                       </button>
                     );

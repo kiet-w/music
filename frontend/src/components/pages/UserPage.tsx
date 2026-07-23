@@ -205,7 +205,7 @@ export function UserPage({ locale }: UserPageProps) {
                 <span>{userInitial}</span>
               )}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-white">
-                <Camera className="w-4 h-4 text-emerald-400" />
+                <Camera className="w-4 h-4 text-white" />
                 <span className="text-[9px] font-semibold">Đổi ảnh</span>
               </div>
             </div>
@@ -213,7 +213,7 @@ export function UserPage({ locale }: UserPageProps) {
             <div className="flex flex-col gap-1 min-w-0 flex-1 my-auto">
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <h2 className="text-lg font-bold text-foreground font-instrument tracking-tight truncate">{user?.name || 'Người dùng'}</h2>
-                <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider shrink-0">
+                <span className="bg-white text-black border border-white/20 text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider shrink-0">
                   <ShieldCheck className="w-3 h-3" /> Verified
                 </span>
               </div>

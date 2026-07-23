@@ -16,8 +16,11 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.docker-compose
 **/.env
 **/.env.*
+!**/.env.example
+!**/.env.docker-compose
 
 # Logs & temp build infos
 *.log

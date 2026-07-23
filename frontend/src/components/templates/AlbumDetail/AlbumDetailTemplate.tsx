@@ -55,7 +55,7 @@ export function AlbumDetailTemplate({
     return (
       <div className="p-8 text-center">
         <p className="mb-4">Album không tồn tại hoặc bạn không có quyền truy cập.</p>
-        <Link href={`/${locale}`} className="text-primary underline">
+        <Link href={`/${locale}`} className="text-foreground underline hover:text-foreground/80">
           Quay lại trang chủ
         </Link>
       </div>

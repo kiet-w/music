@@ -21,6 +21,20 @@ export function ChatFloatingWidget() {
     ? unreadMessages.length
     : Object.keys(unreadMessages).filter((id) => unreadMessages[id]).length;
 
+  React.useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    }
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
   return (
     <>
       {/* Floating Pop-up Window */}
@@ -37,22 +51,18 @@ export function ChatFloatingWidget() {
           "fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl border cursor-pointer active:scale-95 group",
           isOpen
             ? "bg-zinc-900 border-white/20 text-white hover:bg-zinc-800"
-            : "bg-emerald-500 border-emerald-400/50 text-black hover:bg-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.4)]"
+            : "bg-white border-white/20 text-black hover:bg-white/90 shadow-[0_0_25px_rgba(255,255,255,0.3)]"
         )}
         title={isOpen ? t('close_chat') : t('open_chat')}
       >
-        {isOpen ? (
-          <X size={24} strokeWidth={2.2} />
-        ) : (
-          <div className="relative flex items-center justify-center">
-            <MessageCircle size={26} strokeWidth={2.2} />
-            {unreadCount > 0 && (
-              <span className="absolute -top-2 -right-2 flex h-5 min-w-[20px] items-center justify-center px-1 rounded-full bg-rose-500 text-[11px] font-extrabold text-white ring-2 ring-zinc-950 shadow-md animate-bounce">
-                {unreadCount}
-              </span>
-            )}
-          </div>
-        )}
+        <div className="relative flex items-center justify-center">
+          <MessageCircle size={26} strokeWidth={2.2} />
+          {unreadCount > 0 && !isOpen && (
+            <span className="absolute -top-2 -right-2 flex h-5 min-w-[20px] items-center justify-center px-1 rounded-full bg-white text-[11px] font-extrabold text-black ring-2 ring-zinc-950 shadow-md animate-bounce">
+              {unreadCount}
+            </span>
+          )}
+        </div>
       </button>
     </>
   );

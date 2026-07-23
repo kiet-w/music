@@ -8,6 +8,7 @@ import { Plus, MessageSquare, User } from 'lucide-react';
 import { cn, getMediaUrl } from '@/lib/utils';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useChatStore } from '@/store/useChatStore';
+import { optimizedMotionVariants } from '@/hooks/useOptimizedAnimation';
 
 const AddMusicPopup = dynamic(
   () => import('@/components/features/music/AddMusicPopup'),
@@ -62,10 +63,7 @@ export function FloatingWidgetCluster() {
       <AnimatePresence>
         {openPopups.addMusic && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -15 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 320 }}
+            {...optimizedMotionVariants.slideDown}
             className="fixed top-16 right-3 sm:right-6 lg:right-8 z-40 w-[calc(100vw-1.5rem)] sm:w-[500px] md:w-[540px] h-[580px] max-h-[calc(100dvh-5rem)] rounded-[2.5rem] bg-zinc-950/95 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl flex flex-col overflow-hidden text-white p-5"
           >
             <AddMusicPopup
@@ -80,10 +78,7 @@ export function FloatingWidgetCluster() {
       <AnimatePresence>
         {openPopups.chat && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 320 }}
+            {...optimizedMotionVariants.slideUp}
             className="fixed bottom-20 right-3 sm:right-6 lg:right-8 z-40 w-[calc(100vw-1.5rem)] sm:w-[460px] md:w-[500px] h-[580px] max-h-[calc(100dvh-6rem)] rounded-[2.5rem] bg-zinc-950/95 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl flex flex-col overflow-hidden text-white"
           >
             <ChatRightBar onClose={() => closePopup('chat')} />
@@ -95,10 +90,7 @@ export function FloatingWidgetCluster() {
       <AnimatePresence>
         {openPopups.userAccount && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 320 }}
+            {...optimizedMotionVariants.slideUp}
             className="fixed bottom-20 left-3 sm:left-6 lg:left-8 z-40 w-[calc(100vw-1.5rem)] sm:w-[440px] md:w-[480px] h-[580px] max-h-[calc(100dvh-6rem)] rounded-[2.5rem] bg-zinc-950/95 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl p-5 flex flex-col overflow-y-auto text-white"
           >
             <UserAccountPopup
@@ -148,17 +140,7 @@ export function FloatingWidgetCluster() {
           title="Tài khoản"
           aria-label="Tài khoản"
         >
-          {avatarMediaUrl && !avatarError && !openPopups.userAccount ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarMediaUrl}
-              alt={user?.name || 'User Avatar'}
-              onError={() => setAvatarError(true)}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <User className="w-5 h-5" strokeWidth={2.2} />
-          )}
+          <User className="w-5 h-5" strokeWidth={2.2} />
         </button>
       </div>
 

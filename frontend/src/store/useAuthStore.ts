@@ -1,8 +1,6 @@
 'use client';
 
 import { create } from 'zustand';
-import { Capacitor } from '@capacitor/core';
-import { Preferences } from '@capacitor/preferences';
 
 import { fetchMe, type AuthUser } from '@/lib/api';
 import { useAlbumStore } from '@/store/useAlbumStore';
@@ -37,14 +35,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const accessToken = get().accessToken;
     set({ user: updated });
     if (typeof window !== 'undefined') {
-      if (Capacitor.isNativePlatform()) {
-        await Preferences.set({
-          key: AUTH_STORAGE_KEY,
-          value: JSON.stringify({ accessToken, user: updated }),
-        });
-      } else {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, user: updated }));
-      }
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, user: updated }));
     }
   },
 
@@ -57,14 +48,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ accessToken, user: user || null });
 
     if (typeof window !== 'undefined') {
-      if (Capacitor.isNativePlatform()) {
-        await Preferences.set({
-          key: AUTH_STORAGE_KEY,
-          value: JSON.stringify({ accessToken, user }),
-        });
-      } else {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, user }));
-      }
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, user }));
     }
   },
 
@@ -73,11 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     resetUserScopedState();
 
     if (typeof window !== 'undefined') {
-      if (Capacitor.isNativePlatform()) {
-        await Preferences.remove({ key: AUTH_STORAGE_KEY });
-      } else {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-      }
+      localStorage.removeItem(AUTH_STORAGE_KEY);
     }
   },
 
@@ -91,12 +71,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     let stored: string | null = null;
     try {
-      if (Capacitor.isNativePlatform()) {
-        const { value } = await Preferences.get({ key: AUTH_STORAGE_KEY });
-        stored = value;
-      } else {
-        stored = localStorage.getItem(AUTH_STORAGE_KEY);
-      }
+      stored = localStorage.getItem(AUTH_STORAGE_KEY);
     } catch (e) {
       console.error('Failed to get auth session from storage:', e);
     }

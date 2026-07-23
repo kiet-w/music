@@ -1,5 +1,7 @@
 # Local env files
 .env*.local
+.env.production
+!.env.production.example
 
 # Build & dependency outputs
 node_modules/

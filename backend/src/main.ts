@@ -88,6 +88,9 @@ async function bootstrap() {
     }),
   );
 
+  // Enable global rate limiting is already configured in app.module.ts
+  // The ThrottlerModule with multiple limits is already set up
+
   // Swagger only in non-production environments
   if (process.env.NODE_ENV !== 'production') {
     const swaggerConfig = new DocumentBuilder()

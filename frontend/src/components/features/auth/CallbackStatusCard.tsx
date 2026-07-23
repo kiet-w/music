@@ -21,7 +21,7 @@ export function CallbackStatusCard({
     <div className="max-w-md w-full p-8 bg-card border border-border rounded-[2.5rem] shadow-xl">
       {status === 'loading' && (
         <>
-          <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-6" />
+          <Loader2 className="w-12 h-12 text-white animate-spin mx-auto mb-6" />
           <h1 className="text-2xl font-bold tracking-tight">{t('google_connect_title')}</h1>
           <p className="text-muted-foreground text-sm mt-2">{t('google_connect_loading')}</p>
         </>
@@ -29,7 +29,7 @@ export function CallbackStatusCard({
 
       {status === 'success' && (
         <>
-          <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-6" />
+          <CheckCircle2 className="w-12 h-12 text-white mx-auto mb-6" />
           <h1 className="text-2xl font-bold tracking-tight">{t('google_connect_success_title')}</h1>
           <p className="text-muted-foreground text-sm mt-2">{t('google_connect_success_desc')}</p>
         </>

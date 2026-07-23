@@ -144,15 +144,6 @@ export default function ChatRightBar({ onClose }: ChatRightBarProps) {
           >
             {t('add_friend')}
           </button>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-full bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              aria-label="Đóng Chat"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </div>
 

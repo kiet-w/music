@@ -41,7 +41,7 @@ export function DownloadHistoryList({ history, t }: DownloadHistoryListProps) {
                 </p>
               </div>
             </div>
-            <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
           </div>
         ))}
       </div>

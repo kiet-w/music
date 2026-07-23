@@ -45,13 +45,23 @@ export function UserAccountPopup({ isOpen, onClose, locale = 'vi' }: UserAccount
   }, [user?.avatarUrl]);
 
   useEffect(() => {
-    if (!isOpen) {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    }
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       setLocalPreview(null);
     }
-  }, [isOpen]);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const handleAvatarFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -184,18 +194,11 @@ export function UserAccountPopup({ isOpen, onClose, locale = 'vi' }: UserAccount
         <div className="flex items-center gap-2">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 text-xs font-bold transition-all border border-rose-500/20 active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white hover:text-black text-white text-xs font-bold transition-all border border-white/20 active:scale-95 cursor-pointer"
             title="Đăng xuất tài khoản"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Đăng xuất</span>
-          </button>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-full bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-            aria-label="Đóng"
-          >
-            <X className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -342,7 +345,7 @@ export function UserAccountPopup({ isOpen, onClose, locale = 'vi' }: UserAccount
         {/* Full-width Bottom Logout Button */}
         <button
           onClick={handleLogout}
-          className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-600 text-rose-300 hover:text-white font-bold text-xs rounded-xl active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-rose-500/20"
+          className="w-full py-2.5 bg-white/10 hover:bg-white hover:text-black text-white font-bold text-xs rounded-xl active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-white/20"
         >
           <LogOut className="w-4 h-4 text-current" />
           <span>Đăng xuất tài khoản</span>

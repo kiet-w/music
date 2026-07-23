@@ -77,16 +77,11 @@ EXPOSE 3000
 
 ENV NODE_ENV=production
 ENV PORT=10000
-ENV REDIS_HOST=powerful-mayfly-186559.upstash.io
-ENV REDIS_PORT=6379
-ENV REDIS_PASSWORD=gQAAAAAAAti_AAIgcDFlYjU0ZThhODlhMTc0MjU1OGFjZDY4NzQ4OTMwNmUyMQ
-ENV SMTP_HOST=smtp.gmail.com
-ENV SMTP_PORT=587
-ENV SMTP_USER=lpokmoppokida@gmail.com
-ENV SMTP_PASS="xgbb lsiq sojt xbsf"
-ENV MAIL_FROM='"Music App" <lpokmoppokida@gmail.com>'
-ENV JWT_SECRET=music_app_super_secret_jwt_2026_key
-ENV JWT_EXPIRES_IN=7d
+
+# Security-sensitive variables must be provided at runtime or via Docker secrets
+# REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, MAIL_FROM
+# JWT_SECRET, JWT_EXPIRES_IN, ENCRYPTION_KEY, DATABASE_URL, DIRECT_URL, SUPABASE_URL, SUPABASE_KEY
+# GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, SENTRY_DSN
 
 # Use tini as init system for proper signal handling
 ENTRYPOINT ["tini", "--"]

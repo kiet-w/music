@@ -155,21 +155,21 @@ export const DrivePicker = ({
                   placeholder={t('search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all"
                 />
               </div>
 
               <div className="flex-1 overflow-y-auto pr-2 -mr-2">
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center h-full py-12">
-                    <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+                    <Loader2 className="w-10 h-10 text-white animate-spin mb-4" />
                     <p className="text-white/60">{t('fetching_files')}</p>
                   </div>
                 ) : (files as any)?.error ? (
                   <div className="flex flex-col items-center justify-center h-full py-12 text-center px-4">
-                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 w-full flex flex-col items-center gap-4">
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 w-full flex flex-col items-center gap-4">
                       <div>
-                        <p className="text-red-400 font-medium mb-2">{t('drive_error')}</p>
+                        <p className="text-white font-semibold mb-2">{t('drive_error')}</p>
                         <p className="text-white/60 text-sm">{(files as any).message || 'Không thể lấy danh sách file'}</p>
                         {(files as any).details?.error?.message && (
                           <p className="text-white/40 text-xs mt-4 italic">Chi tiết: {(files as any).details.error.message}</p>
@@ -185,7 +185,7 @@ export const DrivePicker = ({
                             toast.error('Vui lòng đăng nhập để kết nối.');
                           }
                         }}
-                        className="bg-blue-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:scale-105 transition-all shadow-lg shadow-blue-500/20"
+                        className="bg-white text-black px-6 py-2 rounded-xl text-sm font-bold hover:bg-zinc-200 transition-all"
                       >
                         {t('google_login')}
                       </button>
@@ -209,7 +209,7 @@ export const DrivePicker = ({
                           className={cn(
                             "flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 text-left",
                             isSelected
-                              ? "bg-accent/20 border-accent/50 text-accent"
+                              ? "bg-white/20 border-white/50 text-white"
                               : isMp3 
                                 ? "bg-white/5 border-transparent hover:bg-white/10 text-white/80"
                                 : "bg-white/5 border-transparent opacity-40 cursor-not-allowed text-white/40"
@@ -217,7 +217,7 @@ export const DrivePicker = ({
                         >
                           <div className={cn(
                             "w-10 h-10 rounded-lg flex items-center justify-center",
-                            isSelected ? "bg-accent/20" : "bg-white/10"
+                            isSelected ? "bg-white/20" : "bg-white/10"
                           )}>
                             {isMp3 ? <Music className="w-5 h-5" /> : <File className="w-5 h-5 opacity-40" />}
                           </div>
@@ -260,7 +260,7 @@ export const DrivePicker = ({
                     className={cn(
                       "px-8 py-3 rounded-xl font-bold transition-all flex items-center gap-2",
                       selectedIds.size > 0 && !isImporting
-                        ? "bg-accent text-white shadow-lg shadow-accent/20 hover:scale-105 active:scale-95"
+                        ? "bg-white text-black font-bold hover:bg-zinc-200 hover:scale-105 active:scale-95 shadow-lg shadow-white/10"
                         : "bg-white/5 text-white/20 cursor-not-allowed"
                     )}
                   >

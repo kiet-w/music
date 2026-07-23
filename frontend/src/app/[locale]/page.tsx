@@ -1,4 +1,4 @@
-import { LocaleRedirect } from '@/components/atoms/LocaleRedirect';
+import { HomePage } from '@/components/pages/HomePage';
 
 export async function generateStaticParams() {
   return [
@@ -13,5 +13,5 @@ export default async function LocalePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  return <LocaleRedirect locale={locale} />;
+  return <HomePage locale={locale} />;
 }

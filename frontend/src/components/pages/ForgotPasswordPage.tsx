@@ -186,9 +186,9 @@ function ForgotPasswordContent({ locale }: ForgotPasswordPageProps) {
 
       {/* Dev/staging inline OTP banner — shown when backend returns OTP directly */}
       {devOtp && (
-        <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-4 mb-4 text-center space-y-1">
-          <p className="text-xs text-emerald-400 font-mono uppercase tracking-widest">Mã OTP của bạn</p>
-          <p className="text-3xl font-mono font-bold tracking-[0.3em] text-emerald-300 select-all">{devOtp}</p>
+        <div className="rounded-xl bg-white/10 border border-white/20 p-4 mb-4 text-center space-y-1">
+          <p className="text-xs text-white/70 font-mono uppercase tracking-widest">Mã OTP của bạn</p>
+          <p className="text-3xl font-mono font-bold tracking-[0.3em] text-white select-all">{devOtp}</p>
           <p className="text-[10px] text-muted-foreground">Mã đã được tự động điền. Hiệu lực 15 phút.</p>
         </div>
       )}

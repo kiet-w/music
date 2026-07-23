@@ -109,7 +109,7 @@ export function ChatWindow({
       {/* Top Status Indicator */}
       {isLoadingMore && (
         <div className="flex justify-center py-2 shrink-0">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400" />
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
         </div>
       )}
 
@@ -122,7 +122,7 @@ export function ChatWindow({
       {/* Empty Messages State with Centered Action Buttons */}
       {messages.length === 0 && (
         <div className="flex flex-col items-center justify-center text-center p-6 max-w-md mx-auto my-auto">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400 shadow-lg shadow-emerald-500/10">
+          <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mb-4 text-white shadow-lg shadow-white/5">
             <MessageSquare className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-white mb-1">
@@ -137,7 +137,7 @@ export function ChatWindow({
               <Button
                 onClick={onAcceptInvite}
                 variant="outline"
-                className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 font-bold rounded-2xl text-xs px-4 py-2.5 h-10 flex items-center gap-2"
+                className="border-white/20 text-white hover:bg-white/10 font-bold rounded-2xl text-xs px-4 py-2.5 h-10 flex items-center gap-2"
               >
                 <UserPlus className="w-4 h-4" />
                 {t('accept_invite_btn')}
@@ -146,7 +146,7 @@ export function ChatWindow({
             {onCreateInvite && (
               <Button
                 onClick={onCreateInvite}
-                className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-2xl text-xs px-4 py-2.5 h-10 flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+                className="bg-white hover:bg-zinc-200 text-black font-bold rounded-2xl text-xs px-4 py-2.5 h-10 flex items-center gap-2 shadow-lg shadow-white/10"
               >
                 <Link2 className="w-4 h-4" />
                 {t('invite_button')}
@@ -229,7 +229,7 @@ export function ChatWindow({
                       onClick={() => setActivePickerMessageId(isPickerOpen ? null : msg.id)}
                       className={cn(
                         "p-1.5 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover/bubble:opacity-100 focus:opacity-100 shrink-0",
-                        isPickerOpen && "opacity-100 bg-white/10 text-emerald-400",
+                        isPickerOpen && "opacity-100 bg-white/10 text-white",
                         isMe ? "order-first" : "order-last"
                       )}
                       title="Bày tỏ cảm xúc"

@@ -1,6 +1,9 @@
 # Environment files
 .env
-.env.*
+.env.local
+.env.production
+!.env.production.example
+!.env.example
 
 # Prisma generated client
 /generated/prisma

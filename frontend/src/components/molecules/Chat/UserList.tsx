@@ -37,7 +37,7 @@ export const UserList = React.memo(function UserList({ users, activeUserId, unre
             className={cn(
               "w-full flex items-center gap-3 p-3 rounded-2xl transition-all duration-200 text-left relative cursor-pointer select-none",
               activeUserId === user.id 
-                ? "glass-light text-white shadow-soft ring-1 ring-emerald-500/50 bg-white/10" 
+                ? "glass-light text-white shadow-soft ring-1 ring-white/20 bg-white/10" 
                 : "text-white/60 hover:text-white hover:bg-white/5 active:scale-[0.98]"
             )}
           >
@@ -49,7 +49,7 @@ export const UserList = React.memo(function UserList({ users, activeUserId, unre
                 <span 
                   className={cn(
                     "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#121212]",
-                    status.isOnline ? "bg-emerald-400" : "bg-white/20"
+                    status.isOnline ? "bg-white" : "bg-white/20"
                   )} 
                 />
               )}
@@ -58,7 +58,7 @@ export const UserList = React.memo(function UserList({ users, activeUserId, unre
               <p className={cn("font-semibold truncate text-sm", isUnread && "text-white")}>
                 {user.name || user.email}
               </p>
-              <p className={cn("text-[11px] truncate", status.isOnline ? "text-emerald-400 font-medium" : "text-white/40")}>
+              <p className={cn("text-[11px] truncate", status.isOnline ? "text-white font-medium" : "text-white/40")}>
                 {status.text}
               </p>
             </div>

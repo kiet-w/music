@@ -93,16 +93,16 @@ export function ImageUploader({
           'relative overflow-hidden rounded-2xl border border-dashed transition-all duration-300 flex flex-col items-center justify-center cursor-pointer group',
           aspectRatio === 'square' ? 'aspect-square max-h-48' : 'h-36',
           isDragOver
-            ? 'border-emerald-500 bg-emerald-500/10'
+            ? 'border-white bg-white/10'
             : displayUrl
             ? 'border-white/20 bg-black/40'
-            : 'border-white/15 bg-white/5 hover:border-emerald-500/50 hover:bg-white/10'
+            : 'border-white/15 bg-white/5 hover:border-white/40 hover:bg-white/10'
         )}
       >
         {isUploading ? (
           <div className="flex flex-col items-center gap-2 p-4 text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
-            <span className="text-xs font-medium text-emerald-400">Đang tải ảnh lên...</span>
+            <Loader2 className="w-8 h-8 animate-spin text-white" />
+            <span className="text-xs font-medium text-white">Đang tải ảnh lên...</span>
           </div>
         ) : displayUrl ? (
           <div className="relative w-full h-full group">
@@ -119,7 +119,7 @@ export function ImageUploader({
               <button
                 type="button"
                 onClick={handleClear}
-                className="p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-full transition-colors"
+                className="p-1.5 bg-white/20 hover:bg-white hover:text-black text-white rounded-full transition-colors"
                 title="Xóa ảnh"
               >
                 <X className="w-4 h-4" />
@@ -128,7 +128,7 @@ export function ImageUploader({
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center p-6 text-center gap-2">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:border-emerald-500/40 transition-all">
+            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:scale-110 group-hover:border-white/40 transition-all">
               <UploadCloud className="w-6 h-6" />
             </div>
             <p className="text-xs text-white/60 font-medium max-w-[200px] leading-relaxed">

@@ -91,7 +91,7 @@ export default function PlayerBar() {
       <div className="mt-4 px-1">
         <div className="relative w-full h-1.5 bg-white/10 rounded-full overflow-hidden group">
           <div
-            className="absolute h-full bg-white transition-[width] duration-1000 ease-linear group-hover:bg-emerald-400"
+            className="absolute h-full bg-white transition-[width] duration-1000 ease-linear group-hover:bg-white"
             style={{ width: `${progressPct}%` }}
           />
           <input
