@@ -11,7 +11,6 @@ import { useChatStore } from '@/store/useChatStore';
 import { useKeyboardVisible } from '@/hooks/useKeyboardVisible';
 
 export default function BottomTabBar() {
-  const isKeyboardVisible = useKeyboardVisible();
   const pathname = usePathname();
   const router = useRouter();
   const locale = useLocale();
@@ -19,9 +18,6 @@ export default function BottomTabBar() {
   const { clearSession, user } = useAuthStore();
   const { unreadMessages, activeReceiverId } = useChatStore();
 
-  if (isKeyboardVisible) {
-    return null;
-  }
 
   const handleLogout = () => {
     clearSession();

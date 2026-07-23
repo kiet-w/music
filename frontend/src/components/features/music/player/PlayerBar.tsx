@@ -18,7 +18,6 @@ const useVolume = () => usePlayerStore((s) => s.volume);
 const useSetVolume = () => usePlayerStore((s) => s.setVolume);
 
 export default function PlayerBar() {
-  const isKeyboardVisible = useKeyboardVisible();
   const pathname = usePathname();
   const currentTrack = useCurrentTrack();
   const isPlaying = useIsPlaying();
@@ -31,7 +30,7 @@ export default function PlayerBar() {
 
   const isMessagesPage = pathname?.includes('/messages');
 
-  if (!currentTrack || isKeyboardVisible || isMessagesPage) return null;
+  if (!currentTrack || isMessagesPage) return null;
 
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return '0:00';
