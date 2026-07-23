@@ -86,11 +86,11 @@ export default function BottomTabBar() {
         <button 
           onClick={handleLogout}
           className="relative flex flex-col items-center justify-center w-16 h-full transition-colors duration-200 text-white/40 hover:text-white/70"
-          title={user?.email || 'Logout'}
+          title={user?.email || t('Navbar.logout')}
         >
           <LogOut size={22} strokeWidth={1.5} />
           <span className="text-[10px] font-bold uppercase tracking-widest absolute bottom-2 opacity-0 hover:opacity-100 transition-opacity duration-200">
-            Logout
+            {t('Navbar.logout')}
           </span>
         </button>
       </div>

@@ -35,9 +35,10 @@
     "browse_drive": "Duyệt file Drive",
     "default_album": "Album đích mặc định",
     "recent": "Gần đây",
-    "create": "Tạo",
-    "create_new_album": "Tạo album mới",
+    "create": "Tạo Album",
+    "create_new_album": "Tạo Album mới",
     "album_title": "Tiêu đề Album",
+    "album_title_placeholder": "Nhập tên Album...",
     "artist_optional": "Nghệ sĩ (Tùy chọn)",
     "no_albums_yet": "Chưa có album nào.",
     "create_first_album": "Tạo album đầu tiên",
@@ -47,7 +48,7 @@
     "delete_confirm": "Xác nhận xóa bài hát",
     "delete_warning": "Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa bài hát này?",
     "move_to_album": "Di chuyển đến Album",
-    "select_album": "Chọn album đích",
+    "select_album": "Di chuyển bài hát",
     "cancel": "Hủy",
     "confirm": "Xác nhận",
     "youtube_upgrade_title": "Hệ thống tải nhạc đã nâng cấp!",
@@ -57,7 +58,18 @@
     "pipeline_enabled": "Unified NestJS Downloader Pipeline Enabled",
     "fetching_title": "Đang tải tên bài hát...",
     "fetching_artist": "Đang tải nghệ sĩ...",
-    "no_album_single": "Không chọn album (Single)"
+    "no_album_single": "Không chọn album (Single)",
+    "song_title_placeholder": "Nhập tên bài hát...",
+    "unknown_artist": "Nghệ sĩ không xác định",
+    "various_artists": "Nhiều nghệ sĩ",
+    "delete_success": "Đã xóa bài hát khỏi thư viện.",
+    "delete_error": "Lỗi khi xóa bài hát.",
+    "move_success": "Đã di chuyển bài hát sang album mới.",
+    "move_error": "Lỗi khi di chuyển bài hát.",
+    "add_to_album_error": "Không thể thêm bài hát vào album",
+    "create_album_error": "Không thể tạo album mới",
+    "update_cover_error": "Không thể cập nhật ảnh bìa Album",
+    "fetch_files_error": "Không thể lấy danh sách file"
   },
   "Auth": {
     "login": "Đăng nhập",
@@ -90,14 +102,19 @@
     "google_connect_success_title": "Thành công!",
     "google_connect_success_desc": "Đã kết nối Drive. Đang quay lại thư viện...",
     "google_connect_error_title": "Lỗi kết nối",
-    "back_to_music": "Quay lại trang Nhạc"
+    "back_to_music": "Quay lại trang Nhạc",
+    "otp_invalid": "Mã OTP không chính xác hoặc đã hết hạn",
+    "resend_otp_success": "Đã gửi lại mã OTP",
+    "resend_otp_error": "Không thể gửi lại mã OTP",
+    "google_login_error": "Đăng nhập Google thất bại"
   },
   "Navbar": {
     "home": "Trang chủ",
     "albums": "Album",
     "music": "Thêm nhạc",
     "messages": "Tin nhắn",
-    "user": "Tài khoản"
+    "user": "Tài khoản",
+    "logout": "Đăng xuất"
   },
   "Chat": {
     "title": "Tin nhắn",
@@ -126,11 +143,17 @@
     "prompt_enter_token": "Nhập link lời mời hoặc Token kết bạn:",
     "accept_invite_success": "Đã chấp nhận lời mời kết bạn thành công!",
     "error_accept_invite": "Không thể chấp nhận lời mời kết bạn",
-    "conversation": "Cuộc trò chuyện",
+    "conversation": "Trò chuyện",
     "top_of_chat": "Đầu cuộc trò chuyện",
     "no_messages_title": "Chưa có tin nhắn nào",
     "no_messages_desc": "Hãy gửi tin nhắn đầu tiên để bắt đầu cuộc trò chuyện hoặc chia sẻ lời mời bạn bè!",
-    "accept_invite_btn": "Nhận lời mời"
+    "accept_invite_btn": "Nhận lời mời",
+    "back_to_list": "Quay lại danh sách bạn bè",
+    "friends": "Bạn bè",
+    "user": "Người dùng",
+    "connect_with_user": "Kết bạn với {name}",
+    "create_friend_code_error": "Không thể tạo mã kết bạn",
+    "accept_friend_code_error": "Không thể chấp nhận mã kết bạn"
   },
   "Error": {
     "not_found_title": "Trang không tồn tại",

@@ -64,7 +64,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
           <div className="relative flex-1">
             <Input 
               type="text" 
-              placeholder={isFetchingInfo ? (t('fetching_title') || 'Fetching Title...') : 'Song Title'}
+              placeholder={isFetchingInfo ? t('fetching_title') : (t('song_title_placeholder') || 'Nhập tên bài hát...')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={isDownloading || isFetchingInfo}
@@ -76,7 +76,7 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
           <div className="relative flex-1">
             <Input 
               type="text" 
-              placeholder={isFetchingInfo ? (t('fetching_artist') || 'Fetching Artist...') : 'Artist (Optional)'}
+              placeholder={isFetchingInfo ? t('fetching_artist') : t('artist_optional')}
               value={artist}
               onChange={(e) => setArtist(e.target.value)}
               disabled={isDownloading || isFetchingInfo}

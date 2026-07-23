@@ -77,11 +77,11 @@ export function Navbar() {
       <button 
         onClick={handleLogout}
         className="relative flex flex-col items-center gap-1 transition-all duration-300 text-white/40 hover:text-white/70"
-        title={user?.email || 'Logout'}
+        title={user?.email || t('logout')}
       >
         <LogOut size={22} strokeWidth={1.5} />
         <span className="text-[9px] font-bold uppercase tracking-widest opacity-0 hover:opacity-100 transition-opacity duration-300">
-          Logout
+          {t('logout')}
         </span>
       </button>
     </nav>
