@@ -1,5 +1,6 @@
 'use client';
 
+// ponytail: 2D Hand-drawn Stacked Cards Music Deck Player Bar (matching exact user screenshot & rotate formula)
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -11,17 +12,12 @@ import {
   Volume2,
   VolumeX,
   Layers,
-  ChevronUp,
-  ChevronDown,
-  Trash2,
-  X,
 } from 'lucide-react';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { StackedFanDeck } from '@/components/features/music/player/StackedFanDeck';
 
-// ponytail: granular selectors — PlayerBar re-renders only on specific value changes
 const useCurrentTrack = () => usePlayerStore((s) => s.currentTrack);
 const useQueue = () => usePlayerStore((s) => s.queue);
 const useIsPlaying = () => usePlayerStore((s) => s.isPlaying);
@@ -33,11 +29,7 @@ const useVolume = () => usePlayerStore((s) => s.volume);
 const useSetVolume = () => usePlayerStore((s) => s.setVolume);
 const usePlayNext = () => usePlayerStore((s) => s.playNext);
 const usePlayPrevious = () => usePlayerStore((s) => s.playPrevious);
-const usePlay = () => usePlayerStore((s) => s.play);
-const useMoveQueueTrack = () => usePlayerStore((s) => s.moveQueueTrack);
-const useRemoveFromQueue = () => usePlayerStore((s) => s.removeFromQueue);
 
-// ponytail: 2D Hand-drawn Stacked Cards Music Deck Player Bar (AWWWARDS-level Stacked Card Layout & Reorder Queue)
 export default function PlayerBar() {
   const pathname = usePathname();
   const currentTrack = useCurrentTrack();
@@ -51,9 +43,6 @@ export default function PlayerBar() {
   const setVolume = useSetVolume();
   const playNext = usePlayNext();
   const playPrevious = usePlayPrevious();
-  const play = usePlay();
-  const moveQueueTrack = useMoveQueueTrack();
-  const removeFromQueue = useRemoveFromQueue();
 
   const [isStackExpanded, setIsStackExpanded] = useState(false);
 
@@ -80,7 +69,7 @@ export default function PlayerBar() {
   const upcomingTracks = currentIndex !== -1 ? queue.slice(currentIndex + 1) : queue;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[420px] z-40">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[440px] z-40">
       {/* --- EXPANDED 2D HAND-DRAWN STACKED CARDS DECK --- */}
       <AnimatePresence>
         {isStackExpanded && (
@@ -96,69 +85,67 @@ export default function PlayerBar() {
         )}
       </AnimatePresence>
 
-      {/* --- STACKED CARDS MASTER PLAYER DECK --- */}
-      <div className="relative w-full">
-        {/* Layer 2 Card (Next Up Card in Stacked Deck - Offset & Angle Preview) */}
+      {/* --- 2D HAND-DRAWN STACKED CARDS PLAYER BAR --- */}
+      <div className="relative w-full group">
+        {/* Layer 2 Card (Card: -5deg tilt, peeking out behind top-left) */}
         {upcomingTracks.length > 0 && (
           <div
-            onClick={() => setIsStackExpanded(true)}
-            style={{ transform: 'rotate(-3deg) translateY(-8px)' }}
-            className="absolute -top-2 left-1/2 -translate-x-1/2 w-[92%] h-12 rounded-[2rem] bg-zinc-900/90 border border-white/10 shadow-lg z-10 cursor-pointer flex items-center justify-between px-4 text-xs text-zinc-400 opacity-80 hover:opacity-100 hover:rotate-0 transition-all duration-300"
-            title="Nhấp mở Stacked Cards Deck để sắp xếp thứ tự phát nhạc"
+            onClick={() => setIsStackExpanded((prev) => !prev)}
+            style={{ transform: 'rotate(-5deg) translateY(-10px) translateX(-6px)' }}
+            className="absolute top-0 left-4 w-[92%] h-14 rounded-[2rem] bg-zinc-900/90 border border-white/10 shadow-lg z-10 cursor-pointer flex items-center justify-between px-5 text-xs text-zinc-400 opacity-80 hover:opacity-100 hover:rotate-0 hover:translate-y-[-14px] transition-all duration-300"
+            title="Nhấp mở Stacked Cards Deck"
           >
-            <span className="truncate max-w-[200px] text-[11px] font-medium">Kế tiếp: {upcomingTracks[0].title}</span>
-            <div className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-full text-[10px] text-white">
-              <Layers size={12} />
-              <span>Stacked</span>
-            </div>
+            <span className="truncate max-w-[200px] text-[11px] font-medium text-zinc-300">
+              Kế tiếp: {upcomingTracks[0].title}
+            </span>
           </div>
         )}
 
-        {/* Layer 3 Card (Deepest Stacked Card - Offset & Angle Preview) */}
+        {/* Layer 3 Card (Card: +4deg tilt, peeking out behind top-right) */}
         {upcomingTracks.length > 1 && (
           <div
-            onClick={() => setIsStackExpanded(true)}
-            style={{ transform: 'rotate(4deg) translateY(-16px)' }}
-            className="absolute -top-4 left-1/2 -translate-x-1/2 w-[84%] h-10 rounded-[1.8rem] bg-zinc-950/80 border border-white/5 shadow-md z-0 cursor-pointer opacity-50 transition-all"
+            onClick={() => setIsStackExpanded((prev) => !prev)}
+            style={{ transform: 'rotate(4deg) translateY(-18px) translateX(8px)' }}
+            className="absolute top-0 right-4 w-[86%] h-12 rounded-[1.8rem] bg-zinc-950/80 border border-white/10 shadow-md z-0 cursor-pointer opacity-60 hover:opacity-90 hover:rotate-0 transition-all duration-300"
           />
         )}
 
-        {/* Layer 1 Frontmaster Card (Active Track Player) */}
+        {/* Layer 1 Frontmaster Player Card (Exact layout matching screenshot) */}
         <div className="relative z-30 w-full bg-zinc-950/95 border border-white/15 backdrop-blur-2xl rounded-[2.5rem] flex flex-col p-4 sm:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.9)] transition-all duration-300">
           <div className="flex items-center w-full gap-3">
-            {/* Track Cover & Details */}
-            <div className="flex items-center flex-1 min-w-0 gap-3">
-              <div className="w-12 h-12 bg-white/5 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 shadow-md">
-                {currentTrack.coverUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={currentTrack.coverUrl} alt={currentTrack.title} loading="lazy" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[8px] font-bold uppercase tracking-tighter text-white/30">
-                    No Art
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold font-instrument tracking-tight truncate text-white">{currentTrack.title}</p>
-                <p className="text-xs text-zinc-400 font-medium truncate">{currentTrack.artist || 'Nghệ sĩ'}</p>
-              </div>
+            {/* Track Cover Art */}
+            <div className="w-12 h-12 bg-white/5 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10 shadow-md">
+              {currentTrack.coverUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={currentTrack.coverUrl} alt={currentTrack.title} loading="lazy" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[8px] font-bold uppercase tracking-tighter text-white/30">
+                  NO ART
+                </div>
+              )}
             </div>
 
-            {/* Audio & Stack Queue Controls */}
-            <div className="flex items-center gap-1.5">
-              {/* Stacked Cards Queue Reorder Toggle Button */}
+            {/* Track Title & Artist */}
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold font-instrument tracking-tight truncate text-white leading-snug">{currentTrack.title}</p>
+              <p className="text-xs text-zinc-400 font-medium truncate mt-0.5">{currentTrack.artist || 'Nghệ sĩ'}</p>
+            </div>
+
+            {/* Stack Queue Button & Player Controls */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* White Stack Button (exact as screenshot) */}
               <button
                 onClick={() => setIsStackExpanded((prev) => !prev)}
                 className={cn(
-                  "p-2 rounded-xl border transition-all active:scale-95 cursor-pointer mr-1",
+                  "w-10 h-10 rounded-2xl flex items-center justify-center border transition-all active:scale-95 cursor-pointer shadow-md",
                   isStackExpanded
-                    ? "bg-white text-zinc-950 border-white shadow-md"
-                    : "bg-white/5 text-zinc-400 hover:text-white border-white/10 hover:bg-white/10"
+                    ? "bg-white text-zinc-950 border-white shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+                    : "bg-white text-zinc-950 hover:bg-zinc-200 border-white"
                 )}
-                title="Mở Stacked Cards / Sắp xếp thứ tự bài hát"
+                title="Sắp xếp thứ tự phát (Stacked Cards Deck)"
                 aria-label="Sắp xếp danh sách phát"
               >
-                <Layers size={18} strokeWidth={2} />
+                <Layers size={20} strokeWidth={2.2} />
               </button>
 
               <button
@@ -168,6 +155,7 @@ export default function PlayerBar() {
               >
                 <SkipBack size={18} strokeWidth={2} fill="currentColor" />
               </button>
+
               <button
                 onClick={togglePlay}
                 className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-zinc-950 hover:scale-105 transition-all active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.4)] cursor-pointer"
@@ -179,6 +167,7 @@ export default function PlayerBar() {
                   <Play size={20} strokeWidth={2} fill="currentColor" className="ml-0.5" />
                 )}
               </button>
+
               <button
                 onClick={playNext}
                 className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white transition-colors active:scale-90 cursor-pointer"
@@ -189,8 +178,8 @@ export default function PlayerBar() {
             </div>
           </div>
 
-          {/* Progress Bar & Volume */}
-          <div className="mt-3 px-1">
+          {/* Progress Bar & Volume Slider */}
+          <div className="mt-3.5 px-1">
             <div className="relative w-full h-1.5 bg-white/10 rounded-full overflow-hidden group cursor-pointer">
               <div
                 className="absolute h-full bg-white transition-[width] duration-1000 ease-linear group-hover:bg-white"
