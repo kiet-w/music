@@ -69,7 +69,11 @@
     "add_to_album_error": "Failed to add track to album",
     "create_album_error": "Failed to create album",
     "update_cover_error": "Failed to update album cover",
-    "fetch_files_error": "Failed to fetch files"
+    "fetch_files_error": "Failed to fetch files",
+    "select_album_first": "Please select an Album before importing music",
+    "track_or_session_not_found": "Track ID or active session not found",
+    "enter_album_name_and_login": "Please enter an album name and verify your login",
+    "import_partially_failed": "Some files failed to import. Please try again."
   },
   "Auth": {
     "login": "Login",
@@ -106,7 +110,17 @@
     "otp_invalid": "Invalid or expired OTP code",
     "resend_otp_success": "Resent OTP code successfully",
     "resend_otp_error": "Failed to resend OTP code",
-    "google_login_error": "Google login failed"
+    "google_login_error": "Google login failed",
+    "session_expired": "Login session expired",
+    "please_login_first": "Please log in first",
+    "please_login_to_connect": "Please log in to connect",
+    "please_login_to_import": "Please log in before importing music",
+    "please_login_to_send": "Please log in again to send messages",
+    "invalid_file_type": "Please select a valid image file (JPEG, PNG, WEBP)",
+    "image_size_exceeded": "Image size must not exceed 5MB",
+    "avatar_upload_failed": "Failed to upload avatar image",
+    "cover_upload_failed": "Failed to update album cover",
+    "check_login": "Please check your login session"
   },
   "Navbar": {
     "home": "Home",
@@ -153,7 +167,10 @@
     "user": "User",
     "connect_with_user": "Connect with {name}",
     "create_friend_code_error": "Failed to create friend code",
-    "accept_friend_code_error": "Failed to accept friend code"
+    "accept_friend_code_error": "Failed to accept friend code",
+    "grant_paste_permission": "Please grant paste permission or paste manually",
+    "enter_friend_code": "Please enter a Friend Code",
+    "create_invite_error": "Failed to create invite link"
   },
   "Error": {
     "not_found_title": "Page not found",
@@ -163,6 +180,8 @@
     "error_desc_default": "An unexpected error occurred. Please try again or return to the home page.",
     "go_back": "Go Back",
     "go_home": "Home Page",
-    "try_again": "Try Again"
+    "try_again": "Try Again",
+    "network_error": "Network Connection Error: Unable to connect to server. Please check your internet connection.",
+    "hydration_timeout": "Connection timeout. Please try again."
   }
 }

@@ -54,17 +54,17 @@ export function AlbumDetailHeader({ album, isAlbumActive, onAlbumUpdated }: Albu
 
     const token = getEffectiveToken();
     if (!token) {
-      toast.error('Phiên đăng nhập hết hạn');
+      toast.error(t('Auth.session_expired') || 'Phiên đăng nhập hết hạn');
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Vui lòng chọn tệp hình ảnh (JPEG, PNG, WEBP)');
+      toast.error(t('Auth.invalid_file_type') || 'Vui lòng chọn tệp hình ảnh (JPEG, PNG, WEBP)');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Kích thước ảnh không vượt quá 5MB');
+      toast.error(t('Auth.image_size_exceeded') || 'Kích thước ảnh không vượt quá 5MB');
       return;
     }
 
@@ -87,10 +87,10 @@ export function AlbumDetailHeader({ album, isAlbumActive, onAlbumUpdated }: Albu
         onAlbumUpdated({ ...album, coverUrl: url });
       }
 
-      toast.success('Đã cập nhật ảnh bìa Album thành công!');
+      toast.success(t('update_cover_success') || 'Đã cập nhật ảnh bìa Album thành công!');
     } catch (err: any) {
       console.error('Failed to update album cover:', err);
-      toast.error(err?.message || 'Không thể cập nhật ảnh bìa Album');
+      toast.error(err?.message || t('update_cover_error') || 'Không thể cập nhật ảnh bìa Album');
       setLocalCover(null);
     } finally {
       setIsUploading(false);

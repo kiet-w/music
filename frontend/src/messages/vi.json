@@ -69,7 +69,11 @@
     "add_to_album_error": "Không thể thêm bài hát vào album",
     "create_album_error": "Không thể tạo album mới",
     "update_cover_error": "Không thể cập nhật ảnh bìa Album",
-    "fetch_files_error": "Không thể lấy danh sách file"
+    "fetch_files_error": "Không thể lấy danh sách file",
+    "select_album_first": "Vui lòng chọn Album trước khi nhập nhạc",
+    "track_or_session_not_found": "Không tìm thấy ID bài hát hoặc phiên làm việc",
+    "enter_album_name_and_login": "Vui lòng nhập tên album và kiểm tra đăng nhập",
+    "import_partially_failed": "Một số file gặp lỗi khi nhập. Vui lòng thử lại."
   },
   "Auth": {
     "login": "Đăng nhập",
@@ -106,7 +110,17 @@
     "otp_invalid": "Mã OTP không chính xác hoặc đã hết hạn",
     "resend_otp_success": "Đã gửi lại mã OTP",
     "resend_otp_error": "Không thể gửi lại mã OTP",
-    "google_login_error": "Đăng nhập Google thất bại"
+    "google_login_error": "Đăng nhập Google thất bại",
+    "session_expired": "Phiên đăng nhập hết hạn",
+    "please_login_first": "Vui lòng đăng nhập trước",
+    "please_login_to_connect": "Vui lòng đăng nhập để kết nối",
+    "please_login_to_import": "Vui lòng đăng nhập trước khi nhập nhạc",
+    "please_login_to_send": "Vui lòng đăng nhập lại để gửi tin nhắn",
+    "invalid_file_type": "Vui lòng chọn tệp hình ảnh (JPEG, PNG, WEBP)",
+    "image_size_exceeded": "Kích thước ảnh không vượt quá 5MB",
+    "avatar_upload_failed": "Không thể tải ảnh đại diện lên",
+    "cover_upload_failed": "Không thể cập nhật ảnh bìa Album",
+    "check_login": "Vui lòng kiểm tra đăng nhập"
   },
   "Navbar": {
     "home": "Trang chủ",
@@ -153,7 +167,10 @@
     "user": "Người dùng",
     "connect_with_user": "Kết bạn với {name}",
     "create_friend_code_error": "Không thể tạo mã kết bạn",
-    "accept_friend_code_error": "Không thể chấp nhận mã kết bạn"
+    "accept_friend_code_error": "Không thể chấp nhận mã kết bạn",
+    "grant_paste_permission": "Vui lòng cấp quyền dán hoặc dán thủ công",
+    "enter_friend_code": "Vui lòng nhập Mã kết bạn",
+    "create_invite_error": "Không thể tạo liên kết mời"
   },
   "Error": {
     "not_found_title": "Trang không tồn tại",
@@ -163,6 +180,8 @@
     "error_desc_default": "Hệ thống gặp sự cố ngoài ý muốn. Vui lòng thử lại hoặc quay về trang chủ.",
     "go_back": "Quay lại",
     "go_home": "Trang chủ",
-    "try_again": "Thử lại"
+    "try_again": "Thử lại",
+    "network_error": "Lỗi kết nối mạng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường truyền.",
+    "hydration_timeout": "Thời gian chờ kết nối quá lâu. Vui lòng thử lại."
   }
 }
