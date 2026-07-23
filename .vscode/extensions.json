@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-python.python"
+  ],
+  "unwantedRecommendations": [
+    "CoenraadS.bracket-pair-colorizer",
+    "CoenraadS.bracket-pair-colorizer-2"
+  ]
+}

@@ -29,6 +29,8 @@ backend/yt-dlp.tsbuildinfo
 
 # Personal Editor configs
 .vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
 **/.vscode/
 .idea/
 **/.idea/
