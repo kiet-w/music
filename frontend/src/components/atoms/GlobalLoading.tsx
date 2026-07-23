@@ -14,7 +14,7 @@ export function GlobalLoading({ fullScreen = false, message }: GlobalLoadingProp
       className={
         fullScreen
           ? "fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-200 p-4"
-          : "flex items-center justify-center w-full min-h-[160px] p-4"
+          : "absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200 p-4"
       }
     >
       <div className="glass-dark border border-white/10 rounded-3xl p-6 sm:p-8 max-w-xs w-full flex flex-col items-center justify-center space-y-4 shadow-2xl animate-in zoom-in-95 duration-200 text-center">
