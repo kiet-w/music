@@ -8,9 +8,11 @@ import { Button } from '@/components/ui/button';
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
 import { AlbumDetailHeader } from '@/components/features/albums/AlbumDetailHeader';
 
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
+
 const Library = dynamic(() => import('@/components/features/music/player/Library'), {
   ssr: false,
-  loading: () => <div className="p-8 text-center text-muted-foreground animate-pulse">Loading tracks...</div>
+  loading: () => <GlobalLoading />
 });
 
 interface Album {
@@ -45,7 +47,7 @@ export function AlbumDetailTemplate({
   t
 }: AlbumDetailTemplateProps) {
   if (loading && !album) {
-    return <div className="p-8 text-center animate-pulse">Loading album...</div>;
+    return <GlobalLoading />;
   }
 
   if (!album) {

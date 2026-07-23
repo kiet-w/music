@@ -8,6 +8,7 @@ import { AlbumGridItem } from '@/components/features/albums/grid/AlbumGridItem';
 import { AlbumListItem } from '@/components/features/albums/list/AlbumListItem';
 import { CreateAlbumDialog } from '@/components/features/albums/dialogs/CreateAlbumDialog';
 import { AlbumsEmptyState } from '@/components/features/albums/AlbumsEmptyState';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
 interface Album {
   id: string;
@@ -77,13 +78,7 @@ export function AlbumsTemplate({
 
       <div className="flex-1 min-h-0 overflow-y-auto pb-4 scrollbar-hide">
         {isLoading && albums.length === 0 ? (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 px-1.5">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i}>
-                <AlbumSkeleton />
-              </div>
-            ))}
-          </div>
+          <GlobalLoading />
         ) : albums.length > 0 ? (
           <div className={viewMode === 'grid' ? "grid grid-cols-2 gap-x-6 gap-y-10 px-1.5" : "flex flex-col gap-4"}>
             {albums.map((album, index) => (
