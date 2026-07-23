@@ -8,6 +8,7 @@ import { CustomSelect, SelectOption } from '@/components/ui/custom-select';
 import { Download, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useYoutubeDownloader } from '@/hooks/useYoutubeDownloader';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
 interface DownloaderProps {
   onDownloadStarted?: (url: string) => void;
@@ -85,20 +86,10 @@ export default function Downloader({ onDownloadStarted }: DownloaderProps) {
           </div>
         </div>
 
-        {/* Metadata Auto-Fetch Lazy Loading Banner (Single Centered Loading Indicator) */}
-        <AnimatePresence>
-          {isFetchingInfo && (
-            <motion.div
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              className="flex flex-col items-center justify-center p-4 gap-2 text-xs text-emerald-400 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-center"
-            >
-              <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
-              <span className="font-medium">Đang tự động tải thông tin bài hát & nghệ sĩ từ YouTube...</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Metadata Auto-Fetch Lazy Loading using unified GlobalLoading */}
+        {isFetchingInfo && (
+          <GlobalLoading message={t('fetching_title') || 'Đang tự động tải thông tin bài hát & nghệ sĩ từ YouTube...'} />
+        )}
 
         {/* Custom Styled Album Selection Dropdown */}
         <CustomSelect
