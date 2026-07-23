@@ -1,323 +1,175 @@
-# Music App
+# 🎵 Music App (Full-stack Ecosystem)
 
-Full-stack music streaming application with YouTube download, Google Drive integration, and mobile support via Capacitor.
-
-## Tech Stack
-
-### Frontend
-- **Framework:** Next.js 15 (App Router) + React 19
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS + shadcn/ui
-- **State Management:** Zustand
-- **Audio Player:** Howler.js
-- **Mobile:** Capacitor (Android)
-- **i18n:** next-intl
-- **Monitoring:** Sentry
-
-### Backend
-- **Framework:** NestJS 11
-- **Language:** TypeScript
-- **Database:** PostgreSQL + Prisma ORM
-- **Cache:** Redis (BullMQ)
-- **Storage:** Supabase Storage
-- **Auth:** JWT + Google OAuth 2.0
-- **Monitoring:** Prometheus + Sentry
-
-### Infrastructure
-- **Containerization:** Docker + Docker Compose
-- **Reverse Proxy:** Nginx / Caddy
-- **Logging:** Loki + Promtail + Prometheus
+Hệ sinh thái ứng dụng Nghe nhạc & Chuyển đổi nhạc Đa nền tảng (Web & Android APK) được xây dựng theo kiến trúc Microservices hiện đại, hỗ trợ chuyển đổi nhạc YouTube, tích hợp Google Drive, nhắn tin thời gian thực và quản lý Album cá nhân.
 
 ---
 
-## Project Structure
+## 🚀 Công nghệ sử dụng (Tech Stack)
+
+### 🎨 Frontend
+- **Framework:** Next.js 15 (App Router) + React 19 (Turbopack compiler)
+- **Ngôn ngữ:** TypeScript
+- **Styling & UI:** Vanilla CSS + Tailwind CSS + Glassmorphism Aesthetics + Lucide Icons
+- **Quản lý State:** Zustand (Player, Auth, Chat, Albums, DownloadHistory)
+- **Trình phát Audio:** Howler.js (Audio Engine)
+- **Đa ngôn ngữ (i18n):** `next-intl` (Hỗ trợ 100% từ điển `vi.json` & `en.json`)
+- **App Di động:** Capacitor 8.x (Android APK Native integration)
+- **Hệ thống Loading:** `GlobalLoading` hợp nhất (Popup kính mờ nổi chính giữa màn hình)
+
+### ⚙️ NestJS Main Backend
+- **Framework:** NestJS 11
+- **Database & ORM:** PostgreSQL + Prisma ORM
+- **Hàng đợi & Cache:** Redis + BullMQ (High-performance Job Queue)
+- **Realtime Chat:** Socket.io (`MessagesGateway`)
+- **Lưu trữ File:** Supabase Storage
+- **Xác thực:** JWT + Google OAuth 2.0
+- **Bảo mật & CORS:** Tự động hỗ trợ Whitelist Origin cho Capacitor App (`https://localhost`, `capacitor://localhost`)
+
+### 🐍 Python Converter Microservice (`python-backend/`)
+- **Framework:** FastAPI + Uvicorn (ASGI Async Web Framework)
+- **Download Engine:** Native `yt_dlp` Python Module (Xử lý trực tiếp trên RAM, không tốn tài nguyên subprocess CLI)
+- **Background Queue:** FastAPI `BackgroundTasks` (Chuyển đổi bất đồng bộ ngầm mà không cần hạ tầng Redis/Celery rườm rà)
+- **Hiệu năng & An toàn:** Dùng đĩa tạm `/tmp` hệ thống (Tránh tràn bộ nhớ `/dev/shm` OOM), phản hồi `taskId` trong **10ms** và bóc tách metadata trong **0.3s - 0.5s**.
+
+---
+
+## 📁 Cấu trúc Thư mục Dự án
 
 ```
 music/
-├── frontend/                 # Next.js frontend
+├── frontend/                 # Web & Mobile App (Next.js 15 + Capacitor 8)
 │   ├── src/
-│   │   ├── app/             # App Router pages
-│   │   ├── components/      # React components
-│   │   ├── hooks/           # Custom hooks
-│   │   ├── lib/             # Utilities
-│   │   ├── store/           # Zustand stores
-│   │   └── messages/        # i18n translations
-│   ├── android/             # Capacitor Android project
-│   ├── public/              # Static assets
+│   │   ├── app/             # App Router routes & loading boundaries
+│   │   ├── components/      # React Atomic UI components
+│   │   │   ├── atoms/       # Components nhỏ (GlobalLoading, Button, v.v.)
+│   │   │   ├── molecules/   # Components vừa (PlayerBar, ChatInput, Navbar)
+│   │   │   ├── features/    # Components theo tính năng (music, chat, albums)
+│   │   │   ├── pages/       # Giao diện chính của từng trang
+│   │   │   └── templates/   # Wrappers & Layout templates
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── lib/             # API helpers & security utilities
+│   │   ├── store/           # Zustand state management
+│   │   └── messages/        # i18n translations (vi.json & en.json)
+│   ├── android/             # Capacitor Android Native Project
 │   └── package.json
 │
-├── backend/                  # NestJS backend
+├── backend/                  # NestJS Main Backend Service
 │   ├── src/
-│   │   ├── auth/            # Authentication (JWT + Google OAuth)
-│   │   ├── songs/           # Songs CRUD (CQRS pattern)
-│   │   ├── albums/          # Albums management
-│   │   ├── messages/        # Messaging & friend requests
-│   │   ├── downloader/      # YouTube download (yt-dlp)
-│   │   ├── google-drive/    # Google Drive integration
-│   │   ├── storage/         # Supabase storage
-│   │   ├── admin/           # Admin panel
-│   │   ├── jobs/            # Background jobs (BullMQ)
-│   │   ├── common/          # Shared utilities
-│   │   └── prisma/          # Prisma service
-│   ├── prisma/
-│   │   └── schema.prisma    # Database schema
+│   │   ├── auth/            # JWT & Google OAuth 2.0
+│   │   ├── songs/           # Quản lý nhạc & kết nối Downloader
+│   │   ├── albums/          # Quản lý Album cá nhân
+│   │   ├── messages/        # Chat realtime & Lời mời kết bạn
+│   │   ├── downloader/      # Service tự động gọi yt-dlp & aria2c
+│   │   ├── google-drive/    # Tích hợp lấy nhạc từ Google Drive
+│   │   ├── storage/         # Lưu trữ Supabase Cloud
+│   │   └── main.ts          # NestJS Entrypoint & Whitelist CORS
+│   ├── prisma/              # Prisma Schema & Migrations
 │   └── package.json
 │
-├── docs/                     # Documentation (gitignored)
-├── docker-compose.yml        # Development Docker Compose
-└── .gitignore
+├── python-backend/           # Lean FastAPI YouTube Converter Microservice
+│   ├── main.py              # Single-file FastAPI Service (~110 lines)
+│   ├── requirements.txt     # Python Dependencies (fastapi, uvicorn, yt-dlp)
+│   └── README.md
+│
+├── .vscode/                  # VS Code Workspace Configuration
+│   ├── settings.json        # Native Bracket Pair Colorization settings
+│   └── extensions.json      # Recommendations
+├── AGENTS.md                 # Quy tắc phát triển an toàn cho AI & Dev
+└── README.md                 # Tài liệu hướng dẫn dự án
 ```
 
 ---
 
-## Database Schema
+## 🗄️ Database Schema & Entities
 
-### Models
-
-| Model | Description |
-|-------|-------------|
-| `User` | User accounts with Google OAuth support |
-| `Album` | Music albums (each user has a default album) |
-| `Track` | Songs/tracks with source tracking |
-| `Message` | User-to-user messages |
-| `FriendRequest` | Friend invitation system |
-| `DownloadJob` | YouTube download job queue |
-
-### Enums
-
-- `UserRole`: `USER`, `ADMIN`
-- `JobStatus`: `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`
+| Model | Mô tả |
+|---|---|
+| `User` | Tài khoản người dùng (Email/Password & Google OAuth) |
+| `Album` | Album nhạc cá nhân (Mỗi người dùng có album mặc định) |
+| `Track` | Bài hát trong thư viện (Hỗ trợ nguồn YouTube & Google Drive) |
+| `Message` | Tin nhắn thời gian thực giữa các người dùng |
+| `FriendRequest` | Lời mời kết bạn & mã Token kết nối |
+| `DownloadJob` | Hàng đợi tải nhạc ngầm BullMQ |
 
 ---
 
-## Features
+## ⚡ Hướng dẫn Chạy ứng dụng (Getting Started)
 
-### Authentication
-- Email/password registration & login
-- Google OAuth 2.0 (unified login flow)
-- JWT token-based authentication
-- Role-based access control (USER, ADMIN)
-
-### Music Management
-- YouTube URL download via yt-dlp
-- Album organization with default album per user
-- Song CRUD operations
-- Move songs between albums
-
-### Google Drive Integration
-- OAuth2 connection to Google Drive
-- Browse and import MP3 files
-- Automatic metadata extraction
-
-### Messaging
-- User-to-user messaging
-- Friend request system with invite links
-
-### Mobile (Capacitor)
-- Android app support
-- Native file system access
-- Preferences storage
-
-### Monitoring & Observability
-- Prometheus metrics (HTTP request duration, queue stats)
-- Sentry error tracking (frontend + backend)
-- Structured logging with Pino
-- Loki + Promtail for log aggregation
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- PostgreSQL 14+
-- Redis 6+
-- yt-dlp (for YouTube downloads)
-- ffmpeg (for audio conversion)
-
-### Environment Variables
-
-Create `.env` files in both `frontend/` and `backend/`:
-
-**Backend `.env`:**
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/music
-DIRECT_URL=postgresql://user:password@localhost:5432/music
-JWT_SECRET=your-jwt-secret
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
-SUPABASE_URL=your-supabase-url
-SUPABASE_KEY=your-supabase-key
-SENTRY_DSN=your-sentry-dsn
-REDIS_HOST=localhost
-REDIS_PORT=6379
-CORS_ORIGINS=http://localhost:3003
-```
-
-**Frontend `.env.local`:**
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-SENTRY_AUTH_TOKEN=your-sentry-auth-token
-```
-
-### Installation
+### 1. Khởi chạy NestJS Backend (Port 4000)
 
 ```bash
-# Install backend dependencies
 cd backend
 npm install
-
-# Install frontend dependencies
-cd ../frontend
-npm install
-
-# Generate Prisma client
-cd ../backend
 npx prisma generate
-
-# Run database migrations
 npx prisma migrate dev
-```
-
-### Development
-
-```bash
-# Start backend (port 3000)
-cd backend
 npm run start:dev
+```
 
-# Start frontend (port 3003)
+### 2. Khởi chạy Python Converter Service (Port 8001)
+
+```bash
+cd python-backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python3 main.py
+```
+
+### 3. Khởi chạy Frontend Next.js Web (Port 3000)
+
+```bash
 cd frontend
+npm install
 npm run dev
-
-# Or use Turbo mode
-npm run dev:turbo
 ```
 
-### Docker
-
-```bash
-docker-compose up -d
-```
-
----
-
-## API Endpoints
-
-### Auth
-- `POST /auth/register` - Register new user
-- `POST /auth/login` - Login with email/password
-- `POST /auth/google` - Google OAuth login
-- `GET /auth/me` - Get current user
-
-### Songs
-- `GET /songs` - List all songs (paginated)
-- `GET /songs/:id` - Get song by ID
-- `POST /songs/youtube` - Download from YouTube
-- `PATCH /songs/:id/move` - Move to album
-- `DELETE /songs/:id` - Delete song
-
-### Albums
-- `GET /albums` - List all albums
-- `GET /albums/:id` - Get album by ID
-- `POST /albums` - Create album
-
-### Google Drive
-- `GET /google-drive/status` - Check connection
-- `GET /google-drive/auth-url` - Get OAuth URL
-- `POST /google-drive/exchange-code` - Exchange OAuth code
-- `GET /google-drive/files` - List MP3 files
-- `POST /google-drive/import` - Import file
-
-### Messages
-- `GET /messages/:userId` - Get conversation
-- `POST /messages` - Send message
-
-### Friend Requests
-- `POST /friend-requests/invite` - Create invite
-- `GET /friend-requests/info/:token` - Get invite info (public)
-- `POST /friend-requests/accept/:token` - Accept invite
-
-### Admin
-- `GET /admin/users` - List all users
-- `POST /admin/cleanup` - Trigger cleanup job
-
----
-
-## Scripts
-
-### Backend
-```bash
-npm run start:dev        # Start with watch mode
-npm run build            # Build for production
-npm run start:prod       # Start production build
-npm run test             # Run tests
-npm run test:e2e         # Run e2e tests
-npm run lint             # Lint code
-npx prisma migrate dev   # Run migrations
-npx prisma studio        # Open Prisma Studio
-```
-
-### Frontend
-```bash
-npm run dev              # Start dev server
-npm run dev:turbo        # Start with Turbopack
-npm run build            # Build for production
-npm run start            # Start production build
-npm run lint             # Lint code
-```
-
----
-
-## Deployment
-
-### Production Build
-
-```bash
-# Build backend
-cd backend
-npm run build
-
-# Build frontend
-cd ../frontend
-npm run build
-
-# Or use Docker
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-### Android (Capacitor)
+### 4. Build & Chạy APK Android (Capacitor)
 
 ```bash
 cd frontend
-npm run build
-npx cap sync android
+npm run build:apk
 npx cap open android
 ```
+*(Thao tác này tự động build Next.js với backend Production `https://music-backend-cb0i.onrender.com` và đồng bộ với Android Studio)*.
 
 ---
 
-## Contributing
+## 📡 Chi tiết API Endpoints
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### 🐍 Python Microservice (Port 8001)
+- `GET /health` - Kiểm tra trạng thái service.
+- `GET /info?url=...` - Lấy thông tin bài hát (tên, ca sĩ, thumbnail) trong ~0.3s.
+- `POST /convert` - Nhận request convert, trả về `taskId` trong 10ms và chạy ngầm.
+- `GET /status/{taskId}` - Kiểm tra tiến độ convert (`processing` / `completed` / `failed`).
+- `GET /download/{filename}` - Tải hoặc phát trực tiếp file MP3.
+
+### ⚙️ NestJS Main Backend (Port 4000 / Production)
+- `POST /auth/register` - Đăng ký tài khoản
+- `POST /auth/login` - Đăng nhập tài khoản
+- `POST /auth/google` - Đăng nhập bằng Google
+- `GET /songs` - Lấy danh sách nhạc cá nhân
+- `POST /songs/youtube` - Tải nhạc YouTube về thư viện
+- `GET /albums` - Lấy danh sách Album
+- `POST /albums` - Tạo Album mới
+- `POST /messages` - Gửi tin nhắn bạn bè
+- `POST /friend-requests/invite` - Tạo mã Token kết bạn
 
 ---
 
-## License
+## 🧪 Kiểm thử & Xác minh Code (Testing)
 
-Private - All rights reserved
+```bash
+# Kiểm tra Type strict trên Frontend
+cd frontend
+npx tsc --noEmit
+
+# Chạy Unit Tests trên Frontend
+npm run test
+```
 
 ---
 
-## Author
+## 📝 Bản quyền & Tác giả
 
-**kiet-w** - [GitHub](https://github.com/kiet-w)
+- **Tác giả:** **kiet-w** - [GitHub Repository](https://github.com/kiet-w/music)
+- **Giấy phép:** Private - Bảo lưu mọi quyền.
