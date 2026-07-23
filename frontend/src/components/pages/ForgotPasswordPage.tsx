@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { forgotPassword, resetPassword } from '@/lib/api';
-import { AuthTemplate } from '@/components/templates/Auth/AuthTemplate';
-import { ForgotPasswordForm } from '@/components/molecules/Auth/ForgotPasswordForm';
-import { ResetPasswordForm } from '@/components/molecules/Auth/ResetPasswordForm';
+import { AuthTemplate } from '@/components/features/auth/AuthTemplate';
+import { ForgotPasswordForm } from '@/components/features/auth/forms/ForgotPasswordForm';
+import { ResetPasswordForm } from '@/components/features/auth/forms/ResetPasswordForm';
 import { toast } from 'sonner';
 
 interface ForgotPasswordPageProps {

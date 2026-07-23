@@ -3,7 +3,7 @@
 import React from 'react';
 import { MessageSquare, MessageCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/atoms/ui/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { User } from '@/components/molecules/Chat/UserList';
 

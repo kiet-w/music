@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { FeatureAnnouncementCard } from '@/components/molecules/Music/FeatureAnnouncementCard';
+import { FeatureAnnouncementCard } from '@/components/features/music/FeatureAnnouncementCard';
 
 export function YoutubePage() {
   const params = useParams();

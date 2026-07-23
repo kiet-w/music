@@ -7,7 +7,7 @@ import { useDownloadHistoryStore } from '@/store/useDownloadHistoryStore';
 import { useGoogleDrive } from '@/hooks/useGoogleDrive';
 import { useAlbumStore } from '@/store/useAlbumStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { MusicTemplate } from '@/components/templates/Music/MusicTemplate';
+import { MusicTemplate } from '@/components/features/music/MusicTemplate';
 
 export function MusicPage() {
   const t = useTranslations('Music');

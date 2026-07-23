@@ -6,7 +6,7 @@ import { ChevronLeft } from 'lucide-react';
 import { User } from '@/components/molecules/Chat/UserList';
 import { ChatWindow } from '@/components/molecules/Chat/ChatWindow';
 import { ChatInput } from '@/components/molecules/Chat/ChatInput';
-import { PresenceStatusBadge } from '@/components/atoms/PresenceStatusBadge';
+import { PresenceStatusBadge } from '@/components/features/shared/PresenceStatusBadge';
 import { cn } from '@/lib/utils';
 
 interface ActiveChatSectionProps {

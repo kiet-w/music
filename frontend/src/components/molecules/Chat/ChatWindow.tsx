@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Message } from '@/store/useChatStore';
 import { User } from '@/components/molecules/Chat/UserList';
-import { Button } from '@/components/atoms/ui/button';
+import { Button } from '@/components/ui/button';
 import { UserPlus, Link2, MessageSquare, User as UserIcon, Smile } from 'lucide-react';
 import { useKeyboardVisible } from '@/hooks/useKeyboardVisible';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';

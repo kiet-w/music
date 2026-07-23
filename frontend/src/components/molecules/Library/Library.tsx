@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Play, Plus, Trash2, FolderInput, Download, CheckCircle2, Loader2, X, MoreVertical } from 'lucide-react';
 import { useOfflineStorage } from '@/hooks/useOfflineStorage';
-import { Button } from '@/components/atoms/ui/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { fetchTracks, deleteTrack, moveTrackToAlbum } from '@/lib/api';
 import dynamic from 'next/dynamic';

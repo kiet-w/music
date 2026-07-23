@@ -2,11 +2,11 @@
 
 import dynamic from 'next/dynamic';
 
-const PlayerBar = dynamic(() => import('@/components/molecules/PlayerBar'), {
+const PlayerBar = dynamic(() => import('@/components/features/music/player/PlayerBar'), {
   ssr: false,
 });
 const BottomTabBar = dynamic(
-  () => import('@/components/molecules/Navigation/BottomTabBar'),
+  () => import('@/components/features/shared/navigation/BottomTabBar'),
   { ssr: false },
 );
 

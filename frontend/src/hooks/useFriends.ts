@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { User } from '@/components/molecules/Chat/UserList';
+import { User } from '@/components/features/chat/sidebar/UserList';
 import { fetchFriends } from '@/lib/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useChatStore } from '@/store/useChatStore';

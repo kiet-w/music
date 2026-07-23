@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { User } from '@/components/molecules/Chat/UserList';
-import { MessagesHeader } from '@/components/molecules/Chat/MessagesHeader';
-import { EmptyFriendListState } from '@/components/molecules/Chat/EmptyFriendListState';
-import { EmptyChatState } from '@/components/molecules/Chat/EmptyChatState';
-import { ChatSidebar } from '@/components/molecules/Chat/ChatSidebar';
-import { ActiveChatSection } from '@/components/molecules/Chat/ActiveChatSection';
+import { User } from '@/components/features/chat/sidebar/UserList';
+import { MessagesHeader } from '@/components/features/chat/window/MessagesHeader';
+import { EmptyFriendListState } from '@/components/features/chat/sidebar/EmptyFriendListState';
+import { EmptyChatState } from '@/components/features/chat/window/EmptyChatState';
+import { ChatSidebar } from '@/components/features/chat/sidebar/ChatSidebar';
+import { ActiveChatSection } from '@/components/features/chat/window/ActiveChatSection';
 import { useChatStore } from '@/store/useChatStore';
 import { useFriends } from '@/hooks/useFriends';
 import { createInvite, acceptInvite } from '@/lib/api';
@@ -22,7 +22,7 @@ import { useKeyboardMode } from '@/hooks/useKeyboardMode';
 import { getEffectiveAccessToken } from '@/store/useAuthStore';
 
 const FriendCodeModal = dynamic(
-  () => import('@/components/molecules/Chat/FriendCodeModal').then((mod) => mod.FriendCodeModal),
+  () => import('@/components/features/chat/FriendCodeModal').then((mod) => mod.FriendCodeModal),
   { ssr: false }
 );
 

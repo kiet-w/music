@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AlbumsTemplate } from '@/components/templates/Albums/AlbumsTemplate';
+import { AlbumsTemplate } from '@/components/features/albums/AlbumsTemplate';
 import { useAlbums } from '@/hooks/useAlbums';
 
 interface AlbumsPageProps {

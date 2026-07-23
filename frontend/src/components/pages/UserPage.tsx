@@ -7,7 +7,7 @@ import { User, Lock, LogOut, ShieldCheck, KeyRound, Sparkles, Camera } from 'luc
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
 import { useAuthStore, getEffectiveAccessToken } from '@/store/useAuthStore';
 import { updateProfile, changePassword, uploadImage } from '@/lib/api';
-import { LoadingPopup } from '@/components/atoms/ui/loading-popup';
+import { LoadingPopup } from '@/components/ui/loading-popup';
 import { getMediaUrl } from '@/lib/utils';
 import { toast } from 'sonner';
 

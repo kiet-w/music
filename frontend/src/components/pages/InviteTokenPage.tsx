@@ -1,8 +1,8 @@
 'use client';
 
 import React, { use } from 'react';
-import { InvitePopup } from '@/components/molecules/Chat/InvitePopup';
-import { InviteStateCard } from '@/components/molecules/Chat/InviteStateCard';
+import { InvitePopup } from '@/components/features/chat/InvitePopup';
+import { InviteStateCard } from '@/components/features/chat/InviteStateCard';
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
 import { useInviteToken } from '@/hooks/useInviteToken';
 

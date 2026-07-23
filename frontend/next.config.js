@@ -35,8 +35,8 @@ const nextConfig = {
       '@geist/font',
       'geist',
     ],
-    // Optimize CSS
-    optimizeCss: true,
+    // Optimize CSS - disabled temporarily due to critters module issue
+    // optimizeCss: true,
   },
 
   compiler: {

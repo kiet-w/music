@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AlbumDetailTemplate } from '@/components/templates/AlbumDetail/AlbumDetailTemplate';
+import { AlbumDetailTemplate } from '@/components/features/albums/AlbumDetailTemplate';
 import { useAlbumDetail } from '@/hooks/useAlbumDetail';
 
 interface AlbumDetailPageProps {

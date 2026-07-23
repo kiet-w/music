@@ -3,7 +3,7 @@ import MessagesPage from '@/components/pages/MessagesPage';
 
 export const dynamic = 'force-dynamic';
 
-export default function Page() {
+export default function Page({ params }: { params: Promise<{ locale: string }> }) {
   return (
     <Suspense
       fallback={
@@ -12,7 +12,12 @@ export default function Page() {
         </div>
       }
     >
-      <MessagesPage />
+      <MessagesPageWrapper params={params} />
     </Suspense>
   );
+}
+
+async function MessagesPageWrapper({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return <MessagesPage locale={locale} />;
 }

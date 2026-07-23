@@ -4,7 +4,7 @@ import React, { useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { MainContainer } from '@/components/templates/wrappers/MainContainer';
-import { InviteStateCard } from '@/components/molecules/Chat/InviteStateCard';
+import { InviteStateCard } from '@/components/features/chat/InviteStateCard';
 import { setInviteCookie } from '@/lib/inviteCookie';
 
 function InviteLegacyContent() {

@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { LoadingPopup } from '@/components/atoms/ui/loading-popup';
+import { LoadingPopup } from '@/components/ui/loading-popup';
 import { useKeyboardMode } from '@/hooks/useKeyboardMode';
 
 export default function PasswordReset() {

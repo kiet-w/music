@@ -4,12 +4,12 @@ import React, { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { GoogleLoginButton } from '@/components/molecules/Auth/GoogleLoginButton';
+import { GoogleLoginButton } from '@/components/features/auth/buttons/GoogleLoginButton';
 import { login } from '@/lib/api';
 import { useAuthStore } from '@/store/useAuthStore';
-import { AuthTemplate } from '@/components/templates/Auth/AuthTemplate';
-import { LoginForm } from '@/components/molecules/Auth/LoginForm';
-import { OtpForm } from '@/components/molecules/Auth/OtpForm';
+import { AuthTemplate } from '@/components/features/auth/AuthTemplate';
+import { LoginForm } from '@/components/features/auth/forms/LoginForm';
+import { OtpForm } from '@/components/features/auth/forms/OtpForm';
 
 import { getInviteCookie } from '@/lib/inviteCookie';
 

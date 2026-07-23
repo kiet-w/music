@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { register } from '@/lib/api';
-import { AuthTemplate } from '@/components/templates/Auth/AuthTemplate';
-import { RegisterForm } from '@/components/molecules/Auth/RegisterForm';
-import { OtpForm } from '@/components/molecules/Auth/OtpForm';
+import { AuthTemplate } from '@/components/features/auth/AuthTemplate';
+import { RegisterForm } from '@/components/features/auth/forms/RegisterForm';
+import { OtpForm } from '@/components/features/auth/forms/OtpForm';
 
 interface RegisterPageProps {
   locale: string;
