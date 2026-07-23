@@ -14,12 +14,12 @@ import {
   ChevronUp,
   ChevronDown,
   Trash2,
-  GripVertical,
   X,
 } from 'lucide-react';
-import { usePlayerStore, Track } from '@/store/usePlayerStore';
+import { usePlayerStore } from '@/store/usePlayerStore';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { StackedFanDeck } from '@/components/features/music/player/StackedFanDeck';
 
 // ponytail: granular selectors — PlayerBar re-renders only on specific value changes
 const useCurrentTrack = () => usePlayerStore((s) => s.currentTrack);
@@ -37,7 +37,7 @@ const usePlay = () => usePlayerStore((s) => s.play);
 const useMoveQueueTrack = () => usePlayerStore((s) => s.moveQueueTrack);
 const useRemoveFromQueue = () => usePlayerStore((s) => s.removeFromQueue);
 
-// ponytail: 3D Stacked Cards Music Deck Player Bar (AWWWARDS-level Stacked Card Layout & Reorder Queue)
+// ponytail: 2D Hand-drawn Stacked Cards Music Deck Player Bar (AWWWARDS-level Stacked Card Layout & Reorder Queue)
 export default function PlayerBar() {
   const pathname = usePathname();
   const currentTrack = useCurrentTrack();
@@ -81,7 +81,7 @@ export default function PlayerBar() {
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[420px] z-40">
-      {/* --- EXPANDED 3D STACKED CARDS QUEUE DRAWER --- */}
+      {/* --- EXPANDED 2D HAND-DRAWN STACKED CARDS DECK --- */}
       <AnimatePresence>
         {isStackExpanded && (
           <motion.div
@@ -89,130 +89,37 @@ export default function PlayerBar() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 30 }}
             transition={{ type: 'spring', damping: 25, stiffness: 320 }}
-            className="mb-3 w-full bg-zinc-950/95 border border-white/15 backdrop-blur-2xl rounded-[2.5rem] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.9)] text-white overflow-hidden max-h-[380px] flex flex-col"
+            className="mb-3 w-full"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-white" />
-                <h3 className="text-sm font-bold tracking-tight font-instrument">
-                  Sắp xếp thứ tự nghe ({queue.length} bài)
-                </h3>
-              </div>
-              <button
-                onClick={() => setIsStackExpanded(false)}
-                className="p-1 rounded-full bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Reorderable Stack Cards List */}
-            <div className="flex-1 overflow-y-auto py-3 space-y-2 pr-0.5 scrollbar-hide">
-              {queue.map((track, idx) => {
-                const isActive = track.id === currentTrack.id;
-                return (
-                  <motion.div
-                    key={track.id}
-                    layout
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className={cn(
-                      "flex items-center justify-between p-3 rounded-2xl transition-all border",
-                      isActive
-                        ? "bg-white text-zinc-950 border-white shadow-lg"
-                        : "bg-zinc-900/80 text-white border-white/5 hover:border-white/20"
-                    )}
-                  >
-                    {/* Track Info */}
-                    <div
-                      onClick={() => play(track)}
-                      className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
-                    >
-                      <span className={cn("text-xs font-bold w-5 text-center font-mono", isActive ? "text-zinc-950" : "text-zinc-500")}>
-                        {idx + 1}
-                      </span>
-                      <div className="w-9 h-9 rounded-xl bg-black/20 overflow-hidden shrink-0 border border-white/10">
-                        {track.coverUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[7px] font-bold">ART</div>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className={cn("text-xs font-bold truncate font-instrument", isActive ? "text-zinc-950" : "text-white")}>
-                          {track.title}
-                        </p>
-                        <p className={cn("text-[11px] truncate font-medium", isActive ? "text-zinc-700" : "text-zinc-400")}>
-                          {track.artist || 'Nghệ sĩ'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Reorder Buttons (Move Up / Down) */}
-                    <div className="flex items-center gap-1 shrink-0 ml-2">
-                      <button
-                        onClick={() => moveQueueTrack(idx, idx - 1)}
-                        disabled={idx === 0}
-                        className={cn(
-                          "p-1 rounded-lg transition-colors cursor-pointer disabled:opacity-20",
-                          isActive ? "hover:bg-zinc-200 text-zinc-950" : "hover:bg-white/10 text-zinc-400 hover:text-white"
-                        )}
-                        title="Chuyển lên"
-                      >
-                        <ChevronUp className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => moveQueueTrack(idx, idx + 1)}
-                        disabled={idx === queue.length - 1}
-                        className={cn(
-                          "p-1 rounded-lg transition-colors cursor-pointer disabled:opacity-20",
-                          isActive ? "hover:bg-zinc-200 text-zinc-950" : "hover:bg-white/10 text-zinc-400 hover:text-white"
-                        )}
-                        title="Chuyển xuống"
-                      >
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => removeFromQueue(track.id)}
-                        className={cn(
-                          "p-1 rounded-lg transition-colors cursor-pointer ml-1",
-                          isActive ? "hover:bg-rose-100 text-rose-600" : "hover:bg-rose-500/20 text-rose-400"
-                        )}
-                        title="Xóa khỏi danh sách"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+            <StackedFanDeck onClose={() => setIsStackExpanded(false)} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* --- 3D STACKED CARDS MASTER PLAYER DECK --- */}
+      {/* --- STACKED CARDS MASTER PLAYER DECK --- */}
       <div className="relative w-full">
-        {/* Layer 2 Card (Next Up Card in Stacked Deck) */}
+        {/* Layer 2 Card (Next Up Card in Stacked Deck - Offset & Angle Preview) */}
         {upcomingTracks.length > 0 && (
           <div
             onClick={() => setIsStackExpanded(true)}
-            className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-[92%] h-12 rounded-[2rem] bg-zinc-900/90 border border-white/10 shadow-lg z-10 cursor-pointer flex items-center justify-between px-4 text-xs text-zinc-400 opacity-80 hover:opacity-100 transition-all"
-            title="Nhấp để xem và sắp xếp danh sách nghe"
+            style={{ transform: 'rotate(-3deg) translateY(-8px)' }}
+            className="absolute -top-2 left-1/2 -translate-x-1/2 w-[92%] h-12 rounded-[2rem] bg-zinc-900/90 border border-white/10 shadow-lg z-10 cursor-pointer flex items-center justify-between px-4 text-xs text-zinc-400 opacity-80 hover:opacity-100 hover:rotate-0 transition-all duration-300"
+            title="Nhấp mở Stacked Cards Deck để sắp xếp thứ tự phát nhạc"
           >
-            <span className="truncate max-w-[200px] text-[11px]">Kế tiếp: {upcomingTracks[0].title}</span>
-            <Layers size={14} />
+            <span className="truncate max-w-[200px] text-[11px] font-medium">Kế tiếp: {upcomingTracks[0].title}</span>
+            <div className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-full text-[10px] text-white">
+              <Layers size={12} />
+              <span>Stacked</span>
+            </div>
           </div>
         )}
 
-        {/* Layer 3 Card (Deepest Stacked Card) */}
+        {/* Layer 3 Card (Deepest Stacked Card - Offset & Angle Preview) */}
         {upcomingTracks.length > 1 && (
           <div
             onClick={() => setIsStackExpanded(true)}
-            className="absolute -top-5 left-1/2 -translate-x-1/2 w-[84%] h-10 rounded-[1.8rem] bg-zinc-950/80 border border-white/5 shadow-md z-0 cursor-pointer opacity-50 transition-all"
+            style={{ transform: 'rotate(4deg) translateY(-16px)' }}
+            className="absolute -top-4 left-1/2 -translate-x-1/2 w-[84%] h-10 rounded-[1.8rem] bg-zinc-950/80 border border-white/5 shadow-md z-0 cursor-pointer opacity-50 transition-all"
           />
         )}
 
