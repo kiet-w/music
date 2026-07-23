@@ -1,9 +1,9 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit {
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor(
     @InjectPinoLogger(PrismaService.name)
     private readonly logger: PinoLogger,
@@ -23,5 +23,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
       );
       throw error;
     }
+  }
+
+  async onModuleDestroy() {
+    this.logger.info('Disconnecting from database...');
+    await this.$disconnect();
+    this.logger.info('Database disconnected');
   }
 }

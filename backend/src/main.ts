@@ -53,7 +53,7 @@ async function bootstrap() {
     next();
   });
 
-  const corsOriginsEnv = process.env.CORS_ORIGINS || 'http://localhost:3003,https://localhost,http://localhost,capacitor://localhost';
+  const corsOriginsEnv = process.env.CORS_ORIGINS || 'http://localhost:3003';
   const allowedOrigins = corsOriginsEnv.split(',').map(origin => origin.trim());
 
   app.enableCors({
@@ -64,12 +64,7 @@ async function bootstrap() {
         return;
       }
 
-      if (
-        allowedOrigins.includes(origin) ||
-        origin.startsWith('http://localhost') ||
-        origin.startsWith('https://localhost') ||
-        origin.startsWith('capacitor://localhost')
-      ) {
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error(`Origin ${origin} not allowed by CORS`));

@@ -81,7 +81,6 @@ export class AuthService {
       message: 'Đăng ký thành công. Vui lòng kiểm tra email để lấy mã xác thực OTP.',
       email: user.email,
       requiresVerification: true,
-      otp,
     };
   }
 
@@ -135,7 +134,7 @@ export class AuthService {
     });
 
     await this.mailService.sendVerificationOtp(email, otp);
-    return { message: 'Đã gửi lại mã OTP xác nhận tới email của bạn.', otp };
+    return { message: 'Đã gửi lại mã OTP xác nhận tới email của bạn.' };
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; otp?: string }> {
@@ -159,7 +158,7 @@ export class AuthService {
     });
 
     await this.mailService.sendPasswordResetOtp(email, otp);
-    return { message: 'Mã OTP đặt lại mật khẩu đã được gửi tới email của bạn.', otp };
+    return { message: 'Mã OTP đặt lại mật khẩu đã được gửi tới email của bạn.' };
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {

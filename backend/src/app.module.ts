@@ -63,7 +63,7 @@ import { HttpMetricsInterceptor } from './common/interceptors/http-metrics.inter
     LoggerModule.forRoot({
       pinoHttp: {
         autoLogging: false,
-        level: process.env.NODE_ENV === 'production' ? 'warn' : 'debug',
+        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
         redact: {
           paths: ['req.headers.authorization', 'req.headers.cookie'],
           censor: '[REDACTED]',

@@ -86,6 +86,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         },
         `Unhandled Exception: ${message}`,
       );
+      // Don't leak internal details in production
+      if (process.env.NODE_ENV === 'production') {
+        responseBody.message = 'Internal server error';
+      }
     } else {
       this.logger.warn(
         { path, statusCode: httpStatus },

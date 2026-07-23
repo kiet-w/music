@@ -6,7 +6,7 @@ import { StorageService } from '../storage/services/storage.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AppLogger } from '../common/logger/app.logger';
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 @Processor('conversion', { concurrency: 2 })
 export class ConversionProcessor extends WorkerHost {
@@ -31,9 +31,7 @@ export class ConversionProcessor extends WorkerHost {
     );
 
     const tempDir = path.join(process.cwd(), 'temp');
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
-    }
+    await fs.mkdir(tempDir, { recursive: true });
     const outputPath = path.join(tempDir, `${songId}.mp3`);
 
     try {

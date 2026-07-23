@@ -8,52 +8,54 @@ export const envValidationSchema = Joi.object({
 
   // Database connection string (Supabase Postgres)
   DATABASE_URL: Joi.string()
-    .optional()
-    .default('postgresql://postgres.ukpsubptfzmuszcnnjoy:lpokmoppokid1234@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true'),
-
+    .required()
+    .description('PostgreSQL connection string'),
   DIRECT_URL: Joi.string()
     .optional()
-    .default('postgresql://postgres.ukpsubptfzmuszcnnjoy:lpokmoppokid1234@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres'),
+    .description('Direct PostgreSQL connection string (bypasses pgbouncer)'),
 
   // Authentication configurations
   JWT_SECRET: Joi.string()
-    .optional()
-    .default('music_app_super_secret_jwt_2026_key'),
+    .min(32)
+    .required()
+    .description('Secret key for JWT signing — must be at least 32 characters'),
   JWT_EXPIRES_IN: Joi.string().default('7d'),
 
   // Google OAuth configurations
   GOOGLE_CLIENT_ID: Joi.string()
-    .optional()
-    .default('dummy-google-client-id'),
+    .required()
+    .description('Google OAuth client ID'),
   GOOGLE_CLIENT_SECRET: Joi.string()
-    .optional()
-    .default('dummy-google-client-secret'),
+    .required()
+    .description('Google OAuth client secret'),
   GOOGLE_REDIRECT_URI: Joi.string()
     .optional()
-    .default('https://music-backend-cb0i.onrender.com/vi/auth/callback/google'),
+    .description('Google OAuth redirect URI'),
 
   // Security key (AES 256 GCM expects 64 hex characters)
   ENCRYPTION_KEY: Joi.string()
-    .optional()
-    .default('00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff'),
+    .pattern(/^[0-9a-fA-F]{64}$/)
+    .required()
+    .description('AES-256-GCM key — exactly 64 hex characters'),
 
   // Supabase Storage configurations
   SUPABASE_URL: Joi.string()
-    .optional()
-    .default('https://dummy.supabase.co'),
+    .required()
+    .description('Supabase project URL'),
   SUPABASE_KEY: Joi.string()
-    .optional()
-    .default('dummy-supabase-key'),
+    .required()
+    .description('Supabase service role key'),
 
   // CORS origin configurations
   CORS_ORIGINS: Joi.string()
     .optional()
-    .default('*'),
+    .default('http://localhost:3003')
+    .description('Comma-separated allowed CORS origins'),
 
   // BullMQ Redis configurations
-  REDIS_HOST: Joi.string().default('powerful-mayfly-186559.upstash.io'),
+  REDIS_HOST: Joi.string().required().description('Redis host'),
   REDIS_PORT: Joi.number().default(6379),
-  REDIS_PASSWORD: Joi.string().optional().allow('').default('gQAAAAAAAti_AAIgcDFlYjU0ZThhODlhMTc0MjU1OGFjZDY4NzQ4OTMwNmUyMQ'),
+  REDIS_PASSWORD: Joi.string().optional().allow(''),
 
   // Optional yt-dlp path configurations
   YTDLP_BINARY_PATH: Joi.string().optional().allow(''),
