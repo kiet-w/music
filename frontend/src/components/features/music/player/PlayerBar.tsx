@@ -11,9 +11,6 @@ import {
   Volume2,
   VolumeX,
   Layers,
-  ChevronUp,
-  ChevronDown,
-  Trash2,
   X,
 } from 'lucide-react';
 import { usePlayerStore } from '@/store/usePlayerStore';
@@ -33,11 +30,8 @@ const useVolume = () => usePlayerStore((s) => s.volume);
 const useSetVolume = () => usePlayerStore((s) => s.setVolume);
 const usePlayNext = () => usePlayerStore((s) => s.playNext);
 const usePlayPrevious = () => usePlayerStore((s) => s.playPrevious);
-const usePlay = () => usePlayerStore((s) => s.play);
-const useMoveQueueTrack = () => usePlayerStore((s) => s.moveQueueTrack);
-const useRemoveFromQueue = () => usePlayerStore((s) => s.removeFromQueue);
 
-// ponytail: 2D Hand-drawn Stacked Cards Music Deck Player Bar (AWWWARDS-level Stacked Card Layout & Reorder Queue)
+// ponytail: Player Bar with Left-Side Vertical Stacked Cards Panel
 export default function PlayerBar() {
   const pathname = usePathname();
   const currentTrack = useCurrentTrack();
@@ -51,9 +45,6 @@ export default function PlayerBar() {
   const setVolume = useSetVolume();
   const playNext = usePlayNext();
   const playPrevious = usePlayPrevious();
-  const play = usePlay();
-  const moveQueueTrack = useMoveQueueTrack();
-  const removeFromQueue = useRemoveFromQueue();
 
   const [isStackExpanded, setIsStackExpanded] = useState(false);
 
@@ -75,32 +66,43 @@ export default function PlayerBar() {
 
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  // Queue tracks upcoming after current track
-  const currentIndex = queue.findIndex((t) => t.id === currentTrack.id);
-  const upcomingTracks = currentIndex !== -1 ? queue.slice(currentIndex + 1) : queue;
-
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[420px] z-40">
-      {/* --- EXPANDED 2D HAND-DRAWN STACKED CARDS DECK --- */}
+    <>
+      {/* --- LEFT-SIDE VERTICAL STACKED CARDS PANEL (Anchored at Left Margin matching hand-drawn box) --- */}
       <AnimatePresence>
         {isStackExpanded && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 30 }}
+            initial={{ opacity: 0, scale: 0.95, x: -30 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.95, x: -30 }}
             transition={{ type: 'spring', damping: 25, stiffness: 320 }}
-            className="mb-3 w-full"
+            className="fixed top-20 left-3 sm:left-6 lg:left-8 z-40 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[420px] max-h-[calc(100dvh-7rem)] rounded-[2.5rem] bg-zinc-950/95 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl p-5 flex flex-col text-white"
           >
-            <StackedFanDeck onClose={() => setIsStackExpanded(false)} />
+            <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-white" />
+                <h3 className="text-sm font-bold tracking-tight font-instrument">
+                  Stacked Cards Queue ({queue.length} bài)
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsStackExpanded(false)}
+                className="p-1.5 rounded-full bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                aria-label="Đóng Stacked Queue"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto py-3 pr-0.5 scrollbar-hide">
+              <StackedFanDeck onClose={() => setIsStackExpanded(false)} />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* --- MASTER PLAYER DECK --- */}
-      <div className="relative w-full">
-
-        {/* Layer 1 Frontmaster Card (Active Track Player) */}
-        <div className="relative z-30 w-full bg-zinc-950/95 border border-white/15 backdrop-blur-2xl rounded-[2.5rem] flex flex-col p-4 sm:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.9)] transition-all duration-300">
+      {/* --- MASTER PLAYER BAR --- */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[420px] z-40">
+        <div className="relative w-full bg-zinc-950/95 border border-white/15 backdrop-blur-2xl rounded-[2.5rem] flex flex-col p-4 sm:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.9)] transition-all duration-300">
           <div className="flex items-center w-full gap-3">
             {/* Track Cover & Details */}
             <div className="flex items-center flex-1 min-w-0 gap-3">
@@ -122,7 +124,7 @@ export default function PlayerBar() {
 
             {/* Audio & Stack Queue Controls */}
             <div className="flex items-center gap-1.5">
-              {/* Stacked Cards Queue Reorder Toggle Button */}
+              {/* Stacked Cards Queue Reorder Toggle Button (Left of Prev/Play/Next) */}
               <button
                 onClick={() => setIsStackExpanded((prev) => !prev)}
                 className={cn(
@@ -131,7 +133,7 @@ export default function PlayerBar() {
                     ? "bg-white text-zinc-950 border-white shadow-md"
                     : "bg-white/5 text-zinc-400 hover:text-white border-white/10 hover:bg-white/10"
                 )}
-                title="Mở Stacked Cards / Sắp xếp thứ tự bài hát"
+                title="Mở Stacked Cards ở góc trái màn hình"
                 aria-label="Sắp xếp danh sách phát"
               >
                 <Layers size={18} strokeWidth={2} />
@@ -214,6 +216,6 @@ export default function PlayerBar() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
