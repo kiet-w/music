@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { User } from '@/components/features/chat/sidebar/UserList';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 
 export interface EmptyFriendListStateProps {
   onOpenTokenModal: () => void;
@@ -42,13 +43,8 @@ export function EmptyFriendListState({
     return null;
   }
 
-  // If still loading friends list, render a loading placeholder
   if (isLoading) {
-    return (
-      <div className={cn("flex-1 p-6 sm:p-10 flex flex-col items-center justify-center text-center my-auto", className)}>
-        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-3" />
-      </div>
-    );
+    return <GlobalLoading />;
   }
 
   const displayTitle = title || t('no_conversations_title');

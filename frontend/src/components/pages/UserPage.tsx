@@ -8,6 +8,7 @@ import { MainContainer } from '@/components/templates/wrappers/MainContainer';
 import { useAuthStore, getEffectiveAccessToken } from '@/store/useAuthStore';
 import { updateProfile, changePassword, uploadImage } from '@/lib/api';
 import { LoadingPopup } from '@/components/ui/loading-popup';
+import { GlobalLoading } from '@/components/atoms/GlobalLoading';
 import { getMediaUrl } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -157,9 +158,9 @@ export function UserPage({ locale }: UserPageProps) {
   return (
     <MainContainer>
       {/* Centered Loading Popups */}
-      <LoadingPopup isOpen={isUploadingAvatar} text="Đang tải ảnh đại diện lên..." />
-      <LoadingPopup isOpen={isUpdatingName} text="Đang cập nhật tên hiển thị..." />
-      <LoadingPopup isOpen={isUpdatingPassword} text="Đang xử lý đổi mật khẩu..." />
+      {isUploadingAvatar && <GlobalLoading fullScreen message="Đang tải ảnh đại diện lên..." />}
+      {isUpdatingName && <GlobalLoading fullScreen message="Đang cập nhật tên hiển thị..." />}
+      {isUpdatingPassword && <GlobalLoading fullScreen message="Đang xử lý đổi mật khẩu..." />}
 
       {/* Hidden File Input for Avatar Selection */}
       <input
