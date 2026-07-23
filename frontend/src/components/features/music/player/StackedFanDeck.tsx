@@ -1,9 +1,9 @@
 'use client';
 
-// ponytail: single-layer vertical 50% half-overlapping stacked deck — drag only via dedicated handle
+// ponytail: minimal clean stacked deck — big play button + dot grid handle, zero unnecessary animation
 import React, { useState } from 'react';
 import { motion, AnimatePresence, PanInfo, useDragControls } from 'framer-motion';
-import { Play, Pause, GripVertical, Layers, X } from 'lucide-react';
+import { Play, Pause, Layers, X } from 'lucide-react';
 import { usePlayerStore, Track } from '@/store/usePlayerStore';
 import { cn } from '@/lib/utils';
 
@@ -12,15 +12,30 @@ interface StackedFanDeckProps {
   onClose: () => void;
 }
 
-const HALF_STACK_STEP = 36; // 50% half overlap step (card height 72px)
+const HALF_STACK_STEP = 38;
 
-// ponytail: separate component so useDragControls hook works per-card
+// ponytail: 6-dot grid icon matching the reference image
+function DotGrid({ className }: { className?: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" className={className}>
+      <circle cx="4" cy="4" r="1.8" fill="currentColor" />
+      <circle cx="9" cy="4" r="1.8" fill="currentColor" />
+      <circle cx="14" cy="4" r="1.8" fill="currentColor" />
+      <circle cx="4" cy="9" r="1.8" fill="currentColor" />
+      <circle cx="9" cy="9" r="1.8" fill="currentColor" />
+      <circle cx="14" cy="9" r="1.8" fill="currentColor" />
+      <circle cx="4" cy="14" r="1.8" fill="currentColor" />
+      <circle cx="9" cy="14" r="1.8" fill="currentColor" />
+      <circle cx="14" cy="14" r="1.8" fill="currentColor" />
+    </svg>
+  );
+}
+
 function DraggableCard({
   track,
   idx,
   isCurrent,
   isPlaying,
-  isPinned,
   topPos,
   baseZIndex,
   draggingIdx,
@@ -32,7 +47,6 @@ function DraggableCard({
   idx: number;
   isCurrent: boolean;
   isPlaying: boolean;
-  isPinned: boolean;
   topPos: number;
   baseZIndex: number;
   draggingIdx: number | null;
@@ -42,97 +56,65 @@ function DraggableCard({
 }) {
   const dragControls = useDragControls();
 
-  const style = isPinned
-    ? { top: '0px', transform: 'scale(1.02)', zIndex: 100 }
-    : { top: `${topPos}px`, zIndex: draggingIdx === idx ? 150 : baseZIndex };
-
   return (
     <motion.div
       drag="y"
       dragControls={dragControls}
       dragListener={false}
       dragConstraints={{ top: -50, bottom: 50 }}
-      dragElastic={0.1}
+      dragElastic={0.08}
       dragSnapToOrigin
       onDragStart={onDragStart}
       onDragEnd={(_, info) => onDragEnd(info)}
-      whileDrag={{
-        scale: 1.02,
-        zIndex: 200,
-        cursor: 'grabbing',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.7)',
+      style={{
+        top: `${topPos}px`,
+        zIndex: draggingIdx === idx ? 150 : baseZIndex,
       }}
-      onClick={onClick}
-      style={style}
       className={cn(
-        "absolute left-0 right-0 h-[72px] rounded-2xl p-3 flex items-center justify-between transition-all duration-300 ease-out shadow-2xl group border select-none",
-        "hover:!z-[100] hover:scale-[1.02] hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(0,0,0,0.8)]",
+        "absolute left-0 right-0 h-[72px] rounded-2xl px-3 flex items-center gap-3 border select-none",
         isCurrent
-          ? "bg-white text-zinc-950 border-white shadow-[0_10px_30px_rgba(255,255,255,0.4)]"
-          : "bg-zinc-900/95 text-white border-white/15 hover:border-white/40 hover:bg-zinc-900"
+          ? "bg-white text-zinc-950 border-white/80"
+          : "bg-zinc-900 text-white border-white/10"
       )}
     >
-      {/* Left: Track Info */}
-      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-        <span
-          className={cn(
-            "text-xs font-bold w-4 text-center font-mono shrink-0",
-            isCurrent ? "text-zinc-950" : "text-zinc-500"
-          )}
-        >
-          #{idx + 1}
-        </span>
-        <div className="w-10 h-10 rounded-xl bg-black/20 overflow-hidden shrink-0 border border-white/10">
-          {track.coverUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-[7px] font-bold">ART</div>
-          )}
-        </div>
-        <div className="min-w-0 flex-1 pr-2">
-          <p className={cn("text-xs font-bold truncate font-instrument leading-tight", isCurrent ? "text-zinc-950" : "text-white")}>
-            {track.title}
-          </p>
-          <p className={cn("text-[10px] truncate font-medium", isCurrent ? "text-zinc-700" : "text-zinc-400")}>
-            {track.artist || 'Nghệ sĩ'}
-          </p>
-        </div>
+      {/* Play/Pause Button — large circle */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onClick(); }}
+        className={cn(
+          "w-11 h-11 rounded-full flex items-center justify-center shrink-0 cursor-pointer",
+          isCurrent
+            ? "bg-zinc-950 text-white"
+            : "bg-white/10 text-white"
+        )}
+      >
+        {isCurrent && isPlaying
+          ? <Pause size={18} fill="currentColor" />
+          : <Play size={18} fill="currentColor" className="ml-0.5" />
+        }
+      </button>
+
+      {/* Track Title — minimal */}
+      <div className="min-w-0 flex-1">
+        <p className={cn("text-sm font-semibold truncate", isCurrent ? "text-zinc-950" : "text-white")}>
+          {track.title}
+        </p>
+        <p className={cn("text-[11px] truncate", isCurrent ? "text-zinc-500" : "text-zinc-500")}>
+          {track.artist || 'Nghệ sĩ'}
+        </p>
       </div>
 
-      {/* Right: Status + Play + Drag Handle */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        <span
-          className={cn(
-            "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0",
-            isCurrent ? "bg-zinc-950 text-white" : "bg-white/10 text-zinc-300"
-          )}
-        >
-          {isCurrent ? (isPlaying ? 'Playing' : 'Paused') : 'Queue'}
-        </span>
-        <button
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          className={cn(
-            "p-1.5 rounded-lg transition-colors cursor-pointer",
-            isCurrent ? "bg-zinc-950 text-white" : "bg-white/10 text-white hover:bg-white/20"
-          )}
-        >
-          {isCurrent && isPlaying ? <Pause size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}
-        </button>
-
-        {/* Drag Handle — hold this to drag */}
-        <div
-          onPointerDown={(e) => dragControls.start(e)}
-          className={cn(
-            "p-1.5 rounded-lg cursor-grab active:cursor-grabbing touch-none transition-colors",
-            isCurrent
-              ? "bg-zinc-200 hover:bg-zinc-300 text-zinc-950"
-              : "bg-white/10 hover:bg-white/20 text-zinc-400 hover:text-white"
-          )}
-          title="Giữ để kéo đổi vị trí"
-        >
-          <GripVertical size={14} />
-        </div>
+      {/* Dot Grid Drag Handle */}
+      <div
+        onPointerDown={(e) => dragControls.start(e)}
+        className={cn(
+          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none",
+          isCurrent
+            ? "bg-zinc-100 text-zinc-400"
+            : "bg-white/5 text-zinc-600 hover:text-zinc-400"
+        )}
+        title="Giữ để kéo"
+      >
+        <DotGrid />
       </div>
     </motion.div>
   );
@@ -140,7 +122,6 @@ function DraggableCard({
 
 export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) {
   const { queue, currentTrack, isPlaying, play, togglePlay, moveQueueTrack } = usePlayerStore();
-  const [pinnedId, setPinnedId] = useState<string | null>(null);
   const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
 
   if (!isOpen || queue.length === 0) return null;
@@ -149,7 +130,6 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
   const containerHeight = Math.min(displayQueue.length * HALF_STACK_STEP + 48, 250);
 
   const handleCardClick = (track: Track) => {
-    setPinnedId(track.id);
     if (currentTrack?.id === track.id) {
       togglePlay();
     } else {
@@ -168,71 +148,54 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
   };
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, x: -20 }}
-        animate={{ opacity: 1, scale: 1, x: 0 }}
-        exit={{ opacity: 0, scale: 0.95, x: -20 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 320 }}
-        className="w-[380px] max-w-[45vw] rounded-[2.5rem] bg-zinc-950/95 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl p-4 sm:p-5 flex flex-col text-white shrink-0 self-end"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-white" />
-            <h3 className="text-sm font-bold tracking-tight font-instrument">
-              Stacked Queue ({queue.length} bài)
-            </h3>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider hidden sm:block">
-              Giữ ⠿ để kéo
-            </span>
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-full bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              aria-label="Đóng Stacked Queue"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+    <div className="w-[340px] max-w-[45vw] rounded-[2rem] bg-zinc-950/95 border border-white/10 backdrop-blur-xl p-4 flex flex-col text-white shrink-0 self-end shadow-2xl">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-3 shrink-0">
+        <div className="flex items-center gap-2">
+          <Layers className="w-4 h-4 text-zinc-400" />
+          <span className="text-xs font-semibold text-zinc-400">
+            Queue · {queue.length}
+          </span>
         </div>
-
-        {/* Half-Overlapping Vertical Stacked Area */}
-        <div
-          style={{ height: `${containerHeight}px` }}
-          className="relative w-full my-3 px-1 flex items-center justify-center overflow-hidden transition-all shrink-0"
+        <button
+          onClick={onClose}
+          className="p-1 rounded-full text-zinc-500 hover:text-white cursor-pointer"
+          aria-label="Đóng"
         >
-          <div className="relative w-full h-full">
-            <AnimatePresence>
-              {displayQueue.map((track, idx) => {
-                const isCurrent = currentTrack?.id === track.id;
-                const isPinned = pinnedId === track.id;
-                const topPos = idx * HALF_STACK_STEP;
-                const baseZIndex = (idx + 1) * 10;
+          <X className="w-4 h-4" />
+        </button>
+      </div>
 
-                return (
-                  <DraggableCard
-                    key={track.id}
-                    track={track}
-                    idx={idx}
-                    isCurrent={isCurrent}
-                    isPlaying={isPlaying}
-                    isPinned={isPinned}
-                    topPos={topPos}
-                    baseZIndex={baseZIndex}
-                    draggingIdx={draggingIdx}
-                    onDragStart={() => setDraggingIdx(idx)}
-                    onDragEnd={(info) => handleDragEnd(idx, info)}
-                    onClick={() => handleCardClick(track)}
-                  />
-                );
-              })}
-            </AnimatePresence>
-          </div>
+      {/* Stacked Cards */}
+      <div
+        style={{ height: `${containerHeight}px` }}
+        className="relative w-full overflow-hidden shrink-0"
+      >
+        <div className="relative w-full h-full">
+          {displayQueue.map((track, idx) => {
+            const isCurrent = currentTrack?.id === track.id;
+            const topPos = idx * HALF_STACK_STEP;
+            const baseZIndex = (idx + 1) * 10;
+
+            return (
+              <DraggableCard
+                key={track.id}
+                track={track}
+                idx={idx}
+                isCurrent={isCurrent}
+                isPlaying={isPlaying}
+                topPos={topPos}
+                baseZIndex={baseZIndex}
+                draggingIdx={draggingIdx}
+                onDragStart={() => setDraggingIdx(idx)}
+                onDragEnd={(info) => handleDragEnd(idx, info)}
+                onClick={() => handleCardClick(track)}
+              />
+            );
+          })}
         </div>
-      </motion.div>
-    </AnimatePresence>
+      </div>
+    </div>
   );
 }
 
