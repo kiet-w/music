@@ -96,15 +96,16 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
                   <motion.div
                     key={track.id}
                     drag="y"
-                    dragConstraints={{ top: -140, bottom: 140 }}
-                    dragElastic={0.15}
+                    dragConstraints={{ top: -50, bottom: 50 }}
+                    dragElastic={0.1}
+                    dragSnapToOrigin
                     onDragStart={() => setDraggingIdx(idx)}
                     onDragEnd={(_, info) => handleDragEnd(idx, info)}
                     whileDrag={{
-                      scale: 1.04,
+                      scale: 1.02,
                       zIndex: 200,
                       cursor: 'grabbing',
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.9)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.7)',
                     }}
                     onClick={() => handleCardClick(track)}
                     style={style}
