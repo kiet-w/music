@@ -1,7 +1,6 @@
 import './globals.css';
 import { Instrument_Serif } from 'next/font/google';
 import { GeistSans } from 'geist/font/sans';
-import { Toaster } from 'sonner';
 
 const instrumentSerif = Instrument_Serif({ 
   weight: '400',
@@ -27,6 +26,7 @@ export const viewport: Viewport = {
   interactiveWidget: 'overlays-content',
 };
 
+// ponytail: disabled all toast notifications as requested by user
 export default function RootLayout({
   children,
 }: {
@@ -36,7 +36,6 @@ export default function RootLayout({
     <html lang="en" className="bg-background dark" suppressHydrationWarning>
       <body className={`${GeistSans.variable} ${instrumentSerif.variable} font-sans bg-background text-foreground antialiased selection:bg-foreground selection:text-background`} suppressHydrationWarning>
         {children}
-        <Toaster richColors position="top-center" theme="dark" closeButton />
       </body>
     </html>
   );
