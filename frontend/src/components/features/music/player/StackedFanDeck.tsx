@@ -1,9 +1,9 @@
 'use client';
 
-// ponytail: 2D hand-drawn fan-out stacked cards deck with direct 2D drag-to-reorder capabilities
+// ponytail: 2D vertical hand-drawn stacked cards deck with vertical drag-and-drop reordering
 import React, { useState } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { Play, Pause, Pin, ArrowUp, ArrowDown, GripHorizontal, Trash2 } from 'lucide-react';
+import { Play, Pause, Pin, GripVertical, Trash2, Layers } from 'lucide-react';
 import { usePlayerStore, Track } from '@/store/usePlayerStore';
 import { cn } from '@/lib/utils';
 
@@ -12,19 +12,19 @@ interface StackedFanDeckProps {
 }
 
 /*
-  Exact 2D rotate & top offset formula specified by user:
-  card:nth-child(1) { left: 0px;   top: 46px; transform: rotate(-6deg); }
-  card:nth-child(2) { left: 46px;  top: 34px; transform: rotate(-3deg); }
-  card:nth-child(3) { left: 92px;  top: 24px; transform: rotate(0deg);  }
-  card:nth-child(4) { left: 138px; top: 16px; transform: rotate(3deg);  }
-  card:nth-child(5) { left: 184px; top: 10px; transform: rotate(6deg);  }
+  Vertical 2D Hand-drawn Stacked Cards Formula (Thẳng hàng dọc lệch nhẹ):
+  card 1: top: 0px,   left: 0px,  rotate: -4deg, zIndex: 10
+  card 2: top: 32px,  left: 10px, rotate: -2deg, zIndex: 20
+  card 3: top: 64px,  left: 20px, rotate: 0deg,  zIndex: 30
+  card 4: top: 96px,  left: 30px, rotate: 2deg,  zIndex: 40
+  card 5: top: 128px, left: 40px, rotate: 4deg,  zIndex: 50
 */
-const CARD_LAYOUTS = [
-  { left: 0,   top: 46, rotate: -6, zIndex: 10 },
-  { left: 46,  top: 34, rotate: -3, zIndex: 20 },
-  { left: 92,  top: 24, rotate: 0,  zIndex: 30 },
-  { left: 138, top: 16, rotate: 3,  zIndex: 40 },
-  { left: 184, top: 10, rotate: 6,  zIndex: 50 },
+const VERTICAL_CARD_LAYOUTS = [
+  { top: 0,   left: 0,  rotate: -4, zIndex: 10 },
+  { top: 32,  left: 10, rotate: -2, zIndex: 20 },
+  { top: 64,  left: 20, rotate: 0,  zIndex: 30 },
+  { top: 96,  left: 30, rotate: 2,  zIndex: 40 },
+  { top: 128, left: 40, rotate: 4,  zIndex: 50 },
 ];
 
 export function StackedFanDeck({ onClose }: StackedFanDeckProps) {
@@ -47,10 +47,10 @@ export function StackedFanDeck({ onClose }: StackedFanDeckProps) {
 
   const handleDragEnd = (index: number, info: PanInfo) => {
     setDraggingIdx(null);
-    const threshold = 35; // px threshold to trigger reorder swap
-    if (info.offset.x > threshold && index < queue.length - 1) {
+    const threshold = 28; // vertical px threshold to trigger reorder swap
+    if (info.offset.y > threshold && index < queue.length - 1) {
       moveQueueTrack(index, index + 1);
-    } else if (info.offset.x < -threshold && index > 0) {
+    } else if (info.offset.y < -threshold && index > 0) {
       moveQueueTrack(index, index - 1);
     }
   };
@@ -60,35 +60,35 @@ export function StackedFanDeck({ onClose }: StackedFanDeckProps) {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/10 pb-2.5 px-1">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+          <Layers className="w-4 h-4 text-white" />
           <h3 className="text-sm font-bold tracking-tight font-instrument">
-            Stacked Cards Queue ({queue.length} bài)
+            Vertical Stacked Cards ({queue.length} bài)
           </h3>
         </div>
         <p className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
-          Kéo trái/phải thẻ bài để đổi thứ tự
+          Kéo Dọc (Drag Up/Down) đổi thứ tự
         </p>
       </div>
 
-      {/* 2D Fan-Out Stacked Cards Deck Area with Direct Dragging */}
-      <div className="relative w-full h-[200px] my-2 px-2 flex items-center justify-center overflow-x-auto scrollbar-hide">
-        <div className="relative w-[390px] h-[170px]">
+      {/* 2D Vertical Stacked Cards Deck Area with Vertical Dragging */}
+      <div className="relative w-full h-[250px] my-1 px-2 flex items-center justify-start overflow-hidden">
+        <div className="relative w-full h-[220px]">
           <AnimatePresence>
             {displayQueue.map((track, idx) => {
               const isCurrent = currentTrack?.id === track.id;
               const isPinned = pinnedId === track.id;
-              const layout = CARD_LAYOUTS[Math.min(idx, 4)];
+              const layout = VERTICAL_CARD_LAYOUTS[Math.min(idx, 4)];
 
               const style = isPinned
                 ? {
-                    left: `${layout.left}px`,
                     top: '0px',
-                    transform: 'rotate(0deg) scale(1.05)',
+                    left: '0px',
+                    transform: 'rotate(0deg) scale(1.03)',
                     zIndex: 100,
                   }
                 : {
-                    left: `${layout.left}px`,
                     top: `${layout.top}px`,
+                    left: `${layout.left}px`,
                     transform: `rotate(${layout.rotate}deg)`,
                     zIndex: draggingIdx === idx ? 150 : layout.zIndex,
                   };
@@ -96,13 +96,13 @@ export function StackedFanDeck({ onClose }: StackedFanDeckProps) {
               return (
                 <motion.div
                   key={track.id}
-                  drag="x"
-                  dragConstraints={{ left: -120, right: 120 }}
+                  drag="y"
+                  dragConstraints={{ top: -140, bottom: 140 }}
                   dragElastic={0.15}
                   onDragStart={() => setDraggingIdx(idx)}
                   onDragEnd={(_, info) => handleDragEnd(idx, info)}
                   whileDrag={{
-                    scale: 1.08,
+                    scale: 1.05,
                     rotate: 0,
                     zIndex: 200,
                     cursor: 'grabbing',
@@ -110,50 +110,53 @@ export function StackedFanDeck({ onClose }: StackedFanDeckProps) {
                   onClick={() => handleCardClick(track)}
                   style={style}
                   className={cn(
-                    "absolute w-[190px] h-[125px] rounded-2xl p-3.5 flex flex-col justify-between cursor-grab active:cursor-grabbing transition-shadow duration-300 ease-out shadow-2xl group border select-none",
-                    "hover:!top-1 hover:!rotate-0 hover:!z-[100] hover:scale-105 hover:-translate-y-2",
+                    "absolute w-[90%] sm:w-[340px] h-[72px] rounded-2xl p-3 flex items-center justify-between cursor-grab active:cursor-grabbing transition-all duration-300 ease-out shadow-2xl group border select-none",
+                    "hover:!left-0 hover:!rotate-0 hover:!z-[100] hover:scale-102 hover:-translate-y-1",
                     isCurrent
                       ? "bg-white text-zinc-950 border-white shadow-[0_10px_30px_rgba(255,255,255,0.4)]"
                       : "bg-zinc-900/95 text-white border-white/15 hover:border-white/40 hover:bg-zinc-900"
                   )}
                 >
-                  {/* Card Header & Drag Handle */}
-                  <div className="flex items-center justify-between gap-1.5">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className={cn("text-[10px] font-extrabold font-mono", isCurrent ? "text-zinc-950" : "text-zinc-400")}>
-                        #{idx + 1}
-                      </span>
-                      <span className={cn("text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full truncate", isCurrent ? "bg-zinc-950 text-white" : "bg-white/10 text-zinc-300")}>
-                        {isCurrent ? (isPlaying ? 'Playing' : 'Paused') : 'Queue'}
-                      </span>
-                    </div>
+                  {/* Left: Drag Handle & Index */}
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <GripVertical className={cn("w-4 h-4 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity", isCurrent ? "text-zinc-950" : "text-zinc-400")} />
+                    <span className={cn("text-xs font-bold w-4 text-center font-mono shrink-0", isCurrent ? "text-zinc-950" : "text-zinc-500")}>
+                      #{idx + 1}
+                    </span>
 
-                    <div className="flex items-center gap-1">
-                      <GripHorizontal className={cn("w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity", isCurrent ? "text-zinc-950" : "text-zinc-400")} />
-                    </div>
-                  </div>
-
-                  {/* Card Title & Artist */}
-                  <div className="min-w-0 my-1">
-                    <h4 className={cn("text-xs font-bold truncate font-instrument leading-snug", isCurrent ? "text-zinc-950" : "text-white")}>
-                      {track.title}
-                    </h4>
-                    <p className={cn("text-[10px] truncate font-medium", isCurrent ? "text-zinc-700" : "text-zinc-400")}>
-                      {track.artist || 'Nghệ sĩ'}
-                    </p>
-                  </div>
-
-                  {/* Play Action & Controls */}
-                  <div className="flex items-center justify-between text-[10px]">
-                    <div className="flex items-center gap-1">
-                      {isCurrent && isPlaying ? (
-                        <Pause size={13} fill="currentColor" />
+                    {/* Album Art & Track Info */}
+                    <div className="w-10 h-10 rounded-xl bg-black/20 overflow-hidden shrink-0 border border-white/10">
+                      {track.coverUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
                       ) : (
-                        <Play size={13} fill="currentColor" />
+                        <div className="w-full h-full flex items-center justify-center text-[7px] font-bold">ART</div>
                       )}
-                      <span className="font-semibold">{isCurrent ? (isPlaying ? 'Tạm dừng' : 'Phát tiếp') : 'Phát ngay'}</span>
                     </div>
-                    {isPinned && <Pin size={11} className="text-zinc-400" />}
+                    <div className="min-w-0 flex-1 pr-2">
+                      <p className={cn("text-xs font-bold truncate font-instrument leading-tight", isCurrent ? "text-zinc-950" : "text-white")}>
+                        {track.title}
+                      </p>
+                      <p className={cn("text-[10px] truncate font-medium", isCurrent ? "text-zinc-700" : "text-zinc-400")}>
+                        {track.artist || 'Nghệ sĩ'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right: Play Action & Status */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={cn("text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full", isCurrent ? "bg-zinc-950 text-white" : "bg-white/10 text-zinc-300")}>
+                      {isCurrent ? (isPlaying ? 'Playing' : 'Paused') : 'Queue'}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCardClick(track);
+                      }}
+                      className={cn("p-1.5 rounded-lg transition-colors", isCurrent ? "bg-zinc-950 text-white" : "bg-white/10 text-white hover:bg-white/20")}
+                    >
+                      {isCurrent && isPlaying ? <Pause size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}
+                    </button>
                   </div>
                 </motion.div>
               );
