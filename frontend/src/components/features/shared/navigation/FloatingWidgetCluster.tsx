@@ -1,6 +1,6 @@
 'use client';
 
-// ponytail: expanded multi-popup widget cluster with larger popup windows (Chat 480px+, Convert 540px+, Account 460px+)
+// ponytail: persistent multi-popup widget cluster with non-hiding action buttons (Account bottom-left, Chat bottom-right, Convert top-right)
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,7 +8,6 @@ import { Plus, MessageSquare, User } from 'lucide-react';
 import { cn, getMediaUrl } from '@/lib/utils';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useChatStore } from '@/store/useChatStore';
-import { useKeyboardVisible } from '@/hooks/useKeyboardVisible';
 
 const AddMusicPopup = dynamic(
   () => import('@/components/features/music/AddMusicPopup'),
@@ -33,7 +32,6 @@ export function FloatingWidgetCluster() {
 
   const { user } = useAuthStore();
   const { unreadMessages } = useChatStore();
-  const isKeyboardVisible = useKeyboardVisible();
 
   // Listen to custom event for opening add music from header
   useEffect(() => {
@@ -111,15 +109,10 @@ export function FloatingWidgetCluster() {
         )}
       </AnimatePresence>
 
-      {/* --- INDEPENDENT ACTION BUTTONS --- */}
+      {/* --- ALWAYS-VISIBLE INDEPENDENT ACTION BUTTONS --- */}
 
       {/* Top-Right Floating Button: Convert / Add Music (+) */}
-      <div
-        className={cn(
-          "fixed top-4 right-3 sm:right-6 z-50 flex items-center gap-2 transition-all duration-300",
-          isKeyboardVisible && "opacity-0 pointer-events-none"
-        )}
-      >
+      <div className="fixed top-4 right-3 sm:right-6 z-50 flex items-center gap-2 transition-all duration-300">
         <button
           onClick={() => togglePopup('addMusic')}
           className={cn(
@@ -143,12 +136,7 @@ export function FloatingWidgetCluster() {
       </div>
 
       {/* Bottom-Left Floating Button: User Account (👤 / Avatar) */}
-      <div
-        className={cn(
-          "fixed bottom-5 left-3 sm:left-6 z-50 flex items-center gap-3 transition-all duration-300",
-          isKeyboardVisible && "translate-y-full opacity-0 pointer-events-none"
-        )}
-      >
+      <div className="fixed bottom-5 left-3 sm:left-6 z-50 flex items-center gap-3 transition-all duration-300">
         <button
           onClick={() => togglePopup('userAccount')}
           className={cn(
@@ -175,12 +163,7 @@ export function FloatingWidgetCluster() {
       </div>
 
       {/* Bottom-Right Floating Button: Chat (💬) */}
-      <div
-        className={cn(
-          "fixed bottom-5 right-3 sm:right-6 z-50 flex items-center gap-3 transition-all duration-300",
-          isKeyboardVisible && "translate-y-full opacity-0 pointer-events-none"
-        )}
-      >
+      <div className="fixed bottom-5 right-3 sm:right-6 z-50 flex items-center gap-3 transition-all duration-300">
         <button
           onClick={() => togglePopup('chat')}
           className={cn(
