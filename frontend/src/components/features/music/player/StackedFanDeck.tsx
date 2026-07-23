@@ -1,9 +1,9 @@
 'use client';
 
-// ponytail: single-layer clean vertical 50% half-overlapping stacked deck anchored at left margin
+// ponytail: single-layer vertical 50% half-overlapping stacked deck anchored at bottom-left position matching user hand-drawn diagram
 import React, { useState } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { Play, Pause, Pin, GripVertical, Layers, X } from 'lucide-react';
+import { Play, Pause, GripVertical, Layers, X } from 'lucide-react';
 import { usePlayerStore, Track } from '@/store/usePlayerStore';
 import { cn } from '@/lib/utils';
 
@@ -55,11 +55,11 @@ export function StackedFanDeck({ isOpen = true, onClose }: StackedFanDeckProps) 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, x: -30 }}
-        animate={{ opacity: 1, scale: 1, x: 0 }}
-        exit={{ opacity: 0, scale: 0.95, x: -30 }}
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 30 }}
         transition={{ type: 'spring', damping: 25, stiffness: 320 }}
-        className="fixed top-20 left-3 sm:left-6 lg:left-8 z-40 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[400px] rounded-[2.5rem] bg-zinc-950/95 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl p-4 sm:p-5 flex flex-col text-white"
+        className="fixed bottom-20 left-3 sm:left-6 lg:left-8 z-40 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[400px] rounded-[2.5rem] bg-zinc-950/95 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl p-4 sm:p-5 flex flex-col text-white"
       >
         {/* Single Clean Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
