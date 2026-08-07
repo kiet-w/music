@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">API and Database Data Integrity Testing</title>
+  <desc id="desc">Data validation flow connecting UI action, API payload, and Database state.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0 0L0 6L9 3z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">API &amp; Database Testing: Data Integrity Flow</text>
+
+  <g font-family="Arial, sans-serif" stroke="#334155" stroke-width="2">
+    <!-- Layer 1: Client UI -->
+    <rect x="80" y="240" width="340" height="340" rx="16" fill="#dbeafe"/>
+    <text x="250" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#1e3a8a">1. Client / UI Trigger</text>
+    <text x="110" y="340" font-size="18" stroke="none" fill="#475569">• User submit Form Đăng Ký</text>
+    <text x="110" y="380" font-size="18" stroke="none" fill="#475569">• Playwright script click Submit</text>
+    <rect x="110" y="420" width="280" height="120" rx="10" fill="#ffffff"/>
+    <text x="250" y="460" text-anchor="middle" font-size="16" font-weight="700" stroke="none" fill="#1e3a8a">UI Verification</text>
+    <text x="250" y="490" text-anchor="middle" font-size="15" stroke="none" fill="#64748b">Check Toast &amp; Redirect URL</text>
+
+    <!-- Layer 2: REST API -->
+    <rect x="580" y="240" width="340" height="340" rx="16" fill="#ede9fe"/>
+    <text x="750" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#6d28d9">2. REST API Layer</text>
+    <text x="610" y="340" font-size="18" stroke="none" fill="#475569">• POST /api/v1/auth/register</text>
+    <text x="610" y="380" font-size="18" stroke="none" fill="#475569">• Payload JSON Validation</text>
+    <rect x="610" y="420" width="280" height="120" rx="10" fill="#ffffff"/>
+    <text x="750" y="460" text-anchor="middle" font-size="16" font-weight="700" stroke="none" fill="#6d28d9">API Verification</text>
+    <text x="750" y="490" text-anchor="middle" font-size="15" stroke="none" fill="#64748b">Status 201 + JSON Schema</text>
+
+    <!-- Layer 3: Database -->
+    <rect x="1080" y="240" width="340" height="340" rx="16" fill="#dcfce7"/>
+    <text x="1250" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#15803d">3. Database Layer</text>
+    <text x="1110" y="340" font-size="18" stroke="none" fill="#475569">• SELECT * FROM users...</text>
+    <text x="1110" y="380" font-size="18" stroke="none" fill="#475569">• Verify Hashed Password</text>
+    <rect x="1110" y="420" width="280" height="120" rx="10" fill="#ffffff"/>
+    <text x="1250" y="460" text-anchor="middle" font-size="16" font-weight="700" stroke="none" fill="#15803d">DB Verification</text>
+    <text x="1250" y="490" text-anchor="middle" font-size="15" stroke="none" fill="#64748b">Check Data Integrity &amp; Keys</text>
+  </g>
+
+  <!-- Connectors -->
+  <g stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <path d="M420 410H580"/>
+    <path d="M920 410H1080"/>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">QA không chỉ tin vào giao diện UI mà phải luôn kiểm tra tính chính xác của dữ liệu trong Database.</text>
+</svg>

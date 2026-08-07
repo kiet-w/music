@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">GitHub Actions CI/CD Test Pipeline</title>
+  <desc id="desc">CI/CD automation pipeline running linting, build, Playwright test suite, and Allure report publish.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0 0L0 6L9 3z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">CI/CD Automation Pipeline (GitHub Actions)</text>
+
+  <g font-family="Arial, sans-serif" stroke="#334155" stroke-width="2">
+    <!-- Trigger -->
+    <rect x="70" y="320" width="220" height="140" rx="14" fill="#ede9fe"/>
+    <text x="180" y="375" text-anchor="middle" font-size="22" font-weight="700" stroke="none" fill="#6d28d9">Git Push / PR</text>
+    <text x="180" y="415" text-anchor="middle" font-size="16" stroke="none" fill="#475569">Developer push code</text>
+
+    <!-- Checkout & Setup -->
+    <rect x="360" y="320" width="240" height="140" rx="14" fill="#dbeafe"/>
+    <text x="480" y="375" text-anchor="middle" font-size="22" font-weight="700" stroke="none" fill="#1e3a8a">Setup Job</text>
+    <text x="480" y="415" text-anchor="middle" font-size="16" stroke="none" fill="#475569">Node.js + Playwright deps</text>
+
+    <!-- Execute Tests -->
+    <rect x="670" y="320" width="260" height="140" rx="14" fill="#dcfce7"/>
+    <text x="800" y="375" text-anchor="middle" font-size="22" font-weight="700" stroke="none" fill="#15803d">Playwright Test</text>
+    <text x="800" y="415" text-anchor="middle" font-size="16" stroke="none" fill="#475569">Headless Chrome / Firefox</text>
+
+    <!-- Report -->
+    <rect x="1000" y="320" width="240" height="140" rx="14" fill="#fef3c7"/>
+    <text x="1120" y="375" text-anchor="middle" font-size="22" font-weight="700" stroke="none" fill="#b45309">Publish Report</text>
+    <text x="1120" y="415" text-anchor="middle" font-size="16" stroke="none" fill="#475569">HTML / Allure Artifact</text>
+
+    <!-- Merge Gate -->
+    <rect x="1310" y="320" width="120" height="140" rx="14" fill="#bbf7d0"/>
+    <text x="1370" y="380" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#14532d">MERGE ✅</text>
+  </g>
+
+  <!-- Connectors -->
+  <g stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <path d="M290 390H360"/>
+    <path d="M600 390H670"/>
+    <path d="M930 390H1000"/>
+    <path d="M1240 390H1310"/>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">Tự động hóa hoàn toàn việc chạy test suite trên CI giúp ngăn chặn bug lọt vào branch Main.</text>
+</svg>

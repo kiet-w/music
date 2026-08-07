@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Bug life cycle workflow</title>
+  <desc id="desc">Full defect status transitions from New to Verified/Closed including reopens and rejections.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0 0L0 6L9 3z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">Bug Life Cycle: complete status transition flow</text>
+
+  <g font-family="Arial, sans-serif" font-size="22" text-anchor="middle" fill="#0f172a" stroke="#334155" stroke-width="2">
+    <!-- NEW -->
+    <rect x="70" y="240" width="180" height="90" rx="14" fill="#dbeafe"/>
+    <text x="160" y="280" stroke="none" font-weight="700">NEW</text>
+    <text x="160" y="308" font-size="16" stroke="none" fill="#475569">QA tạo bug</text>
+
+    <!-- OPEN -->
+    <rect x="330" y="240" width="180" height="90" rx="14" fill="#fef3c7"/>
+    <text x="420" y="280" stroke="none" font-weight="700">OPEN</text>
+    <text x="420" y="308" font-size="16" stroke="none" fill="#475569">Assign to Dev</text>
+
+    <!-- IN PROGRESS -->
+    <rect x="590" y="240" width="190" height="90" rx="14" fill="#fee2e2"/>
+    <text x="685" y="280" stroke="none" font-weight="700">IN PROGRESS</text>
+    <text x="685" y="308" font-size="16" stroke="none" fill="#475569">Dev đang sửa</text>
+
+    <!-- FIXED -->
+    <rect x="860" y="240" width="180" height="90" rx="14" fill="#ede9fe"/>
+    <text x="950" y="280" stroke="none" font-weight="700">FIXED</text>
+    <text x="950" y="308" font-size="16" stroke="none" fill="#475569">Dev xong code</text>
+
+    <!-- RETEST -->
+    <rect x="1130" y="240" width="180" height="90" rx="14" fill="#cffafe"/>
+    <text x="1220" y="280" stroke="none" font-weight="700">RETEST</text>
+    <text x="1220" y="308" font-size="16" stroke="none" fill="#475569">QA test lại</text>
+
+    <!-- CLOSED -->
+    <rect x="1130" y="520" width="180" height="90" rx="14" fill="#bbf7d0"/>
+    <text x="1220" y="560" stroke="none" font-weight="700">CLOSED ✅</text>
+    <text x="1220" y="588" font-size="16" stroke="none" fill="#16a34a">Fix verified</text>
+
+    <!-- REOPENED -->
+    <rect x="860" y="520" width="180" height="90" rx="14" fill="#fecaca"/>
+    <text x="950" y="560" stroke="none" font-weight="700">REOPENED 🔄</text>
+    <text x="950" y="588" font-size="16" stroke="none" fill="#dc2626">Lỗi vẫn còn</text>
+
+    <!-- REJECTED -->
+    <rect x="330" y="520" width="180" height="90" rx="14" fill="#e2e8f0"/>
+    <text x="420" y="560" stroke="none" font-weight="700">REJECTED ❌</text>
+    <text x="420" y="588" font-size="16" stroke="none" fill="#475569">Not a bug</text>
+
+    <!-- DEFERRED -->
+    <rect x="590" y="520" width="180" height="90" rx="14" fill="#f1f5f9"/>
+    <text x="685" y="560" stroke="none" font-weight="700">DEFERRED ⏸️</text>
+    <text x="685" y="588" font-size="16" stroke="none" fill="#475569">Sửa sau</text>
+  </g>
+
+  <!-- Connectors -->
+  <g stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <!-- Main line -->
+    <path d="M250 285H330"/>
+    <path d="M510 285H590"/>
+    <path d="M780 285H860"/>
+    <path d="M1040 285H1130"/>
+    <path d="M1220 330V520"/>
+
+    <!-- Reopen path -->
+    <path d="M1130 565H1040"/>
+    <path d="M950 520V330"/>
+
+    <!-- Reject & Deferred paths -->
+    <path d="M420 330V520"/>
+    <path d="M685 330V520"/>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">QA xác minh lỗi theo đúng kỳ vọng ban đầu; chỉ khi PASS hoàn toàn mới được chuyển trạng thái CLOSED.</text>
+</svg>

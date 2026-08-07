@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Session-Based Exploratory Testing (SBET) Workflow</title>
+  <desc id="desc">Structured stages of an SBET testing session from Charter to Debrief.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0 0L0 6L9 3z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">Session-Based Exploratory Testing (SBET) Workflow</text>
+
+  <g font-family="Arial, sans-serif" stroke="#334155" stroke-width="2">
+    <!-- Step 1: Charter -->
+    <rect x="70" y="240" width="300" height="320" rx="16" fill="#ede9fe"/>
+    <text x="220" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#6d28d9">1. Charter Creation</text>
+    <text x="90" y="340" font-size="18" stroke="none" fill="#475569">• Xác định mục tiêu phiên test</text>
+    <text x="90" y="380" font-size="18" stroke="none" fill="#475569">• Phạm vi &amp; Tính năng focus</text>
+    <text x="90" y="420" font-size="18" stroke="none" fill="#475569">• Ví dụ: "Khám phá luồng</text>
+    <text x="90" y="450" font-size="18" stroke="none" fill="#475569">  Checkout khi rớt mạng"</text>
+
+    <!-- Step 2: Time-Box Execution -->
+    <rect x="420" y="240" width="320" height="320" rx="16" fill="#dbeafe"/>
+    <text x="580" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#1e3a8a">2. Time-Box Execution</text>
+    <text x="440" y="340" font-size="18" stroke="none" fill="#475569">• Thời lượng: 60 - 90 phút</text>
+    <text x="440" y="380" font-size="18" stroke="none" fill="#475569">• Không bị xao nhãng</text>
+    <text x="440" y="420" font-size="18" stroke="none" fill="#475569">• Thử nghiệm các kịch bản</text>
+    <text x="440" y="450" font-size="18" stroke="none" fill="#475569">  ngoài mong đợi</text>
+
+    <!-- Step 3: Session Log -->
+    <rect x="790" y="240" width="320" height="320" rx="16" fill="#dcfce7"/>
+    <text x="950" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#15803d">3. Session Logging</text>
+    <text x="810" y="340" font-size="18" stroke="none" fill="#475569">• Ghi chép các bước đã đi</text>
+    <text x="810" y="380" font-size="18" stroke="none" fill="#475569">• Note các câu hỏi nghi vấn</text>
+    <text x="810" y="420" font-size="18" stroke="none" fill="#475569">• Chụp ảnh / quay clip bug</text>
+    <text x="810" y="450" font-size="18" stroke="none" fill="#475569">• Phân loại: TBS (Test/Bug/Setup)</text>
+
+    <!-- Step 4: Debriefing -->
+    <rect x="1160" y="240" width="270" height="320" rx="16" fill="#fef3c7"/>
+    <text x="1295" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#b45309">4. Debriefing</text>
+    <text x="1180" y="340" font-size="18" stroke="none" fill="#475569">• Họp ngắn 15p với Lead/Dev</text>
+    <text x="1180" y="380" font-size="18" stroke="none" fill="#475569">• Review kết quả phiên test</text>
+    <text x="1180" y="420" font-size="18" stroke="none" fill="#475569">• Đổi Bug thành Jira Ticket</text>
+  </g>
+
+  <!-- Connectors -->
+  <g stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <path d="M370 400H420"/>
+    <path d="M740 400H790"/>
+    <path d="M1110 400H1160"/>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">SBET biến Exploratory Testing thành một quy trình khoa học, có định hướng và có bằng chứng ghi chép rõ ràng.</text>
+</svg>

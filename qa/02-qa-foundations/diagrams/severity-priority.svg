@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Severity vs Priority Matrix</title>
+  <desc id="desc">2x2 grid comparing technical severity against business priority.</desc>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">Severity vs Priority: defect prioritization matrix</text>
+
+  <g transform="translate(260 140)" font-family="Arial, sans-serif" fill="#0f172a">
+    <!-- Axes Titles -->
+    <text x="480" y="-25" font-size="24" font-weight="700" text-anchor="middle">PRIORITY (Mức độ ưu tiên sửa — PM/PO)</text>
+    <text x="-40" y="320" font-size="24" font-weight="700" text-anchor="middle" transform="rotate(-90 -40 320)">SEVERITY (Mức độ ảnh hưởng kỹ thuật — QA)</text>
+
+    <!-- Grid Container -->
+    <rect width="960" height="640" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+    <line x1="480" y1="0" x2="480" y2="640" stroke="#334155" stroke-width="2"/>
+    <line x1="0" y1="320" x2="960" y2="320" stroke="#334155" stroke-width="2"/>
+
+    <!-- High Sev + Low Prio -->
+    <rect x="4" y="4" width="472" height="312" fill="#fef3c7"/>
+    <text x="240" y="110" text-anchor="middle" font-size="26" font-weight="700" fill="#b45309">High Severity + Low Priority</text>
+    <text x="240" y="160" text-anchor="middle" font-size="20" fill="#475569">App crash khi nhập emoji ở field ẩn</text>
+    <text x="240" y="195" text-anchor="middle" font-size="18" fill="#64748b">(Ảnh hưởng kỹ thuật nặng nhưng cực ít user gặp)</text>
+
+    <!-- High Sev + High Prio -->
+    <rect x="484" y="4" width="472" height="312" fill="#fee2e2"/>
+    <text x="720" y="110" text-anchor="middle" font-size="26" font-weight="700" fill="#b91c1c">🔴 FIX IMMEDIATELY (Critical)</text>
+    <text x="720" y="160" text-anchor="middle" font-size="20" fill="#475569">Thanh toán Checkout thất bại 100%</text>
+    <text x="720" y="195" text-anchor="middle" font-size="18" fill="#64748b">(Crash luồng chính → Mất doanh thu ngay lập tức)</text>
+
+    <!-- Low Sev + Low Prio -->
+    <rect x="4" y="324" width="472" height="312" fill="#e2e8f0"/>
+    <text x="240" y="430" text-anchor="middle" font-size="26" font-weight="700" fill="#475569">Low Severity + Low Priority</text>
+    <text x="240" y="480" text-anchor="middle" font-size="20" fill="#475569">Typo nhỏ ở trang trợ giúp (Help doc)</text>
+    <text x="240" y="515" text-anchor="middle" font-size="18" fill="#64748b">(Lỗi nhỏ, đưa vào Backlog sửa sau)</text>
+
+    <!-- Low Sev + High Prio -->
+    <rect x="484" y="324" width="472" height="312" fill="#ede9fe"/>
+    <text x="720" y="430" text-anchor="middle" font-size="26" font-weight="700" fill="#6d28d9">⚡ QUICK FIX (Brand Impact)</text>
+    <text x="720" y="480" text-anchor="middle" font-size="20" fill="#475569">Logo công ty trên trang chủ bị lệch/sai màu</text>
+    <text x="720" y="515" text-anchor="middle" font-size="18" fill="#64748b">(Lỗi nhẹ nhưng ảnh hưởng trực tiếp thương hiệu)</text>
+
+    <!-- Labels -->
+    <text x="240" y="680" text-anchor="middle" font-size="20" fill="#475569">Low Priority</text>
+    <text x="720" y="680" text-anchor="middle" font-size="20" fill="#475569">High Priority</text>
+    <text x="-15" y="620" font-size="20" text-anchor="end" fill="#475569">Low Severity</text>
+    <text x="-15" y="30" font-size="20" text-anchor="end" fill="#475569">High Severity</text>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">QA đánh giá Severity dựa trên kỹ thuật; PM/PO đánh giá Priority dựa trên tác động kinh doanh.</text>
+</svg>

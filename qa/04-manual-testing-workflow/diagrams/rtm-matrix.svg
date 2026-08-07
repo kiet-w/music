@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Requirement Traceability Matrix (RTM)</title>
+  <desc id="desc">Traceability matrix linking Business Requirements to Test Cases, Execution Status, and Defects.</desc>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">Requirement Traceability Matrix (RTM): End-to-End Coverage</text>
+
+  <g transform="translate(80, 150)" font-family="Arial, sans-serif" stroke="#334155" stroke-width="2">
+    <!-- Header -->
+    <rect x="0" y="0" width="220" height="70" fill="#1e293b"/>
+    <text x="110" y="43" font-size="20" font-weight="700" fill="#f8fafc" text-anchor="middle" stroke="none">Req ID</text>
+
+    <rect x="220" y="0" width="440" height="70" fill="#1e293b"/>
+    <text x="440" y="43" font-size="20" font-weight="700" fill="#f8fafc" text-anchor="middle" stroke="none">Description</text>
+
+    <rect x="660" y="0" width="320" height="70" fill="#1e293b"/>
+    <text x="820" y="43" font-size="20" font-weight="700" fill="#f8fafc" text-anchor="middle" stroke="none">Mapped Test Cases</text>
+
+    <rect x="980" y="0" width="180" height="70" fill="#1e293b"/>
+    <text x="1070" y="43" font-size="20" font-weight="700" fill="#f8fafc" text-anchor="middle" stroke="none">Status</text>
+
+    <rect x="1160" y="0" width="180" height="70" fill="#1e293b"/>
+    <text x="1250" y="43" font-size="20" font-weight="700" fill="#f8fafc" text-anchor="middle" stroke="none">Defect ID</text>
+
+    <!-- Row 1 -->
+    <rect x="0" y="70" width="220" height="90" fill="#ffffff"/>
+    <text x="110" y="123" font-size="18" font-weight="700" fill="#0f172a" text-anchor="middle" stroke="none">REQ_AUTH_01</text>
+
+    <rect x="220" y="70" width="440" height="90" fill="#ffffff"/>
+    <text x="240" y="123" font-size="18" fill="#475569" stroke="none">Đăng nhập bằng Email &amp; Password</text>
+
+    <rect x="660" y="70" width="320" height="90" fill="#ffffff"/>
+    <text x="820" y="123" font-size="18" fill="#475569" text-anchor="middle" stroke="none">TC_AUTH_001, TC_AUTH_002</text>
+
+    <rect x="980" y="70" width="180" height="90" fill="#bbf7d0"/>
+    <text x="1070" y="123" font-size="20" font-weight="700" fill="#14532d" text-anchor="middle" stroke="none">PASS ✅</text>
+
+    <rect x="1160" y="70" width="180" height="90" fill="#ffffff"/>
+    <text x="1250" y="123" font-size="18" fill="#94a3b8" text-anchor="middle" stroke="none">-</text>
+
+    <!-- Row 2 -->
+    <rect x="0" y="160" width="220" height="90" fill="#f8fafc"/>
+    <text x="110" y="213" font-size="18" font-weight="700" fill="#0f172a" text-anchor="middle" stroke="none">REQ_AUTH_02</text>
+
+    <rect x="220" y="160" width="440" height="90" fill="#f8fafc"/>
+    <text x="240" y="213" font-size="18" fill="#475569" stroke="none">Quên mật khẩu qua Email OTP</text>
+
+    <rect x="660" y="160" width="320" height="90" fill="#f8fafc"/>
+    <text x="820" y="213" font-size="18" fill="#475569" text-anchor="middle" stroke="none">TC_AUTH_010</text>
+
+    <rect x="980" y="160" width="180" height="90" fill="#fee2e2"/>
+    <text x="1070" y="213" font-size="20" font-weight="700" fill="#b91c1c" text-anchor="middle" stroke="none">FAIL ❌</text>
+
+    <rect x="1160" y="160" width="180" height="90" fill="#fee2e2"/>
+    <text x="1250" y="213" font-size="18" font-weight="700" fill="#b91c1c" text-anchor="middle" stroke="none">BUG_045</text>
+
+    <!-- Row 3 -->
+    <rect x="0" y="250" width="220" height="90" fill="#ffffff"/>
+    <text x="110" y="303" font-size="18" font-weight="700" fill="#0f172a" text-anchor="middle" stroke="none">REQ_CART_01</text>
+
+    <rect x="220" y="250" width="440" height="90" fill="#ffffff"/>
+    <text x="240" y="303" font-size="18" fill="#475569" stroke="none">Áp dụng mã Voucher giảm giá</text>
+
+    <rect x="660" y="250" width="320" height="90" fill="#ffffff"/>
+    <text x="820" y="303" font-size="18" fill="#475569" text-anchor="middle" stroke="none">TC_CART_005, TC_CART_006</text>
+
+    <rect x="980" y="250" width="180" height="90" fill="#bbf7d0"/>
+    <text x="1070" y="303" font-size="20" font-weight="700" fill="#14532d" text-anchor="middle" stroke="none">PASS ✅</text>
+
+    <rect x="1160" y="250" width="180" height="90" fill="#ffffff"/>
+    <text x="1250" y="303" font-size="18" fill="#94a3b8" text-anchor="middle" stroke="none">-</text>
+
+    <!-- RTM Summary Banner -->
+    <rect x="0" y="370" width="1340" height="150" rx="16" fill="#dbeafe"/>
+    <text x="670" y="420" text-anchor="middle" font-size="24" font-weight="700" fill="#1e3a8a" stroke="none">Mục đích chính của RTM:</text>
+    <text x="670" y="460" text-anchor="middle" font-size="18" fill="#475569" stroke="none">1. Đảm bảo 100% Requirement đều được bao phủ bởi ít nhất 1 Test Case.</text>
+    <text x="670" y="495" text-anchor="middle" font-size="18" fill="#475569" stroke="none">2. Theo dõi tiến độ Test Execution và các Bug còn đọng lại trước phiên Release.</text>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">RTM giúp QA khẳng định độ bao phủ kiểm thử (Test Coverage) với PM và Client trước khi sign-off.</text>
+</svg>

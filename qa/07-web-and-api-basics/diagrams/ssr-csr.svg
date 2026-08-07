@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">SSR vs CSR Web Architecture for QA</title>
+  <desc id="desc">Comparison of Server-Side Rendering and Client-Side Rendering flows and QA testing concerns.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0 0L0 6L9 3z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">SSR vs CSR: Web Architecture &amp; QA Testing Focus</text>
+
+  <g font-family="Arial, sans-serif" stroke="#334155" stroke-width="2">
+    <!-- SSR Side -->
+    <rect x="70" y="140" width="650" height="640" rx="18" fill="#dbeafe"/>
+    <text x="395" y="190" text-anchor="middle" font-size="26" font-weight="700" stroke="none" fill="#1e3a8a">SSR (Server-Side Rendering — Next.js)</text>
+    <text x="395" y="225" text-anchor="middle" font-size="18" stroke="none" fill="#3b82f6">HTML được render hoàn chỉnh ngay tại Server</text>
+
+    <rect x="110" y="260" width="570" height="80" rx="10" fill="#ffffff"/>
+    <text x="395" y="305" text-anchor="middle" font-size="18" stroke="none">1. User request ➔ Server render HTML đầy đủ data</text>
+
+    <rect x="110" y="360" width="570" height="80" rx="10" fill="#ffffff"/>
+    <text x="395" y="405" text-anchor="middle" font-size="18" stroke="none">2. Browser nhận HTML ➔ Hợp lệ &amp; Hiển thị tức thì</text>
+
+    <rect x="110" y="460" width="570" height="80" rx="10" fill="#ffffff"/>
+    <text x="395" y="505" text-anchor="middle" font-size="18" stroke="none">3. React Hydration ➔ Gắn event handlers vào DOM</text>
+
+    <rect x="110" y="570" width="570" height="180" rx="12" fill="#eff6ff"/>
+    <text x="130" y="605" font-size="20" font-weight="700" stroke="none" fill="#1d4ed8">⚠️ Trọng tâm QA cần Test (SSR):</text>
+    <text x="130" y="640" font-size="17" stroke="none" fill="#475569">• Lỗi Hydration Mismatch (Server HTML ≠ Client HTML)</text>
+    <text x="130" y="675" font-size="17" stroke="none" fill="#475569">• Button có click được TRƯỚC khi Hydration hoàn tất?</text>
+    <text x="130" y="710" font-size="17" stroke="none" fill="#475569">• View Source (Ctrl+U) kiểm tra SEO &amp; Meta tags</text>
+
+    <!-- CSR Side -->
+    <rect x="780" y="140" width="650" height="640" rx="18" fill="#cffafe"/>
+    <text x="1105" y="190" text-anchor="middle" font-size="26" font-weight="700" stroke="none" fill="#0891b2">CSR (Client-Side Rendering — React SPA)</text>
+    <text x="1105" y="225" text-anchor="middle" font-size="18" stroke="none" fill="#06b6d4">Server trả HTML rỗng, JS Bundle render UI tại Client</text>
+
+    <rect x="820" y="260" width="570" height="80" rx="10" fill="#ffffff"/>
+    <text x="1105" y="305" text-anchor="middle" font-size="18" stroke="none">1. User request ➔ Server trả HTML rỗng (`&lt;div id="root"&gt;`)</text>
+
+    <rect x="820" y="360" width="570" height="80" rx="10" fill="#ffffff"/>
+    <text x="1105" y="405" text-anchor="middle" font-size="18" stroke="none">2. Browser tải JS bundle ➔ Execute React ➔ Render Skeleton</text>
+
+    <rect x="820" y="460" width="570" height="80" rx="10" fill="#ffffff"/>
+    <text x="1105" y="505" text-anchor="middle" font-size="18" stroke="none">3. Client gọi API (Fetch/Axios) ➔ Đổ dữ liệu vào UI</text>
+
+    <rect x="820" y="570" width="570" height="180" rx="12" fill="#ecfeff"/>
+    <text x="840" y="605" font-size="20" font-weight="700" stroke="none" fill="#0e7490">⚠️ Trọng tâm QA cần Test (CSR):</text>
+    <text x="840" y="640" font-size="17" stroke="none" fill="#475569">• Trạng thái Loading / Skeleton / Empty State</text>
+    <text x="840" y="675" font-size="17" stroke="none" fill="#475569">• Race condition khi gọi nhiều API song song</text>
+    <text x="840" y="710" font-size="17" stroke="none" fill="#475569">• Playwright Automation: Phải wait API load xong mới assert</text>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">Hiểu rõ kiến trúc rendering giúp QA viết assertion chính xác và phát hiện các lỗi hydrations/loading.</text>
+</svg>

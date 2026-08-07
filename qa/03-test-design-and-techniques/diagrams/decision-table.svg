@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Decision Table Testing Matrix</title>
+  <desc id="desc">Decision table mapping condition combinations to expected discount actions.</desc>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">Decision Table Testing: Combinatorial Logic Matrix</text>
+
+  <g transform="translate(100, 150)" font-family="Arial, sans-serif" stroke="#334155" stroke-width="2">
+    <!-- Table Header -->
+    <rect x="0" y="0" width="350" height="70" fill="#1e293b"/>
+    <text x="175" y="43" font-size="22" font-weight="700" fill="#f8fafc" text-anchor="middle" stroke="none">Conditions / Actions</text>
+
+    <rect x="350" y="0" width="235" height="70" fill="#dbeafe"/>
+    <text x="467" y="43" font-size="22" font-weight="700" fill="#1e3a8a" text-anchor="middle" stroke="none">Rule 1 (TC_01)</text>
+
+    <rect x="585" y="0" width="235" height="70" fill="#dbeafe"/>
+    <text x="702" y="43" font-size="22" font-weight="700" fill="#1e3a8a" text-anchor="middle" stroke="none">Rule 2 (TC_02)</text>
+
+    <rect x="820" y="0" width="240" height="70" fill="#dbeafe"/>
+    <text x="940" y="43" font-size="22" font-weight="700" fill="#1e3a8a" text-anchor="middle" stroke="none">Rule 3 (TC_03)</text>
+
+    <rect x="1060" y="0" width="240" height="70" fill="#dbeafe"/>
+    <text x="1180" y="43" font-size="22" font-weight="700" fill="#1e3a8a" text-anchor="middle" stroke="none">Rule 4 (TC_04)</text>
+
+    <!-- Condition 1: VIP Member -->
+    <rect x="0" y="70" width="350" height="100" fill="#ffffff"/>
+    <text x="30" y="128" font-size="20" font-weight="700" fill="#0f172a" stroke="none">Is VIP Member?</text>
+
+    <rect x="350" y="70" width="235" height="100" fill="#dcfce7"/>
+    <text x="467" y="130" font-size="22" font-weight="700" fill="#15803d" text-anchor="middle" stroke="none">TRUE</text>
+
+    <rect x="585" y="70" width="235" height="100" fill="#dcfce7"/>
+    <text x="702" y="130" font-size="22" font-weight="700" fill="#15803d" text-anchor="middle" stroke="none">TRUE</text>
+
+    <rect x="820" y="70" width="240" height="100" fill="#fee2e2"/>
+    <text x="940" y="130" font-size="22" font-weight="700" fill="#b91c1c" text-anchor="middle" stroke="none">FALSE</text>
+
+    <rect x="1060" y="70" width="240" height="100" fill="#fee2e2"/>
+    <text x="1180" y="130" font-size="22" font-weight="700" fill="#b91c1c" text-anchor="middle" stroke="none">FALSE</text>
+
+    <!-- Condition 2: Order > 500k -->
+    <rect x="0" y="170" width="350" height="100" fill="#ffffff"/>
+    <text x="30" y="228" font-size="20" font-weight="700" fill="#0f172a" stroke="none">Order Total &gt; 500k?</text>
+
+    <rect x="350" y="170" width="235" height="100" fill="#dcfce7"/>
+    <text x="467" y="230" font-size="22" font-weight="700" fill="#15803d" text-anchor="middle" stroke="none">TRUE</text>
+
+    <rect x="585" y="170" width="235" height="100" fill="#fee2e2"/>
+    <text x="702" y="230" font-size="22" font-weight="700" fill="#b91c1c" text-anchor="middle" stroke="none">FALSE</text>
+
+    <rect x="820" y="170" width="240" height="100" fill="#dcfce7"/>
+    <text x="940" y="230" font-size="22" font-weight="700" fill="#15803d" text-anchor="middle" stroke="none">TRUE</text>
+
+    <rect x="1060" y="170" width="240" height="100" fill="#fee2e2"/>
+    <text x="1180" y="230" font-size="22" font-weight="700" fill="#b91c1c" text-anchor="middle" stroke="none">FALSE</text>
+
+    <!-- Action: Discount % -->
+    <rect x="0" y="270" width="350" height="130" fill="#ede9fe"/>
+    <text x="30" y="345" font-size="22" font-weight="700" fill="#6d28d9" stroke="none">ACTION: Discount Result</text>
+
+    <rect x="350" y="270" width="235" height="130" fill="#bbf7d0"/>
+    <text x="467" y="345" font-size="32" font-weight="700" fill="#14532d" text-anchor="middle" stroke="none">20% Off</text>
+
+    <rect x="585" y="270" width="235" height="130" fill="#fef3c7"/>
+    <text x="702" y="345" font-size="32" font-weight="700" fill="#b45309" text-anchor="middle" stroke="none">10% Off</text>
+
+    <rect x="820" y="270" width="240" height="130" fill="#fef3c7"/>
+    <text x="940" y="345" font-size="32" font-weight="700" fill="#b45309" text-anchor="middle" stroke="none">5% Off</text>
+
+    <rect x="1060" y="270" width="240" height="130" fill="#e2e8f0"/>
+    <text x="1180" y="345" font-size="32" font-weight="700" fill="#475569" text-anchor="middle" stroke="none">0% (No)</text>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">Mỗi cột Rule trong Decision Table tương ứng với 1 Test Case nguyên tử đảm bảo 100% logic kết hợp được test.</text>
+</svg>

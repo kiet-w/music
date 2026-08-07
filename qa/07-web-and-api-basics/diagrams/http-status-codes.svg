@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">HTTP Status Codes Cheat Sheet for QA</title>
+  <desc id="desc">Grouped HTTP status codes with QA validation rules.</desc>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">HTTP Status Codes: QA Testing Cheat Sheet</text>
+
+  <g font-family="Arial, sans-serif" stroke="#334155" stroke-width="2">
+    <!-- 2xx Success -->
+    <rect x="70" y="140" width="310" height="520" rx="16" fill="#dcfce7"/>
+    <text x="225" y="190" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#15803d">2xx – Success ✅</text>
+    <text x="100" y="240" font-size="18" font-weight="700" stroke="none" fill="#16a34a">200 OK</text>
+    <text x="100" y="270" font-size="16" stroke="none" fill="#475569">Thành công, có body data</text>
+    <text x="100" y="320" font-size="18" font-weight="700" stroke="none" fill="#16a34a">201 Created</text>
+    <text x="100" y="350" font-size="16" stroke="none" fill="#475569">POST tạo mới thành công</text>
+    <text x="100" y="400" font-size="18" font-weight="700" stroke="none" fill="#16a34a">204 No Content</text>
+    <text x="100" y="430" font-size="16" stroke="none" fill="#475569">DELETE thành công, no body</text>
+
+    <!-- 3xx Redirection -->
+    <rect x="410" y="140" width="310" height="520" rx="16" fill="#dbeafe"/>
+    <text x="565" y="190" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#1e3a8a">3xx – Redirection 🔀</text>
+    <text x="440" y="240" font-size="18" font-weight="700" stroke="none" fill="#2563eb">301 Moved Permanently</text>
+    <text x="440" y="270" font-size="16" stroke="none" fill="#475569">Đổi URL vĩnh viễn</text>
+    <text x="440" y="320" font-size="18" font-weight="700" stroke="none" fill="#2563eb">302 Found (Temporary)</text>
+    <text x="440" y="350" font-size="16" stroke="none" fill="#475569">Tạm thời chuyển hướng</text>
+    <text x="440" y="400" font-size="18" font-weight="700" stroke="none" fill="#2563eb">304 Not Modified</text>
+    <text x="440" y="430" font-size="16" stroke="none" fill="#475569">Dùng Browser Cache</text>
+
+    <!-- 4xx Client Error -->
+    <rect x="750" y="140" width="340" height="520" rx="16" fill="#fef3c7"/>
+    <text x="920" y="190" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#b45309">4xx – Client Error ⚠️</text>
+    <text x="780" y="235" font-size="17" font-weight="700" stroke="none" fill="#d97706">400 Bad Request <tspan font-size="14" font-weight="400" fill="#475569">(Payload sai format)</tspan></text>
+    <text x="780" y="280" font-size="17" font-weight="700" stroke="none" fill="#d97706">401 Unauthorized <tspan font-size="14" font-weight="400" fill="#475569">(Chưa đăng nhập)</tspan></text>
+    <text x="780" y="325" font-size="17" font-weight="700" stroke="none" fill="#d97706">403 Forbidden <tspan font-size="14" font-weight="400" fill="#475569">(Không đủ quyền)</tspan></text>
+    <text x="780" y="370" font-size="17" font-weight="700" stroke="none" fill="#d97706">404 Not Found <tspan font-size="14" font-weight="400" fill="#475569">(Mất Resource)</tspan></text>
+    <text x="780" y="415" font-size="17" font-weight="700" stroke="none" fill="#d97706">409 Conflict <tspan font-size="14" font-weight="400" fill="#475569">(Email trùng lặp)</tspan></text>
+    <text x="780" y="460" font-size="17" font-weight="700" stroke="none" fill="#d97706">422 Unprocessable <tspan font-size="14" font-weight="400" fill="#475569">(Validation fail)</tspan></text>
+    <text x="780" y="505" font-size="17" font-weight="700" stroke="none" fill="#d97706">429 Rate Limit <tspan font-size="14" font-weight="400" fill="#475569">(Spam request)</tspan></text>
+
+    <!-- 5xx Server Error -->
+    <rect x="1120" y="140" width="310" height="520" rx="16" fill="#fee2e2"/>
+    <text x="1275" y="190" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#b91c1c">5xx – Server Error 🔴</text>
+    <text x="1150" y="240" font-size="18" font-weight="700" stroke="none" fill="#dc2626">500 Internal Error</text>
+    <text x="1150" y="270" font-size="16" stroke="none" fill="#b91c1c">Code unhandled crash</text>
+    <text x="1150" y="320" font-size="18" font-weight="700" stroke="none" fill="#dc2626">502 Bad Gateway</text>
+    <text x="1150" y="350" font-size="16" stroke="none" fill="#b91c1c">Proxy không gọi được BE</text>
+    <text x="1150" y="400" font-size="18" font-weight="700" stroke="none" fill="#dc2626">503 Unavailable</text>
+    <text x="1150" y="430" font-size="16" stroke="none" fill="#b91c1c">Server quá tải / maint</text>
+
+    <!-- Golden Rule Box -->
+    <rect x="70" y="690" width="1360" height="90" rx="14" fill="#ffffff"/>
+    <text x="750" y="730" text-anchor="middle" font-size="20" font-weight="700" stroke="none" fill="#0f172a">⚡ Quy tắc vàng cho QA:</text>
+    <text x="750" y="760" text-anchor="middle" font-size="18" stroke="none" fill="#475569">Client gửi dữ liệu sai ➔ API phải trả 4xx. Nếu Client gửi sai mà API trả 500 ➔ ĐÓ LÀ BUG SERVER CRASH!</text>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">Luôn bắt cặp Response Status Code với Response Body Schema để xác minh API contract đúng chuẩn.</text>
+</svg>

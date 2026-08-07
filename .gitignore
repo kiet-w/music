@@ -82,3 +82,6 @@ __pycache__/
 *.sql
 *.sh
 .vercel
+# Added by code-review-graph
+.code-review-graph/
+.agents/

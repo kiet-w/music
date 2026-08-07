@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">QA vs QC vs Testing relationship</title>
+  <desc id="desc">Concentric diagram showing Quality Assurance containing Quality Control containing Testing.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0 0L0 6L9 3z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">QA ⊃ QC ⊃ Testing: scope and relationship</text>
+
+  <!-- Outer QA Box -->
+  <g font-family="Arial, sans-serif" fill="#0f172a" stroke="#334155" stroke-width="2">
+    <rect x="80" y="140" width="1340" height="660" rx="20" fill="#dbeafe"/>
+    <text x="120" y="185" font-size="26" font-weight="700" stroke="none" fill="#1e3a8a">QA (Quality Assurance) — Quy trình &amp; Phòng ngừa (Preventive)</text>
+    <text x="120" y="215" font-size="18" stroke="none" fill="#3b82f6">• Coding standards • Review requirement • CI/CD pipeline rules • Process improvement</text>
+
+    <!-- Middle QC Box -->
+    <rect x="180" y="250" width="1140" height="510" rx="16" fill="#cffafe"/>
+    <text x="220" y="295" font-size="24" font-weight="700" stroke="none" fill="#0891b2">QC (Quality Control) — Kiểm tra Sản phẩm (Detective)</text>
+    <text x="220" y="325" font-size="18" stroke="none" fill="#06b6d4">• Verification &amp; Validation • Build inspection • Acceptance criteria check</text>
+
+    <!-- Inner Testing Box -->
+    <rect x="280" y="360" width="940" height="360" rx="14" fill="#dcfce7"/>
+    <text x="320" y="405" font-size="22" font-weight="700" stroke="none" fill="#15803d">Testing — Thực thi tìm lỗi (Execution)</text>
+    <text x="320" y="435" font-size="18" stroke="none" fill="#16a34a">• Test Case Execution • Bug Reporting • Exploratory Testing • Automation Run</text>
+
+    <!-- Detailed breakdown cards inside Testing -->
+    <rect x="320" y="465" width="260" height="210" rx="10" fill="#ffffff"/>
+    <text x="450" y="505" text-anchor="middle" font-size="20" font-weight="700" stroke="none">Manual Test</text>
+    <text x="340" y="540" font-size="16" stroke="none" fill="#475569">• Functional check</text>
+    <text x="340" y="570" font-size="16" stroke="none" fill="#475569">• UI/UX inspection</text>
+    <text x="340" y="600" font-size="16" stroke="none" fill="#475569">• Exploratory testing</text>
+
+    <rect x="620" y="465" width="260" height="210" rx="10" fill="#ffffff"/>
+    <text x="750" y="505" text-anchor="middle" font-size="20" font-weight="700" stroke="none">Automation Test</text>
+    <text x="640" y="540" font-size="16" stroke="none" fill="#475569">• Playwright E2E</text>
+    <text x="640" y="570" font-size="16" stroke="none" fill="#475569">• API integration</text>
+    <text x="640" y="600" font-size="16" stroke="none" fill="#475569">• Regression suite</text>
+
+    <rect x="920" y="465" width="260" height="210" rx="10" fill="#ffffff"/>
+    <text x="1050" y="505" text-anchor="middle" font-size="20" font-weight="700" stroke="none">AI-Powered QA</text>
+    <text x="940" y="540" font-size="16" stroke="none" fill="#475569">• AI Test generation</text>
+    <text x="940" y="570" font-size="16" stroke="none" fill="#475569">• Playwright MCP</text>
+    <text x="940" y="600" font-size="16" stroke="none" fill="#475569">• Self-healing tests</text>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">QA ngăn ngừa lỗi từ đầu; QC &amp; Testing đảm bảo sản phẩm đã build đạt chất lượng kỳ vọng.</text>
+</svg>

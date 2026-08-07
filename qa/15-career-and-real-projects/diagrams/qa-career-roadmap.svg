@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">QA Engineer Career Progression Roadmap</title>
+  <desc id="desc">Career progression steps from QA Trainee to AI-Powered QA Lead.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0 0L0 6L9 3z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">QA Career Path: Trainee to AI-Powered QA Lead</text>
+
+  <g font-family="Arial, sans-serif" stroke="#334155" stroke-width="2">
+    <!-- Level 1: QA Trainee -->
+    <rect x="70" y="240" width="300" height="340" rx="16" fill="#dbeafe"/>
+    <text x="220" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#1e3a8a">1. QA Trainee</text>
+    <text x="90" y="340" font-size="18" stroke="none" fill="#475569">• Nắm vững Manual Test</text>
+    <text x="90" y="380" font-size="18" stroke="none" fill="#475569">• Viết Test Case chuẩn</text>
+    <text x="90" y="420" font-size="18" stroke="none" fill="#475569">• Report Bug trên Jira</text>
+    <text x="90" y="460" font-size="18" stroke="none" fill="#475569">• Đọc DevTools &amp; Postman</text>
+
+    <!-- Level 2: Junior QA -->
+    <rect x="420" y="240" width="300" height="340" rx="16" fill="#dcfce7"/>
+    <text x="570" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#15803d">2. Junior QA</text>
+    <text x="440" y="340" font-size="18" stroke="none" fill="#475569">• Test API &amp; Database</text>
+    <text x="440" y="380" font-size="18" stroke="none" fill="#475569">• Viết Playwright E2E</text>
+    <text x="440" y="420" font-size="18" stroke="none" fill="#475569">• Áp dụng mô hình POM</text>
+    <text x="440" y="460" font-size="18" stroke="none" fill="#475569">• Exploratory Testing</text>
+
+    <!-- Level 3: AI-Powered QA Engineer -->
+    <rect x="770" y="240" width="320" height="340" rx="16" fill="#ede9fe"/>
+    <text x="930" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#6d28d9">3. AI-Powered QA</text>
+    <text x="790" y="340" font-size="18" stroke="none" fill="#475569">• Playwright MCP Server</text>
+    <text x="790" y="380" font-size="18" stroke="none" fill="#475569">• Agentic 3-Agent testing</text>
+    <text x="790" y="420" font-size="18" stroke="none" fill="#475569">• CI/CD GitHub Actions</text>
+    <text x="790" y="460" font-size="18" stroke="none" fill="#475569">• Self-Healing Framework</text>
+
+    <!-- Level 4: Senior QA / QA Lead -->
+    <rect x="1140" y="240" width="290" height="340" rx="16" fill="#fef3c7"/>
+    <text x="1285" y="290" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#b45309">4. Senior QA Lead</text>
+    <text x="1160" y="340" font-size="18" stroke="none" fill="#475569">• Test Strategy &amp; Arch</text>
+    <text x="1160" y="380" font-size="18" stroke="none" fill="#475569">• Performance &amp; Security</text>
+    <text x="1160" y="420" font-size="18" stroke="none" fill="#475569">• Mentoring &amp; Process</text>
+    <text x="1160" y="460" font-size="18" stroke="none" fill="#475569">• Quality Governance</text>
+  </g>
+
+  <!-- Connectors -->
+  <g stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <path d="M370 410H420"/>
+    <path d="M720 410H770"/>
+    <path d="M1090 410H1140"/>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">Sự kết hợp giữa tư duy QA vững chắc và năng lực làm chủ AI là chìa khóa thăng tiến trong ngành QA hiện đại.</text>
+</svg>

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Jira Defect Tracking Workflow</title>
+  <desc id="desc">Standard Jira ticket workflow from To Do to Done for QA testing.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0 0L0 6L9 3z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">Jira Bug Tracking &amp; Ticket Workflow</text>
+
+  <g font-family="Arial, sans-serif" font-size="22" text-anchor="middle" fill="#0f172a" stroke="#334155" stroke-width="2">
+    <!-- TO DO -->
+    <rect x="70" y="320" width="200" height="110" rx="14" fill="#e2e8f0"/>
+    <text x="170" y="370" stroke="none" font-weight="700">TO DO</text>
+    <text x="170" y="400" font-size="16" stroke="none" fill="#475569">Backlog / Created</text>
+
+    <!-- IN PROGRESS -->
+    <rect x="360" y="320" width="220" height="110" rx="14" fill="#fef3c7"/>
+    <text x="470" y="370" stroke="none" font-weight="700">IN PROGRESS</text>
+    <text x="470" y="400" font-size="16" stroke="none" fill="#b45309">Dev đang code fix</text>
+
+    <!-- READY FOR QA -->
+    <rect x="670" y="320" width="220" height="110" rx="14" fill="#ede9fe"/>
+    <text x="780" y="370" stroke="none" font-weight="700">READY FOR QA</text>
+    <text x="780" y="400" font-size="16" stroke="none" fill="#6d28d9">Deployed Staging</text>
+
+    <!-- IN QA -->
+    <rect x="980" y="320" width="200" height="110" rx="14" fill="#dbeafe"/>
+    <text x="1080" y="370" stroke="none" font-weight="700">IN QA</text>
+    <text x="1080" y="400" font-size="16" stroke="none" fill="#1e3a8a">QA executing</text>
+
+    <!-- DONE -->
+    <rect x="1270" y="320" width="160" height="110" rx="14" fill="#bbf7d0"/>
+    <text x="1350" y="370" stroke="none" font-weight="700">DONE ✅</text>
+    <text x="1350" y="400" font-size="16" stroke="none" fill="#14532d">Pass &amp; Closed</text>
+
+    <!-- REOPENED -->
+    <rect x="980" y="580" width="200" height="110" rx="14" fill="#fee2e2"/>
+    <text x="1080" y="630" stroke="none" font-weight="700">REOPENED 🔄</text>
+    <text x="1080" y="660" font-size="16" stroke="none" fill="#b91c1c">Fail retest</text>
+  </g>
+
+  <!-- Connectors -->
+  <g stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <path d="M270 375H360"/>
+    <path d="M580 375H670"/>
+    <path d="M890 375H980"/>
+    <path d="M1180 375H1270"/>
+
+    <!-- Fail path: IN QA to REOPENED to IN PROGRESS -->
+    <path d="M1080 430V580"/>
+    <path d="M980 635C700 635 470 580 470 430"/>
+  </g>
+  <text x="720" y="615" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#b91c1c">Assign back to Dev if bug persists</text>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">Jira Workflow giúp minh bạch hóa tiến độ giữa Dev và QA trong từng Sprint.</text>
+</svg>

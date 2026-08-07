@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">AI-Powered QA learning path</title><desc id="desc">Nine ordered learning stages from setup to portfolio.</desc>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs>
+  <rect width="1500" height="900" fill="#f8fafc"/><text x="60" y="65" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">AI-Powered QA: ordered learning path</text>
+  <g font-family="Arial, sans-serif" font-size="21" text-anchor="middle" fill="#0f172a" stroke="#334155" stroke-width="2">
+    <rect x="70" y="150" width="240" height="92" rx="14" fill="#dbeafe"/><text x="190" y="188" stroke="none">01 Setup</text><text x="190" y="218" stroke="none">tools + habit</text>
+    <rect x="390" y="150" width="240" height="92" rx="14" fill="#dcfce7"/><text x="510" y="188" stroke="none">02 QA foundations</text><text x="510" y="218" stroke="none">mindset + oracle</text>
+    <rect x="710" y="150" width="240" height="92" rx="14" fill="#fef3c7"/><text x="830" y="188" stroke="none">03 Test design</text><text x="830" y="218" stroke="none">risk + techniques</text>
+    <rect x="1030" y="150" width="240" height="92" rx="14" fill="#fee2e2"/><text x="1150" y="188" stroke="none">04 Manual workflow</text><text x="1150" y="218" stroke="none">case + bug report</text>
+    <rect x="1030" y="410" width="240" height="92" rx="14" fill="#ede9fe"/><text x="1150" y="448" stroke="none">05 Delivery process</text><text x="1150" y="478" stroke="none">SDLC + Agile</text>
+    <rect x="710" y="410" width="240" height="92" rx="14" fill="#cffafe"/><text x="830" y="448" stroke="none">06 Tools workflow</text><text x="830" y="478" stroke="none">DevTools + Jira</text>
+    <rect x="390" y="410" width="240" height="92" rx="14" fill="#e0f2fe"/><text x="510" y="448" stroke="none">07 Web + API</text><text x="510" y="478" stroke="none">HTTP + Postman</text>
+    <rect x="70" y="410" width="240" height="92" rx="14" fill="#fce7f3"/><text x="190" y="448" stroke="none">08 Automation</text><text x="190" y="478" stroke="none">Playwright/Cypress</text>
+    <rect x="550" y="675" width="400" height="100" rx="14" fill="#ccfbf1"/><text x="750" y="716" stroke="none">09 AI-Powered QA + Portfolio</text><text x="750" y="746" stroke="none">draft, review, evidence, improve</text>
+  </g>
+  <g stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)"><path d="M310 196H390"/><path d="M630 196H710"/><path d="M950 196H1030"/><path d="M1150 242V410"/><path d="M1030 456H950"/><path d="M710 456H630"/><path d="M390 456H310"/><path d="M190 502C190 635 500 725 550 725"/><path d="M1150 502C1150 635 1000 725 950 725"/></g>
+  <text x="750" y="840" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">Move forward only after you can demonstrate the outcome of the previous stage.</text>
+</svg>

@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Agile Sprint Flow and QA Activities</title>
+  <desc id="desc">QA activities synchronized with Scrum ceremonies during a 2-week Sprint.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0 0L0 6L9 3z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="60" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">Agile Sprint Flow: QA Role &amp; Ceremonies</text>
+
+  <g font-family="Arial, sans-serif" stroke="#334155" stroke-width="2">
+    <!-- Sprint Planning -->
+    <rect x="70" y="160" width="300" height="420" rx="16" fill="#ede9fe"/>
+    <text x="220" y="210" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#6d28d9">1. Sprint Planning</text>
+    <text x="90" y="260" font-size="18" stroke="none" fill="#475569">• Clarify Requirements</text>
+    <text x="90" y="300" font-size="18" stroke="none" fill="#475569">• Ask Edge-case questions</text>
+    <text x="90" y="340" font-size="18" stroke="none" fill="#475569">• Estimate Test effort</text>
+    <text x="90" y="380" font-size="18" stroke="none" fill="#475569">• Write Test Case Drafts</text>
+    <rect x="90" y="440" width="260" height="110" rx="10" fill="#ffffff"/>
+    <text x="220" y="480" text-anchor="middle" font-size="16" font-weight="700" stroke="none" fill="#6d28d9">Shift-Left Testing</text>
+    <text x="220" y="510" text-anchor="middle" font-size="14" stroke="none" fill="#64748b">Test từ khâu Spec</text>
+
+    <!-- Dev & QA Parallel -->
+    <rect x="420" y="160" width="320" height="420" rx="16" fill="#dbeafe"/>
+    <text x="580" y="210" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#1e3a8a">2. Dev &amp; QA Parallel</text>
+    <text x="440" y="260" font-size="18" stroke="none" fill="#475569">• Dev: Code &amp; Unit test</text>
+    <text x="440" y="300" font-size="18" stroke="none" fill="#475569">• QA: Complete Test Cases</text>
+    <text x="440" y="340" font-size="18" stroke="none" fill="#475569">• QA: Prepare Test Data</text>
+    <text x="440" y="380" font-size="18" stroke="none" fill="#475569">• Daily Standup updates</text>
+    <rect x="440" y="440" width="280" height="110" rx="10" fill="#ffffff"/>
+    <text x="580" y="480" text-anchor="middle" font-size="16" font-weight="700" stroke="none" fill="#1e3a8a">Daily Standup</text>
+    <text x="580" y="510" text-anchor="middle" font-size="14" stroke="none" fill="#64748b">Báo cáo: Test gì &amp; Blocker?</text>
+
+    <!-- Test Execution & Bug Fix -->
+    <rect x="790" y="160" width="320" height="420" rx="16" fill="#dcfce7"/>
+    <text x="950" y="210" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#15803d">3. Test &amp; Bug Fix</text>
+    <text x="810" y="260" font-size="18" stroke="none" fill="#475569">• Execute Manual &amp; Auto</text>
+    <text x="810" y="300" font-size="18" stroke="none" fill="#475569">• Log Jira Bugs (Reproducible)</text>
+    <text x="810" y="340" font-size="18" stroke="none" fill="#475569">• Retest Fixed Bugs</text>
+    <text x="810" y="380" font-size="18" stroke="none" fill="#475569">• Run Regression Suite</text>
+    <rect x="810" y="440" width="280" height="110" rx="10" fill="#ffffff"/>
+    <text x="950" y="480" text-anchor="middle" font-size="16" font-weight="700" stroke="none" fill="#15803d">Bug Lifecycle</text>
+    <text x="950" y="510" text-anchor="middle" font-size="14" stroke="none" fill="#64748b">Open → Fixed → Verified</text>
+
+    <!-- Review & Retro -->
+    <rect x="1160" y="160" width="270" height="420" rx="16" fill="#fef3c7"/>
+    <text x="1295" y="210" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#b45309">4. Review &amp; Retro</text>
+    <text x="1180" y="260" font-size="18" stroke="none" fill="#475569">• QA Quality Summary</text>
+    <text x="1180" y="300" font-size="18" stroke="none" fill="#475569">• Demo feature to PO</text>
+    <text x="1180" y="340" font-size="18" stroke="none" fill="#475569">• Sprint Retrospective</text>
+    <text x="1180" y="380" font-size="18" stroke="none" fill="#475569">• Process Improvements</text>
+    <rect x="1180" y="440" width="230" height="110" rx="10" fill="#ffffff"/>
+    <text x="1295" y="480" text-anchor="middle" font-size="16" font-weight="700" stroke="none" fill="#b45309">Release Ready</text>
+    <text x="1295" y="510" text-anchor="middle" font-size="14" stroke="none" fill="#64748b">DoD 100% Satisfied</text>
+
+    <!-- DoD Banner at Bottom -->
+    <rect x="70" y="630" width="1360" height="130" rx="16" fill="#bbf7d0"/>
+    <text x="750" y="675" text-anchor="middle" font-size="24" font-weight="700" stroke="none" fill="#14532d">Definition of Done (DoD) Criteria</text>
+    <text x="750" y="720" text-anchor="middle" font-size="18" stroke="none" fill="#15803d">✅ Code Reviewed  •  ✅ Unit/Integration Pass  •  ✅ QA Test Executed &amp; Pass  •  ✅ 0 Critical Bugs  •  ✅ Deployed Staging</text>
+  </g>
+
+  <!-- Connectors -->
+  <g stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <path d="M370 370H420"/>
+    <path d="M740 370H790"/>
+    <path d="M1110 370H1160"/>
+  </g>
+
+  <text x="750" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">QA đồng hành xuyên suốt Sprint từ khâu đọc Spec đến khi Feature đạt chuẩn Definition of Done.</text>
+</svg>
