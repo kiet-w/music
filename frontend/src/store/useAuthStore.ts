@@ -1,6 +1,6 @@
-'use client';
 
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { fetchMe, type AuthUser } from '@/lib/api';
 import { useAlbumStore } from '@/store/useAlbumStore';
@@ -34,8 +34,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const updated = { ...current, ...partialUser };
     const accessToken = get().accessToken;
     set({ user: updated });
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, user: updated }));
+    if (true) {
+      AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, user: updated }));
     }
   },
 
@@ -47,8 +47,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({ accessToken, user: user || null });
 
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, user }));
+    if (true) {
+      AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, user }));
     }
   },
 
@@ -56,8 +56,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ accessToken: null, user: null });
     resetUserScopedState();
 
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
+    if (true) {
+      AsyncStorage.removeItem(AUTH_STORAGE_KEY);
     }
   },
 
@@ -71,7 +71,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     let stored: string | null = null;
     try {
-      stored = localStorage.getItem(AUTH_STORAGE_KEY);
+      stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
     } catch (e) {
       console.error('Failed to get auth session from storage:', e);
     }
@@ -117,18 +117,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
 export function getEffectiveAccessToken(): string | null {
   const storeToken = useAuthStore.getState().accessToken;
-  if (storeToken) return storeToken;
-  if (typeof window !== 'undefined') {
-    try {
-      const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return parsed?.accessToken || parsed?.state?.accessToken || null;
-      }
-    } catch {
-      return null;
-    }
-  }
-  return null;
+  return storeToken || null;
 }
 

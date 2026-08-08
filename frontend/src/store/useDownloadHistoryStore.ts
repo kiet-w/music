@@ -1,6 +1,6 @@
-'use client';
 
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface DownloadHistoryItem {
@@ -54,7 +54,7 @@ export const useDownloadHistoryStore = create<DownloadHistoryState>()(
     }),
     {
       name: 'download-history-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );

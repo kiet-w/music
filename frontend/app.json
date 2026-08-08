@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Music App",
+    "slug": "music-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "music-app",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kietw.musicapp",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b"
+      },
+      "package": "com.kietw.musicapp"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}

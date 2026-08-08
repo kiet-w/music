@@ -1,4 +1,3 @@
-'use client';
 
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
@@ -40,7 +39,7 @@ type ChatState = {
   unsubscribeFromMessages: () => void;
 };
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || API_URL;
+const SOCKET_URL = 'https://music-backend-cb0i.onrender.com';
 
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],

@@ -1,8 +1,5 @@
-'use client';
-
 import { create } from 'zustand';
-import { Howl } from 'howler';
-import { toast } from 'sonner';
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 
 export interface Track {
   id: string;
@@ -29,7 +26,6 @@ interface PlayerState {
   setVolume: (volume: number) => void;
   reset: () => void;
 
-  // ponytail: queue & card stack reordering methods
   setQueue: (tracks: Track[]) => void;
   addToQueue: (track: Track) => void;
   removeFromQueue: (trackId: string) => void;
@@ -39,28 +35,37 @@ interface PlayerState {
   playPrevious: () => void;
 }
 
-// ponytail: howl instance stored outside Zustand — non-serializable objects don't belong in state
-let _howl: Howl | null = null;
+let _sound: Audio.Sound | null = null;
 
-export const getHowl = () => _howl;
+export const getSound = () => _sound;
+
+// Setup Audio mode for background playback if possible
+Audio.setAudioModeAsync({
+  allowsRecordingIOS: false,
+  staysActiveInBackground: true,
+  interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+  playsInSilentModeIOS: true,
+  shouldDuckAndroid: true,
+  interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+  playThroughEarpieceAndroid: false,
+}).catch(console.warn);
 
 export const usePlayerStore = create<PlayerState>((set, get) => {
-  let timer: ReturnType<typeof setInterval> | null = null;
+  const onPlaybackStatusUpdate = (status: any) => {
+    if (status.isLoaded) {
+      set({
+        duration: (status.durationMillis || 0) / 1000,
+        currentTime: (status.positionMillis || 0) / 1000,
+        isPlaying: status.isPlaying,
+      });
 
-  const startTimer = () => {
-    if (timer) clearInterval(timer);
-    timer = setInterval(() => {
-      const { isPlaying } = get();
-      if (_howl && isPlaying) {
-        set({ currentTime: _howl.seek() as number });
+      if (status.didJustFinish && !status.isLooping) {
+        set({ isPlaying: false, currentTime: 0 });
+        get().playNext();
       }
-    }, 1000);
-  };
-
-  const stopTimer = () => {
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
+    } else if (status.error) {
+      console.error('Audio play error:', status.error);
+      set({ isPlaying: false });
     }
   };
 
@@ -72,98 +77,71 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
     currentTime: 0,
     volume: 1,
 
-    play: (track: Track, localUrl?: string) => {
+    play: async (track: Track, localUrl?: string) => {
       const state = get();
-      if (_howl) {
-        _howl.unload();
-      }
+      
+      try {
+        if (_sound) {
+          await _sound.unloadAsync();
+          _sound = null;
+        }
 
-      const playUrl = localUrl || track.url;
-      console.log(`Playing audio from: ${playUrl}`);
+        const playUrl = localUrl || track.url;
+        console.log(`Playing audio from: ${playUrl}`);
 
-      // Auto-append track to queue if not present
-      let newQueue = state.queue;
-      if (!newQueue.some((t) => t.id === track.id)) {
-        newQueue = [...newQueue, track];
-      }
+        let newQueue = state.queue;
+        if (!newQueue.some((t) => t.id === track.id)) {
+          newQueue = [...newQueue, track];
+        }
 
-      const newHowl = new Howl({
-        src: [playUrl],
-        html5: true,
-        format: ['mp3'],
-        volume: state.volume,
-        onload: () => {
-          set({ duration: newHowl.duration() });
-        },
-        onplay: () => {
-          set({ isPlaying: true });
-          startTimer();
-        },
-        onpause: () => {
-          set({ isPlaying: false });
-          stopTimer();
-        },
-        onstop: () => {
-          set({ isPlaying: false, currentTime: 0 });
-          stopTimer();
-        },
-        onend: () => {
-          set({ isPlaying: false, currentTime: 0 });
-          stopTimer();
-          // Auto play next track in queue on end
-          get().playNext();
-        },
-        onloaderror: (_id, error) => {
-          console.error('Audio load error:', error);
-          set({ isPlaying: false, currentTime: 0 });
-          stopTimer();
-        },
-        onplayerror: (_id, error) => {
-          console.error('Audio play error:', error);
-          set({ isPlaying: false });
-          stopTimer();
-        },
-      });
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: playUrl },
+          { shouldPlay: true, volume: state.volume }
+        );
 
-      _howl = newHowl;
-      newHowl.play();
-      set({ currentTrack: track, queue: newQueue, isPlaying: true, currentTime: 0 });
-    },
-
-    pause: () => {
-      if (_howl) {
-        _howl.pause();
+        _sound = sound;
+        _sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+        
+        set({ currentTrack: track, queue: newQueue, isPlaying: true, currentTime: 0 });
+      } catch (error) {
+        console.error('Failed to play track:', error);
       }
     },
 
-    resume: () => {
-      if (_howl) {
-        _howl.play();
+    pause: async () => {
+      if (_sound) {
+        await _sound.pauseAsync();
       }
     },
 
-    togglePlay: () => {
+    resume: async () => {
+      if (_sound) {
+        await _sound.playAsync();
+      }
+    },
+
+    togglePlay: async () => {
       const { isPlaying, currentTrack } = get();
       if (!currentTrack) return;
 
       if (isPlaying) {
-        _howl?.pause();
+        await _sound?.pauseAsync();
       } else {
-        _howl?.play();
+        await _sound?.playAsync();
       }
     },
 
-    seek: (time: number) => {
-      if (_howl) {
-        _howl.seek(time);
+    seek: async (time: number) => {
+      if (_sound) {
+        await _sound.setPositionAsync(time * 1000);
         set({ currentTime: time });
       }
     },
 
-    setVolume: (volume: number) => {
+    setVolume: async (volume: number) => {
       set({ volume });
-      if (_howl) {
-        _howl.volume(volume);
+      if (_sound) {
+        await _sound.setVolumeAsync(volume);
       }
     },
 
@@ -222,11 +200,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => {
       }
     },
 
-    reset: () => {
-      stopTimer();
-      if (_howl) {
-        _howl.unload();
-        _howl = null;
+    reset: async () => {
+      if (_sound) {
+        await _sound.unloadAsync();
+        _sound = null;
       }
       set({
         currentTrack: null,

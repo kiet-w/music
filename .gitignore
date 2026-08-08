@@ -85,3 +85,4 @@ __pycache__/
 # Added by code-review-graph
 .code-review-graph/
 .agents/
+frontend/node_modules/

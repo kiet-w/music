@@ -1,4 +1,4 @@
-const isServer = typeof window === 'undefined';
+
 const isProd = process.env.NODE_ENV === 'production';
 
 if (isProd) {
@@ -11,7 +11,7 @@ if (isProd) {
 }
 
 const PRODUCTION_API_URL = 'https://music-backend-cb0i.onrender.com';
-const isNative = false;
+const isNative = true;
 
 const DEFAULT_API_FALLBACK = (isNative || isProd)
   ? PRODUCTION_API_URL
@@ -340,7 +340,7 @@ export async function fetchTracks(appToken: string, albumId?: string) {
   const params = new URLSearchParams({ limit: '100' });
   if (albumId) params.set('albumId', albumId);
   const result = await customFetch(`${API_URL}/songs?${params}`, { 
-    cache: 'no-store',
+    
     headers: getAuthHeaders(appToken)
   });
   return extractArrayData(result);
@@ -348,7 +348,7 @@ export async function fetchTracks(appToken: string, albumId?: string) {
 
 export async function fetchAlbum(appToken: string, id: string) {
   const result = await customFetch(`${API_URL}/albums/${id}`, { 
-    cache: 'no-store',
+    
     headers: getAuthHeaders(appToken)
   });
   return result?.data ?? result;
@@ -356,7 +356,7 @@ export async function fetchAlbum(appToken: string, id: string) {
 
 export async function fetchTrack(appToken: string, id: string) {
   const result = await customFetch(`${API_URL}/songs/${id}`, { 
-    cache: 'no-store',
+    
     headers: getAuthHeaders(appToken)
   });
   return result?.data ?? result;
@@ -429,7 +429,7 @@ export async function exchangeGoogleDriveCode(appToken: string, code: string, st
 
 export async function fetchGoogleDriveFiles(appToken: string) {
   const result = await customFetch(`${API_URL}/google-drive/files`, { 
-    cache: 'no-store',
+    
     headers: getAuthHeaders(appToken)
   });
   return extractArrayData(result);
@@ -458,7 +458,7 @@ export async function fetchChatHistory(appToken: string, userId: string, before?
   if (before) params.set('before', before);
 
   const result = await customFetch(`${API_URL}/messages/${userId}?${params}`, {
-    cache: 'no-store',
+    
     headers: getAuthHeaders(appToken),
   });
   return extractArrayData(result);
@@ -473,7 +473,7 @@ export async function fetchUsers(appToken: string) {
 
 export async function fetchFriends(appToken: string) {
   const result = await customFetch(`${API_URL}/messages/friends`, {
-    cache: 'no-store',
+    
     headers: getAuthHeaders(appToken),
   });
   return extractArrayData(result);
@@ -490,7 +490,7 @@ export async function createInvite(appToken: string, receiverId?: string) {
 
 export async function getInviteInfo(token: string) {
   const result = await customFetch(`${API_URL}/messages/invite/info/${token}`, {
-    cache: 'no-store',
+    
   });
   return result?.data ?? result;
 }
