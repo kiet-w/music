@@ -1,49 +1,97 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Input } from '../../src/components/ui/Input';
-import { Button } from '../../src/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { Link, useRouter } from 'expo-router';
-// import { login } from '@/lib/api';
-// import { useAuthStore } from '@/store/useAuthStore';
+import { login, verifyOtp } from '@/lib/api';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [requiresOtp, setRequiresOtp] = useState(false);
   const router = useRouter();
+  const setSession = useAuthStore(state => state.setSession);
 
   const handleLogin = async () => {
+    if (!email || !password) return;
     setLoading(true);
-    // await login(email, password);
-    setTimeout(() => {
+    setError('');
+    try {
+      const res = await login({ email, password });
+      if (res.requiresVerification) {
+        setRequiresOtp(true);
+      } else if (res.accessToken && res.user) {
+        await setSession(res.accessToken, res.user);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Login failed');
+    } finally {
       setLoading(false);
-      router.replace('/(tabs)/music');
-    }, 1000);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!email || !otp) return;
+    setLoading(true);
+    setError('');
+    try {
+      const res = await verifyOtp({ email, otp });
+      if (res.accessToken && res.user) {
+        await setSession(res.accessToken, res.user);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Verification failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <Input
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Enter your email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <Input
-        label="Password"
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Enter your password"
-        secureTextEntry
-      />
-      <Button title="Login" onPress={handleLogin} loading={loading} style={styles.button} />
+      <Text style={styles.title}>{requiresOtp ? 'Verify OTP' : 'Login'}</Text>
       
-      <Link href="/(auth)/register" style={styles.link}>
-        <Text style={styles.linkText}>Don't have an account? Register</Text>
-      </Link>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      
+      {!requiresOtp ? (
+        <>
+          <Input
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <Input
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+            secureTextEntry
+          />
+          <Button title="Login" onPress={handleLogin} loading={loading} style={styles.button} />
+          
+          <Link href="/(auth)/register" style={styles.link}>
+            <Text style={styles.linkText}>Don't have an account? Register</Text>
+          </Link>
+        </>
+      ) : (
+        <>
+          <Text style={styles.subtitle}>An OTP has been sent to {email}</Text>
+          <Input
+            label="OTP Code"
+            value={otp}
+            onChangeText={setOtp}
+            placeholder="Enter OTP"
+            keyboardType="numeric"
+          />
+          <Button title="Verify" onPress={handleVerifyOtp} loading={loading} style={styles.button} />
+        </>
+      )}
     </View>
   );
 }
@@ -53,12 +101,19 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: 'center',
+    backgroundColor: '#09090b',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     color: '#fafafa',
-    marginBottom: 32,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#a1a1aa',
+    marginBottom: 24,
     textAlign: 'center',
   },
   button: {
@@ -72,5 +127,10 @@ const styles = StyleSheet.create({
   linkText: {
     color: '#a1a1aa',
     fontSize: 14,
+  },
+  error: {
+    color: '#ef4444',
+    marginBottom: 16,
+    textAlign: 'center',
   },
 });
