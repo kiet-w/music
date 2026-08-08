@@ -1,0 +1,8 @@
+{
+  "expo": {
+    "name": "frontend-rn",
+    "slug": "frontend-rn",
+    "scheme": "frontend-rn",
+    "plugins": ["expo-router"]
+  }
+}
