@@ -36,3 +36,17 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 2. Use `detect_changes_tool` for code review.
 3. Use `get_affected_flows_tool` to understand impact.
 4. Use `query_graph_tool` pattern="tests_for" to check coverage.
+
+---
+
+## ⚡ BẮT BUỘC: HEADROOM, RTK & CODE REVIEW GRAPH (ORCA STANDARD)
+
+Khi làm việc trong môi trường Orca / Antigravity trên dự án này, BẮT BUỘC tuân thủ:
+
+1. **Headroom Proxy (Cổng 8787)**:
+   - Mọi kết nối Agent LLM phải định tuyến qua `http://127.0.0.1:8787` (Headroom proxy) để nén context, cache token và giảm chi phí.
+2. **RTK (Rust Token Killer)**:
+   - **BẮT BUỘC** thêm tiền tố `rtk` trước mọi câu lệnh shell/bash (`rtk git ...`, `rtk ls ...`, `rtk grep ...`, `rtk find ...`, `rtk npm ...`, v.v.) để nén và lọc output, giảm tải tối đa token context.
+3. **Code Review Graph**:
+   - **BẮT BUỘC** dùng các tool của `code-review-graph` (`query_graph_tool`, `semantic_search_nodes_tool`, `detect_changes_tool`, `get_impact_radius_tool`) để duyệt mã nguồn trước khi dùng grep/glob/read thủ công.
+

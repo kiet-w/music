@@ -4,6 +4,59 @@ import { useEffect } from 'react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 
+export function isPublicAuthRoute(pathname: string | null): boolean {
+  const cleanPath = pathname ? pathname.replace(/^\/(en|vi)/, '') : '';
+
+  return (
+    pathname === '/' ||
+    pathname === '/index.html' ||
+    cleanPath === '/login' ||
+    cleanPath === '/register' ||
+    cleanPath === '/forgot-password' ||
+    cleanPath === '/password-reset' ||
+    cleanPath.startsWith('/invite') ||
+    cleanPath.startsWith('/auth/callback') ||
+    Boolean(pathname?.includes('/login')) ||
+    Boolean(pathname?.includes('/register')) ||
+    Boolean(pathname?.includes('/forgot-password')) ||
+    Boolean(pathname?.includes('/password-reset')) ||
+    Boolean(pathname?.includes('/invite')) ||
+    Boolean(pathname?.includes('/auth/callback'))
+  );
+}
+
+export function getAuthRedirectPath({
+  pathname,
+  accessToken,
+  isHydrated,
+  locale = 'vi',
+}: {
+  pathname: string | null;
+  accessToken: string | null;
+  isHydrated: boolean;
+  locale?: string;
+}): string | null {
+  if (!isHydrated) return null;
+  const isPublicRoute = isPublicAuthRoute(pathname);
+  const cleanPath = pathname ? pathname.replace(/^\/(en|vi)/, '') : '';
+
+  if (!accessToken && !isPublicRoute) {
+    return `/${locale}/login`;
+  }
+
+  if (
+    accessToken &&
+    (cleanPath === '/login' ||
+      cleanPath === '/register' ||
+      cleanPath === '/forgot-password' ||
+      cleanPath === '/password-reset')
+  ) {
+    return `/${locale}/albums`;
+  }
+
+  return null;
+}
+
 export function useAuthGate() {
   const { isHydrated, accessToken, hydrate } = useAuthStore();
   const pathname = usePathname();
@@ -18,35 +71,20 @@ export function useAuthGate() {
   }, [isHydrated, hydrate]);
 
   const cleanPath = pathname ? pathname.replace(/^\/(en|vi)/, '') : '';
-
-  const isPublicRoute =
-    pathname === '/' ||
-    pathname === '/index.html' ||
-    cleanPath === '' ||
-    cleanPath === '/' ||
-    cleanPath === '/login' ||
-    cleanPath === '/register' ||
-    cleanPath === '/forgot-password' ||
-    cleanPath === '/password-reset' ||
-    cleanPath.startsWith('/invite') ||
-    cleanPath.startsWith('/auth/callback') ||
-    Boolean(pathname?.includes('/login')) ||
-    Boolean(pathname?.includes('/register')) ||
-    Boolean(pathname?.includes('/forgot-password')) ||
-    Boolean(pathname?.includes('/password-reset')) ||
-    Boolean(pathname?.includes('/invite')) ||
-    Boolean(pathname?.includes('/auth/callback'));
+  const isPublicRoute = isPublicAuthRoute(pathname);
 
   useEffect(() => {
     if (!isHydrated) return;
 
-    if (!accessToken && !isPublicRoute) {
-      router.push(`/${locale}/login`);
-      return;
-    }
+    const redirectPath = getAuthRedirectPath({
+      pathname,
+      accessToken,
+      isHydrated,
+      locale,
+    });
 
-    if (accessToken && (cleanPath === '/login' || cleanPath === '/register' || cleanPath === '/forgot-password' || cleanPath === '/password-reset')) {
-      router.push(`/${locale}/albums`);
+    if (redirectPath) {
+      router.push(redirectPath);
     }
   }, [accessToken, isHydrated, isPublicRoute, locale, pathname, cleanPath, router]);
 

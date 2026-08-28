@@ -10,9 +10,13 @@ type AuthGateProps = {
 };
 
 export function AuthGate({ children }: AuthGateProps) {
-  const { isHydrated, isPublicRoute } = useAuthGate();
+  const { isHydrated, isPublicRoute, accessToken } = useAuthGate();
 
   if (!isHydrated) {
+    return <GlobalLoading fullScreen />;
+  }
+
+  if (!isPublicRoute && !accessToken) {
     return <GlobalLoading fullScreen />;
   }
 

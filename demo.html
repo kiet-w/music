@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Studio — Demo Trang Chủ & Albums</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            canvas: "#09090B",
+            surface: "#121215",
+            surfaceHover: "#1A1A20",
+            borderMuted: "rgba(255, 255, 255, 0.08)",
+            borderHighlight: "rgba(255, 255, 255, 0.2)",
+          },
+          fontFamily: {
+            serif: ["Instrument Serif", "Georgia", "serif"],
+            sans: ["Plus Jakarta Sans", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #09090B;
+      color: #FFFFFF;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      overflow-x: hidden;
+    }
+    .font-serif {
+      font-family: "Instrument Serif", Georgia, serif;
+    }
+    .font-mono {
+      font-family: "JetBrains Mono", monospace;
+    }
+    .glass-card {
+      background: rgba(18, 18, 21, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+    }
+    .glass-pill:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    /* Waveform Animation */
+    @keyframes wave {
+      0%, 100% { height: 6px; }
+      50% { height: 26px; }
+    }
+    .wave-bar {
+      animation: wave 1.2s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.4s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.5s; }
+    .wave-bar:nth-child(6) { animation-delay: 0.3s; }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09090B;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pb-36 selection:bg-white selection:text-black">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 bg-[#09090B]/80 backdrop-blur-xl border-b border-white/10 px-6 lg:px-12 py-4">
+    <div class="max-w-[1600px] mx-auto flex items-center justify-between gap-6">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+        <div class="w-10 h-10 rounded-2xl bg-white text-black flex items-center justify-center font-bold font-mono text-lg shadow-lg">
+          M
+        </div>
+        <div>
+          <span class="font-serif text-2xl tracking-tight text-white block leading-none">STUDIO // MUSIC</span>
+          <span class="text-[10px] font-mono tracking-widest text-zinc-400 uppercase">Monochrome Acoustic v2.0</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-2 bg-white/5 p-1 rounded-full border border-white/10">
+        <button id="nav-home" onclick="switchTab('home')" class="px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all bg-white text-black shadow-md flex items-center gap-2">
+          <i data-lucide="disc-3" class="w-3.5 h-3.5"></i> Trang Chủ
+        </button>
+        <button id="nav-albums" onclick="switchTab('albums')" class="px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all text-zinc-400 hover:text-white flex items-center gap-2">
+          <i data-lucide="library" class="w-3.5 h-3.5"></i> Thư Viện Albums
+        </button>
+      </nav>
+
+      <!-- Right Controls -->
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-zinc-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>DEV BYPASS ACTIVE</span>
+        </div>
+        <button onclick="toggleThemeVisual()" class="p-2.5 rounded-full glass-pill text-zinc-300 hover:text-white" title="Trạng thái Studio">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-[1600px] mx-auto w-full px-6 lg:px-12 pt-8 flex-1">
+
+    <!-- ============================================== -->
+    <!-- VIEW 1: TRANG CHỦ (HOME PAGE)                  -->
+    <!-- ============================================== -->
+    <section id="view-home" class="space-y-12">
+      
+      <!-- Hero Banner -->
+      <div class="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-zinc-900/90 to-surface border border-white/10 p-8 sm:p-12 lg:p-16">
+        <div class="absolute -right-20 -top-20 w-96 h-96 bg-white/[0.03] rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 max-w-3xl space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[11px] font-mono uppercase tracking-widest text-zinc-300">
+            <i data-lucide="flame" class="w-3.5 h-3.5 text-white"></i> Acoustic Sound Experience
+          </div>
+          <h1 class="font-serif text-4xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-white leading-[1.05]">
+            Trải nghiệm Âm nhạc Chuẩn Studio Đơn sắc
+          </h1>
+          <p class="text-zinc-400 text-sm sm:text-base max-w-xl font-light leading-relaxed">
+            Hệ sinh thái giao diện đen nhám tối giản loại bỏ hoàn toàn sự phân tâm, đưa trọn vẹn sự tập trung vào từng thanh âm và tác phẩm nghệ thuật.
+          </p>
+          <div class="flex flex-wrap items-center gap-4 pt-2">
+            <button onclick="playTrack('Midnight Reflection', 'Mono Studio Ensemble', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80')" class="px-7 py-3.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-all shadow-xl flex items-center gap-2.5 active:scale-95">
+              <i data-lucide="play" class="w-4 h-4 fill-black"></i> Phát Ngay Bản Mới
+            </button>
+            <button onclick="switchTab('albums')" class="px-7 py-3.5 rounded-full glass-pill text-white font-medium text-sm transition-all flex items-center gap-2 active:scale-95">
+              <i data-lucide="folder-music" class="w-4 h-4 text-zinc-400"></i> Xem Tất Cả Albums
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Waveform Element -->
+        <div class="absolute right-8 bottom-8 hidden lg:flex items-end gap-1.5 h-16 px-5 py-3 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md">
+          <span class="text-xs font-mono text-zinc-400 mr-2 self-center">AUDIO ENGINE // 120FPS</span>
+          <div class="wave-bar w-1 bg-white/80 rounded-full"></div>
+          <div class="wave-bar w-1 bg-white/60 rounded-full"></div>
+          <div class="wave-bar w-1 bg-white/90 rounded-full"></div>
+          <div class="wave-bar w-1 bg-white/40 rounded-full"></div>
+          <div class="wave-bar w-1 bg-white/100 rounded-full"></div>
+          <div class="wave-bar w-1 bg-white/50 rounded-full"></div>
+          <div class="wave-bar w-1 bg-white/80 rounded-full"></div>
+        </div>
+      </div>
+
+      <!-- Section: Trending Releases -->
+      <div class="space-y-6">
+        <div class="flex items-end justify-between border-b border-white/10 pb-4">
+          <div>
+            <h2 class="font-serif text-3xl sm:text-4xl font-normal text-white">Bản Thu Mới Nổi Bật</h2>
+            <p class="text-zinc-400 text-xs sm:text-sm font-light mt-1">Danh sách bài hát được tuyển chọn và chuyển đổi chất lượng Lossless</p>
+          </div>
+          <button onclick="switchTab('albums')" class="text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1">
+            XEM TẤT CẢ <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- Track Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Card 1 -->
+          <div onclick="playTrack('Nocturne in Black', 'Acoustic Session Vol. 1', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80')" class="glass-card p-4 rounded-3xl flex items-center gap-4 group cursor-pointer transition-all duration-300 hover:-translate-y-1">
+            <div class="relative w-16 h-16 rounded-2xl overflow-hidden shrink-0 bg-zinc-800">
+              <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80" alt="Cover" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300">
+              <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <i data-lucide="play" class="w-6 h-6 text-white fill-white"></i>
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Nocturne in Black</h3>
+              <p class="text-xs text-zinc-400 truncate mt-0.5">Acoustic Session Vol. 1</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-zinc-300">320kbps</span>
+                <span class="text-[10px] font-mono text-zinc-400">03:45</span>
+              </div>
+            </div>
+            <button class="w-9 h-9 rounded-full glass-pill flex items-center justify-center text-zinc-400 hover:text-white shrink-0">
+              <i data-lucide="heart" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Card 2 -->
+          <div onclick="playTrack('Minimalist Drift', 'Kiet Studio Master', 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80')" class="glass-card p-4 rounded-3xl flex items-center gap-4 group cursor-pointer transition-all duration-300 hover:-translate-y-1">
+            <div class="relative w-16 h-16 rounded-2xl overflow-hidden shrink-0 bg-zinc-800">
+              <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80" alt="Cover" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300">
+              <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <i data-lucide="play" class="w-6 h-6 text-white fill-white"></i>
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Minimalist Drift</h3>
+              <p class="text-xs text-zinc-400 truncate mt-0.5">Kiet Studio Master</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-zinc-300">FLAC</span>
+                <span class="text-[10px] font-mono text-zinc-400">04:12</span>
+              </div>
+            </div>
+            <button class="w-9 h-9 rounded-full glass-pill flex items-center justify-center text-zinc-400 hover:text-white shrink-0">
+              <i data-lucide="heart" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Card 3 -->
+          <div onclick="playTrack('Shadows of Sound', 'Noir Soundscapes', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&auto=format&fit=crop&q=80')" class="glass-card p-4 rounded-3xl flex items-center gap-4 group cursor-pointer transition-all duration-300 hover:-translate-y-1">
+            <div class="relative w-16 h-16 rounded-2xl overflow-hidden shrink-0 bg-zinc-800">
+              <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&auto=format&fit=crop&q=80" alt="Cover" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300">
+              <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <i data-lucide="play" class="w-6 h-6 text-white fill-white"></i>
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Shadows of Sound</h3>
+              <p class="text-xs text-zinc-400 truncate mt-0.5">Noir Soundscapes</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-zinc-300">YouTube HQ</span>
+                <span class="text-[10px] font-mono text-zinc-400">02:58</span>
+              </div>
+            </div>
+            <button class="w-9 h-9 rounded-full glass-pill flex items-center justify-center text-zinc-400 hover:text-white shrink-0">
+              <i data-lucide="heart" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Featured Studio Albums Preview -->
+      <div class="space-y-6">
+        <div class="flex items-end justify-between border-b border-white/10 pb-4">
+          <div>
+            <h2 class="font-serif text-3xl sm:text-4xl font-normal text-white">Albums Nổi Bật</h2>
+            <p class="text-zinc-400 text-xs sm:text-sm font-light mt-1">Các tuyển tập âm nhạc cá nhân định dạng Popup Studio</p>
+          </div>
+          <button onclick="switchTab('albums')" class="text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1">
+            XEM THƯ VIỆN ĐẦY ĐỦ <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+          <!-- Album Mini 1 -->
+          <div onclick="openAlbumModal('Midnight Noir Studio', 'Studio Ensemble', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80', 12)" class="glass-card p-3.5 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-1.5">
+            <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+              <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+              <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+                12 Bài
+              </div>
+            </div>
+            <h4 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Midnight Noir Studio</h4>
+            <p class="text-xs text-zinc-400 truncate mt-0.5">Studio Ensemble</p>
+          </div>
+
+          <!-- Album Mini 2 -->
+          <div onclick="openAlbumModal('Acoustic Resonances', 'Kiet-W Artist', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80', 8)" class="glass-card p-3.5 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-1.5">
+            <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+              <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+              <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+                8 Bài
+              </div>
+            </div>
+            <h4 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Acoustic Resonances</h4>
+            <p class="text-xs text-zinc-400 truncate mt-0.5">Kiet-W Artist</p>
+          </div>
+
+          <!-- Album Mini 3 -->
+          <div onclick="openAlbumModal('Tape Echoes & Ambient', 'Analog Sound Project', 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80', 15)" class="glass-card p-3.5 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-1.5">
+            <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+              <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+              <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+                15 Bài
+              </div>
+            </div>
+            <h4 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Tape Echoes & Ambient</h4>
+            <p class="text-xs text-zinc-400 truncate mt-0.5">Analog Sound Project</p>
+          </div>
+
+          <!-- Album Mini 4 -->
+          <div onclick="openAlbumModal('Darkroom Reverie', 'Nordic Frequencies', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=80', 10)" class="glass-card p-3.5 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-1.5">
+            <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+              <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+              <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+                10 Bài
+              </div>
+            </div>
+            <h4 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Darkroom Reverie</h4>
+            <p class="text-xs text-zinc-400 truncate mt-0.5">Nordic Frequencies</p>
+          </div>
+
+          <!-- Album Mini 5 -->
+          <div onclick="openAlbumModal('Piano Solo in C Minor', 'Classic Mono', 'https://images.unsplash.com/photo-1520523839898-507127054c29?w=800&auto=format&fit=crop&q=80', 6)" class="glass-card p-3.5 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-1.5">
+            <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+              <img src="https://images.unsplash.com/photo-1520523839898-507127054c29?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+              <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+                6 Bài
+              </div>
+            </div>
+            <h4 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Piano Solo in C Minor</h4>
+            <p class="text-xs text-zinc-400 truncate mt-0.5">Classic Mono</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- VIEW 2: THƯ VIỆN ALBUMS (ALBUMS PAGE)          -->
+    <!-- ============================================== -->
+    <section id="view-albums" class="space-y-8 hidden">
+      
+      <!-- Albums Page Header -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono text-zinc-300 mb-2">
+            COLLECTIONS // POPUP STUDIO
+          </div>
+          <h1 class="font-serif text-4xl sm:text-5xl font-normal text-white">Thư Viện Album Cá Nhân</h1>
+          <p class="text-zinc-400 text-sm font-light mt-1">Bấm vào bất kỳ Album nào để mở Popup Studio chi tiết không cần reload trang</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center bg-white/5 p-1 rounded-full border border-white/10">
+            <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-white text-black">Lưới (Grid)</button>
+            <button class="px-3 py-1.5 rounded-full text-xs font-medium text-zinc-400 hover:text-white">Danh sách</button>
+          </div>
+          <button onclick="openCreateModal()" class="px-5 py-2 rounded-full bg-white text-black text-xs font-semibold hover:bg-zinc-200 transition-all flex items-center gap-2 active:scale-95">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tạo Album Mới
+          </button>
+        </div>
+      </div>
+
+      <!-- Albums Full Responsive Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+        
+        <!-- Album Item 1 -->
+        <div onclick="openAlbumModal('Midnight Noir Studio', 'Studio Ensemble', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80', 12)" class="glass-card p-4 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-2">
+          <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+            <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center shadow-2xl">
+                <i data-lucide="disc" class="w-6 h-6"></i>
+              </div>
+            </div>
+            <div class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+              12 Tracks
+            </div>
+          </div>
+          <h3 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Midnight Noir Studio</h3>
+          <p class="text-xs text-zinc-400 truncate mt-0.5">Studio Ensemble</p>
+        </div>
+
+        <!-- Album Item 2 -->
+        <div onclick="openAlbumModal('Acoustic Resonances', 'Kiet-W Artist', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80', 8)" class="glass-card p-4 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-2">
+          <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+            <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center shadow-2xl">
+                <i data-lucide="disc" class="w-6 h-6"></i>
+              </div>
+            </div>
+            <div class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+              8 Tracks
+            </div>
+          </div>
+          <h3 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Acoustic Resonances</h3>
+          <p class="text-xs text-zinc-400 truncate mt-0.5">Kiet-W Artist</p>
+        </div>
+
+        <!-- Album Item 3 -->
+        <div onclick="openAlbumModal('Tape Echoes & Ambient', 'Analog Sound Project', 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80', 15)" class="glass-card p-4 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-2">
+          <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+            <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center shadow-2xl">
+                <i data-lucide="disc" class="w-6 h-6"></i>
+              </div>
+            </div>
+            <div class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+              15 Tracks
+            </div>
+          </div>
+          <h3 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Tape Echoes & Ambient</h3>
+          <p class="text-xs text-zinc-400 truncate mt-0.5">Analog Sound Project</p>
+        </div>
+
+        <!-- Album Item 4 -->
+        <div onclick="openAlbumModal('Darkroom Reverie', 'Nordic Frequencies', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=80', 10)" class="glass-card p-4 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-2">
+          <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+            <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center shadow-2xl">
+                <i data-lucide="disc" class="w-6 h-6"></i>
+              </div>
+            </div>
+            <div class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+              10 Tracks
+            </div>
+          </div>
+          <h3 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Darkroom Reverie</h3>
+          <p class="text-xs text-zinc-400 truncate mt-0.5">Nordic Frequencies</p>
+        </div>
+
+        <!-- Album Item 5 -->
+        <div onclick="openAlbumModal('Piano Solo in C Minor', 'Classic Mono', 'https://images.unsplash.com/photo-1520523839898-507127054c29?w=800&auto=format&fit=crop&q=80', 6)" class="glass-card p-4 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-2">
+          <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+            <img src="https://images.unsplash.com/photo-1520523839898-507127054c29?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center shadow-2xl">
+                <i data-lucide="disc" class="w-6 h-6"></i>
+              </div>
+            </div>
+            <div class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+              6 Tracks
+            </div>
+          </div>
+          <h3 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Piano Solo in C Minor</h3>
+          <p class="text-xs text-zinc-400 truncate mt-0.5">Classic Mono</p>
+        </div>
+
+        <!-- Album Item 6 -->
+        <div onclick="openAlbumModal('Late Night Lo-Fi', 'Chillwave Collective', 'https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=800&auto=format&fit=crop&q=80', 14)" class="glass-card p-4 rounded-[2rem] group cursor-pointer transition-all duration-300 hover:-translate-y-2">
+          <div class="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-zinc-800">
+            <img src="https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=800&auto=format&fit=crop&q=80" alt="Album" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center shadow-2xl">
+                <i data-lucide="disc" class="w-6 h-6"></i>
+              </div>
+            </div>
+            <div class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-zinc-300 border border-white/10">
+              14 Tracks
+            </div>
+          </div>
+          <h3 class="text-sm font-semibold text-white truncate group-hover:text-zinc-200">Late Night Lo-Fi</h3>
+          <p class="text-xs text-zinc-400 truncate mt-0.5">Chillwave Collective</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- POPUP STUDIO: ALBUM DETAIL MODAL               -->
+  <!-- ============================================== -->
+  <div id="modal-album" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-all duration-300">
+    <div class="relative w-full max-w-3xl bg-zinc-950/95 border border-white/15 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 border-b border-white/10 pb-6">
+        <div class="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl overflow-hidden shrink-0 bg-zinc-800 shadow-2xl border border-white/10">
+          <img id="modal-cover" src="" alt="Album Cover" class="w-full h-full object-cover">
+        </div>
+        <div class="flex-1 text-center sm:text-left space-y-2">
+          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-mono text-zinc-300 uppercase">
+            STUDIO ALBUM POPUP // ESC ĐỂ ĐÓNG
+          </div>
+          <h2 id="modal-title" class="font-serif text-3xl sm:text-4xl text-white font-normal">Tên Album</h2>
+          <p id="modal-artist" class="text-sm text-zinc-400 font-light">Nghệ Sĩ</p>
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2">
+            <button onclick="playTrack('Track 01 - Intro', document.getElementById('modal-title').innerText, document.getElementById('modal-cover').src); closeModal();" class="px-5 py-2 rounded-full bg-white text-black text-xs font-semibold flex items-center gap-2 hover:bg-zinc-200 transition-all">
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-black"></i> Phát Toàn Bộ
+            </button>
+            <span id="modal-count" class="text-xs font-mono text-zinc-400">12 Bài Hát</span>
+          </div>
+        </div>
+        <!-- Close Hint Button -->
+        <button onclick="closeModal()" class="hidden sm:flex p-2 rounded-full glass-pill text-zinc-400 hover:text-white" title="Đóng Popup (ESC)">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Track List Table -->
+      <div class="space-y-1">
+        <h4 class="text-xs font-mono tracking-wider text-zinc-400 uppercase px-2 mb-2">Danh Sách Bài Hát</h4>
+        
+        <div onclick="playTrack('01. Echoes in the Dark', 'Studio Master', document.getElementById('modal-cover').src)" class="p-3 rounded-2xl hover:bg-white/5 flex items-center justify-between group cursor-pointer transition-colors">
+          <div class="flex items-center gap-3.5">
+            <span class="text-xs font-mono text-zinc-400 w-4 text-center group-hover:text-white">01</span>
+            <div>
+              <p class="text-sm font-medium text-white group-hover:text-zinc-200">Echoes in the Dark</p>
+              <p class="text-xs text-zinc-400 font-light">Studio Master FLAC</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono text-zinc-400">03:42</span>
+            <button class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
+            </button>
+          </div>
+        </div>
+
+        <div onclick="playTrack('02. Velvet Resonance', 'Studio Master', document.getElementById('modal-cover').src)" class="p-3 rounded-2xl hover:bg-white/5 flex items-center justify-between group cursor-pointer transition-colors">
+          <div class="flex items-center gap-3.5">
+            <span class="text-xs font-mono text-zinc-400 w-4 text-center group-hover:text-white">02</span>
+            <div>
+              <p class="text-sm font-medium text-white group-hover:text-zinc-200">Velvet Resonance</p>
+              <p class="text-xs text-zinc-400 font-light">Original Acoustic Tape</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono text-zinc-400">04:15</span>
+            <button class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
+            </button>
+          </div>
+        </div>
+
+        <div onclick="playTrack('03. Monochromatic Drift', 'Studio Master', document.getElementById('modal-cover').src)" class="p-3 rounded-2xl hover:bg-white/5 flex items-center justify-between group cursor-pointer transition-colors">
+          <div class="flex items-center gap-3.5">
+            <span class="text-xs font-mono text-zinc-400 w-4 text-center group-hover:text-white">03</span>
+            <div>
+              <p class="text-sm font-medium text-white group-hover:text-zinc-200">Monochromatic Drift</p>
+              <p class="text-xs text-zinc-400 font-light">Lossless 24-bit / 96kHz</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono text-zinc-400">03:59</span>
+            <button class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- FLOATING AUDIO PLAYER BAR (STUDIO B&W)        -->
+  <!-- ============================================== -->
+  <div class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[94%] max-w-5xl z-40">
+    <div class="glass-card rounded-[2rem] p-3.5 sm:px-6 sm:py-4 shadow-2xl flex items-center justify-between gap-4 border border-white/15">
+      
+      <!-- Current Track Info -->
+      <div class="flex items-center gap-3 min-w-0 max-w-[30%]">
+        <div class="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-zinc-800 border border-white/10">
+          <img id="player-cover" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80" alt="Now Playing" class="w-full h-full object-cover">
+        </div>
+        <div class="min-w-0">
+          <h4 id="player-title" class="text-xs sm:text-sm font-semibold text-white truncate">Midnight Reflection</h4>
+          <p id="player-artist" class="text-[11px] text-zinc-400 truncate mt-0.5">Mono Studio Ensemble</p>
+        </div>
+      </div>
+
+      <!-- Playback Controls & Progress Bar -->
+      <div class="flex-1 max-w-lg flex flex-col items-center gap-1.5">
+        <div class="flex items-center gap-4">
+          <button class="p-1.5 text-zinc-400 hover:text-white transition-colors" title="Trộn bài">
+            <i data-lucide="shuffle" class="w-4 h-4"></i>
+          </button>
+          <button class="p-1.5 text-zinc-400 hover:text-white transition-colors" title="Bài trước">
+            <i data-lucide="skip-back" class="w-4 h-4"></i>
+          </button>
+          <button id="btn-play-pause" onclick="togglePlayPause()" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-zinc-200 transition-all shadow-md active:scale-95">
+            <i id="icon-play" data-lucide="play" class="w-4 h-4 fill-black ml-0.5"></i>
+            <i id="icon-pause" data-lucide="pause" class="w-4 h-4 fill-black hidden"></i>
+          </button>
+          <button class="p-1.5 text-zinc-400 hover:text-white transition-colors" title="Bài tiếp">
+            <i data-lucide="skip-forward" class="w-4 h-4"></i>
+          </button>
+          <button class="p-1.5 text-zinc-400 hover:text-white transition-colors" title="Lặp lại">
+            <i data-lucide="repeat" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Progress Track -->
+        <div class="w-full flex items-center gap-2.5">
+          <span id="time-current" class="text-[10px] font-mono text-zinc-400 w-8 text-right">01:24</span>
+          <div class="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden cursor-pointer group">
+            <div id="progress-bar" class="h-full bg-white rounded-full w-[38%] group-hover:bg-zinc-200 transition-all"></div>
+          </div>
+          <span id="time-total" class="text-[10px] font-mono text-zinc-400 w-8">03:45</span>
+        </div>
+      </div>
+
+      <!-- Volume & Extra Options -->
+      <div class="hidden sm:flex items-center gap-3">
+        <button class="p-2 rounded-full glass-pill text-zinc-400 hover:text-white" title="Danh sách phát (Queue)">
+          <i data-lucide="list-music" class="w-4 h-4"></i>
+        </button>
+        <div class="flex items-center gap-2">
+          <i data-lucide="volume-2" class="w-4 h-4 text-zinc-400"></i>
+          <div class="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden cursor-pointer">
+            <div class="h-full bg-white rounded-full w-2/3"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Tab Navigation Logic
+    function switchTab(tab) {
+      const viewHome = document.getElementById("view-home");
+      const viewAlbums = document.getElementById("view-albums");
+      const navHome = document.getElementById("nav-home");
+      const navAlbums = document.getElementById("nav-albums");
+
+      if (tab === "home") {
+        viewHome.classList.remove("hidden");
+        viewAlbums.classList.add("hidden");
+        navHome.className = "px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all bg-white text-black shadow-md flex items-center gap-2";
+        navAlbums.className = "px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all text-zinc-400 hover:text-white flex items-center gap-2";
+      } else {
+        viewHome.classList.add("hidden");
+        viewAlbums.classList.remove("hidden");
+        navAlbums.className = "px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all bg-white text-black shadow-md flex items-center gap-2";
+        navHome.className = "px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all text-zinc-400 hover:text-white flex items-center gap-2";
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Modal Logic
+    const modal = document.getElementById("modal-album");
+    function openAlbumModal(title, artist, cover, count) {
+      document.getElementById("modal-title").innerText = title;
+      document.getElementById("modal-artist").innerText = artist;
+      document.getElementById("modal-cover").src = cover;
+      document.getElementById("modal-count").innerText = count + " Bài Hát";
+      
+      modal.classList.remove("opacity-0", "pointer-events-none");
+      modal.classList.add("opacity-100", "pointer-events-auto");
+    }
+
+    function closeModal() {
+      modal.classList.add("opacity-0", "pointer-events-none");
+      modal.classList.remove("opacity-100", "pointer-events-auto");
+    }
+
+    // Close on backdrop click or ESC key
+    modal.addEventListener("click", closeModal);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    // Player Play / Pause Logic
+    let isPlaying = false;
+    function playTrack(title, artist, cover) {
+      document.getElementById("player-title").innerText = title;
+      document.getElementById("player-artist").innerText = artist;
+      document.getElementById("player-cover").src = cover;
+      isPlaying = true;
+      updatePlayState();
+    }
+
+    function togglePlayPause() {
+      isPlaying = !isPlaying;
+      updatePlayState();
+    }
+
+    function updatePlayState() {
+      const iconPlay = document.getElementById("icon-play");
+      const iconPause = document.getElementById("icon-pause");
+      if (isPlaying) {
+        iconPlay.classList.add("hidden");
+        iconPause.classList.remove("hidden");
+      } else {
+        iconPlay.classList.remove("hidden");
+        iconPause.classList.add("hidden");
+      }
+    }
+  </script>
+</body>
+</html>
